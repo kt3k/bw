@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "dist": "deno run -A jsr:@kt3k/pack -o dist/main.js src/main.ts",
+    "start": "deno run -A jsr:@std/http/file-server -p 8000"
+  }
+}
