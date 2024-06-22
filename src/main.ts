@@ -1,7 +1,7 @@
-import { register } from "https://kt3k.github.io/cell/dist.min.js";
+import { register } from "jsr:@kt3k/cell";
 
 function Hello() {
-  return "hello";
+  return "hello, world!";
 }
 
 register(Hello, "hello");

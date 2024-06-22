@@ -1,6 +1,9 @@
 {
   "tasks": {
     "dist": "deno run -A jsr:@kt3k/pack -o dist/main.js src/main.ts",
-    "start": "deno run -A jsr:@std/http/file-server -p 8000"
+    "watch:js": "deno run --watch=src/main.ts -A jsr:@kt3k/pack -o dist/main.js src/main.ts",
+    "watch:style": "deno run -A https://deno.land/x/twd@v0.4.8/cli.ts -w -o dist/style.css index.html",
+    "start": "deno run -A npm:concurrently 'deno task watch:js' 'deno task watch:style' 'deno task serve'"
+    "serve": "deno run -A jsr:@std/http/file-server -p 8000"
   }
 }
