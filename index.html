@@ -1,10 +1,14 @@
 <!doctype html>
-<html>
+<html class="bg-black">
   <head>
     <link rel="stylesheet" href="./dist/style.css" />
   </head>
   <body>
-    <div class="hello p-6 border rounded"></div>
+    <p class="text-white relative text-xs">fps=<span class="js-fps-monitor">-</span></p>
+    <div class="absolute p-5">
+      <canvas class="canvas2 absolute" width="320" height="320"></canvas>
+      <canvas class="canvas1 absolute" width="320" height="320"></canvas>
+    </div>
   </body>
   <script type="module" src="./dist/main.js"></script>
 </html>
