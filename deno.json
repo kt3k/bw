@@ -12,5 +12,8 @@
   "imports": {
     "@kt3k/cell": "jsr:@kt3k/cell@^0.1.6",
     "@kt3k/gameloop": "jsr:@kt3k/gameloop@^1.5.0"
+  },
+  "fmt": {
+    "semiColons": false
   }
 }
