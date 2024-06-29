@@ -1,10 +1,6 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 
-function Hello() {
-  return "hello, world!"
-}
-
 function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const WIDTH = +el.width
   const HEIGHT = +el.height
