@@ -1,7 +1,7 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 
-function loadImage(path: string): Promise<Image> {
+function loadImage(path: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -14,7 +14,7 @@ function loadImage(path: string): Promise<Image> {
   })
 }
 
-function loadImages(paths: string[]): Promise<Image[]> {
+function loadImages(paths: string[]): Promise<HTMLImageElement[]> {
   return Promise.all(paths.map(loadImage))
 }
 
@@ -27,26 +27,16 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
 
   const canvasCtx = el.getContext("2d")!
 
-  /*
-  for (const i of Array(W).keys()) {
-    for (const j of Array(H).keys()) {
-      canvasCtx.fillStyle = (i + j) % 2 === 0 ? "black" : "gray"
-      canvasCtx.fillRect(i * 16, j * 16, 16, 16)
-    }
-  }
-    */
-
   loadImages([
-    "./src/images/char/juni/juni_b0.png",
-    "./src/images/char/juni/juni_b1.png",
-    "./src/images/char/juni/juni_f0.png",
-    "./src/images/char/juni/juni_f1.png",
-    "./src/images/char/juni/juni_l0.png",
-    "./src/images/char/juni/juni_l1.png",
-    "./src/images/char/juni/juni_r0.png",
-    "./src/images/char/juni/juni_r1.png",
+    "./assets/char/juni/juni_b0.png",
+    "./assets/char/juni/juni_b1.png",
+    "./assets/char/juni/juni_f0.png",
+    "./assets/char/juni/juni_f1.png",
+    "./assets/char/juni/juni_l0.png",
+    "./assets/char/juni/juni_l1.png",
+    "./assets/char/juni/juni_r0.png",
+    "./assets/char/juni/juni_r1.png",
   ]).then((images) => {
-    console.log(images)
     const loop = gameloop(() => {
       const i = Math.floor(Math.random() * W)
       const j = Math.floor(Math.random() * H)
