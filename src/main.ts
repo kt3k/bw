@@ -1,6 +1,11 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 
+/** Returns a random non-negative integer under `n` */
+function randomInt(n: number) {
+  return Math.floor(Math.random() * n)
+}
+
 function loadImage(path: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -28,11 +33,8 @@ class Brush {
 }
 
 function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
-  const WIDTH = el.width
-  const HEIGHT = el.height
-
-  const W = Math.floor(WIDTH / 16)
-  const H = Math.floor(HEIGHT / 16)
+  const W = Math.floor(el.width / 16)
+  const H = Math.floor(el.height / 16)
 
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
@@ -48,10 +50,10 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
     "./char/juni/juni_r1.png",
   ]).then((images) => {
     const loop = gameloop(() => {
-      const i = Math.floor(Math.random() * W)
-      const j = Math.floor(Math.random() * H)
+      const i = randomInt(W)
+      const j = randomInt(H)
       brush.drawImage(
-        images[Math.floor(Math.random() * 8)],
+        images[randomInt(images.length)],
         i * 16,
         j * 16,
         16,
