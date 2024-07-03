@@ -3,7 +3,7 @@
   "packages": {
     "specifiers": {
       "jsr:@kt3k/cell": "jsr:@kt3k/cell@0.1.3",
-      "jsr:@kt3k/cell@^0.1.6": "jsr:@kt3k/cell@0.1.6",
+      "jsr:@kt3k/cell@^0.1.7": "jsr:@kt3k/cell@0.1.7",
       "jsr:@kt3k/gameloop@^1.5.0": "jsr:@kt3k/gameloop@1.5.0",
       "npm:concurrently": "npm:concurrently@8.2.2",
       "npm:cpx2": "npm:cpx2@7.0.1",
@@ -14,8 +14,8 @@
       "@kt3k/cell@0.1.3": {
         "integrity": "c657a304a46f9673bc2fe7083c2e3ebffe08807e0170cad7178f79bb5d866e12"
       },
-      "@kt3k/cell@0.1.6": {
-        "integrity": "5cfdbe6cd740e105367ab7e189282a2d2aedb819fb800f108fba44b7f6dcb1dc"
+      "@kt3k/cell@0.1.7": {
+        "integrity": "c64f552a6820f4c10fd2f12ff2cbb951e9d089c1dc91fd4bf7b744fd45fe1dbd"
       },
       "@kt3k/gameloop@1.5.0": {
         "integrity": "cc5da5e8960d0f3c76ebb9681c32d2cdc7383c3c123f4a93fceec3bdca73da6c"
@@ -974,7 +974,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@kt3k/cell@^0.1.6",
+      "jsr:@kt3k/cell@^0.1.7",
       "jsr:@kt3k/gameloop@^1.5.0"
     ]
   }
