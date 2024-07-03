@@ -1,4 +1,4 @@
-// https://jsr.io/@kt3k/cell/0.1.6/util.ts
+// https://jsr.io/@kt3k/cell/0.1.7/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
 function documentReady(doc = document) {
@@ -25,6 +25,8 @@ function logEvent({
   if (typeof __DEV__ === "boolean" && !__DEV__)
     return;
   const event = e.type;
+  if (typeof DEBUG_IGNORE === "object" && DEBUG_IGNORE?.has(event))
+    return;
   console.groupCollapsed(
     `${module}> %c${event}%c on %c${component}`,
     boldColor(color || defaultEventColor),
@@ -38,7 +40,7 @@ function logEvent({
   console.groupEnd();
 }
 
-// https://jsr.io/@kt3k/cell/0.1.6/mod.ts
+// https://jsr.io/@kt3k/cell/0.1.7/mod.ts
 var registry = {};
 function assert(assertion, message) {
   if (!assertion) {
@@ -257,6 +259,9 @@ function gameloop(main, fps) {
 }
 
 // src/main.ts
+function randomInt(n) {
+  return Math.floor(Math.random() * n);
+}
 function loadImage(path) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -282,10 +287,8 @@ var Brush = class {
   }
 };
 function Canvas1({ el, pub }) {
-  const WIDTH = el.width;
-  const HEIGHT = el.height;
-  const W = Math.floor(WIDTH / 16);
-  const H = Math.floor(HEIGHT / 16);
+  const COLUMNS = Math.floor(el.width / 16);
+  const ROWS = Math.floor(el.height / 16);
   const canvasCtx = el.getContext("2d");
   const brush = new Brush(canvasCtx);
   loadImages([
@@ -299,10 +302,10 @@ function Canvas1({ el, pub }) {
     "./char/juni/juni_r1.png"
   ]).then((images) => {
     const loop = gameloop(() => {
-      const i = Math.floor(Math.random() * W);
-      const j = Math.floor(Math.random() * H);
+      const i = randomInt(COLUMNS);
+      const j = randomInt(ROWS);
       brush.drawImage(
-        images[Math.floor(Math.random() * 8)],
+        images[randomInt(images.length)],
         i * 16,
         j * 16,
         16,
@@ -327,7 +330,48 @@ function FPSMonitor({ sub, on, el }) {
   };
   return "0";
 }
+var Input = {
+  up: false,
+  down: false,
+  left: false,
+  right: false
+};
+function KeyMonitor({ sub, on, query }) {
+  sub("keydown");
+  on.keydown = (e) => {
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "k") {
+      Input.up = true;
+    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "j") {
+      Input.down = true;
+    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "h") {
+      Input.left = true;
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+      Input.right = true;
+    }
+    renderLabel();
+  };
+  on.keyup = (e) => {
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "k") {
+      Input.up = false;
+    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "j") {
+      Input.down = false;
+    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "h") {
+      Input.left = false;
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+      Input.right = false;
+    }
+    renderLabel();
+  };
+  const renderLabel = () => {
+    const label = query(".current-input");
+    if (label) {
+      label.textContent = (Input.up ? "\u2191" : "") + (Input.down ? "\u2193" : "") + (Input.left ? "\u2190" : "") + (Input.right ? "\u2192" : "");
+    }
+  };
+  renderLabel();
+}
 register(Canvas1, "canvas1");
 register(Canvas2, "canvas2");
 register(FPSMonitor, "js-fps-monitor");
-/*! Cell v0.1.6 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
+register(KeyMonitor, "js-key-monitor");
+/*! Cell v0.1.7 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */

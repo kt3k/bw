@@ -33,8 +33,8 @@ class Brush {
 }
 
 function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
-  const W = Math.floor(el.width / 16)
-  const H = Math.floor(el.height / 16)
+  const COLUMNS = Math.floor(el.width / 16)
+  const ROWS = Math.floor(el.height / 16)
 
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
@@ -50,8 +50,8 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
     "./char/juni/juni_r1.png",
   ]).then((images) => {
     const loop = gameloop(() => {
-      const i = randomInt(W)
-      const j = randomInt(H)
+      const i = randomInt(COLUMNS)
+      const j = randomInt(ROWS)
       brush.drawImage(
         images[randomInt(images.length)],
         i * 16,
@@ -81,6 +81,53 @@ function FPSMonitor({ sub, on, el }: Context) {
   return "0"
 }
 
+const Input = {
+  up: false,
+  down: false,
+  left: false,
+  right: false,
+}
+
+function KeyMonitor({ sub, on, query }: Context) {
+  sub("keydown")
+  on.keydown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "k") {
+      Input.up = true
+    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "j") {
+      Input.down = true
+    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "h") {
+      Input.left = true
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+      Input.right = true
+    }
+    renderLabel()
+  }
+  on.keyup = (e: KeyboardEvent) => {
+    if (e.key === "ArrowUp" || e.key === "w" || e.key === "k") {
+      Input.up = false
+    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "j") {
+      Input.down = false
+    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "h") {
+      Input.left = false
+    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+      Input.right = false
+    }
+    renderLabel()
+  }
+
+  const renderLabel = () => {
+    const label = query(".current-input")
+    if (label) {
+      label.textContent = (Input.up ? "↑" : "") +
+        (Input.down ? "↓" : "") +
+        (Input.left ? "←" : "") +
+        (Input.right ? "→" : "")
+    }
+  }
+  renderLabel()
+}
+
 register(Canvas1, "canvas1")
 register(Canvas2, "canvas2")
 register(FPSMonitor, "js-fps-monitor")
+register(KeyMonitor, "js-key-monitor")
