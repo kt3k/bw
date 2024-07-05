@@ -1,11 +1,6 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 
-/** Returns a random non-negative integer under `n` */
-function randomInt(n: number) {
-  return Math.floor(Math.random() * n)
-}
-
 function loadImage(path: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -19,14 +14,10 @@ function loadImage(path: string): Promise<HTMLImageElement> {
   })
 }
 
-function loadImages(paths: string[]): Promise<HTMLImageElement[]> {
-  return Promise.all(paths.map(loadImage))
-}
-
 class Brush {
   constructor(public ctx: CanvasRenderingContext2D) {}
 
-  drawImage(img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  drawImage(img: HTMLImageElement, x: number, y: number) {
     this.ctx.drawImage(img, x, y)
   }
 
@@ -65,14 +56,15 @@ const STATE = {
 type State = typeof STATE[keyof typeof STATE]
 
 class Character {
-  state: State
+  state: State = "down"
   i: number
   j: number
+  d: number = 0
+  isMoving: boolean = false
 
-  constructor() {
-    this.state = "down"
-    this.i = 5
-    this.j = 5
+  constructor(i: number, j: number) {
+    this.i = i
+    this.j = j
   }
 
   setState(state: State) {
@@ -82,21 +74,66 @@ class Character {
   readInput(input: typeof Input) {
     if (input.up) {
       this.setState(UP)
-      this.j--
     } else if (input.down) {
       this.setState(DOWN)
-      this.j++
     } else if (input.left) {
       this.setState(LEFT)
-      this.i--
     } else if (input.right) {
       this.setState(RIGHT)
-      this.i++
+    }
+  }
+
+  step(input: typeof Input) {
+    if (this.isMoving) {
+      this.d += 1
+      if (this.d == 16) {
+        this.d = 0
+        this.isMoving = false
+        if (this.state === UP) {
+          this.j -= 1
+        } else if (this.state === DOWN) {
+          this.j += 1
+        } else if (this.state === LEFT) {
+          this.i -= 1
+        } else if (this.state === RIGHT) {
+          this.i += 1
+        }
+      }
+    }
+
+    if (input.up || input.down || input.left || input.right) {
+      this.isMoving = true
+      this.readInput(input)
     }
   }
 
   appearance() {
-    return `./char/juni/juni_${this.state}0.png`
+    if (this.d >= 8) {
+      return `./char/juni/juni_${this.state}0.png`
+    } else {
+      return `./char/juni/juni_${this.state}1.png`
+    }
+  }
+
+  getX() {
+    if (this.isMoving) {
+      if (this.state === LEFT) {
+        return this.i * 16 - this.d
+      } else if (this.state === RIGHT) {
+        return this.i * 16 + this.d
+      }
+    }
+    return this.i * 16
+  }
+  getY() {
+    if (this.isMoving) {
+      if (this.state === UP) {
+        return this.j * 16 - this.d
+      } else if (this.state === DOWN) {
+        return this.j * 16 + this.d
+      }
+    }
+    return this.j * 16
   }
 
   assets() {
@@ -112,32 +149,21 @@ class Character {
 }
 
 function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
-  const COLUMNS = Math.floor(el.width / 16)
-  const ROWS = Math.floor(el.height / 16)
-
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
 
-  const character = new Character()
+  const character = new Character(5, 5)
   const assetManager = new AssetManager()
-
-  let i = 0
 
   assetManager.loadImages(character.assets()).then(() => {
     const loop = gameloop(() => {
-      i++
-      if (i % 8 !== 0) {
-        return
-      }
-      character.readInput(Input)
+      character.step(Input)
 
       brush.clear()
       brush.drawImage(
         assetManager.getImage(character.appearance()),
-        character.i * 16,
-        character.j * 16,
-        16,
-        16,
+        character.getX(),
+        character.getY(),
       )
     }, 60)
     loop.onStep((fps) => pub("fps", fps))
@@ -146,11 +172,20 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
 }
 
 function Canvas2({ el }: Context<HTMLCanvasElement>) {
-  const WIDTH = +el.width
-  const HEIGHT = +el.height
+  const WIDTH = el.width
+  const HEIGHT = el.height
+  const W = Math.floor(WIDTH / 16)
+  const H = Math.floor(HEIGHT / 16)
   const canvasCtx = el.getContext("2d")!
   canvasCtx.fillStyle = "black"
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
+
+  for (let i = 0; i < W; i++) {
+    for (let j = 0; j < H; j++) {
+      canvasCtx.fillStyle = (i + j) % 2 === 0 ? "gray" : "black"
+      canvasCtx.fillRect(i * 16, j * 16, 16, 16)
+    }
+  }
 }
 
 function FpsMonitor({ sub, on, el }: Context) {
