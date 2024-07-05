@@ -27,8 +27,87 @@ class Brush {
   constructor(public ctx: CanvasRenderingContext2D) {}
 
   drawImage(img: HTMLImageElement, x: number, y: number, w: number, h: number) {
-    this.ctx.clearRect(x, y, w, h)
     this.ctx.drawImage(img, x, y)
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+  }
+}
+
+class AssetManager {
+  images: { [key: string]: HTMLImageElement } = {}
+
+  async loadImages(paths: string[]) {
+    const images = await Promise.all(paths.map(loadImage))
+
+    paths.forEach((path, i) => {
+      this.images[path] = images[i]
+    })
+  }
+
+  getImage(path: string): HTMLImageElement {
+    return this.images[path]
+  }
+}
+
+/** State of characters */
+const UP = "up"
+const DOWN = "down"
+const LEFT = "left"
+const RIGHT = "right"
+const STATE = {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+} as const
+type State = typeof STATE[keyof typeof STATE]
+
+class Character {
+  state: State
+  i: number
+  j: number
+
+  constructor() {
+    this.state = "down"
+    this.i = 5
+    this.j = 5
+  }
+
+  setState(state: State) {
+    this.state = state
+  }
+
+  readInput(input: typeof Input) {
+    if (input.up) {
+      this.setState(UP)
+      this.j--
+    } else if (input.down) {
+      this.setState(DOWN)
+      this.j++
+    } else if (input.left) {
+      this.setState(LEFT)
+      this.i--
+    } else if (input.right) {
+      this.setState(RIGHT)
+      this.i++
+    }
+  }
+
+  appearance() {
+    return `./char/juni/juni_${this.state}0.png`
+  }
+
+  assets() {
+    const assets = []
+    for (const state of Object.values(STATE)) {
+      assets.push(
+        `./char/juni/juni_${state}0.png`,
+        `./char/juni/juni_${state}1.png`,
+      )
+    }
+    return assets
   }
 }
 
@@ -39,23 +118,24 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
 
-  loadImages([
-    "./char/juni/juni_b0.png",
-    "./char/juni/juni_b1.png",
-    "./char/juni/juni_f0.png",
-    "./char/juni/juni_f1.png",
-    "./char/juni/juni_l0.png",
-    "./char/juni/juni_l1.png",
-    "./char/juni/juni_r0.png",
-    "./char/juni/juni_r1.png",
-  ]).then((images) => {
+  const character = new Character()
+  const assetManager = new AssetManager()
+
+  let i = 0
+
+  assetManager.loadImages(character.assets()).then(() => {
     const loop = gameloop(() => {
-      const i = randomInt(COLUMNS)
-      const j = randomInt(ROWS)
+      i++
+      if (i % 8 !== 0) {
+        return
+      }
+      character.readInput(Input)
+
+      brush.clear()
       brush.drawImage(
-        images[randomInt(images.length)],
-        i * 16,
-        j * 16,
+        assetManager.getImage(character.appearance()),
+        character.i * 16,
+        character.j * 16,
         16,
         16,
       )
@@ -73,7 +153,7 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
 }
 
-function FPSMonitor({ sub, on, el }: Context) {
+function FpsMonitor({ sub, on, el }: Context) {
   sub("fps")
   on.fps = (e: CustomEvent) => {
     el.textContent = e.detail.toFixed(2)
@@ -88,28 +168,32 @@ const Input = {
   right: false,
 }
 
-function KeyMonitor({ sub, on, query }: Context) {
-  sub("keydown")
+const KEY_UP = new Set(["ArrowUp", "w", "k"])
+const KEY_DOWN = new Set(["ArrowDown", "s", "j"])
+const KEY_LEFT = new Set(["ArrowLeft", "a", "h"])
+const KEY_RIGHT = new Set(["ArrowRight", "d", "l"])
+
+function KeyMonitor({ on, query }: Context) {
   on.keydown = (e: KeyboardEvent) => {
-    if (e.key === "ArrowUp" || e.key === "w" || e.key === "k") {
+    if (KEY_UP.has(e.key)) {
       Input.up = true
-    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "j") {
+    } else if (KEY_DOWN.has(e.key)) {
       Input.down = true
-    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "h") {
+    } else if (KEY_LEFT.has(e.key)) {
       Input.left = true
-    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+    } else if (KEY_RIGHT.has(e.key)) {
       Input.right = true
     }
     renderLabel()
   }
   on.keyup = (e: KeyboardEvent) => {
-    if (e.key === "ArrowUp" || e.key === "w" || e.key === "k") {
+    if (KEY_UP.has(e.key)) {
       Input.up = false
-    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "j") {
+    } else if (KEY_DOWN.has(e.key)) {
       Input.down = false
-    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "h") {
+    } else if (KEY_LEFT.has(e.key)) {
       Input.left = false
-    } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+    } else if (KEY_RIGHT.has(e.key)) {
       Input.right = false
     }
     renderLabel()
@@ -129,5 +213,5 @@ function KeyMonitor({ sub, on, query }: Context) {
 
 register(Canvas1, "canvas1")
 register(Canvas2, "canvas2")
-register(FPSMonitor, "js-fps-monitor")
+register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
