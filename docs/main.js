@@ -344,6 +344,7 @@ var Character = class {
           this.i += 1;
         }
       }
+      return;
     }
     if (input.up || input.down || input.left || input.right) {
       this.isMoving = true;
