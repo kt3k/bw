@@ -1,5 +1,6 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
+import { Input, KeyMonitor } from "./ui/KeyMonitor.ts"
 
 function loadImage(path: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -195,56 +196,6 @@ function FpsMonitor({ sub, on, el }: Context) {
     el.textContent = e.detail.toFixed(2)
   }
   return "0"
-}
-
-const Input = {
-  up: false,
-  down: false,
-  left: false,
-  right: false,
-}
-
-const KEY_UP = new Set(["ArrowUp", "w", "k"])
-const KEY_DOWN = new Set(["ArrowDown", "s", "j"])
-const KEY_LEFT = new Set(["ArrowLeft", "a", "h"])
-const KEY_RIGHT = new Set(["ArrowRight", "d", "l"])
-
-function KeyMonitor({ on, query }: Context) {
-  on.keydown = (e: KeyboardEvent) => {
-    if (KEY_UP.has(e.key)) {
-      Input.up = true
-    } else if (KEY_DOWN.has(e.key)) {
-      Input.down = true
-    } else if (KEY_LEFT.has(e.key)) {
-      Input.left = true
-    } else if (KEY_RIGHT.has(e.key)) {
-      Input.right = true
-    }
-    renderLabel()
-  }
-  on.keyup = (e: KeyboardEvent) => {
-    if (KEY_UP.has(e.key)) {
-      Input.up = false
-    } else if (KEY_DOWN.has(e.key)) {
-      Input.down = false
-    } else if (KEY_LEFT.has(e.key)) {
-      Input.left = false
-    } else if (KEY_RIGHT.has(e.key)) {
-      Input.right = false
-    }
-    renderLabel()
-  }
-
-  const renderLabel = () => {
-    const label = query(".current-input")
-    if (label) {
-      label.textContent = (Input.up ? "↑" : "") +
-        (Input.down ? "↓" : "") +
-        (Input.left ? "←" : "") +
-        (Input.right ? "→" : "")
-    }
-  }
-  renderLabel()
 }
 
 register(Canvas1, "canvas1")
