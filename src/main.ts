@@ -45,23 +45,40 @@ const STATE = {
 } as const
 type DIR = typeof STATE[keyof typeof STATE]
 
+/** The character */
 class Character {
-  dir: DIR = "down"
-  i: number
-  j: number
-  d: number = 0
-  isMoving: boolean = false
+  /** The current direction of the character */
+  #dir: DIR = "down"
+  /** The column of the world coordinates */
+  #i: number
+  /** The row of the world coordinates */
+  #j: number
+  /** The distance of the current movement */
+  #d: number = 0
+  /** The speed of the move */
+  #speed: 1 | 2 | 4 | 8 | 16 = 1
+  /** True when moving, false otherwise */
+  #isMoving: boolean = false
+  /** The prefix of assets */
+  #assetPrefix: string
 
-  constructor(i: number, j: number) {
-    this.i = i
-    this.j = j
+  constructor(
+    i: number,
+    j: number,
+    speed: 1 | 2 | 4 | 8 | 16,
+    assetPrefix: string,
+  ) {
+    this.#i = i
+    this.#j = j
+    this.#speed = speed
+    this.#assetPrefix = assetPrefix
   }
 
   setState(state: DIR) {
-    this.dir = state
+    this.#dir = state
   }
 
-  readInput(input: typeof Input) {
+  #readInput(input: typeof Input) {
     if (input.up) {
       this.setState(UP)
     } else if (input.down) {
@@ -74,19 +91,19 @@ class Character {
   }
 
   step(input: typeof Input) {
-    if (this.isMoving) {
-      this.d += 1
-      if (this.d == 16) {
-        this.d = 0
-        this.isMoving = false
-        if (this.dir === UP) {
-          this.j -= 1
-        } else if (this.dir === DOWN) {
-          this.j += 1
-        } else if (this.dir === LEFT) {
-          this.i -= 1
-        } else if (this.dir === RIGHT) {
-          this.i += 1
+    if (this.#isMoving) {
+      this.#d += this.#speed
+      if (this.#d == 16) {
+        this.#d = 0
+        this.#isMoving = false
+        if (this.#dir === UP) {
+          this.#j -= 1
+        } else if (this.#dir === DOWN) {
+          this.#j += 1
+        } else if (this.#dir === LEFT) {
+          this.#i -= 1
+        } else if (this.#dir === RIGHT) {
+          this.#i += 1
         }
       } else {
         return
@@ -94,46 +111,49 @@ class Character {
     }
 
     if (input.up || input.down || input.left || input.right) {
-      this.isMoving = true
-      this.readInput(input)
+      this.#isMoving = true
+      this.#readInput(input)
     }
   }
 
   appearance() {
-    if (this.d >= 8) {
-      return `./char/juni/juni_${this.dir}0.png`
+    if (this.#d >= 8) {
+      return `${this.#assetPrefix}${this.#dir}0.png`
     } else {
-      return `./char/juni/juni_${this.dir}1.png`
+      return `${this.#assetPrefix}${this.#dir}1.png`
     }
   }
 
-  getX() {
-    if (this.isMoving) {
-      if (this.dir === LEFT) {
-        return this.i * 16 - this.d
-      } else if (this.dir === RIGHT) {
-        return this.i * 16 + this.d
+  /** Gets the x of the world coordinates */
+  get x() {
+    if (this.#isMoving) {
+      if (this.#dir === LEFT) {
+        return this.#i * 16 - this.#d
+      } else if (this.#dir === RIGHT) {
+        return this.#i * 16 + this.#d
       }
     }
-    return this.i * 16
+    return this.#i * 16
   }
-  getY() {
-    if (this.isMoving) {
-      if (this.dir === UP) {
-        return this.j * 16 - this.d
-      } else if (this.dir === DOWN) {
-        return this.j * 16 + this.d
+
+  /** Gets the x of the world coordinates */
+  get y() {
+    if (this.#isMoving) {
+      if (this.#dir === UP) {
+        return this.#j * 16 - this.#d
+      } else if (this.#dir === DOWN) {
+        return this.#j * 16 + this.#d
       }
     }
-    return this.j * 16
+    return this.#j * 16
   }
 
   assets() {
     const assets = []
     for (const state of Object.values(STATE)) {
       assets.push(
-        `./char/juni/juni_${state}0.png`,
-        `./char/juni/juni_${state}1.png`,
+        `${this.#assetPrefix}${state}0.png`,
+        `${this.#assetPrefix}${state}1.png`,
       )
     }
     return assets
@@ -144,7 +164,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
 
-  const character = new Character(5, 5)
+  const character = new Character(5, 5, 2, "./char/juni/juni_")
   const assetManager = new AssetManager()
 
   assetManager.loadImages(character.assets()).then(() => {
@@ -154,8 +174,8 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
       brush.clear()
       brush.drawImage(
         assetManager.getImage(character.appearance()),
-        character.getX(),
-        character.getY(),
+        character.x,
+        character.y,
       )
     }, 60)
     loop.onStep((fps) => pub("fps", fps))
