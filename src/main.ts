@@ -4,6 +4,7 @@ import { Input, KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { loadImage } from "./util/load.ts"
 
+/** The wrapper of CanvasRenderingContext2D */
 class Brush {
   constructor(public ctx: CanvasRenderingContext2D) {}
 
@@ -16,6 +17,7 @@ class Brush {
   }
 }
 
+/** AssetManager manages the downloading of the assets */
 class AssetManager {
   images: { [key: string]: HTMLImageElement } = {}
 
@@ -160,22 +162,63 @@ class Character {
   }
 }
 
+/** The area which is visible to the user */
+class ViewScope {
+  x: number
+  y: number
+
+  constructor(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+}
+
+/**
+ * The area which is evaluated i.e. the characters in this area are called `.step()`
+ * each frame.
+ */
+class EvalScope {
+  characters: Character[]
+  constructor(characters: Character[]) {
+    this.characters = characters
+  }
+}
+
+/** The area which is loaded into the page. */
+class LoadScope {}
+
 function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
 
-  const character = new Character(5, 5, 2, "./char/juni/juni_")
+  const me = new Character(5, 5, 1, "./char/juni/juni_")
+  const view = new ViewScope(me.x, me.y)
+  const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
 
-  assetManager.loadImages(character.assets()).then(() => {
+  const canvas2 = document.querySelector(".canvas2")!
+
+  assetManager.loadImages(me.assets()).then(() => {
     const loop = gameloop(() => {
-      character.step(Input)
+      for (const char of evalScope.characters) {
+        char.step(Input)
+      }
+
+      view.x = me.x
+      view.y = me.y
 
       brush.clear()
-      brush.drawImage(
-        assetManager.getImage(character.appearance()),
-        character.x,
-        character.y,
+
+      for (const char of evalScope.characters) {
+        brush.drawImage(
+          assetManager.getImage(me.appearance()),
+          char.x - view.x + 16 * 10,
+          char.y - view.y + 16 * 10,
+        )
+      }
+      canvas2.setAttribute(
+        "style",
+        "margin-left:" + -view.x + "px;margin-top:" + -view.y + "px",
       )
     }, 60)
     loop.onStep((fps) => pub("fps", fps))
