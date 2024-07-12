@@ -196,7 +196,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
 
-  const canvas2 = document.querySelector(".canvas2")!
+  const worldMap = document.querySelector(".world-map")!
 
   assetManager.loadImages(me.assets()).then(() => {
     const loop = gameloop(() => {
@@ -216,7 +216,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
           char.y - view.y + 16 * 10,
         )
       }
-      canvas2.setAttribute(
+      worldMap.setAttribute(
         "style",
         "transform:translateX(" + (0 - view.x) + "px) translateY(" +
           (0 - view.y) + "px);",
