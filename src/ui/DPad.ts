@@ -1,17 +1,17 @@
 import type { Context } from "@kt3k/cell"
 import { Input } from "./KeyMonitor.ts"
 
+const dirs = ["up", "down", "left", "right"] as const
+
 export function DPad({ on }: Context) {
-  on(".up").mousedown = () => Input.up = true
-  on(".up").mouseout = () => Input.up = false
-  on(".up").mouseup = () => Input.up = false
-  on(".left").mousedown = () => Input.left = true
-  on(".left").mouseout = () => Input.left = false
-  on(".left").mouseup = () => Input.left = false
-  on(".right").mousedown = () => Input.right = true
-  on(".right").mouseout = () => Input.right = false
-  on(".right").mouseup = () => Input.right = false
-  on(".down").mousedown = () => Input.down = true
-  on(".down").mouseout = () => Input.down = false
-  on(".down").mouseup = () => Input.down = false
+  for (const dir of dirs) {
+    const delegate = on(`.${dir}`)
+    const toggle = (b: boolean) => () => Input[dir] = b
+    delegate.mousedown = toggle(true)
+    delegate.mouseout = toggle(false)
+    delegate.mouseup = toggle(false)
+    delegate.touchstart = toggle(true)
+    delegate.touchend = toggle(false)
+    delegate.touchcancel = toggle(false)
+  }
 }
