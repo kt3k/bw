@@ -3,6 +3,7 @@ import { gameloop } from "@kt3k/gameloop"
 import { Input, KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { loadImage } from "./util/load.ts"
+import { DPad } from "./ui/DPad.ts"
 
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
@@ -260,3 +261,4 @@ register(Canvas1, "canvas1")
 register(Canvas2, "canvas2")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
+register(DPad, "js-d-pad")
