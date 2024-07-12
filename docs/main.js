@@ -463,6 +463,11 @@ var EvalScope = class {
   constructor(characters) {
     this.characters = characters;
   }
+  step(input) {
+    for (const character of this.characters) {
+      character.step(input);
+    }
+  }
 };
 function Canvas1({ el, pub }) {
   const canvasCtx = el.getContext("2d");
@@ -471,12 +476,10 @@ function Canvas1({ el, pub }) {
   const view = new ViewScope(me.x, me.y);
   const evalScope = new EvalScope([me]);
   const assetManager = new AssetManager();
-  const canvas2 = document.querySelector(".canvas2");
+  const worldMap = document.querySelector(".world-map");
   assetManager.loadImages(me.assets()).then(() => {
     const loop = gameloop(() => {
-      for (const char of evalScope.characters) {
-        char.step(Input);
-      }
+      evalScope.step(Input);
       view.x = me.x;
       view.y = me.y;
       brush.clear();
@@ -487,7 +490,7 @@ function Canvas1({ el, pub }) {
           char.y - view.y + 16 * 10
         );
       }
-      canvas2.setAttribute(
+      worldMap.setAttribute(
         "style",
         "transform:translateX(" + (0 - view.x) + "px) translateY(" + (0 - view.y) + "px);"
       );
