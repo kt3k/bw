@@ -30,7 +30,6 @@ export function KeyMonitor({ on }: Context) {
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = true
     }
-    e.preventDefault()
   }
   on.keyup = (e: KeyboardEvent) => {
     if (KEY_UP.has(e.key)) {
@@ -42,6 +41,5 @@ export function KeyMonitor({ on }: Context) {
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = false
     }
-    e.preventDefault()
   }
 }

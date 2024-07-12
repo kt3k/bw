@@ -191,7 +191,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const canvasCtx = el.getContext("2d")!
   const brush = new Brush(canvasCtx)
 
-  const me = new Character(5, 5, 1, "./char/juni/juni_")
+  const me = new Character(0, 0, 1, "./char/juni/juni_")
   const view = new ViewScope(me.x, me.y)
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
@@ -211,14 +211,15 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
 
       for (const char of evalScope.characters) {
         brush.drawImage(
-          assetManager.getImage(me.appearance()),
+          assetManager.getImage(char.appearance()),
           char.x - view.x + 16 * 10,
           char.y - view.y + 16 * 10,
         )
       }
       canvas2.setAttribute(
         "style",
-        "margin-left:" + -view.x + "px;margin-top:" + -view.y + "px",
+        "transform:translateX(" + (0 - view.x) + "px) translateY(" +
+          (0 - view.y) + "px);",
       )
     }, 60)
     loop.onStep((fps) => pub("fps", fps))
