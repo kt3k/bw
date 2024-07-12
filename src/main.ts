@@ -173,14 +173,27 @@ class ViewScope {
   }
 }
 
+type IChar = {
+  step(input: typeof Input): void
+  get x(): number
+  get y(): number
+  appearance(): string
+}
+
 /**
  * The area which is evaluated i.e. the characters in this area are called `.step()`
  * each frame.
  */
 class EvalScope {
-  characters: Character[]
-  constructor(characters: Character[]) {
+  characters: IChar[]
+  constructor(characters: IChar[]) {
     this.characters = characters
+  }
+
+  step(input: typeof Input) {
+    for (const character of this.characters) {
+      character.step(input)
+    }
   }
 }
 
@@ -200,9 +213,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
 
   assetManager.loadImages(me.assets()).then(() => {
     const loop = gameloop(() => {
-      for (const char of evalScope.characters) {
-        char.step(Input)
-      }
+      evalScope.step(Input)
 
       view.x = me.x
       view.y = me.y
@@ -216,6 +227,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
           char.y - view.y + 16 * 10,
         )
       }
+
       worldMap.setAttribute(
         "style",
         "transform:translateX(" + (0 - view.x) + "px) translateY(" +
