@@ -4,7 +4,7 @@
     "start": "deno run -A npm:concurrently 'deno task watch:js' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
     "dist": "deno run -A jsr:@kt3k/pack -o dist/main.js src/main.ts",
     "watch:js": "deno run --watch=src/main.ts -A jsr:@kt3k/pack@0.1.10 -o dist/main.js src/main.ts",
-    "watch:style": "deno run -A https://deno.land/x/twd@v0.4.8/cli.ts -w -o dist/style.css static/index.html",
+    "watch:style": "npx tailwindcss -i ./src/input.css -o ./dist/style.css --watch",
     "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' dist",
     "docs": "deno run -A npm:cpx2 'dist/**' docs",
     "serve": "deno run -A jsr:@std/http/file-server dist -p 8000"
