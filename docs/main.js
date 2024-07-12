@@ -317,6 +317,22 @@ function loadImage(path) {
   });
 }
 
+// src/ui/DPad.ts
+function DPad({ on }) {
+  on(".up").mousedown = () => Input.up = true;
+  on(".up").mouseout = () => Input.up = false;
+  on(".up").mouseup = () => Input.up = false;
+  on(".left").mousedown = () => Input.left = true;
+  on(".left").mouseout = () => Input.left = false;
+  on(".left").mouseup = () => Input.left = false;
+  on(".right").mousedown = () => Input.right = true;
+  on(".right").mouseout = () => Input.right = false;
+  on(".right").mouseup = () => Input.right = false;
+  on(".down").mousedown = () => Input.down = true;
+  on(".down").mouseout = () => Input.down = false;
+  on(".down").mouseup = () => Input.down = false;
+}
+
 // src/main.ts
 var Brush = class {
   constructor(ctx) {
@@ -518,4 +534,5 @@ register(Canvas1, "canvas1");
 register(Canvas2, "canvas2");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
+register(DPad, "js-d-pad");
 /*! Cell v0.1.7 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
