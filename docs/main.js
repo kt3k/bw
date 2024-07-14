@@ -258,13 +258,44 @@ function gameloop(main, fps) {
   return new GameloopImpl(main, fps);
 }
 
-// src/ui/KeyMonitor.ts
+// src/util/load.ts
+function loadImage(path) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve(img);
+    };
+    img.onerror = (e) => {
+      reject(e);
+    };
+    img.src = path;
+  });
+}
+
+// src/util/dir.ts
+var UP = "up";
+var DOWN = "down";
+var LEFT = "left";
+var RIGHT = "right";
+var DIRS = [
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT
+];
 var Input = {
   up: false,
   down: false,
   left: false,
   right: false
 };
+function clearInput() {
+  for (const dir of DIRS) {
+    Input[dir] = false;
+  }
+}
+
+// src/ui/KeyMonitor.ts
 var KEY_UP = /* @__PURE__ */ new Set(["ArrowUp", "w", "k"]);
 var KEY_DOWN = /* @__PURE__ */ new Set(["ArrowDown", "s", "j"]);
 var KEY_LEFT = /* @__PURE__ */ new Set(["ArrowLeft", "a", "h"]);
@@ -303,32 +334,64 @@ function FpsMonitor({ sub, on, el }) {
   return "0";
 }
 
-// src/util/load.ts
-function loadImage(path) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      resolve(img);
-    };
-    img.onerror = (e) => {
-      reject(e);
-    };
-    img.src = path;
-  });
+// src/util/touch.ts
+function getDistance(current, prev) {
+  const x = current.screenX - prev.screenX;
+  const y = current.screenY - prev.screenY;
+  return Math.sqrt(x ** 2 + y ** 2);
+}
+function getDir(current, prev) {
+  const x = current.screenX - prev.screenX;
+  const y = current.screenY - prev.screenY;
+  const theta = Math.atan2(y, x);
+  if (Math.PI / 4 <= theta && theta < 3 * Math.PI / 4) {
+    return DOWN;
+  } else if (-Math.PI / 4 <= theta && theta < Math.PI / 4) {
+    return RIGHT;
+  } else if (-3 * Math.PI / 4 <= theta && theta < -Math.PI / 4) {
+    return UP;
+  } else {
+    return LEFT;
+  }
+}
+
+// src/ui/SwipeHandler.ts
+function SwipeHandler({ on }) {
+  let prevTouch;
+  on.touchstart = (e) => {
+    prevTouch = e.touches[0];
+  };
+  on.touchmove = (e) => {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    if (prevTouch) {
+      const dist = getDistance(touch, prevTouch);
+      console.log(dist);
+      if (dist < 25) {
+        return;
+      }
+      clearInput();
+      const dir = getDir(touch, prevTouch);
+      Input[dir] = true;
+    }
+    prevTouch = touch;
+  };
+  on.touchend = () => {
+    clearInput();
+  };
 }
 
 // src/ui/DPad.ts
-var dirs = ["up", "down", "left", "right"];
 function DPad({ on }) {
-  for (const dir of dirs) {
-    const delegate = on(`.${dir}`);
-    const toggle = (b) => () => Input[dir] = b;
-    delegate.mousedown = toggle(true);
-    delegate.mouseout = toggle(false);
-    delegate.mouseup = toggle(false);
-    delegate.touchstart = toggle(true);
-    delegate.touchend = toggle(false);
-    delegate.touchcancel = toggle(false);
+  for (const dir of DIRS) {
+    const target = on(`.${dir}`);
+    const set = (b) => () => Input[dir] = b;
+    target.mousedown = set(true);
+    target.mouseout = set(false);
+    target.mouseup = set(false);
+    target.touchstart = set(true);
+    target.touchend = set(false);
+    target.touchcancel = set(false);
   }
 }
 
@@ -355,16 +418,6 @@ var AssetManager = class {
   getImage(path) {
     return this.images[path];
   }
-};
-var UP = "up";
-var DOWN = "down";
-var LEFT = "left";
-var RIGHT = "right";
-var STATE = {
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT
 };
 var Character = class {
   /** The current direction of the character */
@@ -456,7 +509,7 @@ var Character = class {
   }
   assets() {
     const assets = [];
-    for (const state of Object.values(STATE)) {
+    for (const state of DIRS) {
       assets.push(
         `${this.#assetPrefix}${state}0.png`,
         `${this.#assetPrefix}${state}1.png`
@@ -534,4 +587,5 @@ register(Canvas2, "canvas2");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(DPad, "js-d-pad");
+register(SwipeHandler, "js-swipe-handler");
 /*! Cell v0.1.7 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
