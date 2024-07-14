@@ -200,7 +200,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
 
-  const worldMap = document.querySelector(".world-map")!
+  const terrain = document.querySelector(".js-terrain")!
 
   assetManager.loadImages(me.assets()).then(() => {
     const loop = gameloop(() => {
@@ -219,7 +219,7 @@ function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
         )
       }
 
-      worldMap.setAttribute(
+      terrain.setAttribute(
         "style",
         "transform:translateX(" + (0 - view.x) + "px) translateY(" +
           (0 - view.y) + "px);",

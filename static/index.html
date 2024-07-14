@@ -4,16 +4,15 @@
   <head>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body class="js-key-monitor js-swipe-handler" style="overscroll-behavior-y: none; min-height: 100svh;">
+  <body class="js-key-monitor js-swipe-handler" style="overscroll-behavior-y: none; overscroll-behavior-x: none; min-height: 100svh;">
     <p class="text-white relative text-xs">
       fps=<span class="js-fps-monitor">-</span>
     </p>
-    <div class="relative p-5 h-[360px] w-[360px] overflow-hidden">
-      <div class="world-map absolute">
+    <div class="relative h-[320px] w-[320px] overflow-hidden">
+      <div class="js-terrain absolute">
         <canvas class="canvas2 absolute" width="320" height="320"></canvas>
       </div>
       <canvas class="canvas1 absolute" width="320" height="320"></canvas>
-      <div class="absolute h-80 w-80 bg-white opacity-5"></div>
     </div>
     <div class="js-d-pad relative flex justify-center items-center w-[360px]">
       <div class="w-30 h-30 grid grid-cols-3 text-white">
