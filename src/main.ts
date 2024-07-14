@@ -1,9 +1,12 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
-import { Input, KeyMonitor } from "./ui/KeyMonitor.ts"
-import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { loadImage } from "./util/load.ts"
+import { Input } from "./util/dir.ts"
+import { KeyMonitor } from "./ui/KeyMonitor.ts"
+import { FpsMonitor } from "./ui/FpsMonitor.ts"
+import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { DPad } from "./ui/DPad.ts"
+import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
@@ -35,23 +38,10 @@ class AssetManager {
   }
 }
 
-/** State of characters */
-const UP = "up"
-const DOWN = "down"
-const LEFT = "left"
-const RIGHT = "right"
-const STATE = {
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT,
-} as const
-type DIR = typeof STATE[keyof typeof STATE]
-
 /** The character */
 class Character {
   /** The current direction of the character */
-  #dir: DIR = "down"
+  #dir: Dir = "down"
   /** The column of the world coordinates */
   #i: number
   /** The row of the world coordinates */
@@ -77,7 +67,7 @@ class Character {
     this.#assetPrefix = assetPrefix
   }
 
-  setState(state: DIR) {
+  setState(state: Dir) {
     this.#dir = state
   }
 
@@ -153,7 +143,7 @@ class Character {
 
   assets() {
     const assets = []
-    for (const state of Object.values(STATE)) {
+    for (const state of DIRS) {
       assets.push(
         `${this.#assetPrefix}${state}0.png`,
         `${this.#assetPrefix}${state}1.png`,
@@ -262,3 +252,4 @@ register(Canvas2, "canvas2")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(DPad, "js-d-pad")
+register(SwipeHandler, "js-swipe-handler")
