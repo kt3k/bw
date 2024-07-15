@@ -737,7 +737,7 @@ var require_seedrandom2 = __commonJS({
   }
 });
 
-// https://jsr.io/@kt3k/cell/0.1.8/util.ts
+// https://jsr.io/@kt3k/cell/0.1.10/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
 function documentReady(doc = document) {
@@ -779,7 +779,7 @@ function logEvent({
   console.groupEnd();
 }
 
-// https://jsr.io/@kt3k/cell/0.1.8/mod.ts
+// https://jsr.io/@kt3k/cell/0.1.10/mod.ts
 var registry = {};
 function assert(assertion, message) {
   if (!assertion) {
@@ -792,6 +792,13 @@ function assertComponentNameIsValid(name) {
     !!registry[name],
     `The component of the given name is not registered: ${name}`
   );
+}
+function pub(type, data) {
+  document.querySelectorAll(`.sub\\:${type}`).forEach((el) => {
+    el.dispatchEvent(
+      new CustomEvent(type, { bubbles: false, detail: data })
+    );
+  });
 }
 function register(component, name) {
   assert(
@@ -848,33 +855,41 @@ function register(component, name) {
         },
         // event delegation handler (like on(".button").click = (e) => {}))
         apply(_target, _thisArg, args) {
-          const selector = args[0];
-          assert(
-            typeof selector === "string",
-            "Delegation selector must be a string. ${typeof selector} is given."
-          );
-          return new Proxy({}, {
-            set(_, type, value) {
-              addEventListener(
-                name,
-                el,
-                type,
-                // deno-lint-ignore no-explicit-any
-                value,
-                selector
-              );
-              return true;
-            }
-          });
+          const arg0 = args[0];
+          if (typeof arg0 === "string") {
+            return new Proxy({}, {
+              set(_, type, value) {
+                addEventListener(
+                  name,
+                  el,
+                  type,
+                  // deno-lint-ignore no-explicit-any
+                  value,
+                  arg0,
+                  args[1]
+                );
+                return true;
+              }
+            });
+          } else if (arg0 && typeof arg0 === "object") {
+            return new Proxy({}, {
+              set(_, type, value) {
+                addEventListener(
+                  name,
+                  el,
+                  type,
+                  // deno-lint-ignore no-explicit-any
+                  value,
+                  void 0,
+                  arg0
+                );
+                return true;
+              }
+            });
+          }
+          throw new Error(`Invalid on(...) call: ${typeof arg0} is given.`);
         }
       });
-      const pub = (type, data) => {
-        document.querySelectorAll(`.sub\\:${type}`).forEach((el2) => {
-          el2.dispatchEvent(
-            new CustomEvent(type, { bubbles: false, detail: data })
-          );
-        });
-      };
       const sub = (type) => el.classList.add(`sub:${type}`);
       const context = {
         el,
@@ -906,7 +921,7 @@ function register(component, name) {
     });
   }
 }
-function addEventListener(name, el, type, handler, selector) {
+function addEventListener(name, el, type, handler, selector, options) {
   assert(
     typeof handler === "function",
     `Event handler must be a function, ${typeof handler} (${handler}) is given`
@@ -926,9 +941,9 @@ function addEventListener(name, el, type, handler, selector) {
     }
   };
   el.addEventListener(`__unmount__:${name}`, () => {
-    el.removeEventListener(type, listener);
+    el.removeEventListener(type, listener, options);
   }, { once: true });
-  el.addEventListener(type, listener);
+  el.addEventListener(type, listener, options);
 }
 function mount(name, el) {
   let classNames;
@@ -1106,12 +1121,11 @@ function SwipeHandler({ on }) {
   on.touchstart = (e) => {
     prevTouch = e.touches[0];
   };
-  on.touchmove = (e) => {
+  on({ passive: false }).touchmove = (e) => {
     e.preventDefault();
     const touch = e.changedTouches[0];
     if (prevTouch) {
       const dist = getDistance(touch, prevTouch);
-      console.log(dist);
       if (dist < 25) {
         return;
       }
@@ -1223,14 +1237,11 @@ var Character = class {
       }
     }
     if (input.up || input.down || input.left || input.right) {
-      console.log("foo");
       this.#isMoving = true;
-      this.#readInput(input, grid2);
+      this.#readInput(input);
       const [i, j] = this.front();
-      console.log("i, j, grid[i][j]", i, j, grid2[i][j]);
       if (grid2[i][j] === 2) {
         this.#isMoving = false;
-        console.log("hi");
       }
     }
   }
@@ -1293,7 +1304,7 @@ var EvalScope = class {
     }
   }
 };
-async function GameScreen({ query, pub }) {
+async function GameScreen({ query, pub: pub2 }) {
   const canvas1 = query(".canvas1");
   const brush = new Brush(canvas1.getContext("2d"));
   const me = new Character(10, 10, 1, "./char/juni/juni_");
@@ -1323,7 +1334,7 @@ async function GameScreen({ query, pub }) {
       "transform:translateX(" + (0 - view.x + viewAdjust.x) + "px) translateY(" + (0 - view.y + viewAdjust.y) + "px);"
     );
   }, 60);
-  loop.onStep((fps) => pub("fps", fps));
+  loop.onStep((fps) => pub2("fps", fps));
   loop.run();
 }
 var grid = [];
@@ -1353,4 +1364,4 @@ register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
-/*! Cell v0.1.8 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
+/*! Cell v0.1.10 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */

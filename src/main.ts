@@ -116,15 +116,12 @@ class Character {
     }
 
     if (input.up || input.down || input.left || input.right) {
-      console.log("foo")
       this.#isMoving = true
-      this.#readInput(input, grid)
+      this.#readInput(input)
       const [i, j] = this.front()
-      console.log("i, j, grid[i][j]", i, j, grid[i][j])
 
       if (grid[i][j] === 2) {
         this.#isMoving = false
-        console.log("hi")
       }
     }
   }

@@ -8,12 +8,11 @@ export function SwipeHandler({ on }: Context) {
   on.touchstart = (e: TouchEvent) => {
     prevTouch = e.touches[0]
   }
-  on.touchmove = (e: TouchEvent) => {
+  on({ passive: false }).touchmove = (e: TouchEvent) => {
     e.preventDefault()
     const touch = e.changedTouches[0]
     if (prevTouch) {
       const dist = getDistance(touch, prevTouch)
-      console.log(dist)
       if (dist < 25) {
         return
       }
