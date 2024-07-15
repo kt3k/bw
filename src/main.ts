@@ -5,7 +5,6 @@ import { Input } from "./util/dir.ts"
 import { KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
-import { DPad } from "./ui/DPad.ts"
 import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
 
