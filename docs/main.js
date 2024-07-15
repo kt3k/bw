@@ -1320,6 +1320,5 @@ register(Canvas2, "canvas2");
 register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
-register(DPad, "js-d-pad");
 register(SwipeHandler, "js-swipe-handler");
 /*! Cell v0.1.7 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
