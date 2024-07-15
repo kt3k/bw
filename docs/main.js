@@ -737,7 +737,7 @@ var require_seedrandom2 = __commonJS({
   }
 });
 
-// https://jsr.io/@kt3k/cell/0.1.7/util.ts
+// https://jsr.io/@kt3k/cell/0.1.8/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
 function documentReady(doc = document) {
@@ -779,7 +779,7 @@ function logEvent({
   console.groupEnd();
 }
 
-// https://jsr.io/@kt3k/cell/0.1.7/mod.ts
+// https://jsr.io/@kt3k/cell/0.1.8/mod.ts
 var registry = {};
 function assert(assertion, message) {
   if (!assertion) {
@@ -887,6 +887,12 @@ function register(component, name) {
       const html = component(context);
       if (typeof html === "string") {
         el.innerHTML = html;
+      } else if (html && typeof html.then === "function") {
+        html.then((html2) => {
+          if (typeof html2 === "string") {
+            el.innerHTML = html2;
+          }
+        });
       }
     }
   };
@@ -1186,7 +1192,18 @@ var Character = class {
       this.setState(RIGHT);
     }
   }
-  step(input) {
+  front() {
+    if (this.#dir === UP) {
+      return [this.#i, this.#j - 1];
+    } else if (this.#dir === DOWN) {
+      return [this.#i, this.#j + 1];
+    } else if (this.#dir === LEFT) {
+      return [this.#i - 1, this.#j];
+    } else {
+      return [this.#i + 1, this.#j];
+    }
+  }
+  step(input, grid2) {
     if (this.#isMoving) {
       this.#d += this.#speed;
       if (this.#d == 16) {
@@ -1206,8 +1223,15 @@ var Character = class {
       }
     }
     if (input.up || input.down || input.left || input.right) {
+      console.log("foo");
       this.#isMoving = true;
-      this.#readInput(input);
+      this.#readInput(input, grid2);
+      const [i, j] = this.front();
+      console.log("i, j, grid[i][j]", i, j, grid2[i][j]);
+      if (grid2[i][j] === 2) {
+        this.#isMoving = false;
+        console.log("hi");
+      }
     }
   }
   appearance() {
@@ -1263,41 +1287,46 @@ var EvalScope = class {
   constructor(characters) {
     this.characters = characters;
   }
-  step(input) {
+  step(input, grid2) {
     for (const character of this.characters) {
-      character.step(input);
+      character.step(input, grid2);
     }
   }
 };
 async function GameScreen({ query, pub }) {
   const canvas1 = query(".canvas1");
   const brush = new Brush(canvas1.getContext("2d"));
-  const me = new Character(0, 0, 1, "./char/juni/juni_");
+  const me = new Character(10, 10, 1, "./char/juni/juni_");
   const view = new ViewScope(me.x, me.y);
   const evalScope = new EvalScope([me]);
   const assetManager = new AssetManager();
   const terrain = query(".js-terrain");
   await assetManager.loadImages(me.assets());
   const loop = gameloop(() => {
-    evalScope.step(Input);
+    evalScope.step(Input, grid);
     view.x = me.x;
     view.y = me.y;
     brush.clear();
+    const viewAdjust = {
+      x: 16 * 10,
+      y: 16 * 10
+    };
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.x + 16 * 10,
-        char.y - view.y + 16 * 10
+        char.x - view.x + viewAdjust.x,
+        char.y - view.y + viewAdjust.y
       );
     }
     terrain.setAttribute(
       "style",
-      "transform:translateX(" + (0 - view.x) + "px) translateY(" + (0 - view.y) + "px);"
+      "transform:translateX(" + (0 - view.x + viewAdjust.x) + "px) translateY(" + (0 - view.y + viewAdjust.y) + "px);"
     );
   }, 60);
   loop.onStep((fps) => pub("fps", fps));
   loop.run();
 }
+var grid = [];
 function Canvas2({ el }) {
   const WIDTH = el.width;
   const HEIGHT = el.height;
@@ -1309,8 +1338,11 @@ function Canvas2({ el }) {
   const colors = { 0: "#222", 1: "#111", 2: "#888" };
   const length = Object.keys(colors).length;
   for (let i = 0; i < W; i++) {
+    const row = [];
+    grid.push(row);
     for (let j = 0; j < H; j++) {
       const c = randomInt(length);
+      row.push(c);
       canvasCtx.fillStyle = colors[c];
       canvasCtx.fillRect(i * 16, j * 16, 16, 16);
     }
@@ -1321,4 +1353,4 @@ register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
-/*! Cell v0.1.7 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
+/*! Cell v0.1.8 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */

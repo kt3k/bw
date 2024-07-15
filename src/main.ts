@@ -83,7 +83,19 @@ class Character {
     }
   }
 
-  step(input: typeof Input) {
+  front() {
+    if (this.#dir === UP) {
+      return [this.#i, this.#j - 1]
+    } else if (this.#dir === DOWN) {
+      return [this.#i, this.#j + 1]
+    } else if (this.#dir === LEFT) {
+      return [this.#i - 1, this.#j]
+    } else {
+      return [this.#i + 1, this.#j]
+    }
+  }
+
+  step(input: typeof Input, grid: number[][]) {
     if (this.#isMoving) {
       this.#d += this.#speed
       if (this.#d == 16) {
@@ -104,8 +116,16 @@ class Character {
     }
 
     if (input.up || input.down || input.left || input.right) {
+      console.log("foo")
       this.#isMoving = true
-      this.#readInput(input)
+      this.#readInput(input, grid)
+      const [i, j] = this.front()
+      console.log("i, j, grid[i][j]", i, j, grid[i][j])
+
+      if (grid[i][j] === 2) {
+        this.#isMoving = false
+        console.log("hi")
+      }
     }
   }
 
@@ -165,7 +185,7 @@ class ViewScope {
 }
 
 type IChar = {
-  step(input: typeof Input): void
+  step(input: typeof Input, grid: number[][]): void
   get x(): number
   get y(): number
   appearance(): string
@@ -181,9 +201,9 @@ class EvalScope {
     this.characters = characters
   }
 
-  step(input: typeof Input) {
+  step(input: typeof Input, grid: number[][]) {
     for (const character of this.characters) {
-      character.step(input)
+      character.step(input, grid)
     }
   }
 }
@@ -204,7 +224,7 @@ async function GameScreen({ query, pub }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
   const brush = new Brush(canvas1.getContext("2d")!)
 
-  const me = new Character(0, 0, 1, "./char/juni/juni_")
+  const me = new Character(10, 10, 1, "./char/juni/juni_")
   const view = new ViewScope(me.x, me.y)
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
@@ -214,30 +234,38 @@ async function GameScreen({ query, pub }: Context) {
   await assetManager.loadImages(me.assets())
 
   const loop = gameloop(() => {
-    evalScope.step(Input)
+    evalScope.step(Input, grid)
 
     view.x = me.x
     view.y = me.y
 
     brush.clear()
 
+    const viewAdjust = {
+      x: 16 * 10,
+      y: 16 * 10,
+    }
+
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.x + 16 * 10,
-        char.y - view.y + 16 * 10,
+        char.x - view.x + viewAdjust.x,
+        char.y - view.y + viewAdjust.y,
       )
     }
 
     terrain.setAttribute(
       "style",
-      "transform:translateX(" + (0 - view.x) + "px) translateY(" +
-        (0 - view.y) + "px);",
+      "transform:translateX(" + (0 - view.x + viewAdjust.x) +
+        "px) translateY(" +
+        (0 - view.y + viewAdjust.y) + "px);",
     )
   }, 60)
   loop.onStep((fps) => pub("fps", fps))
   loop.run()
 }
+
+const grid = [] as number[][]
 
 function Canvas2({ el }: Context<HTMLCanvasElement>) {
   const WIDTH = el.width
@@ -252,8 +280,11 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
   const length = Object.keys(colors).length
 
   for (let i = 0; i < W; i++) {
+    const row = [] as number[]
+    grid.push(row)
     for (let j = 0; j < H; j++) {
       const c = randomInt(length)
+      row.push(c)
       canvasCtx.fillStyle = colors[c]
       canvasCtx.fillRect(i * 16, j * 16, 16, 16)
     }
@@ -261,7 +292,7 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
 }
 
 register(Canvas2, "canvas2")
-register(GameScreen as any, "js-game-screen")
+register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")

@@ -4,7 +4,7 @@
     "specifiers": {
       "jsr:@b-fuze/deno-dom@^0.1.47": "jsr:@b-fuze/deno-dom@0.1.47",
       "jsr:@kt3k/cell": "jsr:@kt3k/cell@0.1.3",
-      "jsr:@kt3k/cell@^0.1.7": "jsr:@kt3k/cell@0.1.7",
+      "jsr:@kt3k/cell@^0.1.8": "jsr:@kt3k/cell@0.1.8",
       "jsr:@kt3k/gameloop@^1.5.0": "jsr:@kt3k/gameloop@1.5.0",
       "jsr:@std/assert@^0.226.0": "jsr:@std/assert@0.226.0",
       "jsr:@std/internal@^1.0.0": "jsr:@std/internal@1.0.1",
@@ -22,8 +22,8 @@
       "@kt3k/cell@0.1.3": {
         "integrity": "c657a304a46f9673bc2fe7083c2e3ebffe08807e0170cad7178f79bb5d866e12"
       },
-      "@kt3k/cell@0.1.7": {
-        "integrity": "c64f552a6820f4c10fd2f12ff2cbb951e9d089c1dc91fd4bf7b744fd45fe1dbd"
+      "@kt3k/cell@0.1.8": {
+        "integrity": "b38ba397ccfbd2be4f9f7a1c281d30339a1e9a6e34776a1094b9ff98d32ee7f7"
       },
       "@kt3k/gameloop@1.5.0": {
         "integrity": "cc5da5e8960d0f3c76ebb9681c32d2cdc7383c3c123f4a93fceec3bdca73da6c"
@@ -1279,7 +1279,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@b-fuze/deno-dom@^0.1.47",
-      "jsr:@kt3k/cell@^0.1.7",
+      "jsr:@kt3k/cell@^0.1.8",
       "jsr:@kt3k/gameloop@^1.5.0",
       "jsr:@std/assert@^0.226.0"
     ]
