@@ -7,6 +7,7 @@ import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { DPad } from "./ui/DPad.ts"
 import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
+import { randomInt } from "./util/random.ts"
 
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
@@ -188,46 +189,55 @@ class EvalScope {
   }
 }
 
+class Terrain {
+  x: number
+  y: number
+  constructor(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+}
+
 /** The area which is loaded into the page. */
 class LoadScope {}
 
-function Canvas1({ el, pub }: Context<HTMLCanvasElement>) {
-  const canvasCtx = el.getContext("2d")!
-  const brush = new Brush(canvasCtx)
+async function GameScreen({ query, pub }: Context) {
+  const canvas1 = query<HTMLCanvasElement>(".canvas1")!
+  const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(0, 0, 1, "./char/juni/juni_")
   const view = new ViewScope(me.x, me.y)
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
 
-  const terrain = document.querySelector(".js-terrain")!
+  const terrain = query(".js-terrain")!
 
-  assetManager.loadImages(me.assets()).then(() => {
-    const loop = gameloop(() => {
-      evalScope.step(Input)
+  await assetManager.loadImages(me.assets())
 
-      view.x = me.x
-      view.y = me.y
+  const loop = gameloop(() => {
+    evalScope.step(Input)
 
-      brush.clear()
+    view.x = me.x
+    view.y = me.y
 
-      for (const char of evalScope.characters) {
-        brush.drawImage(
-          assetManager.getImage(char.appearance()),
-          char.x - view.x + 16 * 10,
-          char.y - view.y + 16 * 10,
-        )
-      }
+    brush.clear()
 
-      terrain.setAttribute(
-        "style",
-        "transform:translateX(" + (0 - view.x) + "px) translateY(" +
-          (0 - view.y) + "px);",
+    for (const char of evalScope.characters) {
+      brush.drawImage(
+        assetManager.getImage(char.appearance()),
+        char.x - view.x + 16 * 10,
+        char.y - view.y + 16 * 10,
       )
-    }, 60)
-    loop.onStep((fps) => pub("fps", fps))
-    loop.run()
-  })
+    }
+
+    terrain.setAttribute(
+      "style",
+      "transform:translateX(" + (0 - view.x) + "px) translateY(" +
+        (0 - view.y) + "px);",
+    )
+  }, 60)
+  loop.onStep((fps) => pub("fps", fps))
+  loop.run()
 }
 
 function Canvas2({ el }: Context<HTMLCanvasElement>) {
@@ -238,17 +248,21 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
   const canvasCtx = el.getContext("2d")!
   canvasCtx.fillStyle = "black"
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
+  // deno-lint-ignore no-explicit-any
+  const colors = { 0: "#222", 1: "#111", 2: "#888" } as any
+  const length = Object.keys(colors).length
 
   for (let i = 0; i < W; i++) {
     for (let j = 0; j < H; j++) {
-      canvasCtx.fillStyle = (i + j) % 2 === 0 ? "#222" : "#111"
+      const c = randomInt(length)
+      canvasCtx.fillStyle = colors[c]
       canvasCtx.fillRect(i * 16, j * 16, 16, 16)
     }
   }
 }
 
-register(Canvas1, "canvas1")
 register(Canvas2, "canvas2")
+register(GameScreen as any, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(DPad, "js-d-pad")
