@@ -1116,6 +1116,7 @@ function getDir(current, prev) {
 }
 
 // src/ui/SwipeHandler.ts
+var TOUCH_SENSITIVITY_THRESHOLD = 25;
 function SwipeHandler({ on }) {
   let prevTouch;
   on.touchstart = (e) => {
@@ -1126,7 +1127,7 @@ function SwipeHandler({ on }) {
     const touch = e.changedTouches[0];
     if (prevTouch) {
       const dist = getDistance(touch, prevTouch);
-      if (dist < 25) {
+      if (dist < TOUCH_SENSITIVITY_THRESHOLD) {
         return;
       }
       clearInput();
@@ -1184,6 +1185,10 @@ var Character = class {
   #speed = 1;
   /** True when moving, false otherwise */
   #isMoving = false;
+  /** The phase of the move */
+  #movePhase = 0;
+  /** Type of the move */
+  #moveType = "linear";
   /** The prefix of assets */
   #assetPrefix;
   constructor(i, j, speed, assetPrefix) {
@@ -1219,21 +1224,38 @@ var Character = class {
   }
   step(input, grid2) {
     if (this.#isMoving) {
-      this.#d += this.#speed;
-      if (this.#d == 16) {
-        this.#d = 0;
-        this.#isMoving = false;
-        if (this.#dir === UP) {
-          this.#j -= 1;
-        } else if (this.#dir === DOWN) {
-          this.#j += 1;
-        } else if (this.#dir === LEFT) {
-          this.#i -= 1;
-        } else if (this.#dir === RIGHT) {
-          this.#i += 1;
+      if (this.#moveType === "linear") {
+        this.#movePhase += this.#speed;
+        this.#d += this.#speed;
+        if (this.#movePhase == 16) {
+          this.#movePhase = 0;
+          this.#isMoving = false;
+          this.#d = 0;
+          if (this.#dir === UP) {
+            this.#j -= 1;
+          } else if (this.#dir === DOWN) {
+            this.#j += 1;
+          } else if (this.#dir === LEFT) {
+            this.#i -= 1;
+          } else if (this.#dir === RIGHT) {
+            this.#i += 1;
+          }
+        } else {
+          return;
         }
-      } else {
-        return;
+      } else if (this.#moveType === "bounce") {
+        if (this.#movePhase < 8) {
+          this.#d += this.#speed;
+        } else {
+          this.#d -= this.#speed;
+        }
+        this.#movePhase += this.#speed;
+        if (this.#movePhase == 16) {
+          this.#movePhase = 0;
+          this.#isMoving = false;
+        } else {
+          return;
+        }
       }
     }
     if (input.up || input.down || input.left || input.right) {
@@ -1241,12 +1263,15 @@ var Character = class {
       this.#readInput(input);
       const [i, j] = this.front();
       if (grid2[i][j] === 2) {
-        this.#isMoving = false;
+        this.#moveType = "bounce";
+      } else {
+        this.#moveType = "linear";
       }
+      this.#movePhase = 0;
     }
   }
   appearance() {
-    if (this.#d >= 8) {
+    if (this.#movePhase >= 8) {
       return `${this.#assetPrefix}${this.#dir}0.png`;
     } else {
       return `${this.#assetPrefix}${this.#dir}1.png`;
