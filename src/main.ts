@@ -1,7 +1,7 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 import { loadImage } from "./util/load.ts"
-import { Input } from "./util/dir.ts"
+import { clearInput, Input } from "./util/dir.ts"
 import { KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
@@ -255,6 +255,10 @@ async function GameScreen({ query, pub }: Context) {
   const assetManager = new AssetManager()
 
   const terrain = new Terrain(query(".js-terrain")!)
+
+  globalThis.addEventListener("blur", () => {
+    clearInput()
+  })
 
   await assetManager.loadImages(me.assets())
 
