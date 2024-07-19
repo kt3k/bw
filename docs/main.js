@@ -1348,6 +1348,9 @@ async function GameScreen({ query, pub: pub2 }) {
   const evalScope = new EvalScope([me]);
   const assetManager = new AssetManager();
   const terrain = new Terrain(query(".js-terrain"));
+  globalThis.addEventListener("blur", () => {
+    clearInput();
+  });
   await assetManager.loadImages(me.assets());
   const loop = gameloop(() => {
     evalScope.step(Input, grid);
