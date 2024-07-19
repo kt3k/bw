@@ -243,6 +243,8 @@ class LoadScope {}
 
 async function GameScreen({ query, pub }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
+  const SCREEN_CENTER_X = canvas1.width / 2 - 8
+  const SCREEN_CENTER_Y = canvas1.height / 2 - 8
   const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(10, 10, 1, "./char/juni/juni_")
@@ -262,24 +264,19 @@ async function GameScreen({ query, pub }: Context) {
 
     brush.clear()
 
-    const viewAdjust = {
-      x: 16 * 10,
-      y: 16 * 10,
-    }
-
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.x + viewAdjust.x,
-        char.y - view.y + viewAdjust.y,
+        char.x - view.x + SCREEN_CENTER_X,
+        char.y - view.y + SCREEN_CENTER_Y,
       )
     }
 
     terrain.setAttribute(
       "style",
-      "transform:translateX(" + (0 - view.x + viewAdjust.x) +
+      "transform:translateX(" + (0 - view.x + SCREEN_CENTER_X) +
         "px) translateY(" +
-        (0 - view.y + viewAdjust.y) + "px);",
+        (0 - view.y + SCREEN_CENTER_Y) + "px);",
     )
   }, 60)
   loop.onStep((fps) => pub("fps", fps))
