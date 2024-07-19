@@ -1329,34 +1329,41 @@ var EvalScope = class {
     }
   }
 };
+var Terrain = class {
+  el;
+  constructor(el) {
+    this.el = el;
+  }
+  setPosition(x, y) {
+    this.el.style.transform = `translateX(${x}px) translateY(${y}px)`;
+  }
+};
 async function GameScreen({ query, pub: pub2 }) {
   const canvas1 = query(".canvas1");
+  const SCREEN_CENTER_X = canvas1.width / 2 - 8;
+  const SCREEN_CENTER_Y = canvas1.height / 2 - 8;
   const brush = new Brush(canvas1.getContext("2d"));
-  const me = new Character(10, 10, 1, "./char/juni/juni_");
+  const me = new Character(98, 102, 1, "./char/juni/juni_");
   const view = new ViewScope(me.x, me.y);
   const evalScope = new EvalScope([me]);
   const assetManager = new AssetManager();
-  const terrain = query(".js-terrain");
+  const terrain = new Terrain(query(".js-terrain"));
   await assetManager.loadImages(me.assets());
   const loop = gameloop(() => {
     evalScope.step(Input, grid);
     view.x = me.x;
     view.y = me.y;
     brush.clear();
-    const viewAdjust = {
-      x: 16 * 10,
-      y: 16 * 10
-    };
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.x + viewAdjust.x,
-        char.y - view.y + viewAdjust.y
+        char.x - view.x + SCREEN_CENTER_X,
+        char.y - view.y + SCREEN_CENTER_Y
       );
     }
-    terrain.setAttribute(
-      "style",
-      "transform:translateX(" + (0 - view.x + viewAdjust.x) + "px) translateY(" + (0 - view.y + viewAdjust.y) + "px);"
+    terrain.setPosition(
+      0 - view.x + SCREEN_CENTER_X,
+      0 - view.y + SCREEN_CENTER_Y
     );
   }, 60);
   loop.onStep((fps) => pub2("fps", fps));
