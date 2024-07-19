@@ -230,11 +230,13 @@ class EvalScope {
 }
 
 class Terrain {
-  x: number
-  y: number
-  constructor(x: number, y: number) {
-    this.x = x
-    this.y = y
+  el: HTMLElement
+  constructor(el: HTMLElement) {
+    this.el = el
+  }
+
+  setPosition(x: number, y: number) {
+    this.el.style.transform = `translateX(${x}px) translateY(${y}px)`
   }
 }
 
@@ -247,12 +249,12 @@ async function GameScreen({ query, pub }: Context) {
   const SCREEN_CENTER_Y = canvas1.height / 2 - 8
   const brush = new Brush(canvas1.getContext("2d")!)
 
-  const me = new Character(10, 10, 1, "./char/juni/juni_")
+  const me = new Character(98, 102, 1, "./char/juni/juni_")
   const view = new ViewScope(me.x, me.y)
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
 
-  const terrain = query(".js-terrain")!
+  const terrain = new Terrain(query(".js-terrain")!)
 
   await assetManager.loadImages(me.assets())
 
@@ -272,11 +274,9 @@ async function GameScreen({ query, pub }: Context) {
       )
     }
 
-    terrain.setAttribute(
-      "style",
-      "transform:translateX(" + (0 - view.x + SCREEN_CENTER_X) +
-        "px) translateY(" +
-        (0 - view.y + SCREEN_CENTER_Y) + "px);",
+    terrain.setPosition(
+      0 - view.x + SCREEN_CENTER_X,
+      0 - view.y + SCREEN_CENTER_Y,
     )
   }, 60)
   loop.onStep((fps) => pub("fps", fps))
