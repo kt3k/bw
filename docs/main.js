@@ -1381,7 +1381,7 @@ function Canvas2({ el }) {
   const canvasCtx = el.getContext("2d");
   canvasCtx.fillStyle = "black";
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-  const colors = { 0: "#222", 1: "#111", 2: "#888" };
+  const colors = { 0: "#000", 1: "#000", 2: "#777" };
   const length = Object.keys(colors).length;
   for (let i = 0; i < W; i++) {
     const row = [];

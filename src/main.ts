@@ -298,7 +298,7 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
   canvasCtx.fillStyle = "black"
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
   // deno-lint-ignore no-explicit-any
-  const colors = { 0: "#222", 1: "#111", 2: "#888" } as any
+  const colors = { 0: "#000", 1: "#000", 2: "#777" } as any
   const length = Object.keys(colors).length
 
   for (let i = 0; i < W; i++) {
