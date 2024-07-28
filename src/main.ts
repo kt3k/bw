@@ -170,6 +170,10 @@ class Character {
     return this.#i * 16
   }
 
+  get centerX() {
+    return this.x + 8
+  }
+
   /** Gets the x of the world coordinates */
   get y() {
     if (this.#isMoving) {
@@ -180,6 +184,10 @@ class Character {
       }
     }
     return this.#j * 16
+  }
+
+  get centerY() {
+    return this.y + 8
   }
 
   assets() {
@@ -196,12 +204,38 @@ class Character {
 
 /** The area which is visible to the user */
 class ViewScope {
-  x: number
-  y: number
+  #w: number
+  #h: number
+  #left: number = 0
+  #top: number = 0
+  #bottom: number = 0
+  #right: number = 0
+  constructor(w: number, h: number) {
+    this.#w = w
+    this.#h = h
+  }
 
-  constructor(x: number, y: number) {
-    this.x = x
-    this.y = y
+  setCenter(x: number, y: number) {
+    this.#left = x - this.#w / 2
+    this.#top = y - this.#h / 2
+    this.#right = x + this.#w / 2
+    this.#bottom = y + this.#h / 2
+  }
+
+  get left() {
+    return this.#left
+  }
+
+  get top() {
+    return this.#top
+  }
+
+  get right() {
+    return this.#right
+  }
+
+  get bottom() {
+    return this.#bottom
   }
 }
 
@@ -217,10 +251,7 @@ type IChar = {
  * each frame.
  */
 class EvalScope {
-  characters: IChar[]
-  constructor(characters: IChar[]) {
-    this.characters = characters
-  }
+  constructor(public characters: IChar[]) {}
 
   step(input: typeof Input, grid: number[][]) {
     for (const character of this.characters) {
@@ -245,12 +276,12 @@ class LoadScope {}
 
 async function GameScreen({ query, pub }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
-  const SCREEN_CENTER_X = canvas1.width / 2 - 8
-  const SCREEN_CENTER_Y = canvas1.height / 2 - 8
   const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(98, 102, 1, "./char/juni/juni_")
-  const view = new ViewScope(me.x, me.y)
+  const view = new ViewScope(canvas1.width, canvas1.height)
+  view.setCenter(me.centerX, me.centerY)
+
   const evalScope = new EvalScope([me])
   const assetManager = new AssetManager()
 
@@ -265,23 +296,19 @@ async function GameScreen({ query, pub }: Context) {
   const loop = gameloop(() => {
     evalScope.step(Input, grid)
 
-    view.x = me.x
-    view.y = me.y
+    view.setCenter(me.centerX, me.centerY)
 
     brush.clear()
 
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.x + SCREEN_CENTER_X,
-        char.y - view.y + SCREEN_CENTER_Y,
+        char.x - view.left,
+        char.y - view.top,
       )
     }
 
-    terrain.setPosition(
-      0 - view.x + SCREEN_CENTER_X,
-      0 - view.y + SCREEN_CENTER_Y,
-    )
+    terrain.setPosition(0 - view.left, 0 - view.top)
   }, 60)
   loop.onStep((fps) => pub("fps", fps))
   loop.run()
