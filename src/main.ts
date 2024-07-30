@@ -7,7 +7,7 @@ import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
-import { eventHub } from "./util/eventhub.ts"
+import { eventHub, FPS, VIEW_SCOPE_MOVE } from "./util/eventhub.ts"
 
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
@@ -279,7 +279,7 @@ class Terrain {
 }
 
 function Terrain_({ el }: Context) {
-  eventHub.on("move", (e) => {
+  eventHub.on(VIEW_SCOPE_MOVE, (e) => {
     el.style.transform = `translateX(${e.x}px) translateY(${e.y}px)`
   })
 }
@@ -303,7 +303,7 @@ async function GameScreen({ query, pub }: Context) {
   const me = new Character(98, 102, 1, "./char/juni/juni_")
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
-  eventHub.emit("move", { x: -viewScope.left, y: -viewScope.top })
+  eventHub.emit(VIEW_SCOPE_MOVE, { x: -viewScope.left, y: -viewScope.top })
 
   const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
   const assetManager = new AssetManager()
@@ -319,7 +319,7 @@ async function GameScreen({ query, pub }: Context) {
 
     evalScope.setCenter(me.centerX, me.centerY)
     viewScope.setCenter(me.centerX, me.centerY)
-    eventHub.emit("move", { x: -viewScope.left, y: -viewScope.top })
+    eventHub.emit(VIEW_SCOPE_MOVE, { x: -viewScope.left, y: -viewScope.top })
 
     brush.clear()
 
@@ -331,7 +331,7 @@ async function GameScreen({ query, pub }: Context) {
       )
     }
   }, 60)
-  loop.onStep((fps) => eventHub.emit("fps", fps))
+  loop.onStep((fps) => eventHub.emit(FPS, fps))
   loop.run()
 }
 
