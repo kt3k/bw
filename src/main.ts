@@ -7,6 +7,7 @@ import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
+import { eventHub } from "./util/eventhub.ts"
 
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
@@ -202,8 +203,8 @@ class Character {
   }
 }
 
-/** The area which is visible to the user */
-class ViewScope {
+/** Rectangular area */
+class RectangularArea {
   #w: number
   #h: number
   #left: number = 0
@@ -239,6 +240,10 @@ class ViewScope {
   }
 }
 
+/** The area which is visible to the user */
+class ViewScope extends RectangularArea {
+}
+
 type IChar = {
   step(input: typeof Input, grid: number[][]): void
   get x(): number
@@ -250,8 +255,10 @@ type IChar = {
  * The area which is evaluated i.e. the characters in this area are called `.step()`
  * each frame.
  */
-class EvalScope {
-  constructor(public characters: IChar[]) {}
+class EvalScope extends RectangularArea {
+  constructor(public characters: IChar[], w: number, h: number) {
+    super(w, h)
+  }
 
   step(input: typeof Input, grid: number[][]) {
     for (const character of this.characters) {
@@ -271,21 +278,35 @@ class Terrain {
   }
 }
 
-/** The area which is loaded into the page. */
-class LoadScope {}
+function Terrain_({ el }: Context) {
+  eventHub.on("move", (e) => {
+    el.style.transform = `translateX(${e.x}px) translateY(${e.y}px)`
+  })
+}
+
+/**
+ * The scope to load the terrain fragment. The terrain fragment belong
+ * to this area need to be loaded.
+ */
+class LoadScope extends RectangularArea {}
+
+/**
+ * The scope to unload the terrain fragment. The terrain fragment which
+ * doesn't belong to this scope need to be unloaded
+ */
+class UnloadScope extends RectangularArea {}
 
 async function GameScreen({ query, pub }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
   const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(98, 102, 1, "./char/juni/juni_")
-  const view = new ViewScope(canvas1.width, canvas1.height)
-  view.setCenter(me.centerX, me.centerY)
+  const viewScope = new ViewScope(canvas1.width, canvas1.height)
+  viewScope.setCenter(me.centerX, me.centerY)
+  eventHub.emit("move", { x: -viewScope.left, y: -viewScope.top })
 
-  const evalScope = new EvalScope([me])
+  const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
   const assetManager = new AssetManager()
-
-  const terrain = new Terrain(query(".js-terrain")!)
 
   globalThis.addEventListener("blur", () => {
     clearInput()
@@ -296,21 +317,21 @@ async function GameScreen({ query, pub }: Context) {
   const loop = gameloop(() => {
     evalScope.step(Input, grid)
 
-    view.setCenter(me.centerX, me.centerY)
+    evalScope.setCenter(me.centerX, me.centerY)
+    viewScope.setCenter(me.centerX, me.centerY)
+    eventHub.emit("move", { x: -viewScope.left, y: -viewScope.top })
 
     brush.clear()
 
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.left,
-        char.y - view.top,
+        char.x - viewScope.left,
+        char.y - viewScope.top,
       )
     }
-
-    terrain.setPosition(0 - view.left, 0 - view.top)
   }, 60)
-  loop.onStep((fps) => pub("fps", fps))
+  loop.onStep((fps) => eventHub.emit("fps", fps))
   loop.run()
 }
 
@@ -345,3 +366,4 @@ register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
+register(Terrain_, "js-terrain")
