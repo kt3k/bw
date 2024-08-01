@@ -7,7 +7,7 @@ import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
-import { eventHub, FPS, VIEW_SCOPE_MOVE } from "./util/eventhub.ts"
+import { fpsSignal, viewScopeSignal } from "./util/signal.ts"
 
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
@@ -242,6 +242,10 @@ class RectangularArea {
 
 /** The area which is visible to the user */
 class ViewScope extends RectangularArea {
+  setCenter(x: number, y: number): void {
+    super.setCenter(x, y)
+    viewScopeSignal.updateByFields({ x: -this.left, y: -this.top })
+  }
 }
 
 type IChar = {
@@ -267,21 +271,12 @@ class EvalScope extends RectangularArea {
   }
 }
 
-class Terrain {
-  el: HTMLElement
-  constructor(el: HTMLElement) {
-    this.el = el
-  }
-
-  setPosition(x: number, y: number) {
-    this.el.style.transform = `translateX(${x}px) translateY(${y}px)`
-  }
-}
-
-function Terrain_({ el }: Context) {
-  eventHub.on(VIEW_SCOPE_MOVE, (e) => {
-    el.style.transform = `translateX(${e.x}px) translateY(${e.y}px)`
+function Terrain({ el }: Context) {
+  viewScopeSignal.onChange(({ x, y }) => {
+    el.style.transform = `translateX(${x}px) translateY(${y}px`
   })
+  const { x, y } = viewScopeSignal.get()
+  el.style.transform = `translateX(${x}px) translateY(${y}px`
 }
 
 /**
@@ -296,14 +291,13 @@ class LoadScope extends RectangularArea {}
  */
 class UnloadScope extends RectangularArea {}
 
-async function GameScreen({ query, pub }: Context) {
+async function GameScreen({ query }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
   const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(98, 102, 1, "./char/juni/juni_")
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
-  eventHub.emit(VIEW_SCOPE_MOVE, { x: -viewScope.left, y: -viewScope.top })
 
   const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
   const assetManager = new AssetManager()
@@ -319,7 +313,6 @@ async function GameScreen({ query, pub }: Context) {
 
     evalScope.setCenter(me.centerX, me.centerY)
     viewScope.setCenter(me.centerX, me.centerY)
-    eventHub.emit(VIEW_SCOPE_MOVE, { x: -viewScope.left, y: -viewScope.top })
 
     brush.clear()
 
@@ -331,7 +324,7 @@ async function GameScreen({ query, pub }: Context) {
       )
     }
   }, 60)
-  loop.onStep((fps) => eventHub.emit(FPS, fps))
+  loop.onStep((fps) => fpsSignal.update(fps))
   loop.run()
 }
 
@@ -366,4 +359,4 @@ register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
-register(Terrain_, "js-terrain")
+register(Terrain, "js-terrain")
