@@ -123,9 +123,9 @@ class Character {
         }
       } else if (this.#moveType === "bounce") {
         if (this.#movePhase < 8) {
-          this.#d += this.#speed
+          this.#d += this.#speed / 2
         } else {
-          this.#d -= this.#speed
+          this.#d -= this.#speed / 2
         }
         this.#movePhase += this.#speed
         if (this.#movePhase == 16) {
@@ -204,7 +204,7 @@ class Character {
 }
 
 /** Rectangular area */
-class RectangularArea {
+class RectArea {
   #w: number
   #h: number
   #left: number = 0
@@ -214,6 +214,7 @@ class RectangularArea {
   constructor(w: number, h: number) {
     this.#w = w
     this.#h = h
+    this.setCenter(0, 0)
   }
 
   setCenter(x: number, y: number) {
@@ -241,8 +242,8 @@ class RectangularArea {
 }
 
 /** The area which is visible to the user */
-class ViewScope extends RectangularArea {
-  setCenter(x: number, y: number): void {
+class ViewScope extends RectArea {
+  override setCenter(x: number, y: number): void {
     super.setCenter(x, y)
     viewScopeSignal.updateByFields({ x: -this.left, y: -this.top })
   }
@@ -259,7 +260,7 @@ type IChar = {
  * The area which is evaluated i.e. the characters in this area are called `.step()`
  * each frame.
  */
-class EvalScope extends RectangularArea {
+class EvalScope extends RectArea {
   constructor(public characters: IChar[], w: number, h: number) {
     super(w, h)
   }
@@ -272,24 +273,24 @@ class EvalScope extends RectangularArea {
 }
 
 function Terrain({ el }: Context) {
-  viewScopeSignal.onChange(({ x, y }) => {
+  const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
     el.style.transform = `translateX(${x}px) translateY(${y}px`
-  })
-  const { x, y } = viewScopeSignal.get()
-  el.style.transform = `translateX(${x}px) translateY(${y}px`
+  }
+  viewScopeSignal.onChange(setStyleTransform)
+  setStyleTransform(viewScopeSignal.get())
 }
 
 /**
  * The scope to load the terrain fragment. The terrain fragment belong
  * to this area need to be loaded.
  */
-class LoadScope extends RectangularArea {}
+class LoadScope extends RectArea {}
 
 /**
  * The scope to unload the terrain fragment. The terrain fragment which
  * doesn't belong to this scope need to be unloaded
  */
-class UnloadScope extends RectangularArea {}
+class UnloadScope extends RectArea {}
 
 async function GameScreen({ query }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
