@@ -10,14 +10,14 @@
     "serve": "deno run -A jsr:@std/http/file-server dist -p 8000"
   },
   "compilerOptions": {
-    "lib": ["deno.ns", "esnext", "dom"]
+    "lib": ["deno.ns", "esnext", "dom", "dom.iterable"]
   },
   "imports": {
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.47",
     "@kt3k/cell": "jsr:@kt3k/cell@^0.1.10",
     "@kt3k/gameloop": "jsr:@kt3k/gameloop@^1.5.0",
     "@kt3k/signal": "jsr:@kt3k/signal@^0.1.5",
-    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@std/assert": "jsr:@std/assert@^1.0.0"
   },
   "fmt": {
     "semiColons": false
