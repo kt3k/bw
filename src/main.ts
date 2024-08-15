@@ -9,6 +9,8 @@ import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
 import { fpsSignal, viewScopeSignal } from "./util/signal.ts"
 
+const CELL_UNIT = 16
+
 /** The wrapper of CanvasRenderingContext2D */
 class Brush {
   constructor(public ctx: CanvasRenderingContext2D) {}
@@ -22,9 +24,27 @@ class Brush {
   }
 }
 
+/**
+ * Map represents the map of terrain
+ */
+class Map {
+  x: number
+  y: number
+  w: number
+  h: number
+  // deno-lint-ignore no-explicit-any
+  constructor(obj: any) {
+    this.x = obj.x
+    this.y = obj.y
+    this.w = obj.w
+    this.h = obj.h
+  }
+}
+
 /** AssetManager manages the downloading of the assets */
 class AssetManager {
   images: { [key: string]: HTMLImageElement } = {}
+  maps: { [key: string]: Map } = {}
 
   async loadImages(paths: string[]) {
     const images = await Promise.all(paths.map(loadImage))
@@ -32,6 +52,20 @@ class AssetManager {
     paths.forEach((path, i) => {
       this.images[path] = images[i]
     })
+  }
+
+  loadMaps(maps: string[]) {
+    return Promise.all(
+      maps.map(async (x) => {
+        const resp = await fetch(x)
+        return new Map(await resp.json())
+      }),
+    )
+  }
+
+  async #loadMap(path: string): Map {
+    const resp = await fetch(path)
+    return new Map(await resp.json())
   }
 
   getImage(path: string): HTMLImageElement {
@@ -163,32 +197,32 @@ class Character {
   get x() {
     if (this.#isMoving) {
       if (this.#dir === LEFT) {
-        return this.#i * 16 - this.#d
+        return this.#i * CELL_UNIT - this.#d
       } else if (this.#dir === RIGHT) {
-        return this.#i * 16 + this.#d
+        return this.#i * CELL_UNIT + this.#d
       }
     }
-    return this.#i * 16
+    return this.#i * CELL_UNIT
   }
 
   get centerX() {
-    return this.x + 8
+    return this.x + CELL_UNIT / 2
   }
 
   /** Gets the x of the world coordinates */
   get y() {
     if (this.#isMoving) {
       if (this.#dir === UP) {
-        return this.#j * 16 - this.#d
+        return this.#j * CELL_UNIT - this.#d
       } else if (this.#dir === DOWN) {
-        return this.#j * 16 + this.#d
+        return this.#j * CELL_UNIT + this.#d
       }
     }
-    return this.#j * 16
+    return this.#j * CELL_UNIT
   }
 
   get centerY() {
-    return this.y + 8
+    return this.y + CELL_UNIT / 2
   }
 
   assets() {
@@ -284,7 +318,33 @@ function Terrain({ el }: Context) {
  * The scope to load the terrain fragment. The terrain fragment belong
  * to this area need to be loaded.
  */
-class LoadScope extends RectArea {}
+export class LoadScope extends RectArea {
+  static LEN = 200 * CELL_UNIT
+  static ceil(n: number): number {
+    return Math.ceil(n / this.LEN) * this.LEN
+  }
+
+  static floor(n: number): number {
+    return Math.floor(n / this.LEN) * this.LEN
+  }
+
+  maps() {
+    const { LEN } = LoadScope
+    const left = LoadScope.floor(this.left)
+    const right = LoadScope.ceil(this.right)
+    const top = LoadScope.floor(this.top)
+    const bottom = LoadScope.ceil(this.bottom)
+    const list = []
+    for (let x = left; x < right; x += LEN) {
+      for (let y = top; y < bottom; y += LEN) {
+        const i = x / CELL_UNIT
+        const j = y / CELL_UNIT
+        list.push(`map/map_${i}.${j}.json`)
+      }
+    }
+    return list
+  }
+}
 
 /**
  * The scope to unload the terrain fragment. The terrain fragment which
@@ -296,12 +356,18 @@ async function GameScreen({ query }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
   const brush = new Brush(canvas1.getContext("2d")!)
 
-  const me = new Character(98, 102, 1, "./char/juni/juni_")
+  const me = new Character(98, 102, 1, "char/juni/juni_")
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
 
+  const loadScope = new LoadScope(3200, 3200)
+  loadScope.setCenter(me.centerX, me.centerY)
+
   const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
   const assetManager = new AssetManager()
+
+  const maps = await assetManager.loadMaps(loadScope.maps())
+  console.log(maps)
 
   globalThis.addEventListener("blur", () => {
     clearInput()
@@ -334,8 +400,8 @@ const grid = [] as number[][]
 function Canvas2({ el }: Context<HTMLCanvasElement>) {
   const WIDTH = el.width
   const HEIGHT = el.height
-  const W = Math.floor(WIDTH / 16)
-  const H = Math.floor(HEIGHT / 16)
+  const W = Math.floor(WIDTH / CELL_UNIT)
+  const H = Math.floor(HEIGHT / CELL_UNIT)
   const canvasCtx = el.getContext("2d")!
   canvasCtx.fillStyle = "black"
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
@@ -350,7 +416,7 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
       const c = randomInt(length)
       row.push(c)
       canvasCtx.fillStyle = colors[c]
-      canvasCtx.fillRect(i * 16, j * 16, 16, 16)
+      canvasCtx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT)
     }
   }
 }
