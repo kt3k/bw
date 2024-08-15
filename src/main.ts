@@ -63,7 +63,7 @@ class AssetManager {
     )
   }
 
-  async #loadMap(path: string): Map {
+  async #loadMap(path: string): Promise<Map> {
     const resp = await fetch(path)
     return new Map(await resp.json())
   }
