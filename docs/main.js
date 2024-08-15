@@ -1085,12 +1085,79 @@ function KeyMonitor({ on }) {
   };
 }
 
+// https://jsr.io/@kt3k/signal/0.1.5/mod.ts
+var Signal = class {
+  #val;
+  #handlers = [];
+  constructor(value) {
+    this.#val = value;
+  }
+  /**
+   * Get the current value of the signal.
+   *
+   * @returns The current value of the signal
+   */
+  get() {
+    return this.#val;
+  }
+  /**
+   * Update the signal value.
+   *
+   * @param value The new value of the signal
+   */
+  update(value) {
+    if (this.#val !== value) {
+      this.#val = value;
+      this.#handlers.forEach((handler) => {
+        handler(value);
+      });
+    }
+  }
+  /**
+   * Update the signal value by comparing the fields of the new value.
+   *
+   * @param value The new value of the signal
+   */
+  updateByFields(value) {
+    if (typeof value !== "object" || value === null) {
+      throw new Error("value must be an object");
+    }
+    for (const key of Object.keys(value)) {
+      if (this.#val[key] !== value[key]) {
+        this.#val = { ...value };
+        this.#handlers.forEach((handler) => {
+          handler(this.#val);
+        });
+        break;
+      }
+    }
+  }
+  /**
+   * Subscribe to the signal.
+   *
+   * @param cb The callback function to be called when the signal is updated
+   * @returns A function to stop the subscription
+   */
+  onChange(cb) {
+    this.#handlers.push(cb);
+    return () => {
+      this.#handlers.splice(this.#handlers.indexOf(cb) >>> 0, 1);
+    };
+  }
+};
+function signal(value) {
+  return new Signal(value);
+}
+
+// src/util/signal.ts
+var fpsSignal = signal(0);
+var viewScopeSignal = signal({ x: 0, y: 0 });
+
 // src/ui/FpsMonitor.ts
-function FpsMonitor({ sub, on, el }) {
-  sub("fps");
-  on.fps = (e) => {
-    el.textContent = e.detail.toFixed(2);
-  };
+function FpsMonitor({ el }) {
+  fpsSignal.onChange((fps) => {
+    el.textContent = fps.toFixed(2);
+  });
   return "0";
 }
 
@@ -1149,6 +1216,7 @@ function randomInt(n) {
 }
 
 // src/main.ts
+var CELL_UNIT = 16;
 var Brush = class {
   constructor(ctx) {
     this.ctx = ctx;
@@ -1160,13 +1228,39 @@ var Brush = class {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 };
+var Map = class {
+  x;
+  y;
+  w;
+  h;
+  // deno-lint-ignore no-explicit-any
+  constructor(obj) {
+    this.x = obj.x;
+    this.y = obj.y;
+    this.w = obj.w;
+    this.h = obj.h;
+  }
+};
 var AssetManager = class {
   images = {};
+  maps = {};
   async loadImages(paths) {
     const images = await Promise.all(paths.map(loadImage));
     paths.forEach((path, i) => {
       this.images[path] = images[i];
     });
+  }
+  loadMaps(maps) {
+    return Promise.all(
+      maps.map(async (x) => {
+        const resp = await fetch(x);
+        return new Map(await resp.json());
+      })
+    );
+  }
+  async #loadMap(path) {
+    const resp = await fetch(path);
+    return new Map(await resp.json());
   }
   getImage(path) {
     return this.images[path];
@@ -1245,9 +1339,9 @@ var Character = class {
         }
       } else if (this.#moveType === "bounce") {
         if (this.#movePhase < 8) {
-          this.#d += this.#speed;
+          this.#d += this.#speed / 2;
         } else {
-          this.#d -= this.#speed;
+          this.#d -= this.#speed / 2;
         }
         this.#movePhase += this.#speed;
         if (this.#movePhase == 16) {
@@ -1281,23 +1375,29 @@ var Character = class {
   get x() {
     if (this.#isMoving) {
       if (this.#dir === LEFT) {
-        return this.#i * 16 - this.#d;
+        return this.#i * CELL_UNIT - this.#d;
       } else if (this.#dir === RIGHT) {
-        return this.#i * 16 + this.#d;
+        return this.#i * CELL_UNIT + this.#d;
       }
     }
-    return this.#i * 16;
+    return this.#i * CELL_UNIT;
+  }
+  get centerX() {
+    return this.x + CELL_UNIT / 2;
   }
   /** Gets the x of the world coordinates */
   get y() {
     if (this.#isMoving) {
       if (this.#dir === UP) {
-        return this.#j * 16 - this.#d;
+        return this.#j * CELL_UNIT - this.#d;
       } else if (this.#dir === DOWN) {
-        return this.#j * 16 + this.#d;
+        return this.#j * CELL_UNIT + this.#d;
       }
     }
-    return this.#j * 16;
+    return this.#j * CELL_UNIT;
+  }
+  get centerY() {
+    return this.y + CELL_UNIT / 2;
   }
   assets() {
     const assets = [];
@@ -1310,17 +1410,46 @@ var Character = class {
     return assets;
   }
 };
-var ViewScope = class {
-  x;
-  y;
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
+var RectArea = class {
+  #w;
+  #h;
+  #left = 0;
+  #top = 0;
+  #bottom = 0;
+  #right = 0;
+  constructor(w, h) {
+    this.#w = w;
+    this.#h = h;
+    this.setCenter(0, 0);
+  }
+  setCenter(x, y) {
+    this.#left = x - this.#w / 2;
+    this.#top = y - this.#h / 2;
+    this.#right = x + this.#w / 2;
+    this.#bottom = y + this.#h / 2;
+  }
+  get left() {
+    return this.#left;
+  }
+  get top() {
+    return this.#top;
+  }
+  get right() {
+    return this.#right;
+  }
+  get bottom() {
+    return this.#bottom;
   }
 };
-var EvalScope = class {
-  characters;
-  constructor(characters) {
+var ViewScope = class extends RectArea {
+  setCenter(x, y) {
+    super.setCenter(x, y);
+    viewScopeSignal.updateByFields({ x: -this.left, y: -this.top });
+  }
+};
+var EvalScope = class extends RectArea {
+  constructor(characters, w, h) {
+    super(w, h);
     this.characters = characters;
   }
   step(input, grid2) {
@@ -1329,55 +1458,76 @@ var EvalScope = class {
     }
   }
 };
-var Terrain = class {
-  el;
-  constructor(el) {
-    this.el = el;
+function Terrain({ el }) {
+  const setStyleTransform = ({ x, y }) => {
+    el.style.transform = `translateX(${x}px) translateY(${y}px`;
+  };
+  viewScopeSignal.onChange(setStyleTransform);
+  setStyleTransform(viewScopeSignal.get());
+}
+var LoadScope = class _LoadScope extends RectArea {
+  static LEN = 200 * CELL_UNIT;
+  static ceil(n) {
+    return Math.ceil(n / this.LEN) * this.LEN;
   }
-  setPosition(x, y) {
-    this.el.style.transform = `translateX(${x}px) translateY(${y}px)`;
+  static floor(n) {
+    return Math.floor(n / this.LEN) * this.LEN;
+  }
+  maps() {
+    const { LEN } = _LoadScope;
+    const left = _LoadScope.floor(this.left);
+    const right = _LoadScope.ceil(this.right);
+    const top = _LoadScope.floor(this.top);
+    const bottom = _LoadScope.ceil(this.bottom);
+    const list = [];
+    for (let x = left; x < right; x += LEN) {
+      for (let y = top; y < bottom; y += LEN) {
+        const i = x / CELL_UNIT;
+        const j = y / CELL_UNIT;
+        list.push(`map/map_${i}.${j}.json`);
+      }
+    }
+    return list;
   }
 };
-async function GameScreen({ query, pub: pub2 }) {
+async function GameScreen({ query }) {
   const canvas1 = query(".canvas1");
-  const SCREEN_CENTER_X = canvas1.width / 2 - 8;
-  const SCREEN_CENTER_Y = canvas1.height / 2 - 8;
   const brush = new Brush(canvas1.getContext("2d"));
-  const me = new Character(98, 102, 1, "./char/juni/juni_");
-  const view = new ViewScope(me.x, me.y);
-  const evalScope = new EvalScope([me]);
+  const me = new Character(98, 102, 1, "char/juni/juni_");
+  const viewScope = new ViewScope(canvas1.width, canvas1.height);
+  viewScope.setCenter(me.centerX, me.centerY);
+  const loadScope = new LoadScope(3200, 3200);
+  loadScope.setCenter(me.centerX, me.centerY);
+  const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3);
   const assetManager = new AssetManager();
-  const terrain = new Terrain(query(".js-terrain"));
+  const maps = await assetManager.loadMaps(loadScope.maps());
+  console.log(maps);
   globalThis.addEventListener("blur", () => {
     clearInput();
   });
   await assetManager.loadImages(me.assets());
   const loop = gameloop(() => {
     evalScope.step(Input, grid);
-    view.x = me.x;
-    view.y = me.y;
+    evalScope.setCenter(me.centerX, me.centerY);
+    viewScope.setCenter(me.centerX, me.centerY);
     brush.clear();
     for (const char of evalScope.characters) {
       brush.drawImage(
         assetManager.getImage(char.appearance()),
-        char.x - view.x + SCREEN_CENTER_X,
-        char.y - view.y + SCREEN_CENTER_Y
+        char.x - viewScope.left,
+        char.y - viewScope.top
       );
     }
-    terrain.setPosition(
-      0 - view.x + SCREEN_CENTER_X,
-      0 - view.y + SCREEN_CENTER_Y
-    );
   }, 60);
-  loop.onStep((fps) => pub2("fps", fps));
+  loop.onStep((fps) => fpsSignal.update(fps));
   loop.run();
 }
 var grid = [];
 function Canvas2({ el }) {
   const WIDTH = el.width;
   const HEIGHT = el.height;
-  const W = Math.floor(WIDTH / 16);
-  const H = Math.floor(HEIGHT / 16);
+  const W = Math.floor(WIDTH / CELL_UNIT);
+  const H = Math.floor(HEIGHT / CELL_UNIT);
   const canvasCtx = el.getContext("2d");
   canvasCtx.fillStyle = "black";
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -1390,7 +1540,7 @@ function Canvas2({ el }) {
       const c = randomInt(length);
       row.push(c);
       canvasCtx.fillStyle = colors[c];
-      canvasCtx.fillRect(i * 16, j * 16, 16, 16);
+      canvasCtx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT);
     }
   }
 }
@@ -1399,4 +1549,8 @@ register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
+register(Terrain, "js-terrain");
+export {
+  LoadScope
+};
 /*! Cell v0.1.10 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
