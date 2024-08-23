@@ -7,11 +7,11 @@ const TOUCH_SENSITIVITY_THRESHOLD = 25
 
 export function SwipeHandler({ on }: Context) {
   let prevTouch: Touch | undefined
-  on.touchstart = (e: TouchEvent) => {
+  on("touchstart", (e: TouchEvent) => {
     prevTouch = e.touches[0]
-  }
+  })
   // passive false is necessary to prevent scrolling in iOS Safari
-  on({ passive: false }).touchmove = (e: TouchEvent) => {
+  on("touchmove", { passive: false }, (e: TouchEvent) => {
     e.preventDefault()
     const touch = e.changedTouches[0]
     if (prevTouch) {
@@ -24,8 +24,8 @@ export function SwipeHandler({ on }: Context) {
       Input[dir] = true
     }
     prevTouch = touch
-  }
-  on.touchend = () => {
+  })
+  on("touchend", () => {
     clearInput()
-  }
+  })
 }
