@@ -11,10 +11,7 @@ const KEY_RIGHT = new Set(["ArrowRight", "d", "l"])
  * Mount <body> tag.
  */
 export function KeyMonitor({ on }: Context) {
-  on("click", (e) => {
-    console.log(e)
-  })
-  on("keydown", (e: KeyboardEvent) => {
+  on("keydown", (e) => {
     if (KEY_UP.has(e.key)) {
       Input.up = true
     } else if (KEY_DOWN.has(e.key)) {
@@ -25,7 +22,7 @@ export function KeyMonitor({ on }: Context) {
       Input.right = true
     }
   })
-  on("keyup", (e: KeyboardEvent) => {
+  on("keyup", (e) => {
     if (KEY_UP.has(e.key)) {
       Input.up = false
     } else if (KEY_DOWN.has(e.key)) {
