@@ -5,7 +5,7 @@ import { clearInput, Input } from "./util/dir.ts"
 import { KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
-import { type Dir, DIRS, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
+import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
 import { fpsSignal, viewScopeSignal } from "./util/signal.ts"
 
@@ -43,16 +43,7 @@ class Map {
 
 /** AssetManager manages the downloading of the assets */
 class AssetManager {
-  images: { [key: string]: HTMLImageElement } = {}
   maps: { [key: string]: Map } = {}
-
-  async loadImages(paths: string[]) {
-    const images = await Promise.all(paths.map(loadImage))
-
-    paths.forEach((path, i) => {
-      this.images[path] = images[i]
-    })
-  }
 
   loadMaps(maps: string[]) {
     return Promise.all(
@@ -67,10 +58,20 @@ class AssetManager {
     const resp = await fetch(path)
     return new Map(await resp.json())
   }
+}
 
-  getImage(path: string): HTMLImageElement {
-    return this.images[path]
-  }
+type CharacterAppearance =
+  | "up0"
+  | "up1"
+  | "down0"
+  | "down1"
+  | "left0"
+  | "left1"
+  | "right0"
+  | "right1"
+
+type CharacterAssets = {
+  [K in CharacterAppearance]: HTMLImageElement
 }
 
 /** The character */
@@ -93,6 +94,9 @@ class Character {
   #moveType: "linear" | "bounce" = "linear"
   /** The prefix of assets */
   #assetPrefix: string
+  /** True if the assets are loaded */
+  #assetsLoaded: boolean = false
+  #assets?: CharacterAssets
 
   constructor(
     i: number,
@@ -187,9 +191,9 @@ class Character {
 
   appearance() {
     if (this.#movePhase >= 8) {
-      return `${this.#assetPrefix}${this.#dir}0.png`
+      return this.#assets![`${this.#dir}0`]
     } else {
-      return `${this.#assetPrefix}${this.#dir}1.png`
+      return this.#assets![`${this.#dir}1`]
     }
   }
 
@@ -225,20 +229,44 @@ class Character {
     return this.y + CELL_UNIT / 2
   }
 
-  assets() {
-    const assets = []
-    for (const state of DIRS) {
-      assets.push(
-        `${this.#assetPrefix}${state}0.png`,
-        `${this.#assetPrefix}${state}1.png`,
-      )
+  /**
+   * Loads the assets and store resulted HTMLImageElement in the fields.
+   * Assets are managed like this way to make garbage collection easier.
+   */
+  async loadAssets() {
+    const [up0, up1, down0, down1, left0, left1, right0, right1] = await Promise
+      .all([
+        `${this.#assetPrefix}up0.png`,
+        `${this.#assetPrefix}up1.png`,
+        `${this.#assetPrefix}down0.png`,
+        `${this.#assetPrefix}down1.png`,
+        `${this.#assetPrefix}left0.png`,
+        `${this.#assetPrefix}left1.png`,
+        `${this.#assetPrefix}right0.png`,
+        `${this.#assetPrefix}right1.png`,
+      ].map(loadImage))
+    this.#assets = {
+      up0,
+      up1,
+      down0,
+      down1,
+      left0,
+      left1,
+      right0,
+      right1,
     }
-    return assets
+  }
+
+  get assetsLoaded() {
+    return !!this.#assets
   }
 }
 
-/** Rectangular area */
-class RectArea {
+/**
+ * Abstract rectangular area, which implements properties of the rectangle.
+ * Various areas, which have special meanings, are implemented by extending this class.
+ */
+abstract class RectArea {
   #w: number
   #h: number
   #left: number = 0
@@ -275,7 +303,11 @@ class RectArea {
   }
 }
 
-/** The area which is visible to the user */
+/**
+ * The area which is visible to the user
+ * The center of this area is the center of the screen
+ * The center of this area usually follows the 'me' character
+ */
 class ViewScope extends RectArea {
   override setCenter(x: number, y: number): void {
     super.setCenter(x, y)
@@ -287,7 +319,7 @@ type IChar = {
   step(input: typeof Input, grid: number[][]): void
   get x(): number
   get y(): number
-  appearance(): string
+  appearance(): HTMLImageElement
 }
 
 /**
@@ -306,7 +338,7 @@ class EvalScope extends RectArea {
   }
 }
 
-function Terrain({ el }: Context) {
+function TerrainWrap({ el }: Context) {
   const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
     el.style.transform = `translateX(${x}px) translateY(${y}px`
   }
@@ -360,6 +392,10 @@ async function GameScreen({ query }: Context) {
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
 
+  // The load scope unit is 200 x 200 grid (3200 x 3200 px)
+  // A tile of the size 3200 x 3200 px are placed in every direction
+  // 4 tiles which overlap with the area of 3200 x 3200 px surrounding 'me'
+  // are loaded.
   const loadScope = new LoadScope(3200, 3200)
   loadScope.setCenter(me.centerX, me.centerY)
 
@@ -373,7 +409,7 @@ async function GameScreen({ query }: Context) {
     clearInput()
   })
 
-  await assetManager.loadImages(me.assets())
+  await me.loadAssets()
 
   const loop = gameloop(() => {
     evalScope.step(Input, grid)
@@ -385,7 +421,7 @@ async function GameScreen({ query }: Context) {
 
     for (const char of evalScope.characters) {
       brush.drawImage(
-        assetManager.getImage(char.appearance()),
+        char.appearance(),
         char.x - viewScope.left,
         char.y - viewScope.top,
       )
@@ -426,4 +462,4 @@ register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
-register(Terrain, "js-terrain")
+register(TerrainWrap, "js-terrain")
