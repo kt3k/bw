@@ -319,24 +319,24 @@ function Terrain({ el }: Context) {
  * to this area need to be loaded.
  */
 export class LoadScope extends RectArea {
-  static LEN = 200 * CELL_UNIT
+  static LOAD_UNIT = 200 * CELL_UNIT
   static ceil(n: number): number {
-    return Math.ceil(n / this.LEN) * this.LEN
+    return Math.ceil(n / this.LOAD_UNIT) * this.LOAD_UNIT
   }
 
   static floor(n: number): number {
-    return Math.floor(n / this.LEN) * this.LEN
+    return Math.floor(n / this.LOAD_UNIT) * this.LOAD_UNIT
   }
 
   maps() {
-    const { LEN } = LoadScope
+    const { LOAD_UNIT } = LoadScope
     const left = LoadScope.floor(this.left)
     const right = LoadScope.ceil(this.right)
     const top = LoadScope.floor(this.top)
     const bottom = LoadScope.ceil(this.bottom)
     const list = []
-    for (let x = left; x < right; x += LEN) {
-      for (let y = top; y < bottom; y += LEN) {
+    for (let x = left; x < right; x += LOAD_UNIT) {
+      for (let y = top; y < bottom; y += LOAD_UNIT) {
         const i = x / CELL_UNIT
         const j = y / CELL_UNIT
         list.push(`map/map_${i}.${j}.json`)
