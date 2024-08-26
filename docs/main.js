@@ -737,7 +737,7 @@ var require_seedrandom2 = __commonJS({
   }
 });
 
-// https://jsr.io/@kt3k/cell/0.1.10/util.ts
+// https://jsr.io/@kt3k/cell/0.3.6/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
 function documentReady(doc = document) {
@@ -779,7 +779,71 @@ function logEvent({
   console.groupEnd();
 }
 
-// https://jsr.io/@kt3k/cell/0.1.10/mod.ts
+// https://jsr.io/@kt3k/signal/0.1.6/mod.ts
+var Signal = class {
+  #val;
+  #handlers = [];
+  constructor(value) {
+    this.#val = value;
+  }
+  /**
+   * Get the current value of the signal.
+   *
+   * @returns The current value of the signal
+   */
+  get() {
+    return this.#val;
+  }
+  /**
+   * Update the signal value.
+   *
+   * @param value The new value of the signal
+   */
+  update(value) {
+    if (this.#val !== value) {
+      this.#val = value;
+      this.#handlers.forEach((handler) => {
+        handler(value);
+      });
+    }
+  }
+  /**
+   * Update the signal value by comparing the fields of the new value.
+   *
+   * @param value The new value of the signal
+   */
+  updateByFields(value) {
+    if (typeof value !== "object" || value === null) {
+      throw new Error("value must be an object");
+    }
+    for (const key of Object.keys(value)) {
+      if (this.#val[key] !== value[key]) {
+        this.#val = { ...value };
+        this.#handlers.forEach((handler) => {
+          handler(this.#val);
+        });
+        break;
+      }
+    }
+  }
+  /**
+   * Subscribe to the signal.
+   *
+   * @param cb The callback function to be called when the signal is updated
+   * @returns A function to stop the subscription
+   */
+  onChange(cb) {
+    this.#handlers.push(cb);
+    return () => {
+      this.#handlers.splice(this.#handlers.indexOf(cb) >>> 0, 1);
+    };
+  }
+};
+function signal(value) {
+  return new Signal(value);
+}
+
+// https://jsr.io/@kt3k/cell/0.3.6/mod.ts
 var registry = {};
 function assert(assertion, message) {
   if (!assertion) {
@@ -792,13 +856,6 @@ function assertComponentNameIsValid(name) {
     !!registry[name],
     `The component of the given name is not registered: ${name}`
   );
-}
-function pub(type, data) {
-  document.querySelectorAll(`.sub\\:${type}`).forEach((el) => {
-    el.dispatchEvent(
-      new CustomEvent(type, { bubbles: false, detail: data })
-    );
-  });
 }
 function register(component, name) {
   assert(
@@ -817,85 +874,49 @@ function register(component, name) {
       el.addEventListener(`__unmount__:${name}`, () => {
         el.classList.remove(initClass);
       }, { once: true });
-      const on = new Proxy(() => {
-      }, {
-        // simple event handler (like on.click = (e) => {})
-        set(_, type, value) {
-          addEventListener(name, el, type, value);
-          return true;
-        },
-        get(_, outside) {
-          if (outside === "outside") {
-            return new Proxy({}, {
-              set(_2, type, value) {
-                assert(
-                  typeof value === "function",
-                  `Event handler must be a function, ${typeof value} (${value}) is given`
-                );
-                const listener = (e) => {
-                  if (el !== e.target && !el.contains(e.target)) {
-                    logEvent({
-                      module: "outside",
-                      color: "#39cccc",
-                      e,
-                      component: name
-                    });
-                    value(e);
-                  }
-                };
-                document.addEventListener(type, listener);
-                el.addEventListener(`__unmount__:${name}`, () => {
-                  document.removeEventListener(type, listener);
-                }, { once: true });
-                return true;
-              }
-            });
-          }
-          return null;
-        },
-        // event delegation handler (like on(".button").click = (e) => {}))
-        apply(_target, _thisArg, args) {
-          const arg0 = args[0];
-          if (typeof arg0 === "string") {
-            return new Proxy({}, {
-              set(_, type, value) {
-                addEventListener(
-                  name,
-                  el,
-                  type,
-                  // deno-lint-ignore no-explicit-any
-                  value,
-                  arg0,
-                  args[1]
-                );
-                return true;
-              }
-            });
-          } else if (arg0 && typeof arg0 === "object") {
-            return new Proxy({}, {
-              set(_, type, value) {
-                addEventListener(
-                  name,
-                  el,
-                  type,
-                  // deno-lint-ignore no-explicit-any
-                  value,
-                  void 0,
-                  arg0
-                );
-                return true;
-              }
-            });
-          }
-          throw new Error(`Invalid on(...) call: ${typeof arg0} is given.`);
+      const on = (type, selector, options, handler) => {
+        if (typeof selector === "function") {
+          handler = selector;
+          selector = void 0;
+          options = void 0;
+        } else if (typeof options === "function" && typeof selector === "string") {
+          handler = options;
+          options = void 0;
+        } else if (typeof options === "function" && typeof selector === "object") {
+          handler = options;
+          options = selector;
+          selector = void 0;
         }
-      });
-      const sub = (type) => el.classList.add(`sub:${type}`);
+        if (typeof handler !== "function") {
+          throw new Error(
+            `Cannot add event listener: The handler must be a function, but ${typeof handler} is given`
+          );
+        }
+        addEventListener(name, el, type, handler, selector, options);
+      };
+      const onOutside = (type, handler) => {
+        assertEventType(type);
+        assertEventHandler(handler);
+        const listener = (e) => {
+          if (el !== e.target && !el.contains(e.target)) {
+            logEvent({
+              module: "outside",
+              color: "#39cccc",
+              e,
+              component: name
+            });
+            handler(e);
+          }
+        };
+        document.addEventListener(type, listener);
+        el.addEventListener(`__unmount__:${name}`, () => {
+          document.removeEventListener(type, listener);
+        }, { once: true });
+      };
       const context = {
         el,
         on,
-        pub,
-        sub,
+        onOutside,
         query: (s) => el.querySelector(s),
         queryAll: (s) => el.querySelectorAll(s)
       };
@@ -921,11 +942,21 @@ function register(component, name) {
     });
   }
 }
-function addEventListener(name, el, type, handler, selector, options) {
+function assertEventHandler(handler) {
   assert(
     typeof handler === "function",
-    `Event handler must be a function, ${typeof handler} (${handler}) is given`
+    `Cannot add an event listener: The event handler must be a function, ${typeof handler} (${handler}) is given`
   );
+}
+function assertEventType(type) {
+  assert(
+    typeof type === "string",
+    `Cannot add an event listener: The event type must be a string, ${typeof type} (${type}) is given`
+  );
+}
+function addEventListener(name, el, type, handler, selector, options) {
+  assertEventType(type);
+  assertEventHandler(handler);
   const listener = (e) => {
     if (!selector || [].some.call(
       el.querySelectorAll(selector),
@@ -954,6 +985,7 @@ function mount(name, el) {
     classNames = [name];
   }
   classNames.map((className) => {
+    ;
     [].map.call(
       (el || document).querySelectorAll(registry[className].sel),
       registry[className]
@@ -1061,7 +1093,7 @@ var KEY_DOWN = /* @__PURE__ */ new Set(["ArrowDown", "s", "j"]);
 var KEY_LEFT = /* @__PURE__ */ new Set(["ArrowLeft", "a", "h"]);
 var KEY_RIGHT = /* @__PURE__ */ new Set(["ArrowRight", "d", "l"]);
 function KeyMonitor({ on }) {
-  on.keydown = (e) => {
+  on("keydown", (e) => {
     if (KEY_UP.has(e.key)) {
       Input.up = true;
     } else if (KEY_DOWN.has(e.key)) {
@@ -1071,8 +1103,8 @@ function KeyMonitor({ on }) {
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = true;
     }
-  };
-  on.keyup = (e) => {
+  });
+  on("keyup", (e) => {
     if (KEY_UP.has(e.key)) {
       Input.up = false;
     } else if (KEY_DOWN.has(e.key)) {
@@ -1082,71 +1114,7 @@ function KeyMonitor({ on }) {
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = false;
     }
-  };
-}
-
-// https://jsr.io/@kt3k/signal/0.1.5/mod.ts
-var Signal = class {
-  #val;
-  #handlers = [];
-  constructor(value) {
-    this.#val = value;
-  }
-  /**
-   * Get the current value of the signal.
-   *
-   * @returns The current value of the signal
-   */
-  get() {
-    return this.#val;
-  }
-  /**
-   * Update the signal value.
-   *
-   * @param value The new value of the signal
-   */
-  update(value) {
-    if (this.#val !== value) {
-      this.#val = value;
-      this.#handlers.forEach((handler) => {
-        handler(value);
-      });
-    }
-  }
-  /**
-   * Update the signal value by comparing the fields of the new value.
-   *
-   * @param value The new value of the signal
-   */
-  updateByFields(value) {
-    if (typeof value !== "object" || value === null) {
-      throw new Error("value must be an object");
-    }
-    for (const key of Object.keys(value)) {
-      if (this.#val[key] !== value[key]) {
-        this.#val = { ...value };
-        this.#handlers.forEach((handler) => {
-          handler(this.#val);
-        });
-        break;
-      }
-    }
-  }
-  /**
-   * Subscribe to the signal.
-   *
-   * @param cb The callback function to be called when the signal is updated
-   * @returns A function to stop the subscription
-   */
-  onChange(cb) {
-    this.#handlers.push(cb);
-    return () => {
-      this.#handlers.splice(this.#handlers.indexOf(cb) >>> 0, 1);
-    };
-  }
-};
-function signal(value) {
-  return new Signal(value);
+  });
 }
 
 // src/util/signal.ts
@@ -1186,10 +1154,10 @@ function getDir(current, prev) {
 var TOUCH_SENSITIVITY_THRESHOLD = 25;
 function SwipeHandler({ on }) {
   let prevTouch;
-  on.touchstart = (e) => {
+  on("touchstart", (e) => {
     prevTouch = e.touches[0];
-  };
-  on({ passive: false }).touchmove = (e) => {
+  });
+  on("touchmove", { passive: false }, (e) => {
     e.preventDefault();
     const touch = e.changedTouches[0];
     if (prevTouch) {
@@ -1202,10 +1170,10 @@ function SwipeHandler({ on }) {
       Input[dir] = true;
     }
     prevTouch = touch;
-  };
-  on.touchend = () => {
+  });
+  on("touchend", () => {
     clearInput();
-  };
+  });
 }
 
 // src/util/random.ts
@@ -1242,14 +1210,7 @@ var Map = class {
   }
 };
 var AssetManager = class {
-  images = {};
   maps = {};
-  async loadImages(paths) {
-    const images = await Promise.all(paths.map(loadImage));
-    paths.forEach((path, i) => {
-      this.images[path] = images[i];
-    });
-  }
   loadMaps(maps) {
     return Promise.all(
       maps.map(async (x) => {
@@ -1261,9 +1222,6 @@ var AssetManager = class {
   async #loadMap(path) {
     const resp = await fetch(path);
     return new Map(await resp.json());
-  }
-  getImage(path) {
-    return this.images[path];
   }
 };
 var Character = class {
@@ -1285,6 +1243,9 @@ var Character = class {
   #moveType = "linear";
   /** The prefix of assets */
   #assetPrefix;
+  /** True if the assets are loaded */
+  #assetsLoaded = false;
+  #assets;
   constructor(i, j, speed, assetPrefix) {
     this.#i = i;
     this.#j = j;
@@ -1366,9 +1327,9 @@ var Character = class {
   }
   appearance() {
     if (this.#movePhase >= 8) {
-      return `${this.#assetPrefix}${this.#dir}0.png`;
+      return this.#assets[`${this.#dir}0`];
     } else {
-      return `${this.#assetPrefix}${this.#dir}1.png`;
+      return this.#assets[`${this.#dir}1`];
     }
   }
   /** Gets the x of the world coordinates */
@@ -1399,15 +1360,34 @@ var Character = class {
   get centerY() {
     return this.y + CELL_UNIT / 2;
   }
-  assets() {
-    const assets = [];
-    for (const state of DIRS) {
-      assets.push(
-        `${this.#assetPrefix}${state}0.png`,
-        `${this.#assetPrefix}${state}1.png`
-      );
-    }
-    return assets;
+  /**
+   * Loads the assets and store resulted HTMLImageElement in the fields.
+   * Assets are managed like this way to make garbage collection easier.
+   */
+  async loadAssets() {
+    const [up0, up1, down0, down1, left0, left1, right0, right1] = await Promise.all([
+      `${this.#assetPrefix}up0.png`,
+      `${this.#assetPrefix}up1.png`,
+      `${this.#assetPrefix}down0.png`,
+      `${this.#assetPrefix}down1.png`,
+      `${this.#assetPrefix}left0.png`,
+      `${this.#assetPrefix}left1.png`,
+      `${this.#assetPrefix}right0.png`,
+      `${this.#assetPrefix}right1.png`
+    ].map(loadImage));
+    this.#assets = {
+      up0,
+      up1,
+      down0,
+      down1,
+      left0,
+      left1,
+      right0,
+      right1
+    };
+  }
+  get assetsLoaded() {
+    return !!this.#assets;
   }
 };
 var RectArea = class {
@@ -1458,7 +1438,7 @@ var EvalScope = class extends RectArea {
     }
   }
 };
-function Terrain({ el }) {
+function TerrainWrap({ el }) {
   const setStyleTransform = ({ x, y }) => {
     el.style.transform = `translateX(${x}px) translateY(${y}px`;
   };
@@ -1466,22 +1446,22 @@ function Terrain({ el }) {
   setStyleTransform(viewScopeSignal.get());
 }
 var LoadScope = class _LoadScope extends RectArea {
-  static LEN = 200 * CELL_UNIT;
+  static LOAD_UNIT = 200 * CELL_UNIT;
   static ceil(n) {
-    return Math.ceil(n / this.LEN) * this.LEN;
+    return Math.ceil(n / this.LOAD_UNIT) * this.LOAD_UNIT;
   }
   static floor(n) {
-    return Math.floor(n / this.LEN) * this.LEN;
+    return Math.floor(n / this.LOAD_UNIT) * this.LOAD_UNIT;
   }
   maps() {
-    const { LEN } = _LoadScope;
+    const { LOAD_UNIT } = _LoadScope;
     const left = _LoadScope.floor(this.left);
     const right = _LoadScope.ceil(this.right);
     const top = _LoadScope.floor(this.top);
     const bottom = _LoadScope.ceil(this.bottom);
     const list = [];
-    for (let x = left; x < right; x += LEN) {
-      for (let y = top; y < bottom; y += LEN) {
+    for (let x = left; x < right; x += LOAD_UNIT) {
+      for (let y = top; y < bottom; y += LOAD_UNIT) {
         const i = x / CELL_UNIT;
         const j = y / CELL_UNIT;
         list.push(`map/map_${i}.${j}.json`);
@@ -1505,7 +1485,7 @@ async function GameScreen({ query }) {
   globalThis.addEventListener("blur", () => {
     clearInput();
   });
-  await assetManager.loadImages(me.assets());
+  await me.loadAssets();
   const loop = gameloop(() => {
     evalScope.step(Input, grid);
     evalScope.setCenter(me.centerX, me.centerY);
@@ -1513,7 +1493,7 @@ async function GameScreen({ query }) {
     brush.clear();
     for (const char of evalScope.characters) {
       brush.drawImage(
-        assetManager.getImage(char.appearance()),
+        char.appearance(),
         char.x - viewScope.left,
         char.y - viewScope.top
       );
@@ -1549,8 +1529,8 @@ register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
-register(Terrain, "js-terrain");
+register(TerrainWrap, "js-terrain");
 export {
   LoadScope
 };
-/*! Cell v0.1.10 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
+/*! Cell v0.3.6 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
