@@ -2,4 +2,3 @@
 module.exports = {
   content: ["static/index.html"],
 }
-

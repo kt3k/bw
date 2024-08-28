@@ -7,7 +7,8 @@ const weakMap = new WeakMap<HTMLImageElement, Promise<HTMLImageElement>>()
  * It caches the promise of the loading image. If the image is used somewhere in the system,
  * it will be returned from the cached promise.
  */
-export function loadImage(path: string): Promise<HTMLImageElement> {
+export async function loadImage(path: string): Promise<HTMLImageElement> {
+  await new Promise((resolve) => setTimeout(resolve, 2000))
   const cached = weakRefCache.get(path)
   if (cached) {
     return cached

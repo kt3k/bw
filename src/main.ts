@@ -7,7 +7,8 @@ import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { randomInt } from "./util/random.ts"
-import { fpsSignal, viewScopeSignal } from "./util/signal.ts"
+import { fpsSignal, isLoadingSignal, viewScopeSignal } from "./util/signal.ts"
+import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
 
 const CELL_UNIT = 16
 
@@ -97,8 +98,7 @@ class Character {
   #moveType: "linear" | "bounce" = "linear"
   /** The prefix of assets */
   #assetPrefix: string
-  /** True if the assets are loaded */
-  #assetsLoaded: boolean = false
+  /** The images necessary to render this character */
   #assets?: CharacterAssets
 
   constructor(
@@ -260,7 +260,7 @@ class Character {
     }
   }
 
-  get assetsLoaded() {
+  get assetsReady() {
     return !!this.#assets
   }
 }
@@ -323,6 +323,7 @@ type IChar = {
   get x(): number
   get y(): number
   appearance(): HTMLImageElement
+  get assetsReady(): boolean
 }
 
 /**
@@ -334,10 +335,19 @@ class EvalScope extends RectArea {
     super(w, h)
   }
 
-  step(input: typeof Input, grid: number[][]) {
+  step(input: typeof Input, grid: number[][]): void {
     for (const character of this.characters) {
       character.step(input, grid)
     }
+  }
+
+  /** This can be optimized by filtering the characters by their coordinates and view screen scope */
+  get visible(): IChar[] {
+    return this.characters
+  }
+
+  get assetsReady(): boolean {
+    return this.visible.every((x) => x.assetsReady)
   }
 }
 
@@ -415,6 +425,11 @@ async function GameScreen({ query }: Context) {
   await me.loadAssets()
 
   const loop = gameloop(() => {
+    if (!evalScope.assetsReady) {
+      isLoadingSignal.update(true)
+      return
+    }
+    isLoadingSignal.update(false)
     evalScope.step(Input, grid)
 
     evalScope.setCenter(me.centerX, me.centerY)
@@ -422,7 +437,7 @@ async function GameScreen({ query }: Context) {
 
     brush.clear()
 
-    for (const char of evalScope.characters) {
+    for (const char of evalScope.visible) {
       brush.drawImage(
         char.appearance(),
         char.x - viewScope.left,
@@ -466,3 +481,4 @@ register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
 register(TerrainWrap, "js-terrain")
+register(LoadingIndicator, "js-loading-indicator")
