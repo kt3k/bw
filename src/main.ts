@@ -11,7 +11,7 @@ import { fpsSignal, viewScopeSignal } from "./util/signal.ts"
 
 const CELL_UNIT = 16
 
-/** The wrapper of CanvasRenderingContext2D */
+/** A simple wrapper of CanvasRenderingContext2D */
 class Brush {
   constructor(public ctx: CanvasRenderingContext2D) {}
 
@@ -41,7 +41,10 @@ class Map {
   }
 }
 
-/** AssetManager manages the downloading of the assets */
+/**
+ * AssetManager manages the downloading of the assets.
+ * Deprecated.
+ */
 class AssetManager {
   maps: { [key: string]: Map } = {}
 
