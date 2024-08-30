@@ -1,12 +1,5 @@
-import { WeakValueMap } from "./weak_value_map.ts"
+import { WeakValueMap } from "@kt3k/weak-value-map"
 
-const weakValueMap = new WeakValueMap<string, Promise<HTMLImageElement>>()
-const weakMap = new WeakMap<HTMLImageElement, Promise<HTMLImageElement>>()
-
-/** Load a image from a path.
- * It caches the promise of the loading image. If the image is used somewhere in the system,
- * it will be returned from the cached promise.
- */
 function loadImage_(path: string): Promise<HTMLImageElement> {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image()
@@ -20,6 +13,11 @@ function loadImage_(path: string): Promise<HTMLImageElement> {
   })
 }
 
+/**
+ * Load a image from a path.
+ * It caches the promise of the loading image. If the image is used somewhere in the system,
+ * it will be returned from the cached promise.
+ */
 export const loadImage = memoizedLoading(loadImage_)
 
 function memoizedLoading<K, A extends WeakKey>(
