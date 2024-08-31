@@ -142,6 +142,21 @@ class Character {
   }
 
   step(input: typeof Input, grid: number[][]) {
+    if (
+      this.#movePhase === 0 &&
+      (input.up || input.down || input.left || input.right)
+    ) {
+      this.#isMoving = true
+      this.#readInput(input)
+      const [i, j] = this.front()
+
+      if (grid[i][j] === 2) {
+        this.#moveType = "bounce"
+      } else {
+        this.#moveType = "linear"
+      }
+    }
+
     if (this.#isMoving) {
       if (this.#moveType === "linear") {
         this.#movePhase += this.#speed
@@ -159,8 +174,6 @@ class Character {
           } else if (this.#dir === RIGHT) {
             this.#i += 1
           }
-        } else {
-          return
         }
       } else if (this.#moveType === "bounce") {
         if (this.#movePhase < 8) {
@@ -172,23 +185,8 @@ class Character {
         if (this.#movePhase == 16) {
           this.#movePhase = 0
           this.#isMoving = false
-        } else {
-          return
         }
       }
-    }
-
-    if (input.up || input.down || input.left || input.right) {
-      this.#isMoving = true
-      this.#readInput(input)
-      const [i, j] = this.front()
-
-      if (grid[i][j] === 2) {
-        this.#moveType = "bounce"
-      } else {
-        this.#moveType = "linear"
-      }
-      this.#movePhase = 0
     }
   }
 
