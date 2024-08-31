@@ -216,7 +216,7 @@ class Character {
     return this.x + CELL_UNIT / 2
   }
 
-  /** Gets the x of the world coordinates */
+  /** Gets the y of the world coordinates */
   get y() {
     if (this.#isMoving) {
       if (this.#dir === UP) {
