@@ -42,26 +42,9 @@ class Map {
   }
 }
 
-/**
- * AssetManager manages the downloading of the assets.
- * Deprecated.
- */
-class AssetManager {
-  maps: { [key: string]: Map } = {}
-
-  loadMaps(maps: string[]) {
-    return Promise.all(
-      maps.map(async (x) => {
-        const resp = await fetch(x)
-        return new Map(await resp.json())
-      }),
-    )
-  }
-
-  async #loadMap(path: string): Promise<Map> {
-    const resp = await fetch(path)
-    return new Map(await resp.json())
-  }
+async function loadMap(path: string): Promise<Map> {
+  const resp = await fetch(path)
+  return new Map(await resp.json())
 }
 
 type CharacterAppearance =
@@ -129,7 +112,8 @@ class Character {
     }
   }
 
-  front() {
+  /** Returns the grid coordinates of the 1 cell front of the character. */
+  front(): [i: number, j: number] {
     if (this.#dir === UP) {
       return [this.#i, this.#j - 1]
     } else if (this.#dir === DOWN) {
@@ -140,6 +124,18 @@ class Character {
       return [this.#i + 1, this.#j]
     }
   }
+
+  /*
+  step(input: typeof Input, terrain: Terrain) {
+    const [i, j] = this.frontGrid()
+    const cell = terrain.get(i, j)
+    if (cell.canEnter()) {
+      // ...
+    } else {
+      // ...
+    }
+  }
+  */
 
   step(input: typeof Input, grid: number[][]) {
     if (
@@ -176,15 +172,16 @@ class Character {
           }
         }
       } else if (this.#moveType === "bounce") {
+        this.#movePhase += this.#speed
         if (this.#movePhase < 8) {
           this.#d += this.#speed / 2
         } else {
           this.#d -= this.#speed / 2
         }
-        this.#movePhase += this.#speed
         if (this.#movePhase == 16) {
           this.#movePhase = 0
           this.#isMoving = false
+          this.#d = 0
         }
       }
     }
@@ -200,14 +197,13 @@ class Character {
 
   /** Gets the x of the world coordinates */
   get x() {
-    if (this.#isMoving) {
-      if (this.#dir === LEFT) {
-        return this.#i * CELL_UNIT - this.#d
-      } else if (this.#dir === RIGHT) {
-        return this.#i * CELL_UNIT + this.#d
-      }
+    if (this.#dir === LEFT) {
+      return this.#i * CELL_UNIT - this.#d
+    } else if (this.#dir === RIGHT) {
+      return this.#i * CELL_UNIT + this.#d
+    } else {
+      return this.#i * CELL_UNIT
     }
-    return this.#i * CELL_UNIT
   }
 
   get centerX() {
@@ -216,14 +212,13 @@ class Character {
 
   /** Gets the y of the world coordinates */
   get y() {
-    if (this.#isMoving) {
-      if (this.#dir === UP) {
-        return this.#j * CELL_UNIT - this.#d
-      } else if (this.#dir === DOWN) {
-        return this.#j * CELL_UNIT + this.#d
-      }
+    if (this.#dir === UP) {
+      return this.#j * CELL_UNIT - this.#d
+    } else if (this.#dir === DOWN) {
+      return this.#j * CELL_UNIT + this.#d
+    } else {
+      return this.#j * CELL_UNIT
     }
-    return this.#j * CELL_UNIT
   }
 
   get centerY() {
@@ -371,7 +366,33 @@ export class LoadScope extends RectArea {
     return Math.floor(n / this.LOAD_UNIT) * this.LOAD_UNIT
   }
 
-  maps() {
+  #map = {} as Record<string, Map>
+  #loading = new Set()
+
+  constructor(w: number, h: number) {
+    super(w, h)
+    this.#map = {}
+  }
+
+  loadMaps() {
+    const maps = this.#getCurrentMapUrls()
+
+    for (const map of maps) {
+      if (!this.#map[map]) {
+        this.#loadMap(map)
+      }
+    }
+  }
+
+  async #loadMap(url: string) {
+    this.#loading.add(url)
+    const resp = await fetch(url)
+    const map = new Map(await resp.json())
+    this.#map[url] = map
+    this.#loading.delete(url)
+  }
+
+  #getCurrentMapUrls() {
     const { LOAD_UNIT } = LoadScope
     const left = LoadScope.floor(this.left)
     const right = LoadScope.ceil(this.right)
@@ -395,6 +416,8 @@ export class LoadScope extends RectArea {
  */
 class UnloadScope extends RectArea {}
 
+class Terrain {}
+
 async function GameScreen({ query }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
   const brush = new Brush(canvas1.getContext("2d")!)
@@ -409,12 +432,9 @@ async function GameScreen({ query }: Context) {
   // are loaded.
   const loadScope = new LoadScope(3200, 3200)
   loadScope.setCenter(me.centerX, me.centerY)
+  await loadScope.loadMaps()
 
   const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
-  const assetManager = new AssetManager()
-
-  const maps = await assetManager.loadMaps(loadScope.maps())
-  console.log(maps)
 
   globalThis.addEventListener("blur", () => {
     clearInput()
