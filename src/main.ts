@@ -411,6 +411,7 @@ async function GameScreen({ query }: Context) {
   const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(98, 102, 1, "char/juni/juni_")
+
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
 
@@ -420,15 +421,15 @@ async function GameScreen({ query }: Context) {
   // are loaded.
   const loadScope = new LoadScope(3200, 3200)
   loadScope.setCenter(me.centerX, me.centerY)
-  await loadScope.loadMaps()
 
   const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
+  evalScope.setCenter(me.centerX, me.centerY)
 
   globalThis.addEventListener("blur", () => {
     clearInput()
   })
 
-  await me.loadAssets()
+  await Promise.all([me.loadAssets(), loadScope.loadMaps()])
 
   const loop = gameloop(() => {
     if (!evalScope.assetsReady) {
@@ -440,6 +441,7 @@ async function GameScreen({ query }: Context) {
 
     evalScope.setCenter(me.centerX, me.centerY)
     viewScope.setCenter(me.centerX, me.centerY)
+    loadScope.setCenter(me.centerX, me.centerY)
 
     brush.clear()
 
