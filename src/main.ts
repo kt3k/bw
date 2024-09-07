@@ -175,7 +175,7 @@ class Character {
     }
   }
 
-  appearance() {
+  image() {
     if (this.#movePhase >= 8) {
       return this.#assets![`${this.#dir}0`]
     } else {
@@ -303,32 +303,37 @@ type IChar = {
   step(input: typeof Input, grid: number[][]): void
   get x(): number
   get y(): number
-  appearance(): HTMLImageElement
+  image(): HTMLImageElement
   get assetsReady(): boolean
 }
 
-/**
- * The area which is evaluated i.e. the characters in this area are called `.step()`
- * each frame.
- */
-class EvalScope extends RectArea {
-  constructor(public characters: IChar[], w: number, h: number) {
-    super(w, h)
+class Walkers {
+  #walkers: IChar[] = []
+  add(walker: IChar) {
+    this.#walkers.push(walker)
   }
 
-  step(input: typeof Input, grid: number[][]): void {
-    for (const character of this.characters) {
-      character.step(input, grid)
+  step(input: typeof Input, grid: number[][]) {
+    for (const walker of this.#walkers) {
+      walker.step(input, grid)
     }
   }
 
-  /** This can be optimized by filtering the characters by their coordinates and view screen scope */
-  get visible(): IChar[] {
-    return this.characters
+  get assetsReady(): boolean {
+    return this.#walkers.every((x) => x.assetsReady)
   }
 
-  get assetsReady(): boolean {
-    return this.visible.every((x) => x.assetsReady)
+  [Symbol.iterator]() {
+    return this.#walkers[Symbol.iterator]()
+  }
+}
+
+/**
+ * The characters in this scope are evaluated in each frame
+ */
+class WalkScope extends RectArea {
+  constructor(w: number, h: number) {
+    super(w, h)
   }
 }
 
@@ -422,34 +427,37 @@ async function GameScreen({ query }: Context) {
   const loadScope = new LoadScope(3200, 3200)
   loadScope.setCenter(me.centerX, me.centerY)
 
-  const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3)
-  evalScope.setCenter(me.centerX, me.centerY)
+  const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3)
+  walkScope.setCenter(me.centerX, me.centerY)
 
   globalThis.addEventListener("blur", () => {
     clearInput()
   })
 
+  const walkers = new Walkers()
+  walkers.add(me)
+
   await Promise.all([me.loadAssets(), loadScope.loadMaps()])
 
   const loop = gameloop(() => {
-    if (!evalScope.assetsReady) {
+    if (!walkers.assetsReady) {
       isLoadingSignal.update(true)
       return
     }
     isLoadingSignal.update(false)
-    evalScope.step(Input, grid)
+    walkers.step(Input, grid)
 
-    evalScope.setCenter(me.centerX, me.centerY)
+    walkScope.setCenter(me.centerX, me.centerY)
     viewScope.setCenter(me.centerX, me.centerY)
     loadScope.setCenter(me.centerX, me.centerY)
 
     brush.clear()
 
-    for (const char of evalScope.visible) {
+    for (const walker of walkers) {
       brush.drawImage(
-        char.appearance(),
-        char.x - viewScope.left,
-        char.y - viewScope.top,
+        walker.image(),
+        walker.x - viewScope.left,
+        walker.y - viewScope.top,
       )
     }
   }, 60)
