@@ -30,11 +30,6 @@ class Map {
   }
 }
 
-async function loadMap(path: string): Promise<Map> {
-  const resp = await fetch(path)
-  return new Map(await resp.json())
-}
-
 type CharacterAppearance =
   | "up0"
   | "up1"
@@ -115,7 +110,7 @@ class Character {
 
   /*
   step(input: typeof Input, terrain: Terrain) {
-    const [i, j] = this.frontGrid()
+    const [i, j] = this.front()
     const cell = terrain.get(i, j)
     if (cell.canEnter()) {
       // ...
@@ -209,6 +204,14 @@ class Character {
     }
   }
 
+  get h() {
+    return CELL_UNIT
+  }
+
+  get w() {
+    return CELL_UNIT
+  }
+
   get centerY() {
     return this.y + CELL_UNIT / 2
   }
@@ -287,12 +290,22 @@ abstract class RectArea {
   }
 }
 
+abstract class Scope extends RectArea {
+  includes(char: IChar): boolean {
+    const { x, y, w, h } = char
+    return this.left <= x + w &&
+      this.right >= x &&
+      this.top <= y + h &&
+      this.bottom >= y
+  }
+}
+
 /**
  * The area which is visible to the user
  * The center of this area is the center of the screen
  * The center of this area usually follows the 'me' character
  */
-class ViewScope extends RectArea {
+class ViewScope extends Scope {
   override setCenter(x: number, y: number): void {
     super.setCenter(x, y)
     viewScopeSignal.updateByFields({ x: -this.left, y: -this.top })
@@ -303,6 +316,8 @@ type IChar = {
   step(input: typeof Input, grid: number[][]): void
   get x(): number
   get y(): number
+  get w(): number
+  get h(): number
   image(): HTMLImageElement
   get assetsReady(): boolean
 }
@@ -445,6 +460,7 @@ async function GameScreen({ query }: Context) {
       return
     }
     isLoadingSignal.update(false)
+
     walkers.step(Input, grid)
 
     walkScope.setCenter(me.centerX, me.centerY)
@@ -454,6 +470,9 @@ async function GameScreen({ query }: Context) {
     brush.clear()
 
     for (const walker of walkers) {
+      if (!viewScope.includes(walker)) {
+        continue
+      }
       brush.drawImage(
         walker.image(),
         walker.x - viewScope.left,
