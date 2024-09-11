@@ -133,7 +133,7 @@ class Character {
   }
   */
 
-  step(input: typeof Input, grid: number[][]) {
+  step(input: typeof Input, terrain: Terrain) {
     if (
       this.#movePhase === 0 &&
       (input.up || input.down || input.left || input.right)
@@ -141,11 +141,12 @@ class Character {
       this.#isMoving = true
       this.#readInput(input)
       const [i, j] = this.front()
+      const cell = terrain.get(i, j)
 
-      if (grid[i][j] === 2) {
-        this.#moveType = "bounce"
-      } else {
+      if (cell.canEnter()) {
         this.#moveType = "linear"
+      } else {
+        this.#moveType = "bounce"
       }
     }
 
@@ -326,7 +327,7 @@ class ViewScope extends Scope {
 }
 
 type IChar = {
-  step(input: typeof Input, grid: number[][]): void
+  step(input: typeof Input, terrain: Terrain): void
   get x(): number
   get y(): number
   get w(): number
@@ -341,9 +342,9 @@ class Walkers {
     this.#walkers.push(walker)
   }
 
-  step(input: typeof Input, grid: number[][]) {
+  step(input: typeof Input, terrain: Terrain) {
     for (const walker of this.#walkers) {
-      walker.step(input, grid)
+      walker.step(input, terrain)
     }
   }
 
@@ -441,6 +442,10 @@ class TerrainCell {
   canEnter(): boolean {
     return this.#canEnter
   }
+
+  get color() {
+    return this.#color
+  }
 }
 
 class TerrainDistrict {
@@ -466,6 +471,16 @@ class TerrainDistrict {
   }
 }
 
+function renderDistrict(brush: Brush, district: TerrainDistrict) {
+  for (let j = 0; j < 200; j++) {
+    for (let i = 0; i < 200; i++) {
+      const cell = district.get(i, j)
+      brush.ctx.fillStyle = cell.color || "black"
+      brush.ctx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT)
+    }
+  }
+}
+
 class Terrain {
   #districts: Record<string, TerrainDistrict> = {}
   addDistrict(k: number, l: number, district: TerrainDistrict) {
@@ -476,8 +491,14 @@ class Terrain {
     const k = Math.floor(i / 200) * 200
     const l = Math.floor(j / 200) * 200
     const district = this.#districts[`${k}.${l}`]
-    const i_ = i % 200
-    const j_ = j % 200
+    let i_ = i % 200
+    let j_ = j % 200
+    if (i_ < 0) {
+      i_ += 200
+    }
+    if (j_ < 0) {
+      j_ += 200
+    }
     return district.get(i_, j_)
   }
 
@@ -490,7 +511,7 @@ async function GameScreen({ query }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
   const brush = new Brush(canvas1.getContext("2d")!)
 
-  const me = new Character(98, 102, 1, "char/juni/juni_")
+  const me = new Character(2, 2, 1, "char/juni/juni_")
 
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
@@ -518,12 +539,24 @@ async function GameScreen({ query }: Context) {
   )
 
   const maps = await loadScope.loadMaps(mapIdsToLoad)
+  const terrainEl = query(".terrain")!
   for (const map of maps) {
-    console.log(map)
-    terrain.addDistrict(map.x, map.y, new TerrainDistrict(map))
+    const district = new TerrainDistrict(map)
+    terrain.addDistrict(map.x, map.y, district)
+    const canvas = document.createElement("canvas")
+    canvas.width = 3200
+    canvas.height = 3200
+    canvas.style.position = "absolute"
+    canvas.style.left = `${map.x * CELL_UNIT}px`
+    canvas.style.top = `${map.y * CELL_UNIT}px`
+    const brush = new Brush(canvas.getContext("2d")!)
+    renderDistrict(brush, district)
+    terrainEl.appendChild(canvas)
   }
 
-  ;(globalThis as any).terrain = terrain
+  // deno-lint-ignore no-explicit-any
+  void ((globalThis as any).terrain = terrain)
+  console.log(terrain)
 
   await me.loadAssets()
 
@@ -534,7 +567,7 @@ async function GameScreen({ query }: Context) {
     }
     isLoadingSignal.update(false)
 
-    walkers.step(Input, grid)
+    walkers.step(Input, terrain)
 
     walkScope.setCenter(me.centerX, me.centerY)
     viewScope.setCenter(me.centerX, me.centerY)
@@ -557,43 +590,6 @@ async function GameScreen({ query }: Context) {
   loop.run()
 }
 
-const grid = [] as number[][]
-
-function Canvas2({ el }: Context<HTMLCanvasElement>) {
-  const WIDTH = el.width
-  const HEIGHT = el.height
-  const W = Math.floor(WIDTH / CELL_UNIT)
-  const H = Math.floor(HEIGHT / CELL_UNIT)
-  const canvasCtx = el.getContext("2d")!
-  canvasCtx.fillStyle = "black"
-  canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
-  // deno-lint-ignore no-explicit-any
-  const colors = { 0: "#000", 1: "#000", 2: "#7c7c7c" } as any
-  const length = Object.keys(colors).length
-
-  for (let i = 0; i < W; i++) {
-    const row = [] as number[]
-    grid.push(row)
-    for (let j = 0; j < H; j++) {
-      const c = randomInt(length)
-      row.push(c)
-      canvasCtx.fillStyle = colors[c]
-      const x = i * CELL_UNIT
-      const y = j * CELL_UNIT
-      canvasCtx.fillRect(x, y, CELL_UNIT, CELL_UNIT)
-      canvasCtx.fillStyle = colors[2]
-      const size = 4
-      canvasCtx.fillRect(
-        x + randomInt(CELL_UNIT / size) * size,
-        y + randomInt(CELL_UNIT / size) * size,
-        size,
-        size,
-      )
-    }
-  }
-}
-
-register(Canvas2, "canvas2")
 register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
