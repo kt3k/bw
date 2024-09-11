@@ -6,7 +6,6 @@ import { KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
-import { randomInt } from "./util/random.ts"
 import { fpsSignal, isLoadingSignal, viewScopeSignal } from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
 import { Brush } from "./util/brush.ts"
@@ -363,14 +362,6 @@ class Walkers {
 class WalkScope extends RectArea {
 }
 
-function TerrainWrap({ el }: Context) {
-  const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
-    el.style.transform = `translateX(${x}px) translateY(${y}px`
-  }
-  viewScopeSignal.onChange(setStyleTransform)
-  setStyleTransform(viewScopeSignal.get())
-}
-
 type MapId = [k: number, l: number]
 
 /**
@@ -554,9 +545,11 @@ async function GameScreen({ query }: Context) {
     terrainEl.appendChild(canvas)
   }
 
-  // deno-lint-ignore no-explicit-any
-  void ((globalThis as any).terrain = terrain)
-  console.log(terrain)
+  const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
+    terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`
+  }
+  viewScopeSignal.onChange(setStyleTransform)
+  setStyleTransform(viewScopeSignal.get())
 
   await me.loadAssets()
 
@@ -594,5 +587,4 @@ register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
-register(TerrainWrap, "js-terrain")
 register(LoadingIndicator, "js-loading-indicator")
