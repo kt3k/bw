@@ -12,36 +12,6 @@ import { Brush } from "./util/brush.ts"
 
 const CELL_UNIT = 16
 
-/**
- * Map represents the map of terrain
- */
-class Map {
-  x: number
-  y: number
-  w: number
-  h: number
-  cells: {
-    name: string
-    canEnter: boolean
-    color?: string
-    href?: string
-  }[]
-  characters: {}[]
-  items: {}[]
-  terrain: string[]
-  // deno-lint-ignore no-explicit-any
-  constructor(obj: any) {
-    this.x = obj.x
-    this.y = obj.y
-    this.w = obj.w
-    this.h = obj.h
-    this.cells = obj.cells
-    this.characters = obj.characters
-    this.items = obj.items
-    this.terrain = obj.terrain
-  }
-}
-
 type CharacterAppearance =
   | "up0"
   | "up1"
@@ -439,12 +409,46 @@ class TerrainCell {
   }
 }
 
+/**
+ * Map represents the map of terrain
+ */
+class Map {
+  // The column of the world coordinates
+  i: number
+  // The row of the world coordinates
+  j: number
+  cells: {
+    name: string
+    canEnter: boolean
+    color?: string
+    href?: string
+  }[]
+  characters: {}[]
+  items: {}[]
+  terrain: string[]
+  // deno-lint-ignore no-explicit-any
+  constructor(obj: any) {
+    this.i = obj.i
+    this.j = obj.j
+    this.cells = obj.cells
+    this.characters = obj.characters
+    this.items = obj.items
+    this.terrain = obj.terrain
+  }
+}
+
 class TerrainDistrict {
+  // The column of the world coordinates
+  #i: number
+  // The row of the world coordinates
+  #j: number
   #cellMap: Record<string, TerrainCell> = {}
   #items: Item[]
   #characters: Character[]
   #terrain: string[]
   constructor(map: Map) {
+    this.#i = map.i
+    this.#j = map.j
     for (const cell of map.cells) {
       this.#cellMap[cell.name] = new TerrainCell(
         cell.canEnter,
@@ -460,6 +464,29 @@ class TerrainDistrict {
   get(i: number, j: number): TerrainCell {
     return this.#cellMap[this.#terrain[j][i]]
   }
+
+  get i() {
+    return this.#i
+  }
+
+  get j() {
+    return this.#j
+  }
+}
+
+function createCanvasForDistrict(
+  district: TerrainDistrict,
+): [HTMLCanvasElement, CanvasRenderingContext2D] {
+  const canvas = document.createElement("canvas")
+  canvas.width = 3200
+  canvas.height = 3200
+  canvas.style.position = "absolute"
+  canvas.style.left = `${district.i * CELL_UNIT}px`
+  canvas.style.top = `${district.j * CELL_UNIT}px`
+  return [canvas, canvas.getContext("2d")!] as [
+    HTMLCanvasElement,
+    CanvasRenderingContext2D,
+  ]
 }
 
 function renderDistrict(brush: Brush, district: TerrainDistrict) {
@@ -474,8 +501,8 @@ function renderDistrict(brush: Brush, district: TerrainDistrict) {
 
 class Terrain {
   #districts: Record<string, TerrainDistrict> = {}
-  addDistrict(k: number, l: number, district: TerrainDistrict) {
-    this.#districts[`${k}.${l}`] = district
+  addDistrict(district: TerrainDistrict) {
+    this.#districts[`${district.i}.${district.j}`] = district
   }
 
   get(i: number, j: number) {
@@ -533,15 +560,9 @@ async function GameScreen({ query }: Context) {
   const terrainEl = query(".terrain")!
   for (const map of maps) {
     const district = new TerrainDistrict(map)
-    terrain.addDistrict(map.x, map.y, district)
-    const canvas = document.createElement("canvas")
-    canvas.width = 3200
-    canvas.height = 3200
-    canvas.style.position = "absolute"
-    canvas.style.left = `${map.x * CELL_UNIT}px`
-    canvas.style.top = `${map.y * CELL_UNIT}px`
-    const brush = new Brush(canvas.getContext("2d")!)
-    renderDistrict(brush, district)
+    terrain.addDistrict(district)
+    const [canvas, ctx] = createCanvasForDistrict(district)
+    renderDistrict(new Brush(ctx), district)
     terrainEl.appendChild(canvas)
   }
 
