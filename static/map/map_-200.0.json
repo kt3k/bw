@@ -5,16 +5,14 @@
   "h": 200,
   "cells": [
     {
-      "name": "01",
-      "asset": {
-        "href": ""
-      }
+      "name": "0",
+      "color": "#000",
+      "canEnter": true
     },
     {
-      "name": "00",
-      "asset": {
-        "href": ""
-      }
+      "name": "1",
+      "color": "#777",
+      "canEnter": false
     }
   ],
   "objects": [],

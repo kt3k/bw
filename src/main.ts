@@ -21,12 +21,25 @@ class Map {
   y: number
   w: number
   h: number
+  cells: {
+    name: string
+    canEnter: boolean
+    color?: string
+    href?: string
+  }[]
+  characters: {}[]
+  items: {}[]
+  terrain: string[]
   // deno-lint-ignore no-explicit-any
   constructor(obj: any) {
     this.x = obj.x
     this.y = obj.y
     this.w = obj.w
     this.h = obj.h
+    this.cells = obj.cells
+    this.characters = obj.characters
+    this.items = obj.items
+    this.terrain = obj.terrain
   }
 }
 
@@ -347,9 +360,6 @@ class Walkers {
  * The characters in this scope are evaluated in each frame
  */
 class WalkScope extends RectArea {
-  constructor(w: number, h: number) {
-    super(w, h)
-  }
 }
 
 function TerrainWrap({ el }: Context) {
@@ -359,6 +369,8 @@ function TerrainWrap({ el }: Context) {
   viewScopeSignal.onChange(setStyleTransform)
   setStyleTransform(viewScopeSignal.get())
 }
+
+type MapId = [k: number, l: number]
 
 /**
  * The scope to load the terrain fragment. The terrain fragment belong
@@ -374,44 +386,33 @@ export class LoadScope extends RectArea {
     return Math.floor(n / this.LOAD_UNIT) * this.LOAD_UNIT
   }
 
-  #map = {} as Record<string, Map>
   #loading = new Set()
 
-  constructor(w: number, h: number) {
-    super(w, h)
-    this.#map = {}
-  }
-
-  loadMaps() {
-    const maps = this.#getCurrentMapUrls()
-
-    for (const map of maps) {
-      if (!this.#map[map]) {
-        this.#loadMap(map)
-      }
-    }
+  loadMaps(mapIds: MapId[]) {
+    const maps = mapIds.map(([k, l]) => `map/map_${k}.${l}.json`)
+    return Promise.all(maps.map((map) => this.#loadMap(map)))
   }
 
   async #loadMap(url: string) {
     this.#loading.add(url)
     const resp = await fetch(url)
     const map = new Map(await resp.json())
-    this.#map[url] = map
     this.#loading.delete(url)
+    return map
   }
 
-  #getCurrentMapUrls() {
+  mapIds(): MapId[] {
     const { LOAD_UNIT } = LoadScope
     const left = LoadScope.floor(this.left)
     const right = LoadScope.ceil(this.right)
     const top = LoadScope.floor(this.top)
     const bottom = LoadScope.ceil(this.bottom)
-    const list = []
+    const list = [] as MapId[]
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
         const i = x / CELL_UNIT
         const j = y / CELL_UNIT
-        list.push(`map/map_${i}.${j}.json`)
+        list.push([i, j])
       }
     }
     return list
@@ -424,7 +425,66 @@ export class LoadScope extends RectArea {
  */
 class UnloadScope extends RectArea {}
 
-class Terrain {}
+/** Item represents the item in the terrain */
+class Item {}
+
+class TerrainCell {
+  #color?: string
+  #href?: string
+  #canEnter: boolean
+  constructor(canEnter: boolean, color?: string, href?: string) {
+    this.#canEnter = canEnter
+    this.#color = color
+    this.#href = href
+  }
+
+  canEnter(): boolean {
+    return this.#canEnter
+  }
+}
+
+class TerrainDistrict {
+  #cellMap: Record<string, TerrainCell> = {}
+  #items: Item[]
+  #characters: Character[]
+  #terrain: string[]
+  constructor(map: Map) {
+    for (const cell of map.cells) {
+      this.#cellMap[cell.name] = new TerrainCell(
+        cell.canEnter,
+        cell.color,
+        cell.href,
+      )
+    }
+    this.#terrain = map.terrain
+    this.#items = map.items
+    this.#characters = []
+  }
+
+  get(i: number, j: number): TerrainCell {
+    return this.#cellMap[this.#terrain[j][i]]
+  }
+}
+
+class Terrain {
+  #districts: Record<string, TerrainDistrict> = {}
+  addDistrict(k: number, l: number, district: TerrainDistrict) {
+    this.#districts[`${k}.${l}`] = district
+  }
+
+  get(i: number, j: number) {
+    const k = Math.floor(i / 200) * 200
+    const l = Math.floor(j / 200) * 200
+    const district = this.#districts[`${k}.${l}`]
+    const i_ = i % 200
+    const j_ = j % 200
+    return district.get(i_, j_)
+  }
+
+  hasDistrict(k: number, l: number) {
+    return !!this.#districts[`${k}.${l}`]
+  }
+}
 
 async function GameScreen({ query }: Context) {
   const canvas1 = query<HTMLCanvasElement>(".canvas1")!
@@ -452,7 +512,20 @@ async function GameScreen({ query }: Context) {
   const walkers = new Walkers()
   walkers.add(me)
 
-  await Promise.all([me.loadAssets(), loadScope.loadMaps()])
+  const terrain = new Terrain()
+  const mapIdsToLoad = loadScope.mapIds().filter(([k, l]) =>
+    !terrain.hasDistrict(k, l)
+  )
+
+  const maps = await loadScope.loadMaps(mapIdsToLoad)
+  for (const map of maps) {
+    console.log(map)
+    terrain.addDistrict(map.x, map.y, new TerrainDistrict(map))
+  }
+
+  ;(globalThis as any).terrain = terrain
+
+  await me.loadAssets()
 
   const loop = gameloop(() => {
     if (!walkers.assetsReady) {
@@ -495,7 +568,7 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
   canvasCtx.fillStyle = "black"
   canvasCtx.fillRect(0, 0, WIDTH, HEIGHT)
   // deno-lint-ignore no-explicit-any
-  const colors = { 0: "#000", 1: "#000", 2: "#777" } as any
+  const colors = { 0: "#000", 1: "#000", 2: "#7c7c7c" } as any
   const length = Object.keys(colors).length
 
   for (let i = 0; i < W; i++) {
@@ -505,7 +578,17 @@ function Canvas2({ el }: Context<HTMLCanvasElement>) {
       const c = randomInt(length)
       row.push(c)
       canvasCtx.fillStyle = colors[c]
-      canvasCtx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT)
+      const x = i * CELL_UNIT
+      const y = j * CELL_UNIT
+      canvasCtx.fillRect(x, y, CELL_UNIT, CELL_UNIT)
+      canvasCtx.fillStyle = colors[2]
+      const size = 4
+      canvasCtx.fillRect(
+        x + randomInt(CELL_UNIT / size) * size,
+        y + randomInt(CELL_UNIT / size) * size,
+        size,
+        size,
+      )
     }
   }
 }

@@ -6,15 +6,13 @@
   "cells": [
     {
       "name": "0",
-      "asset": {
-        "href": ""
-      }
+      "color": "#000",
+      "canEnter": true
     },
     {
       "name": "1",
-      "asset": {
-        "href": ""
-      }
+      "color": "#777",
+      "canEnter": false
     }
   ],
   "objects": [],
