@@ -9,6 +9,7 @@ import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { fpsSignal, isLoadingSignal, viewScopeSignal } from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
 import { Brush } from "./util/brush.ts"
+import { ceilN, floorN } from "./util/math.ts"
 
 const CELL_UNIT = 16
 
@@ -89,18 +90,6 @@ class Character {
       return [this.#i + 1, this.#j]
     }
   }
-
-  /*
-  step(input: typeof Input, terrain: Terrain) {
-    const [i, j] = this.front()
-    const cell = terrain.get(i, j)
-    if (cell.canEnter()) {
-      // ...
-    } else {
-      // ...
-    }
-  }
-  */
 
   step(input: typeof Input, terrain: Terrain) {
     if (
@@ -236,7 +225,7 @@ class Character {
  * Abstract rectangular area, which implements properties of the rectangle.
  * Various areas, which have special meanings, are implemented by extending this class.
  */
-abstract class RectArea {
+abstract class RectScope {
   #w: number
   #h: number
   #left: number = 0
@@ -271,10 +260,8 @@ abstract class RectArea {
   get bottom() {
     return this.#bottom
   }
-}
 
-abstract class Scope extends RectArea {
-  includes(char: IChar): boolean {
+  includes(char: IBox): boolean {
     const { x, y, w, h } = char
     return this.left <= x + w &&
       this.right >= x &&
@@ -288,25 +275,35 @@ abstract class Scope extends RectArea {
  * The center of this area is the center of the screen
  * The center of this area usually follows the 'me' character
  */
-class ViewScope extends Scope {
+class ViewScope extends RectScope {
   override setCenter(x: number, y: number): void {
     super.setCenter(x, y)
     viewScopeSignal.updateByFields({ x: -this.left, y: -this.top })
   }
 }
 
-type IChar = {
-  step(input: typeof Input, terrain: Terrain): void
+/** The interface represents a box */
+type IBox = {
   get x(): number
   get y(): number
   get w(): number
   get h(): number
+}
+
+/** The interface represents a character */
+type IChar = IBox & {
+  step(input: typeof Input, terrain: Terrain): void
   image(): HTMLImageElement
   get assetsReady(): boolean
 }
 
+/**
+ * The characters who can walk,
+ * i.e. the characters who are evaluated in each frame
+ */
 class Walkers {
   #walkers: IChar[] = []
+
   add(walker: IChar) {
     this.#walkers.push(walker)
   }
@@ -329,26 +326,21 @@ class Walkers {
 /**
  * The characters in this scope are evaluated in each frame
  */
-class WalkScope extends RectArea {
+class WalkScope extends RectScope {
 }
-
-type MapId = [k: number, l: number]
 
 /**
  * The scope to load the terrain fragment. The terrain fragment belong
  * to this area need to be loaded.
  */
-export class LoadScope extends RectArea {
+export class LoadScope extends RectScope {
   static LOAD_UNIT = 200 * CELL_UNIT
-  static ceil(n: number): number {
-    return Math.ceil(n / this.LOAD_UNIT) * this.LOAD_UNIT
-  }
-
-  static floor(n: number): number {
-    return Math.floor(n / this.LOAD_UNIT) * this.LOAD_UNIT
-  }
 
   #loading = new Set()
+
+  constructor() {
+    super(LoadScope.LOAD_UNIT, LoadScope.LOAD_UNIT)
+  }
 
   loadMaps(mapIds: MapId[]) {
     const maps = mapIds.map(([k, l]) => `map/map_${k}.${l}.json`)
@@ -365,10 +357,10 @@ export class LoadScope extends RectArea {
 
   mapIds(): MapId[] {
     const { LOAD_UNIT } = LoadScope
-    const left = LoadScope.floor(this.left)
-    const right = LoadScope.ceil(this.right)
-    const top = LoadScope.floor(this.top)
-    const bottom = LoadScope.ceil(this.bottom)
+    const left = floorN(this.left, LoadScope.LOAD_UNIT)
+    const right = ceilN(this.right, LoadScope.LOAD_UNIT)
+    const top = floorN(this.top, LoadScope.LOAD_UNIT)
+    const bottom = ceilN(this.bottom, LoadScope.LOAD_UNIT)
     const list = [] as MapId[]
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
@@ -385,29 +377,17 @@ export class LoadScope extends RectArea {
  * The scope to unload the terrain fragment. The terrain fragment which
  * doesn't belong to this scope need to be unloaded
  */
-class UnloadScope extends RectArea {}
+class UnloadScope extends RectScope {
+  static UNLOAD_UNIT = 300 * CELL_UNIT
+  constructor() {
+    super(UnloadScope.UNLOAD_UNIT, UnloadScope.UNLOAD_UNIT)
+  }
+}
 
 /** Item represents the item in the terrain */
 class Item {}
 
-class TerrainCell {
-  #color?: string
-  #href?: string
-  #canEnter: boolean
-  constructor(canEnter: boolean, color?: string, href?: string) {
-    this.#canEnter = canEnter
-    this.#color = color
-    this.#href = href
-  }
-
-  canEnter(): boolean {
-    return this.#canEnter
-  }
-
-  get color() {
-    return this.#color
-  }
-}
+type MapId = [k: number, l: number]
 
 /**
  * Map represents the map of terrain
@@ -437,7 +417,33 @@ class Map {
   }
 }
 
+/**
+ * TerrainCell represents the cell in the terrain district
+ */
+class TerrainCell {
+  #color?: string
+  #href?: string
+  #canEnter: boolean
+  constructor(canEnter: boolean, color?: string, href?: string) {
+    this.#canEnter = canEnter
+    this.#color = color
+    this.#href = href
+  }
+
+  canEnter(): boolean {
+    return this.#canEnter
+  }
+
+  get color() {
+    return this.#color
+  }
+}
+
 class TerrainDistrict {
+  #x: number
+  #y: number
+  #w: number
+  #h: number
   // The column of the world coordinates
   #i: number
   // The row of the world coordinates
@@ -449,6 +455,10 @@ class TerrainDistrict {
   constructor(map: Map) {
     this.#i = map.i
     this.#j = map.j
+    this.#x = this.#i * 200
+    this.#y = this.#j * 200
+    this.#h = CELL_UNIT * 200
+    this.#w = CELL_UNIT * 200
     for (const cell of map.cells) {
       this.#cellMap[cell.name] = new TerrainCell(
         cell.canEnter,
@@ -464,13 +474,23 @@ class TerrainDistrict {
   get(i: number, j: number): TerrainCell {
     return this.#cellMap[this.#terrain[j][i]]
   }
-
   get i() {
     return this.#i
   }
-
   get j() {
     return this.#j
+  }
+  get x() {
+    return this.#x
+  }
+  get y() {
+    return this.#y
+  }
+  get h() {
+    return this.#h
+  }
+  get w() {
+    return this.#w
   }
 }
 
@@ -506,8 +526,8 @@ class Terrain {
   }
 
   get(i: number, j: number) {
-    const k = Math.floor(i / 200) * 200
-    const l = Math.floor(j / 200) * 200
+    const k = floorN(i, 200)
+    const l = floorN(j, 200)
     const district = this.#districts[`${k}.${l}`]
     let i_ = i % 200
     let j_ = j % 200
@@ -522,6 +542,10 @@ class Terrain {
 
   hasDistrict(k: number, l: number) {
     return !!this.#districts[`${k}.${l}`]
+  }
+
+  [Symbol.iterator]() {
+    return Object.values(this.#districts)[Symbol.iterator]()
   }
 }
 
@@ -538,8 +562,14 @@ async function GameScreen({ query }: Context) {
   // A tile of the size 3200 x 3200 px are placed in every direction
   // 4 tiles which overlap with the area of 3200 x 3200 px surrounding 'me'
   // are loaded.
-  const loadScope = new LoadScope(3200, 3200)
+  const loadScope = new LoadScope()
   loadScope.setCenter(me.centerX, me.centerY)
+
+  // The unload scope unit is 250 x 250 grid (4000 x 4000 px)
+  // The district which are not included in the area.
+  // surrounding 'me' are unloaded from the memory.
+  const unloadScope = new UnloadScope()
+  unloadScope.setCenter(me.centerX, me.centerY)
 
   const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3)
   walkScope.setCenter(me.centerX, me.centerY)
