@@ -471,6 +471,18 @@ class TerrainDistrict {
     this.#characters = []
   }
 
+  createCanvas(): HTMLCanvasElement {
+    const canvas = document.createElement("canvas")
+    canvas.style.position = "absolute"
+    canvas.style.left = `${this.x}px`
+    canvas.style.top = `${this.y}px`
+    canvas.width = this.w
+    canvas.height = this.h
+    const ctx = canvas.getContext("2d")!
+    renderDistrict(new Brush(ctx), this)
+    return canvas
+  }
+
   get(i: number, j: number): TerrainCell {
     return this.#cellMap[this.#terrain[j][i]]
   }
@@ -492,18 +504,6 @@ class TerrainDistrict {
   get w() {
     return this.#w
   }
-}
-
-function createCanvasForDistrict(
-  district: TerrainDistrict,
-): [HTMLCanvasElement, CanvasRenderingContext2D] {
-  const canvas = document.createElement("canvas")
-  canvas.style.position = "absolute"
-  canvas.style.left = `${district.x}px`
-  canvas.style.top = `${district.y}px`
-  canvas.width = district.w
-  canvas.height = district.h
-  return [canvas, canvas.getContext("2d")!]
 }
 
 function renderDistrict(brush: Brush, district: TerrainDistrict) {
@@ -572,9 +572,7 @@ async function GameScreen({ query }: Context) {
   for (const map of maps) {
     const district = new TerrainDistrict(map)
     terrain.addDistrict(district)
-    const [canvas, ctx] = createCanvasForDistrict(district)
-    renderDistrict(new Brush(ctx), district)
-    terrainEl.appendChild(canvas)
+    terrainEl.appendChild(district.createCanvas())
   }
 
   const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
