@@ -7,3 +7,9 @@ export function floorN(x: number, n: number) {
 export function ceilN(x: number, n: number) {
   return Math.ceil(x / n) * n
 }
+
+/** Returns x modulo m */
+export function modulo(x: number, m: number) {
+  const r = x % m
+  return r >= 0 ? r : r + m
+}

@@ -9,7 +9,7 @@ import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import { fpsSignal, isLoadingSignal, viewScopeSignal } from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
 import { Brush } from "./util/brush.ts"
-import { ceilN, floorN } from "./util/math.ts"
+import { ceilN, floorN, modulo } from "./util/math.ts"
 
 const CELL_UNIT = 16
 
@@ -330,7 +330,7 @@ class WalkScope extends RectScope {
 }
 
 /**
- * The scope to load the terrain fragment. The terrain fragment belong
+ * The scope to load the terrain district. The terrain district belong
  * to this area need to be loaded.
  */
 export class LoadScope extends RectScope {
@@ -455,8 +455,8 @@ class TerrainDistrict {
   constructor(map: Map) {
     this.#i = map.i
     this.#j = map.j
-    this.#x = this.#i * 200
-    this.#y = this.#j * 200
+    this.#x = this.#i * CELL_UNIT
+    this.#y = this.#j * CELL_UNIT
     this.#h = CELL_UNIT * 200
     this.#w = CELL_UNIT * 200
     for (const cell of map.cells) {
@@ -498,15 +498,12 @@ function createCanvasForDistrict(
   district: TerrainDistrict,
 ): [HTMLCanvasElement, CanvasRenderingContext2D] {
   const canvas = document.createElement("canvas")
-  canvas.width = 3200
-  canvas.height = 3200
   canvas.style.position = "absolute"
-  canvas.style.left = `${district.i * CELL_UNIT}px`
-  canvas.style.top = `${district.j * CELL_UNIT}px`
-  return [canvas, canvas.getContext("2d")!] as [
-    HTMLCanvasElement,
-    CanvasRenderingContext2D,
-  ]
+  canvas.style.left = `${district.x}px`
+  canvas.style.top = `${district.y}px`
+  canvas.width = district.w
+  canvas.height = district.h
+  return [canvas, canvas.getContext("2d")!]
 }
 
 function renderDistrict(brush: Brush, district: TerrainDistrict) {
@@ -528,16 +525,7 @@ class Terrain {
   get(i: number, j: number) {
     const k = floorN(i, 200)
     const l = floorN(j, 200)
-    const district = this.#districts[`${k}.${l}`]
-    let i_ = i % 200
-    let j_ = j % 200
-    if (i_ < 0) {
-      i_ += 200
-    }
-    if (j_ < 0) {
-      j_ += 200
-    }
-    return district.get(i_, j_)
+    return this.#districts[`${k}.${l}`].get(modulo(i, 200), modulo(j, 200))
   }
 
   hasDistrict(k: number, l: number) {
@@ -558,16 +546,9 @@ async function GameScreen({ query }: Context) {
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
   viewScope.setCenter(me.centerX, me.centerY)
 
-  // The load scope unit is 200 x 200 grid (3200 x 3200 px)
-  // A tile of the size 3200 x 3200 px are placed in every direction
-  // 4 tiles which overlap with the area of 3200 x 3200 px surrounding 'me'
-  // are loaded.
   const loadScope = new LoadScope()
   loadScope.setCenter(me.centerX, me.centerY)
 
-  // The unload scope unit is 250 x 250 grid (4000 x 4000 px)
-  // The district which are not included in the area.
-  // surrounding 'me' are unloaded from the memory.
   const unloadScope = new UnloadScope()
   unloadScope.setCenter(me.centerX, me.centerY)
 
