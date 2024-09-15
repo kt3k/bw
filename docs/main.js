@@ -932,6 +932,9 @@ var TerrainDistrict = class {
     this.#items = map.items;
     this.#characters = [];
   }
+  get id() {
+    return `${this.#i}.${this.#j}`;
+  }
   createCanvas() {
     const canvas = document.createElement("canvas");
     canvas.style.position = "absolute";
@@ -975,10 +978,22 @@ function renderDistrict(brush, district) {
   }
 }
 var Terrain = class {
+  #el;
   #districts = {};
   #districtElements = {};
+  constructor(el) {
+    this.#el = el;
+  }
   addDistrict(district) {
-    this.#districts[`${district.i}.${district.j}`] = district;
+    this.#districts[district.id] = district;
+    const canvas = district.createCanvas();
+    this.#districtElements[district.id] = canvas;
+    this.#el.appendChild(canvas);
+  }
+  removeDistrict(district) {
+    delete this.#districts[district.id];
+    this.#el.removeChild(this.#districtElements[district.id]);
+    delete this.#districtElements[district.id];
   }
   get(i, j) {
     const k = floorN(i, DISTRICT_SIZE);
@@ -1012,16 +1027,13 @@ async function GameScreen({ query }) {
   });
   const walkers = new Walkers();
   walkers.add(me);
-  const terrain = new Terrain();
+  const terrainEl = query(".terrain");
+  const terrain = new Terrain(terrainEl);
   const mapIdsToLoad = loadScope.mapIds().filter(
     ([k, l]) => !terrain.hasDistrict(k, l)
   );
-  const maps = await loadScope.loadMaps(mapIdsToLoad);
-  const terrainEl = query(".terrain");
-  for (const map of maps) {
-    const district = new TerrainDistrict(map);
-    terrain.addDistrict(district);
-    terrainEl.appendChild(district.createCanvas());
+  for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
+    terrain.addDistrict(new TerrainDistrict(map));
   }
   const setStyleTransform = ({ x, y }) => {
     terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`;
