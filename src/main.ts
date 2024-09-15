@@ -473,6 +473,10 @@ class TerrainDistrict {
     this.#characters = []
   }
 
+  get id() {
+    return `${this.#i}.${this.#j}`
+  }
+
   createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
@@ -519,10 +523,25 @@ function renderDistrict(brush: Brush, district: TerrainDistrict) {
 }
 
 class Terrain {
+  #el: HTMLElement
   #districts: Record<string, TerrainDistrict> = {}
   #districtElements: Record<string, HTMLCanvasElement> = {}
+
+  constructor(el: HTMLElement) {
+    this.#el = el
+  }
+
   addDistrict(district: TerrainDistrict) {
-    this.#districts[`${district.i}.${district.j}`] = district
+    this.#districts[district.id] = district
+    const canvas = district.createCanvas()
+    this.#districtElements[district.id] = canvas
+    this.#el.appendChild(canvas)
+  }
+
+  removeDistrict(district: TerrainDistrict) {
+    delete this.#districts[district.id]
+    this.#el.removeChild(this.#districtElements[district.id])
+    delete this.#districtElements[district.id]
   }
 
   get(i: number, j: number) {
@@ -568,17 +587,14 @@ async function GameScreen({ query }: Context) {
   const walkers = new Walkers()
   walkers.add(me)
 
-  const terrain = new Terrain()
+  const terrainEl = query(".terrain")!
+  const terrain = new Terrain(terrainEl)
   const mapIdsToLoad = loadScope.mapIds().filter(([k, l]) =>
     !terrain.hasDistrict(k, l)
   )
 
-  const maps = await loadScope.loadMaps(mapIdsToLoad)
-  const terrainEl = query(".terrain")!
-  for (const map of maps) {
-    const district = new TerrainDistrict(map)
-    terrain.addDistrict(district)
-    terrainEl.appendChild(district.createCanvas())
+  for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
+    terrain.addDistrict(new TerrainDistrict(map))
   }
 
   const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
