@@ -3,8 +3,7 @@ import { fpsSignal } from "../util/signal.ts"
 
 /** The ui which shows the current fps number */
 export function FpsMonitor({ el }: Context) {
-  fpsSignal.onChange((fps) => {
+  fpsSignal.subscribe((fps) => {
     el.textContent = fps.toFixed(2)
   })
-  return "0"
 }

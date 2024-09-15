@@ -371,6 +371,7 @@ export class LoadScope extends RectScope {
         list.push([i, j])
       }
     }
+    console.log(list)
     return list
   }
 }
@@ -553,8 +554,8 @@ class Terrain {
     )
   }
 
-  hasDistrict(k: number, l: number) {
-    return !!this.#districts[`${k}.${l}`]
+  hasDistrict(i: number, j: number) {
+    return !!this.#districts[`${i}.${j}`]
   }
 
   [Symbol.iterator]() {
@@ -597,11 +598,9 @@ async function GameScreen({ query }: Context) {
     terrain.addDistrict(new TerrainDistrict(map))
   }
 
-  const setStyleTransform = ({ x, y }: { x: number; y: number }) => {
+  viewScopeSignal.subscribe(({ x, y }) => {
     terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`
-  }
-  viewScopeSignal.onChange(setStyleTransform)
-  setStyleTransform(viewScopeSignal.get())
+  })
 
   await me.loadAssets()
 
@@ -617,6 +616,7 @@ async function GameScreen({ query }: Context) {
     walkScope.setCenter(me.centerX, me.centerY)
     viewScope.setCenter(me.centerX, me.centerY)
     loadScope.setCenter(me.centerX, me.centerY)
+    unloadScope.setCenter(me.centerX, me.centerY)
 
     brush.clear()
 
