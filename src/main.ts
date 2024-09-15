@@ -13,6 +13,8 @@ import { ceilN, floorN, modulo } from "./util/math.ts"
 
 const CELL_UNIT = 16
 
+const DISTRICT_SIZE = 200
+
 type CharacterAppearance =
   | "up0"
   | "up1"
@@ -457,8 +459,8 @@ class TerrainDistrict {
     this.#j = map.j
     this.#x = this.#i * CELL_UNIT
     this.#y = this.#j * CELL_UNIT
-    this.#h = CELL_UNIT * 200
-    this.#w = CELL_UNIT * 200
+    this.#h = DISTRICT_SIZE * CELL_UNIT
+    this.#w = DISTRICT_SIZE * CELL_UNIT
     for (const cell of map.cells) {
       this.#cellMap[cell.name] = new TerrainCell(
         cell.canEnter,
@@ -507,8 +509,8 @@ class TerrainDistrict {
 }
 
 function renderDistrict(brush: Brush, district: TerrainDistrict) {
-  for (let j = 0; j < 200; j++) {
-    for (let i = 0; i < 200; i++) {
+  for (let j = 0; j < DISTRICT_SIZE; j++) {
+    for (let i = 0; i < DISTRICT_SIZE; i++) {
       const cell = district.get(i, j)
       brush.ctx.fillStyle = cell.color || "black"
       brush.ctx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT)
@@ -518,14 +520,18 @@ function renderDistrict(brush: Brush, district: TerrainDistrict) {
 
 class Terrain {
   #districts: Record<string, TerrainDistrict> = {}
+  #districtElements: Record<string, HTMLCanvasElement> = {}
   addDistrict(district: TerrainDistrict) {
     this.#districts[`${district.i}.${district.j}`] = district
   }
 
   get(i: number, j: number) {
-    const k = floorN(i, 200)
-    const l = floorN(j, 200)
-    return this.#districts[`${k}.${l}`].get(modulo(i, 200), modulo(j, 200))
+    const k = floorN(i, DISTRICT_SIZE)
+    const l = floorN(j, DISTRICT_SIZE)
+    return this.#districts[`${k}.${l}`].get(
+      modulo(i, DISTRICT_SIZE),
+      modulo(j, DISTRICT_SIZE),
+    )
   }
 
   hasDistrict(k: number, l: number) {
