@@ -1,6 +1,6 @@
 {
-  "i": 0,
-  "j": 0,
+  "i": -200,
+  "j": -200,
   "cells": [
     {
       "name": "0",
@@ -9,7 +9,7 @@
     },
     {
       "name": "1",
-      "color": "#8c7c7c",
+      "color": "#7c7c8c",
       "canEnter": false
     }
   ],

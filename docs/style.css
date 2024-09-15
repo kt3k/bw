@@ -1,5 +1,5 @@
 /*
-! tailwindcss v3.4.10 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.11 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -570,8 +570,24 @@ video {
   bottom: 1.25rem;
 }
 
+.flex {
+  display: flex;
+}
+
+.hidden {
+  display: none;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
 .h-\[320px\] {
   height: 320px;
+}
+
+.w-4 {
+  width: 1rem;
 }
 
 .w-\[320px\] {
@@ -580,6 +596,20 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.justify-between {
+  justify-content: space-between;
 }
 
 .overflow-hidden {

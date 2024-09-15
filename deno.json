@@ -6,7 +6,7 @@
     "watch:js": "deno run --watch=src -A jsr:@kt3k/pack@0.1.10 -o dist/main.js src/main.ts",
     "watch:style": "deno run -A npm:tailwindcss -i ./src/input.css -o ./dist/style.css --watch",
     "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' dist",
-    "docs": "deno run -A npm:cpx2 'dist/**' docs",
+    "dist": "deno run -A npm:cpx2 'dist/**' docs",
     "serve": "deno run -A jsr:@std/http/file-server dist -p 8000"
   },
   "compilerOptions": {

@@ -1,742 +1,3 @@
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined")
-    return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-var __commonJS = (cb, mod) => function __require2() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/alea.js
-var require_alea = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/alea.js"(exports, module) {
-    (function(global, module2, define2) {
-      function Alea(seed) {
-        var me = this, mash = Mash();
-        me.next = function() {
-          var t = 2091639 * me.s0 + me.c * 23283064365386963e-26;
-          me.s0 = me.s1;
-          me.s1 = me.s2;
-          return me.s2 = t - (me.c = t | 0);
-        };
-        me.c = 1;
-        me.s0 = mash(" ");
-        me.s1 = mash(" ");
-        me.s2 = mash(" ");
-        me.s0 -= mash(seed);
-        if (me.s0 < 0) {
-          me.s0 += 1;
-        }
-        me.s1 -= mash(seed);
-        if (me.s1 < 0) {
-          me.s1 += 1;
-        }
-        me.s2 -= mash(seed);
-        if (me.s2 < 0) {
-          me.s2 += 1;
-        }
-        mash = null;
-      }
-      function copy(f, t) {
-        t.c = f.c;
-        t.s0 = f.s0;
-        t.s1 = f.s1;
-        t.s2 = f.s2;
-        return t;
-      }
-      function impl(seed, opts) {
-        var xg = new Alea(seed), state = opts && opts.state, prng = xg.next;
-        prng.int32 = function() {
-          return xg.next() * 4294967296 | 0;
-        };
-        prng.double = function() {
-          return prng() + (prng() * 2097152 | 0) * 11102230246251565e-32;
-        };
-        prng.quick = prng;
-        if (state) {
-          if (typeof state == "object")
-            copy(state, xg);
-          prng.state = function() {
-            return copy(xg, {});
-          };
-        }
-        return prng;
-      }
-      function Mash() {
-        var n = 4022871197;
-        var mash = function(data) {
-          data = String(data);
-          for (var i = 0; i < data.length; i++) {
-            n += data.charCodeAt(i);
-            var h = 0.02519603282416938 * n;
-            n = h >>> 0;
-            h -= n;
-            h *= n;
-            n = h >>> 0;
-            h -= n;
-            n += h * 4294967296;
-          }
-          return (n >>> 0) * 23283064365386963e-26;
-        };
-        return mash;
-      }
-      if (module2 && module2.exports) {
-        module2.exports = impl;
-      } else if (define2 && define2.amd) {
-        define2(function() {
-          return impl;
-        });
-      } else {
-        this.alea = impl;
-      }
-    })(
-      exports,
-      typeof module == "object" && module,
-      // present in node.js
-      typeof define == "function" && define
-      // present with an AMD loader
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xor128.js
-var require_xor128 = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xor128.js"(exports, module) {
-    (function(global, module2, define2) {
-      function XorGen(seed) {
-        var me = this, strseed = "";
-        me.x = 0;
-        me.y = 0;
-        me.z = 0;
-        me.w = 0;
-        me.next = function() {
-          var t = me.x ^ me.x << 11;
-          me.x = me.y;
-          me.y = me.z;
-          me.z = me.w;
-          return me.w ^= me.w >>> 19 ^ t ^ t >>> 8;
-        };
-        if (seed === (seed | 0)) {
-          me.x = seed;
-        } else {
-          strseed += seed;
-        }
-        for (var k = 0; k < strseed.length + 64; k++) {
-          me.x ^= strseed.charCodeAt(k) | 0;
-          me.next();
-        }
-      }
-      function copy(f, t) {
-        t.x = f.x;
-        t.y = f.y;
-        t.z = f.z;
-        t.w = f.w;
-        return t;
-      }
-      function impl(seed, opts) {
-        var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
-          return (xg.next() >>> 0) / 4294967296;
-        };
-        prng.double = function() {
-          do {
-            var top = xg.next() >>> 11, bot = (xg.next() >>> 0) / 4294967296, result = (top + bot) / (1 << 21);
-          } while (result === 0);
-          return result;
-        };
-        prng.int32 = xg.next;
-        prng.quick = prng;
-        if (state) {
-          if (typeof state == "object")
-            copy(state, xg);
-          prng.state = function() {
-            return copy(xg, {});
-          };
-        }
-        return prng;
-      }
-      if (module2 && module2.exports) {
-        module2.exports = impl;
-      } else if (define2 && define2.amd) {
-        define2(function() {
-          return impl;
-        });
-      } else {
-        this.xor128 = impl;
-      }
-    })(
-      exports,
-      typeof module == "object" && module,
-      // present in node.js
-      typeof define == "function" && define
-      // present with an AMD loader
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xorwow.js
-var require_xorwow = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xorwow.js"(exports, module) {
-    (function(global, module2, define2) {
-      function XorGen(seed) {
-        var me = this, strseed = "";
-        me.next = function() {
-          var t = me.x ^ me.x >>> 2;
-          me.x = me.y;
-          me.y = me.z;
-          me.z = me.w;
-          me.w = me.v;
-          return (me.d = me.d + 362437 | 0) + (me.v = me.v ^ me.v << 4 ^ (t ^ t << 1)) | 0;
-        };
-        me.x = 0;
-        me.y = 0;
-        me.z = 0;
-        me.w = 0;
-        me.v = 0;
-        if (seed === (seed | 0)) {
-          me.x = seed;
-        } else {
-          strseed += seed;
-        }
-        for (var k = 0; k < strseed.length + 64; k++) {
-          me.x ^= strseed.charCodeAt(k) | 0;
-          if (k == strseed.length) {
-            me.d = me.x << 10 ^ me.x >>> 4;
-          }
-          me.next();
-        }
-      }
-      function copy(f, t) {
-        t.x = f.x;
-        t.y = f.y;
-        t.z = f.z;
-        t.w = f.w;
-        t.v = f.v;
-        t.d = f.d;
-        return t;
-      }
-      function impl(seed, opts) {
-        var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
-          return (xg.next() >>> 0) / 4294967296;
-        };
-        prng.double = function() {
-          do {
-            var top = xg.next() >>> 11, bot = (xg.next() >>> 0) / 4294967296, result = (top + bot) / (1 << 21);
-          } while (result === 0);
-          return result;
-        };
-        prng.int32 = xg.next;
-        prng.quick = prng;
-        if (state) {
-          if (typeof state == "object")
-            copy(state, xg);
-          prng.state = function() {
-            return copy(xg, {});
-          };
-        }
-        return prng;
-      }
-      if (module2 && module2.exports) {
-        module2.exports = impl;
-      } else if (define2 && define2.amd) {
-        define2(function() {
-          return impl;
-        });
-      } else {
-        this.xorwow = impl;
-      }
-    })(
-      exports,
-      typeof module == "object" && module,
-      // present in node.js
-      typeof define == "function" && define
-      // present with an AMD loader
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xorshift7.js
-var require_xorshift7 = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xorshift7.js"(exports, module) {
-    (function(global, module2, define2) {
-      function XorGen(seed) {
-        var me = this;
-        me.next = function() {
-          var X = me.x, i = me.i, t, v, w;
-          t = X[i];
-          t ^= t >>> 7;
-          v = t ^ t << 24;
-          t = X[i + 1 & 7];
-          v ^= t ^ t >>> 10;
-          t = X[i + 3 & 7];
-          v ^= t ^ t >>> 3;
-          t = X[i + 4 & 7];
-          v ^= t ^ t << 7;
-          t = X[i + 7 & 7];
-          t = t ^ t << 13;
-          v ^= t ^ t << 9;
-          X[i] = v;
-          me.i = i + 1 & 7;
-          return v;
-        };
-        function init(me2, seed2) {
-          var j, w, X = [];
-          if (seed2 === (seed2 | 0)) {
-            w = X[0] = seed2;
-          } else {
-            seed2 = "" + seed2;
-            for (j = 0; j < seed2.length; ++j) {
-              X[j & 7] = X[j & 7] << 15 ^ seed2.charCodeAt(j) + X[j + 1 & 7] << 13;
-            }
-          }
-          while (X.length < 8)
-            X.push(0);
-          for (j = 0; j < 8 && X[j] === 0; ++j)
-            ;
-          if (j == 8)
-            w = X[7] = -1;
-          else
-            w = X[j];
-          me2.x = X;
-          me2.i = 0;
-          for (j = 256; j > 0; --j) {
-            me2.next();
-          }
-        }
-        init(me, seed);
-      }
-      function copy(f, t) {
-        t.x = f.x.slice();
-        t.i = f.i;
-        return t;
-      }
-      function impl(seed, opts) {
-        if (seed == null)
-          seed = +/* @__PURE__ */ new Date();
-        var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
-          return (xg.next() >>> 0) / 4294967296;
-        };
-        prng.double = function() {
-          do {
-            var top = xg.next() >>> 11, bot = (xg.next() >>> 0) / 4294967296, result = (top + bot) / (1 << 21);
-          } while (result === 0);
-          return result;
-        };
-        prng.int32 = xg.next;
-        prng.quick = prng;
-        if (state) {
-          if (state.x)
-            copy(state, xg);
-          prng.state = function() {
-            return copy(xg, {});
-          };
-        }
-        return prng;
-      }
-      if (module2 && module2.exports) {
-        module2.exports = impl;
-      } else if (define2 && define2.amd) {
-        define2(function() {
-          return impl;
-        });
-      } else {
-        this.xorshift7 = impl;
-      }
-    })(
-      exports,
-      typeof module == "object" && module,
-      // present in node.js
-      typeof define == "function" && define
-      // present with an AMD loader
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xor4096.js
-var require_xor4096 = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/xor4096.js"(exports, module) {
-    (function(global, module2, define2) {
-      function XorGen(seed) {
-        var me = this;
-        me.next = function() {
-          var w = me.w, X = me.X, i = me.i, t, v;
-          me.w = w = w + 1640531527 | 0;
-          v = X[i + 34 & 127];
-          t = X[i = i + 1 & 127];
-          v ^= v << 13;
-          t ^= t << 17;
-          v ^= v >>> 15;
-          t ^= t >>> 12;
-          v = X[i] = v ^ t;
-          me.i = i;
-          return v + (w ^ w >>> 16) | 0;
-        };
-        function init(me2, seed2) {
-          var t, v, i, j, w, X = [], limit = 128;
-          if (seed2 === (seed2 | 0)) {
-            v = seed2;
-            seed2 = null;
-          } else {
-            seed2 = seed2 + "\0";
-            v = 0;
-            limit = Math.max(limit, seed2.length);
-          }
-          for (i = 0, j = -32; j < limit; ++j) {
-            if (seed2)
-              v ^= seed2.charCodeAt((j + 32) % seed2.length);
-            if (j === 0)
-              w = v;
-            v ^= v << 10;
-            v ^= v >>> 15;
-            v ^= v << 4;
-            v ^= v >>> 13;
-            if (j >= 0) {
-              w = w + 1640531527 | 0;
-              t = X[j & 127] ^= v + w;
-              i = 0 == t ? i + 1 : 0;
-            }
-          }
-          if (i >= 128) {
-            X[(seed2 && seed2.length || 0) & 127] = -1;
-          }
-          i = 127;
-          for (j = 4 * 128; j > 0; --j) {
-            v = X[i + 34 & 127];
-            t = X[i = i + 1 & 127];
-            v ^= v << 13;
-            t ^= t << 17;
-            v ^= v >>> 15;
-            t ^= t >>> 12;
-            X[i] = v ^ t;
-          }
-          me2.w = w;
-          me2.X = X;
-          me2.i = i;
-        }
-        init(me, seed);
-      }
-      function copy(f, t) {
-        t.i = f.i;
-        t.w = f.w;
-        t.X = f.X.slice();
-        return t;
-      }
-      ;
-      function impl(seed, opts) {
-        if (seed == null)
-          seed = +/* @__PURE__ */ new Date();
-        var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
-          return (xg.next() >>> 0) / 4294967296;
-        };
-        prng.double = function() {
-          do {
-            var top = xg.next() >>> 11, bot = (xg.next() >>> 0) / 4294967296, result = (top + bot) / (1 << 21);
-          } while (result === 0);
-          return result;
-        };
-        prng.int32 = xg.next;
-        prng.quick = prng;
-        if (state) {
-          if (state.X)
-            copy(state, xg);
-          prng.state = function() {
-            return copy(xg, {});
-          };
-        }
-        return prng;
-      }
-      if (module2 && module2.exports) {
-        module2.exports = impl;
-      } else if (define2 && define2.amd) {
-        define2(function() {
-          return impl;
-        });
-      } else {
-        this.xor4096 = impl;
-      }
-    })(
-      exports,
-      // window object or global
-      typeof module == "object" && module,
-      // present in node.js
-      typeof define == "function" && define
-      // present with an AMD loader
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/tychei.js
-var require_tychei = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/lib/tychei.js"(exports, module) {
-    (function(global, module2, define2) {
-      function XorGen(seed) {
-        var me = this, strseed = "";
-        me.next = function() {
-          var b = me.b, c = me.c, d = me.d, a = me.a;
-          b = b << 25 ^ b >>> 7 ^ c;
-          c = c - d | 0;
-          d = d << 24 ^ d >>> 8 ^ a;
-          a = a - b | 0;
-          me.b = b = b << 20 ^ b >>> 12 ^ c;
-          me.c = c = c - d | 0;
-          me.d = d << 16 ^ c >>> 16 ^ a;
-          return me.a = a - b | 0;
-        };
-        me.a = 0;
-        me.b = 0;
-        me.c = 2654435769 | 0;
-        me.d = 1367130551;
-        if (seed === Math.floor(seed)) {
-          me.a = seed / 4294967296 | 0;
-          me.b = seed | 0;
-        } else {
-          strseed += seed;
-        }
-        for (var k = 0; k < strseed.length + 20; k++) {
-          me.b ^= strseed.charCodeAt(k) | 0;
-          me.next();
-        }
-      }
-      function copy(f, t) {
-        t.a = f.a;
-        t.b = f.b;
-        t.c = f.c;
-        t.d = f.d;
-        return t;
-      }
-      ;
-      function impl(seed, opts) {
-        var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
-          return (xg.next() >>> 0) / 4294967296;
-        };
-        prng.double = function() {
-          do {
-            var top = xg.next() >>> 11, bot = (xg.next() >>> 0) / 4294967296, result = (top + bot) / (1 << 21);
-          } while (result === 0);
-          return result;
-        };
-        prng.int32 = xg.next;
-        prng.quick = prng;
-        if (state) {
-          if (typeof state == "object")
-            copy(state, xg);
-          prng.state = function() {
-            return copy(xg, {});
-          };
-        }
-        return prng;
-      }
-      if (module2 && module2.exports) {
-        module2.exports = impl;
-      } else if (define2 && define2.amd) {
-        define2(function() {
-          return impl;
-        });
-      } else {
-        this.tychei = impl;
-      }
-    })(
-      exports,
-      typeof module == "object" && module,
-      // present in node.js
-      typeof define == "function" && define
-      // present with an AMD loader
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/seedrandom.js
-var require_seedrandom = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/seedrandom.js"(exports, module) {
-    (function(global, pool, math) {
-      var width = 256, chunks = 6, digits = 52, rngname = "random", startdenom = math.pow(width, chunks), significance = math.pow(2, digits), overflow = significance * 2, mask = width - 1, nodecrypto;
-      function seedrandom2(seed, options, callback) {
-        var key = [];
-        options = options == true ? { entropy: true } : options || {};
-        var shortseed = mixkey(flatten(
-          options.entropy ? [seed, tostring(pool)] : seed == null ? autoseed() : seed,
-          3
-        ), key);
-        var arc4 = new ARC4(key);
-        var prng = function() {
-          var n = arc4.g(chunks), d = startdenom, x = 0;
-          while (n < significance) {
-            n = (n + x) * width;
-            d *= width;
-            x = arc4.g(1);
-          }
-          while (n >= overflow) {
-            n /= 2;
-            d /= 2;
-            x >>>= 1;
-          }
-          return (n + x) / d;
-        };
-        prng.int32 = function() {
-          return arc4.g(4) | 0;
-        };
-        prng.quick = function() {
-          return arc4.g(4) / 4294967296;
-        };
-        prng.double = prng;
-        mixkey(tostring(arc4.S), pool);
-        return (options.pass || callback || function(prng2, seed2, is_math_call, state) {
-          if (state) {
-            if (state.S) {
-              copy(state, arc4);
-            }
-            prng2.state = function() {
-              return copy(arc4, {});
-            };
-          }
-          if (is_math_call) {
-            math[rngname] = prng2;
-            return seed2;
-          } else
-            return prng2;
-        })(
-          prng,
-          shortseed,
-          "global" in options ? options.global : this == math,
-          options.state
-        );
-      }
-      function ARC4(key) {
-        var t, keylen = key.length, me = this, i = 0, j = me.i = me.j = 0, s = me.S = [];
-        if (!keylen) {
-          key = [keylen++];
-        }
-        while (i < width) {
-          s[i] = i++;
-        }
-        for (i = 0; i < width; i++) {
-          s[i] = s[j = mask & j + key[i % keylen] + (t = s[i])];
-          s[j] = t;
-        }
-        (me.g = function(count) {
-          var t2, r = 0, i2 = me.i, j2 = me.j, s2 = me.S;
-          while (count--) {
-            t2 = s2[i2 = mask & i2 + 1];
-            r = r * width + s2[mask & (s2[i2] = s2[j2 = mask & j2 + t2]) + (s2[j2] = t2)];
-          }
-          me.i = i2;
-          me.j = j2;
-          return r;
-        })(width);
-      }
-      function copy(f, t) {
-        t.i = f.i;
-        t.j = f.j;
-        t.S = f.S.slice();
-        return t;
-      }
-      ;
-      function flatten(obj, depth) {
-        var result = [], typ = typeof obj, prop;
-        if (depth && typ == "object") {
-          for (prop in obj) {
-            try {
-              result.push(flatten(obj[prop], depth - 1));
-            } catch (e) {
-            }
-          }
-        }
-        return result.length ? result : typ == "string" ? obj : obj + "\0";
-      }
-      function mixkey(seed, key) {
-        var stringseed = seed + "", smear, j = 0;
-        while (j < stringseed.length) {
-          key[mask & j] = mask & (smear ^= key[mask & j] * 19) + stringseed.charCodeAt(j++);
-        }
-        return tostring(key);
-      }
-      function autoseed() {
-        try {
-          var out;
-          if (nodecrypto && (out = nodecrypto.randomBytes)) {
-            out = out(width);
-          } else {
-            out = new Uint8Array(width);
-            (global.crypto || global.msCrypto).getRandomValues(out);
-          }
-          return tostring(out);
-        } catch (e) {
-          var browser = global.navigator, plugins = browser && browser.plugins;
-          return [+/* @__PURE__ */ new Date(), global, plugins, global.screen, tostring(pool)];
-        }
-      }
-      function tostring(a) {
-        return String.fromCharCode.apply(0, a);
-      }
-      mixkey(math.random(), pool);
-      if (typeof module == "object" && module.exports) {
-        module.exports = seedrandom2;
-        try {
-          nodecrypto = __require("crypto");
-        } catch (ex) {
-        }
-      } else if (typeof define == "function" && define.amd) {
-        define(function() {
-          return seedrandom2;
-        });
-      } else {
-        math["seed" + rngname] = seedrandom2;
-      }
-    })(
-      // global: `self` in browsers (including strict mode and web workers),
-      // otherwise `this` in Node and other environments
-      typeof self !== "undefined" ? self : exports,
-      [],
-      // pool: entropy pool starts empty
-      Math
-      // math: package containing random, pow, and seedrandom
-    );
-  }
-});
-
-// ../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/index.js
-var require_seedrandom2 = __commonJS({
-  "../../Library/Caches/deno/deno_esbuild/seedrandom@3.0.5/node_modules/seedrandom/index.js"(exports, module) {
-    var alea = require_alea();
-    var xor128 = require_xor128();
-    var xorwow = require_xorwow();
-    var xorshift7 = require_xorshift7();
-    var xor4096 = require_xor4096();
-    var tychei = require_tychei();
-    var sr = require_seedrandom();
-    sr.alea = alea;
-    sr.xor128 = xor128;
-    sr.xorwow = xorwow;
-    sr.xorshift7 = xorshift7;
-    sr.xor4096 = xor4096;
-    sr.tychei = tychei;
-    module.exports = sr;
-  }
-});
-
 // https://jsr.io/@kt3k/cell/0.3.6/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
@@ -1050,8 +311,117 @@ function gameloop(main, fps) {
   return new GameloopImpl(main, fps);
 }
 
+// https://jsr.io/@kt3k/weak-value-map/0.1.2/mod.ts
+var WeakValueMap = class {
+  #map = /* @__PURE__ */ new Map();
+  #registry = new FinalizationRegistry((key) => {
+    this.#map.delete(key);
+  });
+  [Symbol.toStringTag] = "WeakValueMap";
+  constructor(iterable = []) {
+    for (const [k, v] of iterable) {
+      this.set(k, v);
+    }
+  }
+  clear() {
+    for (const key of this.keys()) {
+      this.delete(key);
+    }
+  }
+  delete(key) {
+    const ref = this.#map.get(key);
+    if (ref) {
+      this.#map.delete(key);
+      this.#registry.unregister(ref);
+      if (ref.deref() === void 0) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+  forEach(callbackfn, thisArg) {
+    this.#map.forEach((ref, k) => {
+      callbackfn(ref.deref(), k, thisArg);
+    });
+  }
+  get(key) {
+    const ref = this.#map.get(key);
+    if (ref === void 0) {
+      return void 0;
+    }
+    const value = ref.deref();
+    if (value === void 0) {
+      this.#map.delete(key);
+      this.#registry.unregister(ref);
+      return void 0;
+    }
+    return value;
+  }
+  has(key) {
+    const ref = this.#map.get(key);
+    if (ref === void 0) {
+      return false;
+    }
+    const value = ref.deref();
+    if (value === void 0) {
+      this.#map.delete(key);
+      this.#registry.unregister(ref);
+      return false;
+    }
+    return true;
+  }
+  set(key, value) {
+    const prevRef = this.#map.get(key);
+    if (prevRef) {
+      this.#registry.unregister(prevRef);
+    }
+    const ref = new WeakRef(value);
+    this.#map.set(key, ref);
+    this.#registry.register(value, key, ref);
+    return this;
+  }
+  get size() {
+    return this.#map.size;
+  }
+  [Symbol.iterator]() {
+    return this.entries();
+  }
+  *entries() {
+    for (const [k, ref] of this.#map.entries()) {
+      const v = ref.deref();
+      if (v === void 0) {
+        this.#map.delete(k);
+        this.#registry.unregister(ref);
+        continue;
+      }
+      yield [k, v];
+    }
+  }
+  *keys() {
+    for (const [k, ref] of this.#map.entries()) {
+      const v = ref.deref();
+      if (v === void 0) {
+        this.#map.delete(k);
+        this.#registry.unregister(ref);
+        continue;
+      }
+      yield k;
+    }
+  }
+  *values() {
+    for (const ref of this.#map.values()) {
+      const v = ref.deref();
+      if (v === void 0) {
+        continue;
+      }
+      yield v;
+    }
+  }
+};
+
 // src/util/load.ts
-function loadImage(path) {
+function loadImage_(path) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -1062,6 +432,23 @@ function loadImage(path) {
     };
     img.src = path;
   });
+}
+var loadImage = memoizedLoading(loadImage_);
+function memoizedLoading(fn) {
+  const weakValueMap = new WeakValueMap();
+  const weakKeyMap = /* @__PURE__ */ new WeakMap();
+  return (key) => {
+    const cache = weakValueMap.get(key);
+    if (cache) {
+      return cache;
+    }
+    const promise = fn(key);
+    weakValueMap.set(key, promise);
+    promise.then((value) => {
+      weakKeyMap.set(value, promise);
+    });
+    return promise;
+  };
 }
 
 // src/util/dir.ts
@@ -1120,6 +507,7 @@ function KeyMonitor({ on }) {
 // src/util/signal.ts
 var fpsSignal = signal(0);
 var viewScopeSignal = signal({ x: 0, y: 0 });
+var isLoadingSignal = signal(true);
 
 // src/ui/FpsMonitor.ts
 function FpsMonitor({ el }) {
@@ -1176,15 +564,14 @@ function SwipeHandler({ on }) {
   });
 }
 
-// src/util/random.ts
-var import_npm_seedrandom = __toESM(require_seedrandom2());
-var rng = (0, import_npm_seedrandom.default)("Hello.");
-function randomInt(n) {
-  return Math.floor(rng() * n);
+// src/ui/LoadingIndicator.ts
+function LoadingIndicator({ el }) {
+  const toggle = () => el.classList.toggle("hidden", !isLoadingSignal.get());
+  isLoadingSignal.onChange(toggle);
+  toggle();
 }
 
-// src/main.ts
-var CELL_UNIT = 16;
+// src/util/brush.ts
 var Brush = class {
   constructor(ctx) {
     this.ctx = ctx;
@@ -1196,34 +583,22 @@ var Brush = class {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 };
-var Map = class {
-  x;
-  y;
-  w;
-  h;
-  // deno-lint-ignore no-explicit-any
-  constructor(obj) {
-    this.x = obj.x;
-    this.y = obj.y;
-    this.w = obj.w;
-    this.h = obj.h;
-  }
-};
-var AssetManager = class {
-  maps = {};
-  loadMaps(maps) {
-    return Promise.all(
-      maps.map(async (x) => {
-        const resp = await fetch(x);
-        return new Map(await resp.json());
-      })
-    );
-  }
-  async #loadMap(path) {
-    const resp = await fetch(path);
-    return new Map(await resp.json());
-  }
-};
+
+// src/util/math.ts
+function floorN(x, n) {
+  return Math.floor(x / n) * n;
+}
+function ceilN(x, n) {
+  return Math.ceil(x / n) * n;
+}
+function modulo(x, m) {
+  const r = x % m;
+  return r >= 0 ? r : r + m;
+}
+
+// src/main.ts
+var CELL_UNIT = 16;
+var DISTRICT_SIZE = 200;
 var Character = class {
   /** The current direction of the character */
   #dir = "down";
@@ -1243,8 +618,7 @@ var Character = class {
   #moveType = "linear";
   /** The prefix of assets */
   #assetPrefix;
-  /** True if the assets are loaded */
-  #assetsLoaded = false;
+  /** The images necessary to render this character */
   #assets;
   constructor(i, j, speed, assetPrefix) {
     this.#i = i;
@@ -1266,6 +640,7 @@ var Character = class {
       this.setState(RIGHT);
     }
   }
+  /** Returns the grid coordinates of the 1 cell front of the character. */
   front() {
     if (this.#dir === UP) {
       return [this.#i, this.#j - 1];
@@ -1277,7 +652,18 @@ var Character = class {
       return [this.#i + 1, this.#j];
     }
   }
-  step(input, grid2) {
+  step(input, terrain) {
+    if (this.#movePhase === 0 && (input.up || input.down || input.left || input.right)) {
+      this.#isMoving = true;
+      this.#readInput(input);
+      const [i, j] = this.front();
+      const cell = terrain.get(i, j);
+      if (cell.canEnter()) {
+        this.#moveType = "linear";
+      } else {
+        this.#moveType = "bounce";
+      }
+    }
     if (this.#isMoving) {
       if (this.#moveType === "linear") {
         this.#movePhase += this.#speed;
@@ -1295,37 +681,23 @@ var Character = class {
           } else if (this.#dir === RIGHT) {
             this.#i += 1;
           }
-        } else {
-          return;
         }
       } else if (this.#moveType === "bounce") {
+        this.#movePhase += this.#speed;
         if (this.#movePhase < 8) {
           this.#d += this.#speed / 2;
         } else {
           this.#d -= this.#speed / 2;
         }
-        this.#movePhase += this.#speed;
         if (this.#movePhase == 16) {
           this.#movePhase = 0;
           this.#isMoving = false;
-        } else {
-          return;
+          this.#d = 0;
         }
       }
     }
-    if (input.up || input.down || input.left || input.right) {
-      this.#isMoving = true;
-      this.#readInput(input);
-      const [i, j] = this.front();
-      if (grid2[i][j] === 2) {
-        this.#moveType = "bounce";
-      } else {
-        this.#moveType = "linear";
-      }
-      this.#movePhase = 0;
-    }
   }
-  appearance() {
+  image() {
     if (this.#movePhase >= 8) {
       return this.#assets[`${this.#dir}0`];
     } else {
@@ -1334,28 +706,32 @@ var Character = class {
   }
   /** Gets the x of the world coordinates */
   get x() {
-    if (this.#isMoving) {
-      if (this.#dir === LEFT) {
-        return this.#i * CELL_UNIT - this.#d;
-      } else if (this.#dir === RIGHT) {
-        return this.#i * CELL_UNIT + this.#d;
-      }
+    if (this.#dir === LEFT) {
+      return this.#i * CELL_UNIT - this.#d;
+    } else if (this.#dir === RIGHT) {
+      return this.#i * CELL_UNIT + this.#d;
+    } else {
+      return this.#i * CELL_UNIT;
     }
-    return this.#i * CELL_UNIT;
   }
   get centerX() {
     return this.x + CELL_UNIT / 2;
   }
-  /** Gets the x of the world coordinates */
+  /** Gets the y of the world coordinates */
   get y() {
-    if (this.#isMoving) {
-      if (this.#dir === UP) {
-        return this.#j * CELL_UNIT - this.#d;
-      } else if (this.#dir === DOWN) {
-        return this.#j * CELL_UNIT + this.#d;
-      }
+    if (this.#dir === UP) {
+      return this.#j * CELL_UNIT - this.#d;
+    } else if (this.#dir === DOWN) {
+      return this.#j * CELL_UNIT + this.#d;
+    } else {
+      return this.#j * CELL_UNIT;
     }
-    return this.#j * CELL_UNIT;
+  }
+  get h() {
+    return CELL_UNIT;
+  }
+  get w() {
+    return CELL_UNIT;
   }
   get centerY() {
     return this.y + CELL_UNIT / 2;
@@ -1386,11 +762,11 @@ var Character = class {
       right1
     };
   }
-  get assetsLoaded() {
+  get assetsReady() {
     return !!this.#assets;
   }
 };
-var RectArea = class {
+var RectScope = class {
   #w;
   #h;
   #left = 0;
@@ -1420,116 +796,269 @@ var RectArea = class {
   get bottom() {
     return this.#bottom;
   }
+  includes(char) {
+    const { x, y, w, h } = char;
+    return this.left <= x + w && this.right >= x && this.top <= y + h && this.bottom >= y;
+  }
 };
-var ViewScope = class extends RectArea {
+var ViewScope = class extends RectScope {
   setCenter(x, y) {
     super.setCenter(x, y);
     viewScopeSignal.updateByFields({ x: -this.left, y: -this.top });
   }
 };
-var EvalScope = class extends RectArea {
-  constructor(characters, w, h) {
-    super(w, h);
-    this.characters = characters;
+var Walkers = class {
+  #walkers = [];
+  add(walker) {
+    this.#walkers.push(walker);
   }
-  step(input, grid2) {
-    for (const character of this.characters) {
-      character.step(input, grid2);
+  step(input, terrain) {
+    for (const walker of this.#walkers) {
+      walker.step(input, terrain);
     }
   }
+  get assetsReady() {
+    return this.#walkers.every((x) => x.assetsReady);
+  }
+  [Symbol.iterator]() {
+    return this.#walkers[Symbol.iterator]();
+  }
 };
-function TerrainWrap({ el }) {
-  const setStyleTransform = ({ x, y }) => {
-    el.style.transform = `translateX(${x}px) translateY(${y}px`;
-  };
-  viewScopeSignal.onChange(setStyleTransform);
-  setStyleTransform(viewScopeSignal.get());
-}
-var LoadScope = class _LoadScope extends RectArea {
+var WalkScope = class extends RectScope {
+};
+var LoadScope = class _LoadScope extends RectScope {
   static LOAD_UNIT = 200 * CELL_UNIT;
-  static ceil(n) {
-    return Math.ceil(n / this.LOAD_UNIT) * this.LOAD_UNIT;
+  #loading = /* @__PURE__ */ new Set();
+  constructor() {
+    super(_LoadScope.LOAD_UNIT, _LoadScope.LOAD_UNIT);
   }
-  static floor(n) {
-    return Math.floor(n / this.LOAD_UNIT) * this.LOAD_UNIT;
+  loadMaps(mapIds) {
+    const maps = mapIds.map(([k, l]) => `map/map_${k}.${l}.json`);
+    return Promise.all(maps.map((map) => this.#loadMap(map)));
   }
-  maps() {
+  async #loadMap(url) {
+    this.#loading.add(url);
+    const resp = await fetch(url);
+    const map = new Map2(await resp.json());
+    this.#loading.delete(url);
+    return map;
+  }
+  mapIds() {
     const { LOAD_UNIT } = _LoadScope;
-    const left = _LoadScope.floor(this.left);
-    const right = _LoadScope.ceil(this.right);
-    const top = _LoadScope.floor(this.top);
-    const bottom = _LoadScope.ceil(this.bottom);
+    const left = floorN(this.left, _LoadScope.LOAD_UNIT);
+    const right = ceilN(this.right, _LoadScope.LOAD_UNIT);
+    const top = floorN(this.top, _LoadScope.LOAD_UNIT);
+    const bottom = ceilN(this.bottom, _LoadScope.LOAD_UNIT);
     const list = [];
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
         const i = x / CELL_UNIT;
         const j = y / CELL_UNIT;
-        list.push(`map/map_${i}.${j}.json`);
+        list.push([i, j]);
       }
     }
     return list;
   }
 };
+var UnloadScope = class _UnloadScope extends RectScope {
+  static UNLOAD_UNIT = 300 * CELL_UNIT;
+  constructor() {
+    super(_UnloadScope.UNLOAD_UNIT, _UnloadScope.UNLOAD_UNIT);
+  }
+};
+var Map2 = class {
+  // The column of the world coordinates
+  i;
+  // The row of the world coordinates
+  j;
+  cells;
+  characters;
+  items;
+  terrain;
+  // deno-lint-ignore no-explicit-any
+  constructor(obj) {
+    this.i = obj.i;
+    this.j = obj.j;
+    this.cells = obj.cells;
+    this.characters = obj.characters;
+    this.items = obj.items;
+    this.terrain = obj.terrain;
+  }
+};
+var TerrainCell = class {
+  #color;
+  #href;
+  #canEnter;
+  constructor(canEnter, color, href) {
+    this.#canEnter = canEnter;
+    this.#color = color;
+    this.#href = href;
+  }
+  canEnter() {
+    return this.#canEnter;
+  }
+  get color() {
+    return this.#color;
+  }
+};
+var TerrainDistrict = class {
+  #x;
+  #y;
+  #w;
+  #h;
+  // The column of the world coordinates
+  #i;
+  // The row of the world coordinates
+  #j;
+  #cellMap = {};
+  #items;
+  #characters;
+  #terrain;
+  constructor(map) {
+    this.#i = map.i;
+    this.#j = map.j;
+    this.#x = this.#i * CELL_UNIT;
+    this.#y = this.#j * CELL_UNIT;
+    this.#h = DISTRICT_SIZE * CELL_UNIT;
+    this.#w = DISTRICT_SIZE * CELL_UNIT;
+    for (const cell of map.cells) {
+      this.#cellMap[cell.name] = new TerrainCell(
+        cell.canEnter,
+        cell.color,
+        cell.href
+      );
+    }
+    this.#terrain = map.terrain;
+    this.#items = map.items;
+    this.#characters = [];
+  }
+  createCanvas() {
+    const canvas = document.createElement("canvas");
+    canvas.style.position = "absolute";
+    canvas.style.left = `${this.x}px`;
+    canvas.style.top = `${this.y}px`;
+    canvas.width = this.w;
+    canvas.height = this.h;
+    const ctx = canvas.getContext("2d");
+    renderDistrict(new Brush(ctx), this);
+    return canvas;
+  }
+  get(i, j) {
+    return this.#cellMap[this.#terrain[j][i]];
+  }
+  get i() {
+    return this.#i;
+  }
+  get j() {
+    return this.#j;
+  }
+  get x() {
+    return this.#x;
+  }
+  get y() {
+    return this.#y;
+  }
+  get h() {
+    return this.#h;
+  }
+  get w() {
+    return this.#w;
+  }
+};
+function renderDistrict(brush, district) {
+  for (let j = 0; j < DISTRICT_SIZE; j++) {
+    for (let i = 0; i < DISTRICT_SIZE; i++) {
+      const cell = district.get(i, j);
+      brush.ctx.fillStyle = cell.color || "black";
+      brush.ctx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT);
+    }
+  }
+}
+var Terrain = class {
+  #districts = {};
+  #districtElements = {};
+  addDistrict(district) {
+    this.#districts[`${district.i}.${district.j}`] = district;
+  }
+  get(i, j) {
+    const k = floorN(i, DISTRICT_SIZE);
+    const l = floorN(j, DISTRICT_SIZE);
+    return this.#districts[`${k}.${l}`].get(
+      modulo(i, DISTRICT_SIZE),
+      modulo(j, DISTRICT_SIZE)
+    );
+  }
+  hasDistrict(k, l) {
+    return !!this.#districts[`${k}.${l}`];
+  }
+  [Symbol.iterator]() {
+    return Object.values(this.#districts)[Symbol.iterator]();
+  }
+};
 async function GameScreen({ query }) {
   const canvas1 = query(".canvas1");
   const brush = new Brush(canvas1.getContext("2d"));
-  const me = new Character(98, 102, 1, "char/juni/juni_");
+  const me = new Character(2, 2, 1, "char/juni/juni_");
   const viewScope = new ViewScope(canvas1.width, canvas1.height);
   viewScope.setCenter(me.centerX, me.centerY);
-  const loadScope = new LoadScope(3200, 3200);
+  const loadScope = new LoadScope();
   loadScope.setCenter(me.centerX, me.centerY);
-  const evalScope = new EvalScope([me], canvas1.width * 3, canvas1.height * 3);
-  const assetManager = new AssetManager();
-  const maps = await assetManager.loadMaps(loadScope.maps());
-  console.log(maps);
+  const unloadScope = new UnloadScope();
+  unloadScope.setCenter(me.centerX, me.centerY);
+  const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3);
+  walkScope.setCenter(me.centerX, me.centerY);
   globalThis.addEventListener("blur", () => {
     clearInput();
   });
+  const walkers = new Walkers();
+  walkers.add(me);
+  const terrain = new Terrain();
+  const mapIdsToLoad = loadScope.mapIds().filter(
+    ([k, l]) => !terrain.hasDistrict(k, l)
+  );
+  const maps = await loadScope.loadMaps(mapIdsToLoad);
+  const terrainEl = query(".terrain");
+  for (const map of maps) {
+    const district = new TerrainDistrict(map);
+    terrain.addDistrict(district);
+    terrainEl.appendChild(district.createCanvas());
+  }
+  const setStyleTransform = ({ x, y }) => {
+    terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`;
+  };
+  viewScopeSignal.onChange(setStyleTransform);
+  setStyleTransform(viewScopeSignal.get());
   await me.loadAssets();
   const loop = gameloop(() => {
-    evalScope.step(Input, grid);
-    evalScope.setCenter(me.centerX, me.centerY);
+    if (!walkers.assetsReady) {
+      isLoadingSignal.update(true);
+      return;
+    }
+    isLoadingSignal.update(false);
+    walkers.step(Input, terrain);
+    walkScope.setCenter(me.centerX, me.centerY);
     viewScope.setCenter(me.centerX, me.centerY);
+    loadScope.setCenter(me.centerX, me.centerY);
     brush.clear();
-    for (const char of evalScope.characters) {
+    for (const walker of walkers) {
+      if (!viewScope.includes(walker)) {
+        continue;
+      }
       brush.drawImage(
-        char.appearance(),
-        char.x - viewScope.left,
-        char.y - viewScope.top
+        walker.image(),
+        walker.x - viewScope.left,
+        walker.y - viewScope.top
       );
     }
   }, 60);
   loop.onStep((fps) => fpsSignal.update(fps));
   loop.run();
 }
-var grid = [];
-function Canvas2({ el }) {
-  const WIDTH = el.width;
-  const HEIGHT = el.height;
-  const W = Math.floor(WIDTH / CELL_UNIT);
-  const H = Math.floor(HEIGHT / CELL_UNIT);
-  const canvasCtx = el.getContext("2d");
-  canvasCtx.fillStyle = "black";
-  canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-  const colors = { 0: "#000", 1: "#000", 2: "#777" };
-  const length = Object.keys(colors).length;
-  for (let i = 0; i < W; i++) {
-    const row = [];
-    grid.push(row);
-    for (let j = 0; j < H; j++) {
-      const c = randomInt(length);
-      row.push(c);
-      canvasCtx.fillStyle = colors[c];
-      canvasCtx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT);
-    }
-  }
-}
-register(Canvas2, "canvas2");
 register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
-register(TerrainWrap, "js-terrain");
+register(LoadingIndicator, "js-loading-indicator");
 export {
   LoadScope
 };
