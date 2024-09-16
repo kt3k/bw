@@ -309,6 +309,10 @@ type IChar = IBox & {
 class Walkers {
   #walkers: IChar[] = []
 
+  constructor(chars: IChar[] = []) {
+    this.#walkers = chars
+  }
+
   add(walker: IChar) {
     this.#walkers.push(walker)
   }
@@ -489,8 +493,18 @@ class TerrainDistrict {
     canvas.width = this.w
     canvas.height = this.h
     const ctx = canvas.getContext("2d")!
-    renderDistrict(new Brush(ctx), this)
+    this.#renderDistrict(new Brush(ctx))
     return canvas
+  }
+
+  #renderDistrict(brush: Brush) {
+    for (let j = 0; j < BLOCK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_SIZE; i++) {
+        const cell = this.get(i, j)
+        brush.ctx.fillStyle = cell.color || "black"
+        brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+    }
   }
 
   get(i: number, j: number): TerrainCell {
@@ -513,16 +527,6 @@ class TerrainDistrict {
   }
   get w() {
     return this.#w
-  }
-}
-
-function renderDistrict(brush: Brush, district: TerrainDistrict) {
-  for (let j = 0; j < BLOCK_SIZE; j++) {
-    for (let i = 0; i < BLOCK_SIZE; i++) {
-      const cell = district.get(i, j)
-      brush.ctx.fillStyle = cell.color || "black"
-      brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-    }
   }
 }
 
@@ -591,12 +595,7 @@ async function GameScreen({ query }: Context) {
     unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
 
-  globalThis.addEventListener("blur", () => {
-    clearInput()
-  })
-
-  const walkers = new Walkers()
-  walkers.add(me)
+  const walkers = new Walkers([me])
 
   const terrainEl = query(".terrain")!
   const terrain = new Terrain(terrainEl)
@@ -643,6 +642,8 @@ async function GameScreen({ query }: Context) {
   loop.onStep((fps) => fpsSignal.update(fps))
   loop.run()
 }
+
+globalThis.addEventListener("blur", clearInput)
 
 register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
