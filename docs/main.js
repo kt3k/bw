@@ -523,9 +523,9 @@ var fpsSignal = signal(0);
 var viewScopeSignal = signal({ x: 0, y: 0 });
 var isLoadingSignal = signal(true);
 var centerPixelSignal = signal({ x: 0, y: 0 });
-var centerGridSignal = signal({ i: 0, j: 0 });
+var centerGrid$ = signal({ i: 0, j: 0 });
 centerPixelSignal.subscribe(({ x, y }) => {
-  centerGridSignal.updateByFields({
+  centerGrid$.updateByFields({
     i: Math.floor(x / CELL_SIZE),
     j: Math.floor(y / CELL_SIZE)
   });
@@ -591,15 +591,26 @@ function LoadingIndicator({ el }) {
 }
 
 // src/util/brush.ts
-var Brush = class {
-  constructor(ctx) {
-    this.ctx = ctx;
+var DrawLayer = class {
+  #ctx;
+  constructor(canvas) {
+    this.#ctx = canvas.getContext("2d");
   }
   drawImage(img, x, y) {
-    this.ctx.drawImage(img, x, y);
+    this.#ctx.drawImage(img, x, y);
+  }
+  drawRect(x, y, w, h, color) {
+    this.#ctx.fillStyle = color;
+    this.#ctx.fillRect(x, y, w, h);
   }
   clear() {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.#ctx.clearRect(0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height);
+  }
+  get width() {
+    return this.#ctx.canvas.width;
+  }
+  get height() {
+    return this.#ctx.canvas.height;
   }
 };
 
@@ -963,16 +974,20 @@ var TerrainDistrict = class {
     canvas.style.top = `${this.y}px`;
     canvas.width = this.w;
     canvas.height = this.h;
-    const ctx = canvas.getContext("2d");
-    this.#renderDistrict(new Brush(ctx));
+    this.#renderDistrict(new DrawLayer(canvas));
     return canvas;
   }
-  #renderDistrict(brush) {
+  #renderDistrict(layer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j);
-        brush.ctx.fillStyle = cell.color || "black";
-        brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        layer.drawRect(
+          i * CELL_SIZE,
+          j * CELL_SIZE,
+          CELL_SIZE,
+          CELL_SIZE,
+          cell.color || "black"
+        );
       }
     }
   }
@@ -1032,22 +1047,21 @@ var Terrain = class {
   }
 };
 async function GameScreen({ query }) {
-  const canvas1 = query(".canvas1");
-  const brush = new Brush(canvas1.getContext("2d"));
+  const layer = new DrawLayer(query(".canvas1"));
   const me = new Character(2, 2, 1, "char/juni/juni_");
   centerPixelSignal.updateByFields({ x: me.centerX, y: me.centerY });
-  const viewScope = new ViewScope(canvas1.width, canvas1.height);
+  const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
-  const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3);
-  centerGridSignal.subscribe(
+  const walkScope = new WalkScope(layer.width * 3, layer.height * 3);
+  centerGrid$.subscribe(
     ({ i, j }) => walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
   const loadScope = new LoadScope();
-  centerGridSignal.subscribe(
+  centerGrid$.subscribe(
     ({ i, j }) => loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
   const unloadScope = new UnloadScope();
-  centerGridSignal.subscribe(
+  centerGrid$.subscribe(
     ({ i, j }) => unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
   const walkers = new Walkers([me]);
@@ -1074,12 +1088,12 @@ async function GameScreen({ query }) {
       x: me.centerX,
       y: me.centerY
     });
-    brush.clear();
+    layer.clear();
     for (const walker of walkers) {
       if (!viewScope.includes(walker)) {
         continue;
       }
-      brush.drawImage(
+      layer.drawImage(
         walker.image(),
         walker.x - viewScope.left,
         walker.y - viewScope.top
