@@ -6,14 +6,17 @@ import { KeyMonitor } from "./ui/KeyMonitor.ts"
 import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
-import { fpsSignal, isLoadingSignal, viewScopeSignal } from "./util/signal.ts"
+import {
+  centerGridSignal,
+  centerPixelSignal,
+  fpsSignal,
+  isLoadingSignal,
+  viewScopeSignal,
+} from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
 import { Brush } from "./util/brush.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
-
-const CELL_UNIT = 16
-
-const DISTRICT_SIZE = 200
+import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
 
 type CharacterAppearance =
   | "up0"
@@ -155,39 +158,39 @@ class Character {
   /** Gets the x of the world coordinates */
   get x() {
     if (this.#dir === LEFT) {
-      return this.#i * CELL_UNIT - this.#d
+      return this.#i * CELL_SIZE - this.#d
     } else if (this.#dir === RIGHT) {
-      return this.#i * CELL_UNIT + this.#d
+      return this.#i * CELL_SIZE + this.#d
     } else {
-      return this.#i * CELL_UNIT
+      return this.#i * CELL_SIZE
     }
   }
 
   get centerX() {
-    return this.x + CELL_UNIT / 2
+    return this.x + CELL_SIZE / 2
   }
 
   /** Gets the y of the world coordinates */
   get y() {
     if (this.#dir === UP) {
-      return this.#j * CELL_UNIT - this.#d
+      return this.#j * CELL_SIZE - this.#d
     } else if (this.#dir === DOWN) {
-      return this.#j * CELL_UNIT + this.#d
+      return this.#j * CELL_SIZE + this.#d
     } else {
-      return this.#j * CELL_UNIT
+      return this.#j * CELL_SIZE
     }
   }
 
   get h() {
-    return CELL_UNIT
+    return CELL_SIZE
   }
 
   get w() {
-    return CELL_UNIT
+    return CELL_SIZE
   }
 
   get centerY() {
-    return this.y + CELL_UNIT / 2
+    return this.y + CELL_SIZE / 2
   }
 
   /**
@@ -336,7 +339,7 @@ class WalkScope extends RectScope {
  * to this area need to be loaded.
  */
 export class LoadScope extends RectScope {
-  static LOAD_UNIT = 200 * CELL_UNIT
+  static LOAD_UNIT = 200 * CELL_SIZE
 
   #loading = new Set()
 
@@ -366,8 +369,8 @@ export class LoadScope extends RectScope {
     const list = [] as MapId[]
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
-        const i = x / CELL_UNIT
-        const j = y / CELL_UNIT
+        const i = x / CELL_SIZE
+        const j = y / CELL_SIZE
         list.push([i, j])
       }
     }
@@ -381,7 +384,7 @@ export class LoadScope extends RectScope {
  * doesn't belong to this scope need to be unloaded
  */
 class UnloadScope extends RectScope {
-  static UNLOAD_UNIT = 300 * CELL_UNIT
+  static UNLOAD_UNIT = 300 * CELL_SIZE
   constructor() {
     super(UnloadScope.UNLOAD_UNIT, UnloadScope.UNLOAD_UNIT)
   }
@@ -458,10 +461,10 @@ class TerrainDistrict {
   constructor(map: Map) {
     this.#i = map.i
     this.#j = map.j
-    this.#x = this.#i * CELL_UNIT
-    this.#y = this.#j * CELL_UNIT
-    this.#h = DISTRICT_SIZE * CELL_UNIT
-    this.#w = DISTRICT_SIZE * CELL_UNIT
+    this.#x = this.#i * CELL_SIZE
+    this.#y = this.#j * CELL_SIZE
+    this.#h = BLOCK_SIZE * CELL_SIZE
+    this.#w = BLOCK_SIZE * CELL_SIZE
     for (const cell of map.cells) {
       this.#cellMap[cell.name] = new TerrainCell(
         cell.canEnter,
@@ -514,11 +517,11 @@ class TerrainDistrict {
 }
 
 function renderDistrict(brush: Brush, district: TerrainDistrict) {
-  for (let j = 0; j < DISTRICT_SIZE; j++) {
-    for (let i = 0; i < DISTRICT_SIZE; i++) {
+  for (let j = 0; j < BLOCK_SIZE; j++) {
+    for (let i = 0; i < BLOCK_SIZE; i++) {
       const cell = district.get(i, j)
       brush.ctx.fillStyle = cell.color || "black"
-      brush.ctx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT)
+      brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     }
   }
 }
@@ -546,11 +549,11 @@ class Terrain {
   }
 
   get(i: number, j: number) {
-    const k = floorN(i, DISTRICT_SIZE)
-    const l = floorN(j, DISTRICT_SIZE)
+    const k = floorN(i, BLOCK_SIZE)
+    const l = floorN(j, BLOCK_SIZE)
     return this.#districts[`${k}.${l}`].get(
-      modulo(i, DISTRICT_SIZE),
-      modulo(j, DISTRICT_SIZE),
+      modulo(i, BLOCK_SIZE),
+      modulo(j, BLOCK_SIZE),
     )
   }
 
@@ -568,18 +571,25 @@ async function GameScreen({ query }: Context) {
   const brush = new Brush(canvas1.getContext("2d")!)
 
   const me = new Character(2, 2, 1, "char/juni/juni_")
+  centerPixelSignal.updateByFields({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(canvas1.width, canvas1.height)
-  viewScope.setCenter(me.centerX, me.centerY)
-
-  const loadScope = new LoadScope()
-  loadScope.setCenter(me.centerX, me.centerY)
-
-  const unloadScope = new UnloadScope()
-  unloadScope.setCenter(me.centerX, me.centerY)
+  centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
   const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3)
-  walkScope.setCenter(me.centerX, me.centerY)
+  centerGridSignal.subscribe(({ i, j }) =>
+    walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+  )
+
+  const loadScope = new LoadScope()
+  centerGridSignal.subscribe(({ i, j }) =>
+    loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+  )
+
+  const unloadScope = new UnloadScope()
+  centerGridSignal.subscribe(({ i, j }) =>
+    unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+  )
 
   globalThis.addEventListener("blur", () => {
     clearInput()
@@ -612,11 +622,10 @@ async function GameScreen({ query }: Context) {
     isLoadingSignal.update(false)
 
     walkers.step(Input, terrain)
-
-    walkScope.setCenter(me.centerX, me.centerY)
-    viewScope.setCenter(me.centerX, me.centerY)
-    loadScope.setCenter(me.centerX, me.centerY)
-    unloadScope.setCenter(me.centerX, me.centerY)
+    centerPixelSignal.updateByFields({
+      x: me.centerX,
+      y: me.centerY,
+    })
 
     brush.clear()
 
