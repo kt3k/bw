@@ -14,7 +14,7 @@ import {
   viewScopeSignal,
 } from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
-import { Brush } from "./util/brush.ts"
+import { DrawLayer } from "./util/brush.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
 
@@ -492,17 +492,21 @@ class TerrainDistrict {
     canvas.style.top = `${this.y}px`
     canvas.width = this.w
     canvas.height = this.h
-    const ctx = canvas.getContext("2d")!
-    this.#renderDistrict(new Brush(ctx))
+    this.#renderDistrict(new DrawLayer(canvas))
     return canvas
   }
 
-  #renderDistrict(brush: Brush) {
+  #renderDistrict(layer: DrawLayer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j)
-        brush.ctx.fillStyle = cell.color || "black"
-        brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+        layer.drawRect(
+          i * CELL_SIZE,
+          j * CELL_SIZE,
+          CELL_SIZE,
+          CELL_SIZE,
+          cell.color || "black",
+        )
       }
     }
   }
@@ -571,16 +575,15 @@ class Terrain {
 }
 
 async function GameScreen({ query }: Context) {
-  const canvas1 = query<HTMLCanvasElement>(".canvas1")!
-  const brush = new Brush(canvas1.getContext("2d")!)
+  const layer = new DrawLayer(query<HTMLCanvasElement>(".canvas1")!)
 
   const me = new Character(2, 2, 1, "char/juni/juni_")
   centerPixelSignal.updateByFields({ x: me.centerX, y: me.centerY })
 
-  const viewScope = new ViewScope(canvas1.width, canvas1.height)
+  const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
-  const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3)
+  const walkScope = new WalkScope(layer.width * 3, layer.height * 3)
   centerGridSignal.subscribe(({ i, j }) =>
     walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
@@ -626,13 +629,13 @@ async function GameScreen({ query }: Context) {
       y: me.centerY,
     })
 
-    brush.clear()
+    layer.clear()
 
     for (const walker of walkers) {
       if (!viewScope.includes(walker)) {
         continue
       }
-      brush.drawImage(
+      layer.drawImage(
         walker.image(),
         walker.x - viewScope.left,
         walker.y - viewScope.top,

@@ -10,10 +10,10 @@ export const isLoadingSignal = signal(true)
 // The center pixel coordinate
 export const centerPixelSignal = signal({ x: 0, y: 0 })
 // The center grid coordinate
-export const centerGridSignal = signal({ i: 0, j: 0 })
+export const centerGrid$ = signal({ i: 0, j: 0 })
 
 centerPixelSignal.subscribe(({ x, y }) => {
-  centerGridSignal.updateByFields({
+  centerGrid$.updateByFields({
     i: Math.floor(x / CELL_SIZE),
     j: Math.floor(y / CELL_SIZE),
   })
