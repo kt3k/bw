@@ -1,4 +1,4 @@
-// https://jsr.io/@kt3k/cell/0.3.6/util.ts
+// https://jsr.io/@kt3k/cell/0.3.8/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
 function documentReady(doc = document) {
@@ -40,7 +40,7 @@ function logEvent({
   console.groupEnd();
 }
 
-// https://jsr.io/@kt3k/signal/0.1.6/mod.ts
+// https://jsr.io/@kt3k/signal/0.1.7/mod.ts
 var Signal = class {
   #val;
   #handlers = [];
@@ -99,12 +99,22 @@ var Signal = class {
       this.#handlers.splice(this.#handlers.indexOf(cb) >>> 0, 1);
     };
   }
+  /**
+   * Subscribe to the signal.
+   *
+   * @param cb The callback function to be called when the signal is updated and also called immediately
+   * @returns A function to stop the subscription
+   */
+  subscribe(cb) {
+    cb(this.#val);
+    return this.onChange(cb);
+  }
 };
 function signal(value) {
   return new Signal(value);
 }
 
-// https://jsr.io/@kt3k/cell/0.3.6/mod.ts
+// https://jsr.io/@kt3k/cell/0.3.8/mod.ts
 var registry = {};
 function assert(assertion, message) {
   if (!assertion) {
@@ -504,17 +514,28 @@ function KeyMonitor({ on }) {
   });
 }
 
+// src/util/constants.ts
+var CELL_SIZE = 16;
+var BLOCK_SIZE = 200;
+
 // src/util/signal.ts
 var fpsSignal = signal(0);
 var viewScopeSignal = signal({ x: 0, y: 0 });
 var isLoadingSignal = signal(true);
+var centerPixelSignal = signal({ x: 0, y: 0 });
+var centerGridSignal = signal({ i: 0, j: 0 });
+centerPixelSignal.subscribe(({ x, y }) => {
+  centerGridSignal.updateByFields({
+    i: Math.floor(x / CELL_SIZE),
+    j: Math.floor(y / CELL_SIZE)
+  });
+});
 
 // src/ui/FpsMonitor.ts
 function FpsMonitor({ el }) {
-  fpsSignal.onChange((fps) => {
+  fpsSignal.subscribe((fps) => {
     el.textContent = fps.toFixed(2);
   });
-  return "0";
 }
 
 // src/util/touch.ts
@@ -566,9 +587,7 @@ function SwipeHandler({ on }) {
 
 // src/ui/LoadingIndicator.ts
 function LoadingIndicator({ el }) {
-  const toggle = () => el.classList.toggle("hidden", !isLoadingSignal.get());
-  isLoadingSignal.onChange(toggle);
-  toggle();
+  isLoadingSignal.subscribe((v) => el.classList.toggle("hidden", !v));
 }
 
 // src/util/brush.ts
@@ -597,8 +616,6 @@ function modulo(x, m) {
 }
 
 // src/main.ts
-var CELL_UNIT = 16;
-var DISTRICT_SIZE = 200;
 var Character = class {
   /** The current direction of the character */
   #dir = "down";
@@ -707,34 +724,34 @@ var Character = class {
   /** Gets the x of the world coordinates */
   get x() {
     if (this.#dir === LEFT) {
-      return this.#i * CELL_UNIT - this.#d;
+      return this.#i * CELL_SIZE - this.#d;
     } else if (this.#dir === RIGHT) {
-      return this.#i * CELL_UNIT + this.#d;
+      return this.#i * CELL_SIZE + this.#d;
     } else {
-      return this.#i * CELL_UNIT;
+      return this.#i * CELL_SIZE;
     }
   }
   get centerX() {
-    return this.x + CELL_UNIT / 2;
+    return this.x + CELL_SIZE / 2;
   }
   /** Gets the y of the world coordinates */
   get y() {
     if (this.#dir === UP) {
-      return this.#j * CELL_UNIT - this.#d;
+      return this.#j * CELL_SIZE - this.#d;
     } else if (this.#dir === DOWN) {
-      return this.#j * CELL_UNIT + this.#d;
+      return this.#j * CELL_SIZE + this.#d;
     } else {
-      return this.#j * CELL_UNIT;
+      return this.#j * CELL_SIZE;
     }
   }
   get h() {
-    return CELL_UNIT;
+    return CELL_SIZE;
   }
   get w() {
-    return CELL_UNIT;
+    return CELL_SIZE;
   }
   get centerY() {
-    return this.y + CELL_UNIT / 2;
+    return this.y + CELL_SIZE / 2;
   }
   /**
    * Loads the assets and store resulted HTMLImageElement in the fields.
@@ -827,7 +844,7 @@ var Walkers = class {
 var WalkScope = class extends RectScope {
 };
 var LoadScope = class _LoadScope extends RectScope {
-  static LOAD_UNIT = 200 * CELL_UNIT;
+  static LOAD_UNIT = 200 * CELL_SIZE;
   #loading = /* @__PURE__ */ new Set();
   constructor() {
     super(_LoadScope.LOAD_UNIT, _LoadScope.LOAD_UNIT);
@@ -852,16 +869,17 @@ var LoadScope = class _LoadScope extends RectScope {
     const list = [];
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
-        const i = x / CELL_UNIT;
-        const j = y / CELL_UNIT;
+        const i = x / CELL_SIZE;
+        const j = y / CELL_SIZE;
         list.push([i, j]);
       }
     }
+    console.log(list);
     return list;
   }
 };
 var UnloadScope = class _UnloadScope extends RectScope {
-  static UNLOAD_UNIT = 300 * CELL_UNIT;
+  static UNLOAD_UNIT = 300 * CELL_SIZE;
   constructor() {
     super(_UnloadScope.UNLOAD_UNIT, _UnloadScope.UNLOAD_UNIT);
   }
@@ -917,10 +935,10 @@ var TerrainDistrict = class {
   constructor(map) {
     this.#i = map.i;
     this.#j = map.j;
-    this.#x = this.#i * CELL_UNIT;
-    this.#y = this.#j * CELL_UNIT;
-    this.#h = DISTRICT_SIZE * CELL_UNIT;
-    this.#w = DISTRICT_SIZE * CELL_UNIT;
+    this.#x = this.#i * CELL_SIZE;
+    this.#y = this.#j * CELL_SIZE;
+    this.#h = BLOCK_SIZE * CELL_SIZE;
+    this.#w = BLOCK_SIZE * CELL_SIZE;
     for (const cell of map.cells) {
       this.#cellMap[cell.name] = new TerrainCell(
         cell.canEnter,
@@ -969,11 +987,11 @@ var TerrainDistrict = class {
   }
 };
 function renderDistrict(brush, district) {
-  for (let j = 0; j < DISTRICT_SIZE; j++) {
-    for (let i = 0; i < DISTRICT_SIZE; i++) {
+  for (let j = 0; j < BLOCK_SIZE; j++) {
+    for (let i = 0; i < BLOCK_SIZE; i++) {
       const cell = district.get(i, j);
       brush.ctx.fillStyle = cell.color || "black";
-      brush.ctx.fillRect(i * CELL_UNIT, j * CELL_UNIT, CELL_UNIT, CELL_UNIT);
+      brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     }
   }
 }
@@ -996,15 +1014,15 @@ var Terrain = class {
     delete this.#districtElements[district.id];
   }
   get(i, j) {
-    const k = floorN(i, DISTRICT_SIZE);
-    const l = floorN(j, DISTRICT_SIZE);
+    const k = floorN(i, BLOCK_SIZE);
+    const l = floorN(j, BLOCK_SIZE);
     return this.#districts[`${k}.${l}`].get(
-      modulo(i, DISTRICT_SIZE),
-      modulo(j, DISTRICT_SIZE)
+      modulo(i, BLOCK_SIZE),
+      modulo(j, BLOCK_SIZE)
     );
   }
-  hasDistrict(k, l) {
-    return !!this.#districts[`${k}.${l}`];
+  hasDistrict(i, j) {
+    return !!this.#districts[`${i}.${j}`];
   }
   [Symbol.iterator]() {
     return Object.values(this.#districts)[Symbol.iterator]();
@@ -1014,14 +1032,21 @@ async function GameScreen({ query }) {
   const canvas1 = query(".canvas1");
   const brush = new Brush(canvas1.getContext("2d"));
   const me = new Character(2, 2, 1, "char/juni/juni_");
+  centerPixelSignal.updateByFields({ x: me.centerX, y: me.centerY });
   const viewScope = new ViewScope(canvas1.width, canvas1.height);
-  viewScope.setCenter(me.centerX, me.centerY);
-  const loadScope = new LoadScope();
-  loadScope.setCenter(me.centerX, me.centerY);
-  const unloadScope = new UnloadScope();
-  unloadScope.setCenter(me.centerX, me.centerY);
+  centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
   const walkScope = new WalkScope(canvas1.width * 3, canvas1.height * 3);
-  walkScope.setCenter(me.centerX, me.centerY);
+  centerGridSignal.subscribe(
+    ({ i, j }) => walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+  );
+  const loadScope = new LoadScope();
+  centerGridSignal.subscribe(
+    ({ i, j }) => loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+  );
+  const unloadScope = new UnloadScope();
+  centerGridSignal.subscribe(
+    ({ i, j }) => unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+  );
   globalThis.addEventListener("blur", () => {
     clearInput();
   });
@@ -1035,11 +1060,9 @@ async function GameScreen({ query }) {
   for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
     terrain.addDistrict(new TerrainDistrict(map));
   }
-  const setStyleTransform = ({ x, y }) => {
+  viewScopeSignal.subscribe(({ x, y }) => {
     terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`;
-  };
-  viewScopeSignal.onChange(setStyleTransform);
-  setStyleTransform(viewScopeSignal.get());
+  });
   await me.loadAssets();
   const loop = gameloop(() => {
     if (!walkers.assetsReady) {
@@ -1048,9 +1071,10 @@ async function GameScreen({ query }) {
     }
     isLoadingSignal.update(false);
     walkers.step(Input, terrain);
-    walkScope.setCenter(me.centerX, me.centerY);
-    viewScope.setCenter(me.centerX, me.centerY);
-    loadScope.setCenter(me.centerX, me.centerY);
+    centerPixelSignal.updateByFields({
+      x: me.centerX,
+      y: me.centerY
+    });
     brush.clear();
     for (const walker of walkers) {
       if (!viewScope.includes(walker)) {
@@ -1074,4 +1098,4 @@ register(LoadingIndicator, "js-loading-indicator");
 export {
   LoadScope
 };
-/*! Cell v0.3.6 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
+/*! Cell v0.3.8 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
