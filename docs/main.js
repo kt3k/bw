@@ -826,6 +826,9 @@ var ViewScope = class extends RectScope {
 };
 var Walkers = class {
   #walkers = [];
+  constructor(chars = []) {
+    this.#walkers = chars;
+  }
   add(walker) {
     this.#walkers.push(walker);
   }
@@ -961,8 +964,17 @@ var TerrainDistrict = class {
     canvas.width = this.w;
     canvas.height = this.h;
     const ctx = canvas.getContext("2d");
-    renderDistrict(new Brush(ctx), this);
+    this.#renderDistrict(new Brush(ctx));
     return canvas;
+  }
+  #renderDistrict(brush) {
+    for (let j = 0; j < BLOCK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_SIZE; i++) {
+        const cell = this.get(i, j);
+        brush.ctx.fillStyle = cell.color || "black";
+        brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
+    }
   }
   get(i, j) {
     return this.#cellMap[this.#terrain[j][i]];
@@ -986,15 +998,6 @@ var TerrainDistrict = class {
     return this.#w;
   }
 };
-function renderDistrict(brush, district) {
-  for (let j = 0; j < BLOCK_SIZE; j++) {
-    for (let i = 0; i < BLOCK_SIZE; i++) {
-      const cell = district.get(i, j);
-      brush.ctx.fillStyle = cell.color || "black";
-      brush.ctx.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-    }
-  }
-}
 var Terrain = class {
   #el;
   #districts = {};
@@ -1047,11 +1050,7 @@ async function GameScreen({ query }) {
   centerGridSignal.subscribe(
     ({ i, j }) => unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
-  globalThis.addEventListener("blur", () => {
-    clearInput();
-  });
-  const walkers = new Walkers();
-  walkers.add(me);
+  const walkers = new Walkers([me]);
   const terrainEl = query(".terrain");
   const terrain = new Terrain(terrainEl);
   const mapIdsToLoad = loadScope.mapIds().filter(
@@ -1090,6 +1089,7 @@ async function GameScreen({ query }) {
   loop.onStep((fps) => fpsSignal.update(fps));
   loop.run();
 }
+globalThis.addEventListener("blur", clearInput);
 register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
