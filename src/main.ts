@@ -570,6 +570,10 @@ class Terrain {
   [Symbol.iterator]() {
     return Object.values(this.#districts)[Symbol.iterator]()
   }
+
+  translateElement(x: number, y: number) {
+    this.#el.style.transform = `translateX(${x}px) translateY(${y}px)`
+  }
 }
 
 async function GameScreen({ query }: Context) {
@@ -598,8 +602,7 @@ async function GameScreen({ query }: Context) {
 
   const walkers = new Walkers([me])
 
-  const terrainEl = query(".terrain")!
-  const terrain = new Terrain(terrainEl)
+  const terrain = new Terrain(query(".terrain")!)
   const mapIdsToLoad = loadScope.mapIds().filter((id) =>
     !terrain.hasDistrict(id)
   )
@@ -608,9 +611,7 @@ async function GameScreen({ query }: Context) {
     terrain.addDistrict(new TerrainDistrict(map))
   }
 
-  viewScopeSignal.subscribe(({ x, y }) => {
-    terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`
-  })
+  viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y))
 
   await me.loadAssets()
 
