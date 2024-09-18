@@ -352,8 +352,8 @@ export class LoadScope extends RectScope {
     super(LoadScope.LOAD_UNIT, LoadScope.LOAD_UNIT)
   }
 
-  loadMaps(mapIds: MapId[]) {
-    const maps = mapIds.map(([k, l]) => `map/map_${k}.${l}.json`)
+  loadMaps(mapIds: string[]) {
+    const maps = mapIds.map((mapId) => `map/map_${mapId}.json`)
     return Promise.all(maps.map((map) => this.#loadMap(map)))
   }
 
@@ -365,21 +365,20 @@ export class LoadScope extends RectScope {
     return map
   }
 
-  mapIds(): MapId[] {
+  mapIds(): string[] {
     const { LOAD_UNIT } = LoadScope
     const left = floorN(this.left, LoadScope.LOAD_UNIT)
     const right = ceilN(this.right, LoadScope.LOAD_UNIT)
     const top = floorN(this.top, LoadScope.LOAD_UNIT)
     const bottom = ceilN(this.bottom, LoadScope.LOAD_UNIT)
-    const list = [] as MapId[]
+    const list = [] as string[]
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
         const i = x / CELL_SIZE
         const j = y / CELL_SIZE
-        list.push([i, j])
+        list.push(`${i}.${j}`)
       }
     }
-    console.log(list)
     return list
   }
 }
@@ -397,8 +396,6 @@ class UnloadScope extends RectScope {
 
 /** Item represents the item in the terrain */
 class Item {}
-
-type MapId = [k: number, l: number]
 
 /**
  * Map represents the map of terrain
@@ -566,8 +563,8 @@ class Terrain {
     )
   }
 
-  hasDistrict(i: number, j: number) {
-    return !!this.#districts[`${i}.${j}`]
+  hasDistrict(mapId: string) {
+    return !!this.#districts[mapId]
   }
 
   [Symbol.iterator]() {
@@ -603,8 +600,8 @@ async function GameScreen({ query }: Context) {
 
   const terrainEl = query(".terrain")!
   const terrain = new Terrain(terrainEl)
-  const mapIdsToLoad = loadScope.mapIds().filter(([k, l]) =>
-    !terrain.hasDistrict(k, l)
+  const mapIdsToLoad = loadScope.mapIds().filter((id) =>
+    !terrain.hasDistrict(id)
   )
 
   for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
