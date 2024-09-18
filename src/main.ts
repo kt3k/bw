@@ -266,7 +266,8 @@ abstract class RectScope {
     return this.#bottom
   }
 
-  includes(char: IBox): boolean {
+  /** The given IBox overlaps with this rectangle scope. */
+  overlaps(char: IBox): boolean {
     const { x, y, w, h } = char
     return this.left <= x + w &&
       this.right >= x &&
@@ -632,7 +633,7 @@ async function GameScreen({ query }: Context) {
     layer.clear()
 
     for (const walker of walkers) {
-      if (!viewScope.includes(walker)) {
+      if (!viewScope.overlaps(walker)) {
         continue
       }
       layer.drawImage(
