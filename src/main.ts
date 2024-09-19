@@ -7,6 +7,7 @@ import { FpsMonitor } from "./ui/FpsMonitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import {
+  centerGrid10Signal,
   centerGridSignal,
   centerPixelSignal,
   fpsSignal,
@@ -284,7 +285,7 @@ abstract class RectScope {
 class ViewScope extends RectScope {
   override setCenter(x: number, y: number): void {
     super.setCenter(x, y)
-    viewScopeSignal.updateByFields({ x: -this.left, y: -this.top })
+    viewScopeSignal.update({ x: -this.left, y: -this.top })
   }
 }
 
@@ -388,7 +389,7 @@ export class LoadScope extends RectScope {
  * doesn't belong to this scope need to be unloaded
  */
 class UnloadScope extends RectScope {
-  static UNLOAD_UNIT = 300 * CELL_SIZE
+  static UNLOAD_UNIT = 200 * CELL_SIZE
   constructor() {
     super(UnloadScope.UNLOAD_UNIT, UnloadScope.UNLOAD_UNIT)
   }
@@ -580,36 +581,44 @@ async function GameScreen({ query }: Context) {
   const layer = new CanvasLater(query<HTMLCanvasElement>(".canvas1")!)
 
   const me = new Character(2, 2, 1, "char/juni/juni_")
-  centerPixelSignal.updateByFields({ x: me.centerX, y: me.centerY })
+  centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
+
+  const walkers = new Walkers([me])
 
   const walkScope = new WalkScope(layer.width * 3, layer.height * 3)
   centerGridSignal.subscribe(({ i, j }) =>
     walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
 
+  const terrain = new Terrain(query(".terrain")!)
+
   const loadScope = new LoadScope()
-  centerGridSignal.subscribe(({ i, j }) =>
+  centerGrid10Signal.subscribe(async ({ i, j }) => {
+    console.log("load check")
     loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-  )
+
+    const mapIdsToLoad = loadScope.mapIds().filter((id) =>
+      !terrain.hasDistrict(id)
+    )
+
+    for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
+      terrain.addDistrict(new TerrainDistrict(map))
+    }
+  })
 
   const unloadScope = new UnloadScope()
-  centerGridSignal.subscribe(({ i, j }) =>
+  centerGrid10Signal.subscribe(({ i, j }) => {
+    console.log("unload check")
     unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-  )
-
-  const walkers = new Walkers([me])
-
-  const terrain = new Terrain(query(".terrain")!)
-  const mapIdsToLoad = loadScope.mapIds().filter((id) =>
-    !terrain.hasDistrict(id)
-  )
-
-  for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
-    terrain.addDistrict(new TerrainDistrict(map))
-  }
+    for (const district of terrain) {
+      if (!unloadScope.overlaps(district)) {
+        terrain.removeDistrict(district)
+      }
+    }
+  })
 
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y))
 
@@ -623,7 +632,7 @@ async function GameScreen({ query }: Context) {
     isLoadingSignal.update(false)
 
     walkers.step(Input, terrain)
-    centerPixelSignal.updateByFields({
+    centerPixelSignal.update({
       x: me.centerX,
       y: me.centerY,
     })
