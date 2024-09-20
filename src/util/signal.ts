@@ -1,14 +1,14 @@
-import { groupSignal, signal } from "@kt3k/cell"
+import { GroupSignal, Signal } from "@kt3k/cell"
 import { CELL_SIZE } from "./constants.ts"
 
 // The current frame per second (fps)
-export const fpsSignal = signal(0)
+export const fpsSignal = new Signal(0)
 // The center of the view scope
-export const viewScopeSignal = groupSignal({ x: 0, y: 0 })
+export const viewScopeSignal = new GroupSignal({ x: 0, y: 0 })
 // The current loading state
-export const isLoadingSignal = signal(true)
+export const isLoadingSignal = new Signal(true)
 // The center pixel coordinate
-export const centerPixelSignal = groupSignal({ x: 0, y: 0 })
+export const centerPixelSignal = new GroupSignal({ x: 0, y: 0 })
 // The center grid coordinate
 export const centerGridSignal = centerPixelSignal.map(({ x, y }) => ({
   i: Math.floor(x / CELL_SIZE),
