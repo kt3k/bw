@@ -3,7 +3,7 @@ import { gameloop } from "@kt3k/gameloop"
 import { loadImage } from "./util/load.ts"
 import { clearInput, Input } from "./util/dir.ts"
 import { KeyMonitor } from "./ui/KeyMonitor.ts"
-import { FpsMonitor } from "./ui/FpsMonitor.ts"
+import { FpsMonitor } from "./ui/fps-monitor.ts"
 import { SwipeHandler } from "./ui/SwipeHandler.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import {
