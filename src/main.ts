@@ -15,7 +15,7 @@ import {
   viewScopeSignal,
 } from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
-import { CanvasLayer } from "./util/brush.ts"
+import { CanvasLayer } from "./util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
 
