@@ -2,9 +2,9 @@ import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 import { loadImage } from "./util/load.ts"
 import { clearInput, Input } from "./util/dir.ts"
-import { KeyMonitor } from "./ui/KeyMonitor.ts"
+import { KeyMonitor } from "./ui/key-monitor.ts"
 import { FpsMonitor } from "./ui/fps-monitor.ts"
-import { SwipeHandler } from "./ui/SwipeHandler.ts"
+import { SwipeHandler } from "./ui/swipe-handler.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
 import {
   centerGrid10Signal,
@@ -14,7 +14,7 @@ import {
   isLoadingSignal,
   viewScopeSignal,
 } from "./util/signal.ts"
-import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
+import { LoadingIndicator } from "./ui/loading-indicator.ts"
 import { CanvasLayer } from "./util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
