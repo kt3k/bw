@@ -15,7 +15,7 @@ import {
   viewScopeSignal,
 } from "./util/signal.ts"
 import { LoadingIndicator } from "./ui/LoadingIndicator.ts"
-import { CanvasLater } from "./util/brush.ts"
+import { CanvasLayer } from "./util/brush.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
 
@@ -491,11 +491,11 @@ class TerrainDistrict {
     canvas.style.top = `${this.y}px`
     canvas.width = this.w
     canvas.height = this.h
-    this.#renderDistrict(new CanvasLater(canvas))
+    this.#renderDistrict(new CanvasLayer(canvas))
     return canvas
   }
 
-  #renderDistrict(layer: CanvasLater) {
+  #renderDistrict(layer: CanvasLayer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j)
@@ -578,7 +578,7 @@ class Terrain {
 }
 
 async function GameScreen({ query }: Context) {
-  const layer = new CanvasLater(query<HTMLCanvasElement>(".canvas1")!)
+  const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
 
   const me = new Character(2, 2, 1, "char/juni/juni_")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
