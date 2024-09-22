@@ -1,4 +1,4 @@
-import { KeyMonitor } from "./KeyMonitor.ts"
+import { KeyMonitor } from "./key-monitor.ts"
 import "../dom-polyfill.ts"
 import { mount, register } from "@kt3k/cell"
 import { assertEquals } from "@std/assert"
