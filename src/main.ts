@@ -382,6 +382,10 @@ export class LoadScope extends RectScope {
     }
     return list
   }
+
+  get isLoading() {
+    return this.#loading.size > 0
+  }
 }
 
 /**
@@ -461,6 +465,7 @@ class TerrainDistrict {
   #items: Item[]
   #characters: Character[]
   #terrain: string[]
+
   constructor(map: Map) {
     this.#i = map.i
     this.#j = map.j
@@ -537,6 +542,8 @@ class Terrain {
   #el: HTMLElement
   #districts: Record<string, TerrainDistrict> = {}
   #districtElements: Record<string, HTMLCanvasElement> = {}
+  #loadScope = new LoadScope()
+  #unloadScope = new UnloadScope()
 
   constructor(el: HTMLElement) {
     this.#el = el
@@ -575,9 +582,32 @@ class Terrain {
   translateElement(x: number, y: number) {
     this.#el.style.transform = `translateX(${x}px) translateY(${y}px)`
   }
+
+  async checkLoad(i: number, j: number) {
+    this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+    const mapIdsToLoad = this.#loadScope.mapIds().filter((id) =>
+      !this.hasDistrict(id)
+    )
+    for (const map of await this.#loadScope.loadMaps(mapIdsToLoad)) {
+      this.addDistrict(new TerrainDistrict(map))
+    }
+  }
+
+  checkUnload(i: number, j: number) {
+    this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+    for (const district of this) {
+      if (!this.#unloadScope.overlaps(district)) {
+        this.removeDistrict(district)
+      }
+    }
+  }
+
+  get assetsReady() {
+    return !this.#loadScope.isLoading
+  }
 }
 
-async function GameScreen({ query }: Context) {
+function GameScreen({ query }: Context) {
   const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
 
   const me = new Character(2, 2, 1, "char/juni/juni_")
@@ -594,38 +624,14 @@ async function GameScreen({ query }: Context) {
   )
 
   const terrain = new Terrain(query(".terrain")!)
-
-  const loadScope = new LoadScope()
-  centerGrid10Signal.subscribe(async ({ i, j }) => {
-    console.log("load check")
-    loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-
-    const mapIdsToLoad = loadScope.mapIds().filter((id) =>
-      !terrain.hasDistrict(id)
-    )
-
-    for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
-      terrain.addDistrict(new TerrainDistrict(map))
-    }
-  })
-
-  const unloadScope = new UnloadScope()
-  centerGrid10Signal.subscribe(({ i, j }) => {
-    console.log("unload check")
-    unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    for (const district of terrain) {
-      if (!unloadScope.overlaps(district)) {
-        terrain.removeDistrict(district)
-      }
-    }
-  })
-
+  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkLoad(i, j))
+  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkUnload(i, j))
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y))
 
-  await me.loadAssets()
+  me.loadAssets()
 
   const loop = gameloop(() => {
-    if (!walkers.assetsReady) {
+    if (!walkers.assetsReady || !terrain.assetsReady) {
       isLoadingSignal.update(true)
       return
     }
