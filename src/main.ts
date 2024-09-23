@@ -347,23 +347,8 @@ class WalkScope extends RectScope {
 export class LoadScope extends RectScope {
   static LOAD_UNIT = 200 * CELL_SIZE
 
-  #loading = new Set()
-
   constructor() {
     super(LoadScope.LOAD_UNIT, LoadScope.LOAD_UNIT)
-  }
-
-  loadMaps(mapIds: string[]) {
-    const maps = mapIds.map((mapId) => `map/map_${mapId}.json`)
-    return Promise.all(maps.map((map) => this.#loadMap(map)))
-  }
-
-  async #loadMap(url: string) {
-    this.#loading.add(url)
-    const resp = await fetch(url)
-    const map = new Map(await resp.json())
-    this.#loading.delete(url)
-    return map
   }
 
   mapIds(): string[] {
@@ -381,6 +366,29 @@ export class LoadScope extends RectScope {
       }
     }
     return list
+  }
+}
+
+/** MapLoader manages the loading of maps */
+class MapLoader {
+  #loading = new Set<string>()
+  #prefix: string
+
+  constructor(prefix: string) {
+    this.#prefix = prefix
+  }
+
+  loadMaps(mapIds: string[]) {
+    const maps = mapIds.map((mapId) => `${this.#prefix}${mapId}.json`)
+    return Promise.all(maps.map((map) => this.loadMap(map)))
+  }
+
+  async loadMap(url: string) {
+    this.#loading.add(url)
+    const resp = await fetch(url)
+    const map = new Map(await resp.json())
+    this.#loading.delete(url)
+    return map
   }
 
   get isLoading() {
@@ -544,6 +552,7 @@ class Terrain {
   #districtElements: Record<string, HTMLCanvasElement> = {}
   #loadScope = new LoadScope()
   #unloadScope = new UnloadScope()
+  #mapLoader = new MapLoader("map/map_")
 
   constructor(el: HTMLElement) {
     this.#el = el
@@ -588,7 +597,7 @@ class Terrain {
     const mapIdsToLoad = this.#loadScope.mapIds().filter((id) =>
       !this.hasDistrict(id)
     )
-    for (const map of await this.#loadScope.loadMaps(mapIdsToLoad)) {
+    for (const map of await this.#mapLoader.loadMaps(mapIdsToLoad)) {
       this.addDistrict(new TerrainDistrict(map))
     }
   }
@@ -603,7 +612,7 @@ class Terrain {
   }
 
   get assetsReady() {
-    return !this.#loadScope.isLoading
+    return !this.#mapLoader.isLoading
   }
 }
 
