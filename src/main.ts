@@ -370,7 +370,7 @@ export class LoadScope extends RectScope {
 }
 
 /** MapLoader manages the loading of maps */
-class MapLoader {
+class BlockMapLoader {
   #loading = new Set<string>()
   #prefix: string
 
@@ -386,7 +386,7 @@ class MapLoader {
   async loadMap(url: string) {
     this.#loading.add(url)
     const resp = await fetch(url)
-    const map = new Map(await resp.json())
+    const map = new BlockMap(await resp.json())
     this.#loading.delete(url)
     return map
   }
@@ -413,7 +413,7 @@ class Item {}
 /**
  * Map represents the map of terrain
  */
-class Map {
+class BlockMap {
   // The column of the world coordinates
   i: number
   // The row of the world coordinates
@@ -474,7 +474,7 @@ class TerrainBlock {
   #characters: Character[]
   #terrain: string[]
 
-  constructor(map: Map) {
+  constructor(map: BlockMap) {
     this.#i = map.i
     this.#j = map.j
     this.#x = this.#i * CELL_SIZE
@@ -552,7 +552,7 @@ class Terrain {
   #blockElements: Record<string, HTMLCanvasElement> = {}
   #loadScope = new LoadScope()
   #unloadScope = new UnloadScope()
-  #mapLoader = new MapLoader("map/map_")
+  #mapLoader = new BlockMapLoader("map/block_")
 
   constructor(el: HTMLElement) {
     this.#el = el
