@@ -341,7 +341,7 @@ class WalkScope extends RectScope {
 }
 
 /**
- * The scope to load the terrain district. The terrain district belong
+ * The scope to load the terrain block. The terrain block belong
  * to this area need to be loaded.
  */
 export class LoadScope extends RectScope {
@@ -351,7 +351,7 @@ export class LoadScope extends RectScope {
     super(LoadScope.LOAD_UNIT, LoadScope.LOAD_UNIT)
   }
 
-  mapIds(): string[] {
+  blockIds(): string[] {
     const { LOAD_UNIT } = LoadScope
     const left = floorN(this.left, LoadScope.LOAD_UNIT)
     const right = ceilN(this.right, LoadScope.LOAD_UNIT)
@@ -439,9 +439,9 @@ class Map {
 }
 
 /**
- * TerrainCell represents the cell in the terrain district
+ * TerrainCell represents the cell in the terrain block
  */
-class TerrainCell {
+class TerrainBlockCell {
   #color?: string
   #href?: string
   #canEnter: boolean
@@ -460,7 +460,7 @@ class TerrainCell {
   }
 }
 
-class TerrainDistrict {
+class TerrainBlock {
   #x: number
   #y: number
   #w: number
@@ -469,7 +469,7 @@ class TerrainDistrict {
   #i: number
   // The row of the world coordinates
   #j: number
-  #cellMap: Record<string, TerrainCell> = {}
+  #cellMap: Record<string, TerrainBlockCell> = {}
   #items: Item[]
   #characters: Character[]
   #terrain: string[]
@@ -482,7 +482,7 @@ class TerrainDistrict {
     this.#h = BLOCK_SIZE * CELL_SIZE
     this.#w = BLOCK_SIZE * CELL_SIZE
     for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new TerrainCell(
+      this.#cellMap[cell.name] = new TerrainBlockCell(
         cell.canEnter,
         cell.color,
         cell.href,
@@ -504,11 +504,11 @@ class TerrainDistrict {
     canvas.style.top = `${this.y}px`
     canvas.width = this.w
     canvas.height = this.h
-    this.#renderDistrict(new CanvasLayer(canvas))
+    this.#renderBlock(new CanvasLayer(canvas))
     return canvas
   }
 
-  #renderDistrict(layer: CanvasLayer) {
+  #renderBlock(layer: CanvasLayer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j)
@@ -523,7 +523,7 @@ class TerrainDistrict {
     }
   }
 
-  get(i: number, j: number): TerrainCell {
+  get(i: number, j: number): TerrainBlockCell {
     return this.#cellMap[this.#terrain[j][i]]
   }
   get i() {
@@ -548,8 +548,8 @@ class TerrainDistrict {
 
 class Terrain {
   #el: HTMLElement
-  #districts: Record<string, TerrainDistrict> = {}
-  #districtElements: Record<string, HTMLCanvasElement> = {}
+  #blocks: Record<string, TerrainBlock> = {}
+  #blockElements: Record<string, HTMLCanvasElement> = {}
   #loadScope = new LoadScope()
   #unloadScope = new UnloadScope()
   #mapLoader = new MapLoader("map/map_")
@@ -558,34 +558,34 @@ class Terrain {
     this.#el = el
   }
 
-  addDistrict(district: TerrainDistrict) {
-    this.#districts[district.id] = district
-    const canvas = district.createCanvas()
-    this.#districtElements[district.id] = canvas
+  addDistrict(block: TerrainBlock) {
+    this.#blocks[block.id] = block
+    const canvas = block.createCanvas()
+    this.#blockElements[block.id] = canvas
     this.#el.appendChild(canvas)
   }
 
-  removeDistrict(district: TerrainDistrict) {
-    delete this.#districts[district.id]
-    this.#el.removeChild(this.#districtElements[district.id])
-    delete this.#districtElements[district.id]
+  removeBlock(block: TerrainBlock) {
+    delete this.#blocks[block.id]
+    this.#el.removeChild(this.#blockElements[block.id])
+    delete this.#blockElements[block.id]
   }
 
   get(i: number, j: number) {
     const k = floorN(i, BLOCK_SIZE)
     const l = floorN(j, BLOCK_SIZE)
-    return this.#districts[`${k}.${l}`].get(
+    return this.#blocks[`${k}.${l}`].get(
       modulo(i, BLOCK_SIZE),
       modulo(j, BLOCK_SIZE),
     )
   }
 
-  hasDistrict(mapId: string) {
-    return !!this.#districts[mapId]
+  hasBlock(blockId: string) {
+    return !!this.#blocks[blockId]
   }
 
   [Symbol.iterator]() {
-    return Object.values(this.#districts)[Symbol.iterator]()
+    return Object.values(this.#blocks)[Symbol.iterator]()
   }
 
   translateElement(x: number, y: number) {
@@ -594,19 +594,19 @@ class Terrain {
 
   async checkLoad(i: number, j: number) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    const mapIdsToLoad = this.#loadScope.mapIds().filter((id) =>
-      !this.hasDistrict(id)
+    const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
+      !this.hasBlock(id)
     )
-    for (const map of await this.#mapLoader.loadMaps(mapIdsToLoad)) {
-      this.addDistrict(new TerrainDistrict(map))
+    for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
+      this.addDistrict(new TerrainBlock(map))
     }
   }
 
   checkUnload(i: number, j: number) {
     this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    for (const district of this) {
-      if (!this.#unloadScope.overlaps(district)) {
-        this.removeDistrict(district)
+    for (const block of this) {
+      if (!this.#unloadScope.overlaps(block)) {
+        this.removeBlock(block)
       }
     }
   }
