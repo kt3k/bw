@@ -250,23 +250,18 @@ abstract class RectScope {
     this.#right = x + this.#w / 2
     this.#bottom = y + this.#h / 2
   }
-
   get left() {
     return this.#left
   }
-
   get top() {
     return this.#top
   }
-
   get right() {
     return this.#right
   }
-
   get bottom() {
     return this.#bottom
   }
-
   /** The given IBox overlaps with this rectangle scope. */
   overlaps(char: IBox): boolean {
     const { x, y, w, h } = char
@@ -460,6 +455,7 @@ class TerrainBlockCell {
   }
 }
 
+/** TerrainBlock represents a block of a terrain */
 class TerrainBlock {
   #x: number
   #y: number
