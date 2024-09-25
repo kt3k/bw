@@ -4,12 +4,12 @@
   "cells": [
     {
       "name": "0",
-      "color": "#000",
+      "color": "#7c8c7c",
       "canEnter": true
     },
     {
       "name": "1",
-      "color": "#7c7c8c",
+      "href": "cell/wall0.png",
       "canEnter": false
     }
   ],

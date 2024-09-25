@@ -440,6 +440,7 @@ class TerrainBlockCell {
   #color?: string
   #href?: string
   #canEnter: boolean
+  #img?: HTMLImageElement
   constructor(canEnter: boolean, color?: string, href?: string) {
     this.#canEnter = canEnter
     this.#color = color
@@ -450,8 +451,17 @@ class TerrainBlockCell {
     return this.#canEnter
   }
 
+  async loadAssets() {
+    if (this.#href) {
+      this.#img = await loadImage(this.#href)
+    }
+  }
+
   get color() {
     return this.#color
+  }
+  get img() {
+    return this.#img
   }
 }
 
@@ -493,13 +503,16 @@ class TerrainBlock {
     return `${this.#i}.${this.#j}`
   }
 
-  createCanvas(): HTMLCanvasElement {
+  async createCanvas(): Promise<HTMLCanvasElement> {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
     canvas.style.left = `${this.x}px`
     canvas.style.top = `${this.y}px`
     canvas.width = this.w
     canvas.height = this.h
+    await Promise.all(
+      Object.values(this.#cellMap).map((cell) => cell.loadAssets()),
+    )
     this.#renderBlock(new CanvasLayer(canvas))
     return canvas
   }
@@ -508,13 +521,18 @@ class TerrainBlock {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j)
-        layer.drawRect(
-          i * CELL_SIZE,
-          j * CELL_SIZE,
-          CELL_SIZE,
-          CELL_SIZE,
-          cell.color || "black",
-        )
+        if (cell.img) {
+          layer.drawImage(cell.img, i * CELL_SIZE, j * CELL_SIZE)
+          continue
+        } else {
+          layer.drawRect(
+            i * CELL_SIZE,
+            j * CELL_SIZE,
+            CELL_SIZE,
+            CELL_SIZE,
+            cell.color || "black",
+          )
+        }
       }
     }
   }
@@ -554,9 +572,9 @@ class Terrain {
     this.#el = el
   }
 
-  addDistrict(block: TerrainBlock) {
+  async addDistrict(block: TerrainBlock) {
     this.#blocks[block.id] = block
-    const canvas = block.createCanvas()
+    const canvas = await block.createCanvas()
     this.#blockElements[block.id] = canvas
     this.#el.appendChild(canvas)
   }
