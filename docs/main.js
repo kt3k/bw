@@ -1,4 +1,4 @@
-// https://jsr.io/@kt3k/cell/0.3.8/util.ts
+// https://jsr.io/@kt3k/cell/0.5.0/util.ts
 var READY_STATE_CHANGE = "readystatechange";
 var p;
 function documentReady(doc = document) {
@@ -40,8 +40,8 @@ function logEvent({
   console.groupEnd();
 }
 
-// https://jsr.io/@kt3k/signal/0.1.7/mod.ts
-var Signal = class {
+// https://jsr.io/@kt3k/signal/0.3.0/mod.ts
+var Signal = class _Signal {
   #val;
   #handlers = [];
   constructor(value) {
@@ -69,11 +69,55 @@ var Signal = class {
     }
   }
   /**
-   * Update the signal value by comparing the fields of the new value.
+   * Subscribe to the signal.
+   *
+   * @param cb The callback function to be called when the signal is updated
+   * @returns A function to stop the subscription
+   */
+  onChange(cb) {
+    this.#handlers.push(cb);
+    return () => {
+      this.#handlers.splice(this.#handlers.indexOf(cb) >>> 0, 1);
+    };
+  }
+  /**
+   * Subscribe to the signal.
+   *
+   * @param cb The callback function to be called when the signal is updated and also called immediately
+   * @returns A function to stop the subscription
+   */
+  subscribe(cb) {
+    cb(this.#val);
+    return this.onChange(cb);
+  }
+  /** Maps the signal to a different signal */
+  map(fn) {
+    const signal = new _Signal(fn(this.#val));
+    this.onChange((val) => signal.update(fn(val)));
+    return signal;
+  }
+};
+var GroupSignal = class _GroupSignal {
+  #val;
+  #handlers = [];
+  constructor(value) {
+    this.#val = value;
+  }
+  /**
+   * Get the current value of the signal.
+   *
+   * @returns The current value of the signal
+   */
+  get() {
+    return this.#val;
+  }
+  /**
+   * Update the signal value.
+   * The signal event is only emitted when the fields of the new value are different from the current value.
    *
    * @param value The new value of the signal
    */
-  updateByFields(value) {
+  update(value) {
     if (typeof value !== "object" || value === null) {
       throw new Error("value must be an object");
     }
@@ -109,12 +153,15 @@ var Signal = class {
     cb(this.#val);
     return this.onChange(cb);
   }
+  /** Maps the signal to a different signal */
+  map(fn) {
+    const signal = new _GroupSignal(fn(this.#val));
+    this.onChange((val) => signal.update(fn(val)));
+    return signal;
+  }
 };
-function signal(value) {
-  return new Signal(value);
-}
 
-// https://jsr.io/@kt3k/cell/0.3.8/mod.ts
+// https://jsr.io/@kt3k/cell/0.5.0/mod.ts
 var registry = {};
 function assert(assertion, message) {
   if (!assertion) {
@@ -484,7 +531,7 @@ function clearInput() {
   }
 }
 
-// src/ui/KeyMonitor.ts
+// src/ui/key-monitor.ts
 var KEY_UP = /* @__PURE__ */ new Set(["ArrowUp", "w", "k"]);
 var KEY_DOWN = /* @__PURE__ */ new Set(["ArrowDown", "s", "j"]);
 var KEY_LEFT = /* @__PURE__ */ new Set(["ArrowLeft", "a", "h"]);
@@ -519,19 +566,20 @@ var CELL_SIZE = 16;
 var BLOCK_SIZE = 200;
 
 // src/util/signal.ts
-var fpsSignal = signal(0);
-var viewScopeSignal = signal({ x: 0, y: 0 });
-var isLoadingSignal = signal(true);
-var centerPixelSignal = signal({ x: 0, y: 0 });
-var centerGrid$ = signal({ i: 0, j: 0 });
-centerPixelSignal.subscribe(({ x, y }) => {
-  centerGrid$.updateByFields({
-    i: Math.floor(x / CELL_SIZE),
-    j: Math.floor(y / CELL_SIZE)
-  });
-});
+var fpsSignal = new Signal(0);
+var viewScopeSignal = new GroupSignal({ x: 0, y: 0 });
+var isLoadingSignal = new Signal(true);
+var centerPixelSignal = new GroupSignal({ x: 0, y: 0 });
+var centerGridSignal = centerPixelSignal.map(({ x, y }) => ({
+  i: Math.floor(x / CELL_SIZE),
+  j: Math.floor(y / CELL_SIZE)
+}));
+var centerGrid10Signal = centerGridSignal.map(({ i, j }) => ({
+  i: Math.floor(i / 10) * 10,
+  j: Math.floor(j / 10) * 10
+}));
 
-// src/ui/FpsMonitor.ts
+// src/ui/fps-monitor.ts
 function FpsMonitor({ el }) {
   fpsSignal.subscribe((fps) => {
     el.textContent = fps.toFixed(2);
@@ -559,7 +607,7 @@ function getDir(current, prev) {
   }
 }
 
-// src/ui/SwipeHandler.ts
+// src/ui/swipe-handler.ts
 var TOUCH_SENSITIVITY_THRESHOLD = 25;
 function SwipeHandler({ on }) {
   let prevTouch;
@@ -585,13 +633,13 @@ function SwipeHandler({ on }) {
   });
 }
 
-// src/ui/LoadingIndicator.ts
+// src/ui/loading-indicator.ts
 function LoadingIndicator({ el }) {
   isLoadingSignal.subscribe((v) => el.classList.toggle("hidden", !v));
 }
 
-// src/util/brush.ts
-var DrawLayer = class {
+// src/util/canvas-layer.ts
+var CanvasLayer = class {
   #ctx;
   constructor(canvas) {
     this.#ctx = canvas.getContext("2d");
@@ -824,7 +872,8 @@ var RectScope = class {
   get bottom() {
     return this.#bottom;
   }
-  includes(char) {
+  /** The given IBox overlaps with this rectangle scope. */
+  overlaps(char) {
     const { x, y, w, h } = char;
     return this.left <= x + w && this.right >= x && this.top <= y + h && this.bottom >= y;
   }
@@ -832,7 +881,7 @@ var RectScope = class {
 var ViewScope = class extends RectScope {
   setCenter(x, y) {
     super.setCenter(x, y);
-    viewScopeSignal.updateByFields({ x: -this.left, y: -this.top });
+    viewScopeSignal.update({ x: -this.left, y: -this.top });
   }
 };
 var Walkers = class {
@@ -859,22 +908,10 @@ var WalkScope = class extends RectScope {
 };
 var LoadScope = class _LoadScope extends RectScope {
   static LOAD_UNIT = 200 * CELL_SIZE;
-  #loading = /* @__PURE__ */ new Set();
   constructor() {
     super(_LoadScope.LOAD_UNIT, _LoadScope.LOAD_UNIT);
   }
-  loadMaps(mapIds) {
-    const maps = mapIds.map(([k, l]) => `map/map_${k}.${l}.json`);
-    return Promise.all(maps.map((map) => this.#loadMap(map)));
-  }
-  async #loadMap(url) {
-    this.#loading.add(url);
-    const resp = await fetch(url);
-    const map = new Map2(await resp.json());
-    this.#loading.delete(url);
-    return map;
-  }
-  mapIds() {
+  blockIds() {
     const { LOAD_UNIT } = _LoadScope;
     const left = floorN(this.left, _LoadScope.LOAD_UNIT);
     const right = ceilN(this.right, _LoadScope.LOAD_UNIT);
@@ -885,20 +922,40 @@ var LoadScope = class _LoadScope extends RectScope {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
         const i = x / CELL_SIZE;
         const j = y / CELL_SIZE;
-        list.push([i, j]);
+        list.push(`${i}.${j}`);
       }
     }
-    console.log(list);
     return list;
   }
 };
+var BlockMapLoader = class {
+  #loading = /* @__PURE__ */ new Set();
+  #prefix;
+  constructor(prefix) {
+    this.#prefix = prefix;
+  }
+  loadMaps(mapIds) {
+    const maps = mapIds.map((mapId) => `${this.#prefix}${mapId}.json`);
+    return Promise.all(maps.map((map) => this.loadMap(map)));
+  }
+  async loadMap(url) {
+    this.#loading.add(url);
+    const resp = await fetch(url);
+    const map = new BlockMap(await resp.json());
+    this.#loading.delete(url);
+    return map;
+  }
+  get isLoading() {
+    return this.#loading.size > 0;
+  }
+};
 var UnloadScope = class _UnloadScope extends RectScope {
-  static UNLOAD_UNIT = 300 * CELL_SIZE;
+  static UNLOAD_UNIT = 200 * CELL_SIZE;
   constructor() {
     super(_UnloadScope.UNLOAD_UNIT, _UnloadScope.UNLOAD_UNIT);
   }
 };
-var Map2 = class {
+var BlockMap = class {
   // The column of the world coordinates
   i;
   // The row of the world coordinates
@@ -917,10 +974,11 @@ var Map2 = class {
     this.terrain = obj.terrain;
   }
 };
-var TerrainCell = class {
+var TerrainBlockCell = class {
   #color;
   #href;
   #canEnter;
+  #img;
   constructor(canEnter, color, href) {
     this.#canEnter = canEnter;
     this.#color = color;
@@ -929,11 +987,19 @@ var TerrainCell = class {
   canEnter() {
     return this.#canEnter;
   }
+  async loadAssets() {
+    if (this.#href) {
+      this.#img = await loadImage(this.#href);
+    }
+  }
   get color() {
     return this.#color;
   }
+  get img() {
+    return this.#img;
+  }
 };
-var TerrainDistrict = class {
+var TerrainBlock = class {
   #x;
   #y;
   #w;
@@ -954,7 +1020,7 @@ var TerrainDistrict = class {
     this.#h = BLOCK_SIZE * CELL_SIZE;
     this.#w = BLOCK_SIZE * CELL_SIZE;
     for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new TerrainCell(
+      this.#cellMap[cell.name] = new TerrainBlockCell(
         cell.canEnter,
         cell.color,
         cell.href
@@ -967,27 +1033,35 @@ var TerrainDistrict = class {
   get id() {
     return `${this.#i}.${this.#j}`;
   }
-  createCanvas() {
+  async createCanvas() {
     const canvas = document.createElement("canvas");
     canvas.style.position = "absolute";
     canvas.style.left = `${this.x}px`;
     canvas.style.top = `${this.y}px`;
     canvas.width = this.w;
     canvas.height = this.h;
-    this.#renderDistrict(new DrawLayer(canvas));
+    await Promise.all(
+      Object.values(this.#cellMap).map((cell) => cell.loadAssets())
+    );
+    this.#renderBlock(new CanvasLayer(canvas));
     return canvas;
   }
-  #renderDistrict(layer) {
+  #renderBlock(layer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j);
-        layer.drawRect(
-          i * CELL_SIZE,
-          j * CELL_SIZE,
-          CELL_SIZE,
-          CELL_SIZE,
-          cell.color || "black"
-        );
+        if (cell.img) {
+          layer.drawImage(cell.img, i * CELL_SIZE, j * CELL_SIZE);
+          continue;
+        } else {
+          layer.drawRect(
+            i * CELL_SIZE,
+            j * CELL_SIZE,
+            CELL_SIZE,
+            CELL_SIZE,
+            cell.color || "black"
+          );
+        }
       }
     }
   }
@@ -1015,82 +1089,93 @@ var TerrainDistrict = class {
 };
 var Terrain = class {
   #el;
-  #districts = {};
-  #districtElements = {};
+  #blocks = {};
+  #blockElements = {};
+  #loadScope = new LoadScope();
+  #unloadScope = new UnloadScope();
+  #mapLoader = new BlockMapLoader("map/block_");
   constructor(el) {
     this.#el = el;
   }
-  addDistrict(district) {
-    this.#districts[district.id] = district;
-    const canvas = district.createCanvas();
-    this.#districtElements[district.id] = canvas;
+  async addDistrict(block) {
+    this.#blocks[block.id] = block;
+    const canvas = await block.createCanvas();
+    this.#blockElements[block.id] = canvas;
     this.#el.appendChild(canvas);
   }
-  removeDistrict(district) {
-    delete this.#districts[district.id];
-    this.#el.removeChild(this.#districtElements[district.id]);
-    delete this.#districtElements[district.id];
+  removeBlock(block) {
+    delete this.#blocks[block.id];
+    this.#el.removeChild(this.#blockElements[block.id]);
+    delete this.#blockElements[block.id];
   }
   get(i, j) {
     const k = floorN(i, BLOCK_SIZE);
     const l = floorN(j, BLOCK_SIZE);
-    return this.#districts[`${k}.${l}`].get(
+    return this.#blocks[`${k}.${l}`].get(
       modulo(i, BLOCK_SIZE),
       modulo(j, BLOCK_SIZE)
     );
   }
-  hasDistrict(i, j) {
-    return !!this.#districts[`${i}.${j}`];
+  hasBlock(blockId) {
+    return !!this.#blocks[blockId];
   }
   [Symbol.iterator]() {
-    return Object.values(this.#districts)[Symbol.iterator]();
+    return Object.values(this.#blocks)[Symbol.iterator]();
+  }
+  translateElement(x, y) {
+    this.#el.style.transform = `translateX(${x}px) translateY(${y}px)`;
+  }
+  async checkLoad(i, j) {
+    this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE);
+    const blockIdsToLoad = this.#loadScope.blockIds().filter(
+      (id) => !this.hasBlock(id)
+    );
+    for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
+      this.addDistrict(new TerrainBlock(map));
+    }
+  }
+  checkUnload(i, j) {
+    this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE);
+    for (const block of this) {
+      if (!this.#unloadScope.overlaps(block)) {
+        this.removeBlock(block);
+      }
+    }
+  }
+  get assetsReady() {
+    return !this.#mapLoader.isLoading;
   }
 };
-async function GameScreen({ query }) {
-  const layer = new DrawLayer(query(".canvas1"));
+function GameScreen({ query }) {
+  const layer = new CanvasLayer(query(".canvas1"));
   const me = new Character(2, 2, 1, "char/juni/juni_");
-  centerPixelSignal.updateByFields({ x: me.centerX, y: me.centerY });
+  centerPixelSignal.update({ x: me.centerX, y: me.centerY });
   const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
+  const walkers = new Walkers([me]);
   const walkScope = new WalkScope(layer.width * 3, layer.height * 3);
-  centerGrid$.subscribe(
+  centerGridSignal.subscribe(
     ({ i, j }) => walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
-  const loadScope = new LoadScope();
-  centerGrid$.subscribe(
-    ({ i, j }) => loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-  );
-  const unloadScope = new UnloadScope();
-  centerGrid$.subscribe(
-    ({ i, j }) => unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-  );
-  const walkers = new Walkers([me]);
-  const terrainEl = query(".terrain");
-  const terrain = new Terrain(terrainEl);
-  const mapIdsToLoad = loadScope.mapIds().filter(
-    ([k, l]) => !terrain.hasDistrict(k, l)
-  );
-  for (const map of await loadScope.loadMaps(mapIdsToLoad)) {
-    terrain.addDistrict(new TerrainDistrict(map));
-  }
-  viewScopeSignal.subscribe(({ x, y }) => {
-    terrainEl.style.transform = `translateX(${x}px) translateY(${y}px`;
-  });
-  await me.loadAssets();
+  const terrain = new Terrain(query(".terrain"));
+  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkLoad(i, j));
+  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkUnload(i, j));
+  viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y));
+  me.loadAssets();
   const loop = gameloop(() => {
-    if (!walkers.assetsReady) {
+    if (!walkers.assetsReady || !terrain.assetsReady) {
       isLoadingSignal.update(true);
       return;
     }
     isLoadingSignal.update(false);
     walkers.step(Input, terrain);
-    centerPixelSignal.updateByFields({
+    centerPixelSignal.update({
       x: me.centerX,
       y: me.centerY
     });
     layer.clear();
     for (const walker of walkers) {
-      if (!viewScope.includes(walker)) {
+      if (!viewScope.overlaps(walker)) {
         continue;
       }
       layer.drawImage(
@@ -1112,4 +1197,4 @@ register(LoadingIndicator, "js-loading-indicator");
 export {
   LoadScope
 };
-/*! Cell v0.3.8 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
+/*! Cell v0.5.0 | Copyright 2024 Yoshiya Hinosawa and Capsule contributors | MIT license */
