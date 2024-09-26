@@ -1,3 +1,9 @@
-# BW
+# Black and White
 
-An experiment
+Clone the repo and run the command:
+
+```
+deno task start
+```
+
+Go to `http://localhost:8000`
