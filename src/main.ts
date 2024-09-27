@@ -18,6 +18,7 @@ import { LoadingIndicator } from "./ui/loading-indicator.ts"
 import { CanvasLayer } from "./util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
+import { choice, randomInt } from "./util/random.ts"
 
 type CharacterAppearance =
   | "up0"
@@ -523,7 +524,6 @@ class TerrainBlock {
         const cell = this.get(i, j)
         if (cell.img) {
           layer.drawImage(cell.img, i * CELL_SIZE, j * CELL_SIZE)
-          continue
         } else {
           layer.drawRect(
             i * CELL_SIZE,
@@ -533,6 +533,17 @@ class TerrainBlock {
             cell.color || "black",
           )
         }
+        const size = 2
+        const x = randomInt(16 / size) * size
+        const y = randomInt(16 / size) * size
+
+        layer.drawRect(
+          i * CELL_SIZE + x,
+          j * CELL_SIZE + y,
+          size,
+          size,
+          choice(["#7c7c7c", "#bcbcbc"]),
+        )
       }
     }
   }

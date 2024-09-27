@@ -6,3 +6,7 @@ const rng = seedrandom("Hello.")
 export function randomInt(n: number) {
   return Math.floor(rng() * n)
 }
+
+export function choice<T>(arr: T[]) {
+  return arr[randomInt(arr.length)]
+}
