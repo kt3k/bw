@@ -1789,6 +1789,7 @@ var TerrainBlock = class {
     canvas.style.top = `${this.y}px`;
     canvas.width = this.w;
     canvas.height = this.h;
+    canvas.classList.add("crisp-edges");
     await Promise.all(
       Object.values(this.#cellMap).map((cell) => cell.loadAssets())
     );

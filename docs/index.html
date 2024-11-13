@@ -1,25 +1,51 @@
-<!doctype html>
+<!DOCTYPE html>
 <html class="bg-black">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <head>
     <link rel="stylesheet" href="./style.css" />
+    <style>
+      .crisp-edges {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+    </style>
   </head>
-  <body class="js-key-monitor js-swipe-handler" style="overscroll-behavior-y: none; overscroll-behavior-x: none; min-height: 100svh;">
+  <body
+    class="js-key-monitor js-swipe-handler"
+    style="overscroll-behavior-y: none; overscroll-behavior-x: none; min-height: 100svh"
+  >
     <p class="text-neutral-500 relative text-xs flex justify-between w-[320px]">
       <span>fps=<span class="js-fps-monitor">-</span></span>
       <span class="js-loading-indicator hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="animate-spin w-4 h-4" viewBox="0 0 24 24"  fill="currentColor">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <path d="M4.929 4.929c3.905 -3.905 10.237 -3.905 14.142 0c3.905 3.905 3.905 10.237 0 14.142c-3.905 3.905 -10.237 3.905 -14.142 0c-3.905 -3.905 -3.905 -10.237 0 -14.142zm3.535 2.121a1 1 0 0 0 -1.414 0a7 7 0 0 0 0 9.9a1 1 0 1 0 1.414 -1.414a5 5 0 0 1 0 -7.072a1 1 0 0 0 0 -1.414z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="animate-spin w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M4.929 4.929c3.905 -3.905 10.237 -3.905 14.142 0c3.905 3.905 3.905 10.237 0 14.142c-3.905 3.905 -10.237 3.905 -14.142 0c-3.905 -3.905 -3.905 -10.237 0 -14.142zm3.535 2.121a1 1 0 0 0 -1.414 0a7 7 0 0 0 0 9.9a1 1 0 1 0 1.414 -1.414a5 5 0 0 1 0 -7.072a1 1 0 0 0 0 -1.414z"
+          />
         </svg>
       </span>
     </p>
     <div class="js-game-screen relative h-[320px] w-[320px] overflow-hidden">
       <div class="terrain absolute"></div>
-      <canvas class="canvas1 absolute" width="320" height="320"></canvas>
+      <canvas
+        class="canvas1 absolute crisp-edges"
+        width="320"
+        height="320"
+      ></canvas>
     </div>
-    <div class="w-full text-center text-neutral-500 text-sm fixed bottom-5 sm:hidden">swipe ↑↓←→ and hold to move</div>
+    <div
+      class="w-full text-center text-neutral-500 text-sm fixed bottom-5 sm:hidden"
+    >
+      swipe ↑↓←→ and hold to move
+    </div>
   </body>
-  <script>DEBUG_IGNORE=new Set(["fps"]);</script>
+  <script>
+    DEBUG_IGNORE = new Set(["fps"])
+  </script>
   <script type="module" src="./main.js"></script>
 </html>
