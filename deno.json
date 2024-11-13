@@ -23,6 +23,6 @@
     "semiColons": false
   },
   "exclude": [
-    "docs"
+    "dist"
   ]
 }

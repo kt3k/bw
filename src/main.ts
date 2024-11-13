@@ -534,17 +534,6 @@ class TerrainBlock {
             cell.color || "black",
           )
         }
-        const size = 2
-        const x = randomInt(16 / size) * size
-        const y = randomInt(16 / size) * size
-
-        layer.drawRect(
-          i * CELL_SIZE + x,
-          j * CELL_SIZE + y,
-          size,
-          size,
-          choice(["#7c7c7c", "#bcbcbc"]),
-        )
       }
     }
   }
