@@ -1096,7 +1096,6 @@ var Terrain = class {
   #mapLoader = new BlockMapLoader("map/block_");
   constructor(el) {
     this.#el = el;
-    this.#el.style.transitionDuration = "16.666ms";
   }
   async addDistrict(block) {
     this.#blocks[block.id] = block;

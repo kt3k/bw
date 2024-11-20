@@ -571,7 +571,6 @@ class Terrain {
 
   constructor(el: HTMLElement) {
     this.#el = el
-    this.#el.style.transitionDuration = "16.666ms"
   }
 
   async addDistrict(block: TerrainBlock) {
