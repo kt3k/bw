@@ -1,4 +1,9 @@
 {
+  "name": "@kt3k/bw",
+  "version": "0.1.0",
+  "exports": {
+    "./models": "./src/models.ts"
+  },
   "lock": false,
   "tasks": {
     "test": "deno test",
