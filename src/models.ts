@@ -136,7 +136,7 @@ export class Character {
     }
   }
 
-  image() {
+  image(): HTMLImageElement {
     if (this.#movePhase >= 8) {
       return this.#assets![`${this.#dir}0`]
     } else {
@@ -145,7 +145,7 @@ export class Character {
   }
 
   /** Gets the x of the world coordinates */
-  get x() {
+  get x(): number {
     if (this.#dir === LEFT) {
       return this.#i * CELL_SIZE - this.#d
     } else if (this.#dir === RIGHT) {
@@ -155,12 +155,12 @@ export class Character {
     }
   }
 
-  get centerX() {
+  get centerX(): number {
     return this.x + CELL_SIZE / 2
   }
 
   /** Gets the y of the world coordinates */
-  get y() {
+  get y(): number {
     if (this.#dir === UP) {
       return this.#j * CELL_SIZE - this.#d
     } else if (this.#dir === DOWN) {
@@ -170,15 +170,15 @@ export class Character {
     }
   }
 
-  get h() {
+  get h(): number {
     return CELL_SIZE
   }
 
-  get w() {
+  get w(): number {
     return CELL_SIZE
   }
 
-  get centerY() {
+  get centerY(): number {
     return this.y + CELL_SIZE / 2
   }
 
@@ -210,7 +210,7 @@ export class Character {
     }
   }
 
-  get assetsReady() {
+  get assetsReady(): boolean {
     return !!this.#assets
   }
 }
@@ -239,10 +239,10 @@ export class TerrainBlockCell {
     }
   }
 
-  get color() {
+  get color(): string | undefined {
     return this.#color
   }
-  get img() {
+  get img(): HTMLImageElement | undefined {
     return this.#img
   }
 }
@@ -312,7 +312,7 @@ export class TerrainBlock {
     this.#characters = []
   }
 
-  get id() {
+  get id(): string {
     return `${this.#i}.${this.#j}`
   }
 
@@ -353,22 +353,22 @@ export class TerrainBlock {
   get(i: number, j: number): TerrainBlockCell {
     return this.#cellMap[this.#terrain[j][i]]
   }
-  get i() {
+  get i(): number {
     return this.#i
   }
-  get j() {
+  get j(): number {
     return this.#j
   }
-  get x() {
+  get x(): number {
     return this.#x
   }
-  get y() {
+  get y(): number {
     return this.#y
   }
-  get h() {
+  get h(): number {
     return this.#h
   }
-  get w() {
+  get w(): number {
     return this.#w
   }
 }
