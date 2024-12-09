@@ -18,7 +18,6 @@ import { LoadingIndicator } from "./ui/loading-indicator.ts"
 import { CanvasLayer } from "./util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
-import { choice, randomInt } from "./util/random.ts"
 
 type CharacterAppearance =
   | "up0"
