@@ -158,21 +158,23 @@ export class LoadScope extends RectScope {
 /** MapLoader manages the loading of maps */
 class BlockMapLoader {
   #loading = new Set<string>()
-  #prefix: string
+  #root: string
 
-  constructor(prefix: string) {
-    this.#prefix = prefix
+  constructor(root: string) {
+    this.#root = root
   }
 
   loadMaps(mapIds: string[]) {
-    const maps = mapIds.map((mapId) => `${this.#prefix}${mapId}.json`)
+    const maps = mapIds.map((mapId) =>
+      new URL(`block_${mapId}.json`, this.#root).href
+    )
     return Promise.all(maps.map((map) => this.loadMap(map)))
   }
 
   async loadMap(url: string) {
     this.#loading.add(url)
     const resp = await fetch(url)
-    const map = new BlockMap(await resp.json())
+    const map = new BlockMap(url, await resp.json())
     this.#loading.delete(url)
     return map
   }
@@ -198,7 +200,7 @@ class Terrain {
   #blockElements: Record<string, HTMLCanvasElement> = {}
   #loadScope = new LoadScope()
   #unloadScope = new UnloadScope()
-  #mapLoader = new BlockMapLoader("map/block_")
+  #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
 
   constructor(el: HTMLElement) {
     this.#el = el

@@ -260,6 +260,8 @@ export class Item {}
  * Map represents the map of terrain
  */
 export class BlockMap {
+  /** The URL of the map */
+  url: string
   // The column of the world coordinates
   i: number
   // The row of the world coordinates
@@ -274,7 +276,8 @@ export class BlockMap {
   items: {}[]
   terrain: string[]
   // deno-lint-ignore no-explicit-any
-  constructor(obj: any) {
+  constructor(url: string, obj: any) {
+    this.url = url
     this.i = obj.i
     this.j = obj.j
     this.cells = obj.cells
