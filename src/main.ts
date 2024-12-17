@@ -17,6 +17,7 @@ import { CanvasLayer } from "./util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "./util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
 import { BlockMap, Character, TerrainBlock } from "./models.ts"
+import { loadImage } from "./util/load.ts"
 
 /**
  * Abstract rectangular area, which implements properties of the rectangle.
@@ -246,7 +247,7 @@ class Terrain {
       !this.hasBlock(id)
     )
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.addDistrict(new TerrainBlock(map))
+      this.addDistrict(new TerrainBlock(map, loadImage))
     }
   }
 

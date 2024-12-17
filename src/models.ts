@@ -228,7 +228,6 @@ export class TerrainBlockCell {
   #color?: string
   #href?: string
   #canEnter: boolean
-  #img?: HTMLImageElement
   constructor(canEnter: boolean, color?: string, href?: string) {
     this.#canEnter = canEnter
     this.#color = color
@@ -239,17 +238,11 @@ export class TerrainBlockCell {
     return this.#canEnter
   }
 
-  async loadAssets() {
-    if (this.#href) {
-      this.#img = await loadImage(this.#href)
-    }
-  }
-
   get color(): string | undefined {
     return this.#color
   }
-  get img(): HTMLImageElement | undefined {
-    return this.#img
+  get href(): string | undefined {
+    return this.#href
   }
 }
 
@@ -301,8 +294,13 @@ export class TerrainBlock {
   #items: Item[]
   #characters: Character[]
   #terrain: string[]
+  #loadImage: (url: string) => Promise<HTMLImageElement>
+  #map: BlockMap
 
-  constructor(map: BlockMap) {
+  constructor(
+    map: BlockMap,
+    loadImage: (url: string) => Promise<HTMLImageElement>,
+  ) {
     this.#i = map.i
     this.#j = map.j
     this.#x = this.#i * CELL_SIZE
@@ -319,6 +317,8 @@ export class TerrainBlock {
     this.#terrain = map.terrain
     this.#items = map.items
     this.#characters = []
+    this.#loadImage = loadImage
+    this.#map = map
   }
 
   get id(): string {
@@ -333,19 +333,26 @@ export class TerrainBlock {
     canvas.width = this.w
     canvas.height = this.h
     canvas.classList.add("crisp-edges")
+    const imgMap = {} as Record<string, HTMLImageElement>
     await Promise.all(
-      Object.values(this.#cellMap).map((cell) => cell.loadAssets()),
+      Object.values(this.#cellMap).map(async (cell) => {
+        if (cell.href) {
+          const img = await loadImage(new URL(cell.href, this.#map.url).href)
+          imgMap[cell.href] = img
+        }
+      }),
     )
-    this.#renderBlock(new CanvasLayer(canvas))
+
+    this.#renderBlock(new CanvasLayer(canvas), imgMap)
     return canvas
   }
 
-  #renderBlock(layer: CanvasLayer) {
+  #renderBlock(layer: CanvasLayer, imgMap: Record<string, HTMLImageElement>) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         const cell = this.get(i, j)
-        if (cell.img) {
-          layer.drawImage(cell.img, i * CELL_SIZE, j * CELL_SIZE)
+        if (cell.href) {
+          layer.drawImage(imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE)
         } else {
           layer.drawRect(
             i * CELL_SIZE,
