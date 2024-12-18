@@ -337,7 +337,9 @@ export class TerrainBlock {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
         if (cell.href) {
-          const img = await loadImage(new URL(cell.href, this.#map.url).href)
+          const img = await this.#loadImage(
+            new URL(cell.href, this.#map.url).href,
+          )
           imgMap[cell.href] = img
         }
       }),
