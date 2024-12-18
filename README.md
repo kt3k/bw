@@ -1,4 +1,4 @@
-# Black and White
+# Block Walker
 
 Clone the repo and run the command:
 
