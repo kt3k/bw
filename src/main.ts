@@ -289,8 +289,9 @@ function GameScreen({ query }: Context) {
   me.loadAssets()
 
   isLoadingSignal.subscribe((v) => {
-    const curtain = query(".curtain")!
-    curtain.style.opacity = v ? "1" : "0"
+    if (!v) {
+      query(".curtain")!.style.opacity = "0"
+    }
   })
 
   const loop = gameloop(() => {

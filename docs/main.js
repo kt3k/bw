@@ -1176,8 +1176,9 @@ function GameScreen({ query }) {
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y));
   me.loadAssets();
   isLoadingSignal.subscribe((v) => {
-    const curtain = query(".curtain");
-    curtain.style.opacity = v ? "1" : "0";
+    if (!v) {
+      query(".curtain").style.opacity = "0";
+    }
   });
   const loop = gameloop(() => {
     if (!walkers.assetsReady || !terrain.assetsReady) {
