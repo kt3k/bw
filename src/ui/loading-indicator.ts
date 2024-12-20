@@ -1,4 +1,4 @@
-import { type Context } from "@kt3k/cell"
+import type { Context } from "@kt3k/cell"
 import { isLoadingSignal } from "../util/signal.ts"
 
 export function LoadingIndicator({ el }: Context) {

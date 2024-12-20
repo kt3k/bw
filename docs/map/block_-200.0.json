@@ -4,12 +4,12 @@
   "cells": [
     {
       "name": "0",
-      "href": "cell/floor0.png",
+      "href": "../cell/floor0.png",
       "canEnter": true
     },
     {
       "name": "1",
-      "href": "cell/wall0.png",
+      "href": "../cell/wall0.png",
       "canEnter": false
     }
   ],

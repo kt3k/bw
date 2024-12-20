@@ -368,146 +368,6 @@ function gameloop(main, fps) {
   return new GameloopImpl(main, fps);
 }
 
-// https://jsr.io/@kt3k/weak-value-map/0.1.2/mod.ts
-var WeakValueMap = class {
-  #map = /* @__PURE__ */ new Map();
-  #registry = new FinalizationRegistry((key) => {
-    this.#map.delete(key);
-  });
-  [Symbol.toStringTag] = "WeakValueMap";
-  constructor(iterable = []) {
-    for (const [k, v] of iterable) {
-      this.set(k, v);
-    }
-  }
-  clear() {
-    for (const key of this.keys()) {
-      this.delete(key);
-    }
-  }
-  delete(key) {
-    const ref = this.#map.get(key);
-    if (ref) {
-      this.#map.delete(key);
-      this.#registry.unregister(ref);
-      if (ref.deref() === void 0) {
-        return false;
-      }
-      return true;
-    }
-    return false;
-  }
-  forEach(callbackfn, thisArg) {
-    this.#map.forEach((ref, k) => {
-      callbackfn(ref.deref(), k, thisArg);
-    });
-  }
-  get(key) {
-    const ref = this.#map.get(key);
-    if (ref === void 0) {
-      return void 0;
-    }
-    const value = ref.deref();
-    if (value === void 0) {
-      this.#map.delete(key);
-      this.#registry.unregister(ref);
-      return void 0;
-    }
-    return value;
-  }
-  has(key) {
-    const ref = this.#map.get(key);
-    if (ref === void 0) {
-      return false;
-    }
-    const value = ref.deref();
-    if (value === void 0) {
-      this.#map.delete(key);
-      this.#registry.unregister(ref);
-      return false;
-    }
-    return true;
-  }
-  set(key, value) {
-    const prevRef = this.#map.get(key);
-    if (prevRef) {
-      this.#registry.unregister(prevRef);
-    }
-    const ref = new WeakRef(value);
-    this.#map.set(key, ref);
-    this.#registry.register(value, key, ref);
-    return this;
-  }
-  get size() {
-    return this.#map.size;
-  }
-  [Symbol.iterator]() {
-    return this.entries();
-  }
-  *entries() {
-    for (const [k, ref] of this.#map.entries()) {
-      const v = ref.deref();
-      if (v === void 0) {
-        this.#map.delete(k);
-        this.#registry.unregister(ref);
-        continue;
-      }
-      yield [k, v];
-    }
-  }
-  *keys() {
-    for (const [k, ref] of this.#map.entries()) {
-      const v = ref.deref();
-      if (v === void 0) {
-        this.#map.delete(k);
-        this.#registry.unregister(ref);
-        continue;
-      }
-      yield k;
-    }
-  }
-  *values() {
-    for (const ref of this.#map.values()) {
-      const v = ref.deref();
-      if (v === void 0) {
-        continue;
-      }
-      yield v;
-    }
-  }
-};
-
-// src/util/load.ts
-function loadImage_(path) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      resolve(img);
-    };
-    img.onerror = (e) => {
-      reject(e);
-    };
-    img.src = path;
-  });
-}
-var loadImage = memoizedLoading(loadImage_);
-function memoizedLoading(fn) {
-  const weakValueMap = new WeakValueMap();
-  const weakKeyMap = /* @__PURE__ */ new WeakMap();
-  return (key) => {
-    const cache = weakValueMap.get(key);
-    if (cache) {
-      return cache;
-    }
-    const promise = fn(key);
-    weakValueMap.set(key, promise);
-    promise.then((value) => {
-      weakKeyMap.set(value, promise);
-    });
-    return promise;
-  };
-}
-
 // src/util/dir.ts
 var UP = "up";
 var DOWN = "down";
@@ -674,7 +534,147 @@ function modulo(x, m) {
   return r >= 0 ? r : r + m;
 }
 
-// src/main.ts
+// https://jsr.io/@kt3k/weak-value-map/0.1.2/mod.ts
+var WeakValueMap = class {
+  #map = /* @__PURE__ */ new Map();
+  #registry = new FinalizationRegistry((key) => {
+    this.#map.delete(key);
+  });
+  [Symbol.toStringTag] = "WeakValueMap";
+  constructor(iterable = []) {
+    for (const [k, v] of iterable) {
+      this.set(k, v);
+    }
+  }
+  clear() {
+    for (const key of this.keys()) {
+      this.delete(key);
+    }
+  }
+  delete(key) {
+    const ref = this.#map.get(key);
+    if (ref) {
+      this.#map.delete(key);
+      this.#registry.unregister(ref);
+      if (ref.deref() === void 0) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+  forEach(callbackfn, thisArg) {
+    this.#map.forEach((ref, k) => {
+      callbackfn(ref.deref(), k, thisArg);
+    });
+  }
+  get(key) {
+    const ref = this.#map.get(key);
+    if (ref === void 0) {
+      return void 0;
+    }
+    const value = ref.deref();
+    if (value === void 0) {
+      this.#map.delete(key);
+      this.#registry.unregister(ref);
+      return void 0;
+    }
+    return value;
+  }
+  has(key) {
+    const ref = this.#map.get(key);
+    if (ref === void 0) {
+      return false;
+    }
+    const value = ref.deref();
+    if (value === void 0) {
+      this.#map.delete(key);
+      this.#registry.unregister(ref);
+      return false;
+    }
+    return true;
+  }
+  set(key, value) {
+    const prevRef = this.#map.get(key);
+    if (prevRef) {
+      this.#registry.unregister(prevRef);
+    }
+    const ref = new WeakRef(value);
+    this.#map.set(key, ref);
+    this.#registry.register(value, key, ref);
+    return this;
+  }
+  get size() {
+    return this.#map.size;
+  }
+  [Symbol.iterator]() {
+    return this.entries();
+  }
+  *entries() {
+    for (const [k, ref] of this.#map.entries()) {
+      const v = ref.deref();
+      if (v === void 0) {
+        this.#map.delete(k);
+        this.#registry.unregister(ref);
+        continue;
+      }
+      yield [k, v];
+    }
+  }
+  *keys() {
+    for (const [k, ref] of this.#map.entries()) {
+      const v = ref.deref();
+      if (v === void 0) {
+        this.#map.delete(k);
+        this.#registry.unregister(ref);
+        continue;
+      }
+      yield k;
+    }
+  }
+  *values() {
+    for (const ref of this.#map.values()) {
+      const v = ref.deref();
+      if (v === void 0) {
+        continue;
+      }
+      yield v;
+    }
+  }
+};
+
+// src/util/load.ts
+function loadImage_(path) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve(img);
+    };
+    img.onerror = (e) => {
+      reject(e);
+    };
+    img.src = path;
+  });
+}
+var loadImage = memoizedLoading(loadImage_);
+function memoizedLoading(fn) {
+  const weakValueMap = new WeakValueMap();
+  const weakKeyMap = /* @__PURE__ */ new WeakMap();
+  return (key) => {
+    const cache = weakValueMap.get(key);
+    if (cache) {
+      return cache;
+    }
+    const promise = fn(key);
+    weakValueMap.set(key, promise);
+    promise.then((value) => {
+      weakKeyMap.set(value, promise);
+    });
+    return promise;
+  };
+}
+
+// src/models.ts
 var Character = class {
   /** The current direction of the character */
   #dir = "down";
@@ -842,6 +842,149 @@ var Character = class {
     return !!this.#assets;
   }
 };
+var TerrainBlockCell = class {
+  #color;
+  #href;
+  #canEnter;
+  constructor(canEnter, color, href) {
+    this.#canEnter = canEnter;
+    this.#color = color;
+    this.#href = href;
+  }
+  canEnter() {
+    return this.#canEnter;
+  }
+  get color() {
+    return this.#color;
+  }
+  get href() {
+    return this.#href;
+  }
+};
+var BlockMap = class {
+  /** The URL of the map */
+  url;
+  // The column of the world coordinates
+  i;
+  // The row of the world coordinates
+  j;
+  cells;
+  characters;
+  items;
+  terrain;
+  // deno-lint-ignore no-explicit-any
+  constructor(url, obj) {
+    this.url = url;
+    this.i = obj.i;
+    this.j = obj.j;
+    this.cells = obj.cells;
+    this.characters = obj.characters;
+    this.items = obj.items;
+    this.terrain = obj.terrain;
+  }
+};
+var TerrainBlock = class {
+  #x;
+  #y;
+  #w;
+  #h;
+  // The column of the world coordinates
+  #i;
+  // The row of the world coordinates
+  #j;
+  #cellMap = {};
+  #items;
+  #characters;
+  #terrain;
+  #loadImage;
+  #map;
+  constructor(map, loadImage2) {
+    this.#i = map.i;
+    this.#j = map.j;
+    this.#x = this.#i * CELL_SIZE;
+    this.#y = this.#j * CELL_SIZE;
+    this.#h = BLOCK_SIZE * CELL_SIZE;
+    this.#w = BLOCK_SIZE * CELL_SIZE;
+    for (const cell of map.cells) {
+      this.#cellMap[cell.name] = new TerrainBlockCell(
+        cell.canEnter,
+        cell.color,
+        cell.href ? new URL(cell.href, map.url).href : void 0
+      );
+    }
+    this.#terrain = map.terrain;
+    this.#items = map.items;
+    this.#characters = [];
+    this.#loadImage = loadImage2;
+    this.#map = map;
+  }
+  get id() {
+    return `${this.#i}.${this.#j}`;
+  }
+  async createCanvas() {
+    const canvas = document.createElement("canvas");
+    canvas.style.position = "absolute";
+    canvas.style.left = `${this.x}px`;
+    canvas.style.top = `${this.y}px`;
+    canvas.width = this.w;
+    canvas.height = this.h;
+    canvas.classList.add("crisp-edges");
+    const imgMap = {};
+    await Promise.all(
+      Object.values(this.#cellMap).map(async (cell) => {
+        if (cell.href) {
+          const img = await this.#loadImage(
+            new URL(cell.href, this.#map.url).href
+          );
+          imgMap[cell.href] = img;
+        }
+      })
+    );
+    this.#renderBlock(new CanvasLayer(canvas), imgMap);
+    return canvas;
+  }
+  #renderBlock(layer, imgMap) {
+    for (let j = 0; j < BLOCK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_SIZE; i++) {
+        const cell = this.get(i, j);
+        if (cell.href) {
+          layer.drawImage(imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE);
+        } else {
+          layer.drawRect(
+            i * CELL_SIZE,
+            j * CELL_SIZE,
+            CELL_SIZE,
+            CELL_SIZE,
+            cell.color || "black"
+          );
+        }
+      }
+    }
+  }
+  get(i, j) {
+    return this.#cellMap[this.#terrain[j][i]];
+  }
+  get i() {
+    return this.#i;
+  }
+  get j() {
+    return this.#j;
+  }
+  get x() {
+    return this.#x;
+  }
+  get y() {
+    return this.#y;
+  }
+  get h() {
+    return this.#h;
+  }
+  get w() {
+    return this.#w;
+  }
+};
+
+// src/main.ts
 var RectScope = class {
   #w;
   #h;
@@ -930,18 +1073,20 @@ var LoadScope = class _LoadScope extends RectScope {
 };
 var BlockMapLoader = class {
   #loading = /* @__PURE__ */ new Set();
-  #prefix;
-  constructor(prefix) {
-    this.#prefix = prefix;
+  #root;
+  constructor(root) {
+    this.#root = root;
   }
   loadMaps(mapIds) {
-    const maps = mapIds.map((mapId) => `${this.#prefix}${mapId}.json`);
+    const maps = mapIds.map(
+      (mapId) => new URL(`block_${mapId}.json`, this.#root).href
+    );
     return Promise.all(maps.map((map) => this.loadMap(map)));
   }
   async loadMap(url) {
     this.#loading.add(url);
     const resp = await fetch(url);
-    const map = new BlockMap(await resp.json());
+    const map = new BlockMap(url, await resp.json());
     this.#loading.delete(url);
     return map;
   }
@@ -955,145 +1100,13 @@ var UnloadScope = class _UnloadScope extends RectScope {
     super(_UnloadScope.UNLOAD_UNIT, _UnloadScope.UNLOAD_UNIT);
   }
 };
-var BlockMap = class {
-  // The column of the world coordinates
-  i;
-  // The row of the world coordinates
-  j;
-  cells;
-  characters;
-  items;
-  terrain;
-  // deno-lint-ignore no-explicit-any
-  constructor(obj) {
-    this.i = obj.i;
-    this.j = obj.j;
-    this.cells = obj.cells;
-    this.characters = obj.characters;
-    this.items = obj.items;
-    this.terrain = obj.terrain;
-  }
-};
-var TerrainBlockCell = class {
-  #color;
-  #href;
-  #canEnter;
-  #img;
-  constructor(canEnter, color, href) {
-    this.#canEnter = canEnter;
-    this.#color = color;
-    this.#href = href;
-  }
-  canEnter() {
-    return this.#canEnter;
-  }
-  async loadAssets() {
-    if (this.#href) {
-      this.#img = await loadImage(this.#href);
-    }
-  }
-  get color() {
-    return this.#color;
-  }
-  get img() {
-    return this.#img;
-  }
-};
-var TerrainBlock = class {
-  #x;
-  #y;
-  #w;
-  #h;
-  // The column of the world coordinates
-  #i;
-  // The row of the world coordinates
-  #j;
-  #cellMap = {};
-  #items;
-  #characters;
-  #terrain;
-  constructor(map) {
-    this.#i = map.i;
-    this.#j = map.j;
-    this.#x = this.#i * CELL_SIZE;
-    this.#y = this.#j * CELL_SIZE;
-    this.#h = BLOCK_SIZE * CELL_SIZE;
-    this.#w = BLOCK_SIZE * CELL_SIZE;
-    for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new TerrainBlockCell(
-        cell.canEnter,
-        cell.color,
-        cell.href
-      );
-    }
-    this.#terrain = map.terrain;
-    this.#items = map.items;
-    this.#characters = [];
-  }
-  get id() {
-    return `${this.#i}.${this.#j}`;
-  }
-  async createCanvas() {
-    const canvas = document.createElement("canvas");
-    canvas.style.position = "absolute";
-    canvas.style.left = `${this.x}px`;
-    canvas.style.top = `${this.y}px`;
-    canvas.width = this.w;
-    canvas.height = this.h;
-    canvas.classList.add("crisp-edges");
-    await Promise.all(
-      Object.values(this.#cellMap).map((cell) => cell.loadAssets())
-    );
-    this.#renderBlock(new CanvasLayer(canvas));
-    return canvas;
-  }
-  #renderBlock(layer) {
-    for (let j = 0; j < BLOCK_SIZE; j++) {
-      for (let i = 0; i < BLOCK_SIZE; i++) {
-        const cell = this.get(i, j);
-        if (cell.img) {
-          layer.drawImage(cell.img, i * CELL_SIZE, j * CELL_SIZE);
-        } else {
-          layer.drawRect(
-            i * CELL_SIZE,
-            j * CELL_SIZE,
-            CELL_SIZE,
-            CELL_SIZE,
-            cell.color || "black"
-          );
-        }
-      }
-    }
-  }
-  get(i, j) {
-    return this.#cellMap[this.#terrain[j][i]];
-  }
-  get i() {
-    return this.#i;
-  }
-  get j() {
-    return this.#j;
-  }
-  get x() {
-    return this.#x;
-  }
-  get y() {
-    return this.#y;
-  }
-  get h() {
-    return this.#h;
-  }
-  get w() {
-    return this.#w;
-  }
-};
 var Terrain = class {
   #el;
   #blocks = {};
   #blockElements = {};
   #loadScope = new LoadScope();
   #unloadScope = new UnloadScope();
-  #mapLoader = new BlockMapLoader("map/block_");
+  #mapLoader = new BlockMapLoader(new URL("map/", location.href).href);
   constructor(el) {
     this.#el = el;
   }
@@ -1131,7 +1144,7 @@ var Terrain = class {
       (id) => !this.hasBlock(id)
     );
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.addDistrict(new TerrainBlock(map));
+      this.addDistrict(new TerrainBlock(map, loadImage));
     }
   }
   checkUnload(i, j) {
@@ -1162,6 +1175,10 @@ function GameScreen({ query }) {
   centerGrid10Signal.subscribe(({ i, j }) => terrain.checkUnload(i, j));
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y));
   me.loadAssets();
+  isLoadingSignal.subscribe((v) => {
+    const curtain = query(".curtain");
+    curtain.style.opacity = v ? "1" : "0";
+  });
   const loop = gameloop(() => {
     if (!walkers.assetsReady || !terrain.assetsReady) {
       isLoadingSignal.update(true);
