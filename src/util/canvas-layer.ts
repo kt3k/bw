@@ -27,4 +27,8 @@ export class CanvasLayer {
   get height(): number {
     return this.#ctx.canvas.height
   }
+
+  get ctx(): CanvasRenderingContext2D {
+    return this.#ctx
+  }
 }
