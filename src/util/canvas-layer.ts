@@ -18,11 +18,13 @@ export class CanvasLayer {
     this.#ctx.clearRect(0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height)
   }
 
-  get width() {
+  /** The width of the canvas */
+  get width(): number {
     return this.#ctx.canvas.width
   }
 
-  get height() {
+  /** The height of the canvas */
+  get height(): number {
     return this.#ctx.canvas.height
   }
 }

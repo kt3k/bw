@@ -3,7 +3,8 @@
   "version": "0.1.4",
   "exports": {
     "./models": "./src/models.ts",
-    "./util/math": "./src/util/math.ts"
+    "./util/math": "./src/util/math.ts",
+    "./util/canvas-layer": "./src/util/canvas-layer.ts"
   },
   "lock": false,
   "tasks": {
