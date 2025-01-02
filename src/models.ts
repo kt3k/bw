@@ -325,6 +325,10 @@ export class TerrainBlock {
     return `${this.#i}.${this.#j}`
   }
 
+  get cells(): TerrainBlockCell[] {
+    return Object.values(this.#cellMap)
+  }
+
   async createCanvas(): Promise<HTMLCanvasElement> {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
