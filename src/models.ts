@@ -228,7 +228,9 @@ export class TerrainBlockCell {
   #color?: string
   #href?: string
   #canEnter: boolean
-  constructor(canEnter: boolean, color?: string, href?: string) {
+  #name: string
+  constructor(name: string, canEnter: boolean, color?: string, href?: string) {
+    this.#name = name
     this.#canEnter = canEnter
     this.#color = color
     this.#href = href
@@ -237,7 +239,9 @@ export class TerrainBlockCell {
   canEnter(): boolean {
     return this.#canEnter
   }
-
+  get name(): string {
+    return this.#name
+  }
   get color(): string | undefined {
     return this.#color
   }
@@ -309,6 +313,7 @@ export class TerrainBlock {
     this.#w = BLOCK_SIZE * CELL_SIZE
     for (const cell of map.cells) {
       this.#cellMap[cell.name] = new TerrainBlockCell(
+        cell.name,
         cell.canEnter,
         cell.color,
         cell.href ? new URL(cell.href, map.url).href : undefined,
