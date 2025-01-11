@@ -272,6 +272,7 @@ export class BlockMap {
   characters: {}[]
   items: {}[]
   terrain: string[]
+  #obj: any
   // deno-lint-ignore no-explicit-any
   constructor(url: string, obj: any) {
     this.url = url
@@ -281,6 +282,11 @@ export class BlockMap {
     this.characters = obj.characters
     this.items = obj.items
     this.terrain = obj.terrain
+    this.#obj = obj
+  }
+
+  clone(): BlockMap {
+    return new BlockMap(this.url, structuredClone(this.#obj))
   }
 }
 
@@ -324,6 +330,10 @@ export class TerrainBlock {
     this.#characters = []
     this.#loadImage = loadImage
     this.#map = map
+  }
+
+  clone(): TerrainBlock {
+    return new TerrainBlock(this.#map.clone(), this.#loadImage)
   }
 
   get id(): string {
