@@ -1,6 +1,6 @@
 {
   "name": "@kt3k/bw",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "exports": {
     "./models": "./src/models.ts",
     "./util/math": "./src/util/math.ts",
