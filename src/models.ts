@@ -375,8 +375,8 @@ export class TerrainBlock {
   get(i: number, j: number): TerrainBlockCell {
     return this.#cellMap[this.#terrain[j][i]]
   }
-  update(i: number, j: number, cell: string) {
-    return this.#terrain[j] = this.#terrain[j].substring(0, i) + cell +
+  update(i: number, j: number, cell: string): void {
+    this.#terrain[j] = this.#terrain[j].substring(0, i) + cell +
       this.#terrain[j].substring(i + 1)
   }
   get i(): number {
