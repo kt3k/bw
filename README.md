@@ -1,4 +1,6 @@
-# Block Walker
+# bw
+
+> block walker or black and white
 
 Clone the repo and run the command:
 
