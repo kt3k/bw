@@ -4,6 +4,7 @@
   "exports": {
     "./models": "./src/models.ts",
     "./util/math": "./src/util/math.ts",
+    "./util/memo": "./src/util/memo.ts",
     "./util/canvas-layer": "./src/util/canvas-layer.ts"
   },
   "lock": false,
