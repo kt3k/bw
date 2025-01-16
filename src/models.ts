@@ -288,6 +288,10 @@ export class BlockMap {
   clone(): BlockMap {
     return new BlockMap(this.url, structuredClone(this.#obj))
   }
+
+  toObject(): any {
+    return this.#obj
+  }
 }
 
 /** TerrainBlock represents a block of a terrain */
@@ -411,5 +415,21 @@ export class TerrainBlock {
   }
   get w(): number {
     return this.#w
+  }
+
+  toMap(): BlockMap {
+    return new BlockMap(this.#map.url, {
+      i: this.#i,
+      j: this.#j,
+      cells: this.cells.map((cell) => ({
+        name: cell.name,
+        canEnter: cell.canEnter(),
+        color: cell.color,
+        href: cell.href,
+      })),
+      characters: this.#characters,
+      items: this.#items,
+      terrain: this.#terrain,
+    })
   }
 }
