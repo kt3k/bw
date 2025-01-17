@@ -336,6 +336,12 @@ export class TerrainBlock {
     this.#map = map
   }
 
+  loadCellImage(href: string): Promise<HTMLImageElement> {
+    return this.#loadImage(
+      new URL(href, this.#map.url).href,
+    )
+  }
+
   clone(): TerrainBlock {
     return new TerrainBlock(this.#map.clone(), this.#loadImage)
   }
@@ -360,10 +366,7 @@ export class TerrainBlock {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
         if (cell.href) {
-          const img = await this.#loadImage(
-            new URL(cell.href, this.#map.url).href,
-          )
-          imgMap[cell.href] = img
+          imgMap[cell.href] = await this.loadCellImage(cell.href)
         }
       }),
     )
