@@ -326,7 +326,7 @@ export class TerrainBlock {
         cell.name,
         cell.canEnter,
         cell.color,
-        cell.href ? new URL(cell.href, map.url).href : undefined,
+        cell.href,
       )
     }
     this.#terrain = map.terrain
