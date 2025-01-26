@@ -141,6 +141,24 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
   })
 }
 
+function KeyHandler({ on }: Context) {
+  on("keydown", (e) => {
+    if (e.key === "k") {
+      const currentCell = selectedCell.get()
+      const block = terrainBlock.get()
+      if (currentCell === null) return
+      if (block === null) return
+      selectedCell.update((currentCell + 1) % block.cells.length)
+    } else if (e.key === "j") {
+      const currentCell = selectedCell.get()
+      const block = terrainBlock.get()
+      if (currentCell === null) return
+      if (block === null) return
+      selectedCell.update((currentCell - 1) % block.cells.length)
+    }
+  })
+}
+
 const loadImage = memoizedLoading((uri: string) => {
   const { resolve, promise } = Promise.withResolvers<HTMLImageElement>()
   const id = Math.random().toString()
@@ -181,3 +199,4 @@ if (state) {
 register(MainContainer, "main-container")
 register(TerrainBlockCanvas, "terrain-block-canvas")
 register(CellSwitch, "cell-switch")
+register(KeyHandler, "key-handler")
