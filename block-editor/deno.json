@@ -1,0 +1,28 @@
+{
+  "imports": {
+    "@kt3k/bw": "jsr:@kt3k/bw@^0.1.14",
+    "@kt3k/cell": "jsr:@kt3k/cell@^0.7.6",
+    "@std/encoding": "jsr:@std/encoding@^1.0.6",
+    "vscode": "./vscode.js"
+  },
+  "tasks": {
+    "compile": "deno task extension && deno task webview && deno task webview-style",
+    "extension": "deno -A jsr:@kt3k/pack@0.1.14 -o out/extension.js extension.ts --external vscode --format cjs",
+    "webview": "deno -A jsr:@kt3k/pack@0.1.14 -o out/webview.js webview.ts",
+    "webview-style": "deno -A npm:tailwindcss -o out/style.css",
+    "package": "deno -A --unstable-unsafe-proto npm:@vscode/vsce package"
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "require-await",
+        "no-explicit-any",
+        "no-window",
+        "no-window-prefix"
+      ]
+    }
+  },
+  "fmt": {
+    "semiColons": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "vscode-bw-block-editor",
+  "displayName": "BW Block Editor",
+  "description": "The editor for BW blocks",
+  "version": "0.3.0",
+  "publisher": "kt3k",
+  "files": [
+    "out",
+    "LICENSE"
+  ],
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kt3k/vscode-bw-block-editor"
+  },
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "kt3k.bwBlock",
+        "displayName": "Block",
+        "selector": [
+          {
+            "filenamePattern": "block_*.json"
+          }
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/vscode-webview": "^1.57.5",
+    "@types/vscode": "^1.96.0"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@kt3k/bw@~0.1.14": "0.1.14",
+    "jsr:@kt3k/cell@~0.7.6": "0.7.6",
+    "jsr:@kt3k/signal@0.3": "0.3.0",
+    "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
+    "jsr:@std/encoding@^1.0.6": "1.0.6",
+    "npm:@types/vscode-webview@^1.57.5": "1.57.5",
+    "npm:@types/vscode@^1.96.0": "1.96.0"
+  },
+  "jsr": {
+    "@kt3k/bw@0.1.14": {
+      "integrity": "eea7c85457538fcf86483931cc1d489296152142fc9c089abb3a21724b1942c2",
+      "dependencies": [
+        "jsr:@kt3k/weak-value-map"
+      ]
+    },
+    "@kt3k/cell@0.7.6": {
+      "integrity": "f5b7bdf5a75d434959d14d6fa2d426d976ed84f8a8d7d7a60ccd76683bf2deb3",
+      "dependencies": [
+        "jsr:@kt3k/signal"
+      ]
+    },
+    "@kt3k/signal@0.3.0": {
+      "integrity": "5279863b78cbe475a8606864122abaad600e508e08eec7fff126f05c81aad7ff"
+    },
+    "@kt3k/weak-value-map@0.1.2": {
+      "integrity": "b95ba4b9a56ba74191703707e3a2ff77cabe68a5d66fe35f4a73f5ece91a6b95"
+    },
+    "@std/encoding@1.0.6": {
+      "integrity": "ca87122c196e8831737d9547acf001766618e78cd8c33920776c7f5885546069"
+    }
+  },
+  "npm": {
+    "@types/vscode-webview@1.57.5": {
+      "integrity": "sha512-iBAUYNYkz+uk1kdsq05fEcoh8gJmwT3lqqFPN7MGyjQ3HVloViMdo7ZJ8DFIP8WOK74PjOEilosqAyxV2iUFUw=="
+    },
+    "@types/vscode@1.96.0": {
+      "integrity": "sha512-qvZbSZo+K4ZYmmDuaodMbAa67Pl6VDQzLKFka6rq+3WUTY4Kro7Bwoi0CuZLO/wema0ygcmpwow7zZfPJTs5jg=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@kt3k/bw@~0.1.14",
+      "jsr:@kt3k/cell@~0.7.6",
+      "jsr:@std/encoding@^1.0.6"
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:@types/vscode-webview@^1.57.5",
+        "npm:@types/vscode@^1.96.0"
+      ]
+    }
+  }
+}
