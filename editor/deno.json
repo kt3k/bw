@@ -4,8 +4,7 @@
     "@kt3k/weak-value-map": "jsr:@kt3k/weak-value-map@^0.1.2",
     "@std/encoding": "jsr:@std/encoding@^1.0.6",
     "@types/vscode-webview": "npm:@types/vscode-webview@^1.57.5",
-    "@types/vscode": "npm:@types/vscode@^1.96.0",
-    "vscode": "data:text/javascript,//@ts-self-types=\"@types/vscode\""
+    "vscode": "data:text/javascript,//@ts-self-types=\"npm:@types/vscode@^1.96.0\""
   },
   "tasks": {
     "compile": "deno task extension && deno task webview && deno task webview-style",
