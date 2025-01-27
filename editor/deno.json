@@ -5,7 +5,7 @@
     "@std/encoding": "jsr:@std/encoding@^1.0.6",
     "@types/vscode-webview": "npm:@types/vscode-webview@^1.57.5",
     "@types/vscode": "npm:@types/vscode@^1.96.0",
-    "vscode": "./vscode.js"
+    "vscode": "data:text/javascript,//@ts-self-types=\"@types/vscode\""
   },
   "tasks": {
     "compile": "deno task extension && deno task webview && deno task webview-style",
