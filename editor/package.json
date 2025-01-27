@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kt3k/vscode-bw-block-editor"
+    "url": "https://github.com/kt3k/bw"
   },
   "engines": {
     "vscode": "^1.96.0"
@@ -34,9 +34,5 @@
         ]
       }
     ]
-  },
-  "devDependencies": {
-    "@types/vscode-webview": "^1.57.5",
-    "@types/vscode": "^1.96.0"
   }
 }

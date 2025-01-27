@@ -3,6 +3,8 @@
     "@kt3k/cell": "jsr:@kt3k/cell@^0.7.6",
     "@kt3k/weak-value-map": "jsr:@kt3k/weak-value-map@^0.1.2",
     "@std/encoding": "jsr:@std/encoding@^1.0.6",
+    "@types/vscode-webview": "npm:@types/vscode-webview@^1.57.5",
+    "@types/vscode": "npm:@types/vscode@^1.96.0",
     "vscode": "./vscode.js"
   },
   "tasks": {
