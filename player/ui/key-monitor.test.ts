@@ -2,7 +2,7 @@ import { KeyMonitor } from "./key-monitor.ts"
 import "../dom-polyfill.ts"
 import { mount, register } from "@kt3k/cell"
 import { assertEquals } from "@std/assert"
-import { Input } from "../util/dir.ts"
+import { Input } from "../../util/dir.ts"
 
 register(KeyMonitor, "key-monitor")
 

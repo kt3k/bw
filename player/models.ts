@@ -4,11 +4,11 @@
  * @module models
  */
 
-import { loadImage } from "./util/load.ts"
-import type { Input } from "./util/dir.ts"
-import { type Dir, DOWN, LEFT, RIGHT, UP } from "./util/dir.ts"
-import { CanvasLayer } from "./util/canvas-layer.ts"
-import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
+import { loadImage } from "../util/load.ts"
+import type { Input } from "../util/dir.ts"
+import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
+import { CanvasLayer } from "../util/canvas-layer.ts"
+import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
 type CharacterAppearance =
   | "up0"

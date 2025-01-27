@@ -1,6 +1,6 @@
 import { type Context, register } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
-import { clearInput, Input } from "./util/dir.ts"
+import { clearInput, Input } from "../util/dir.ts"
 import { KeyMonitor } from "./ui/key-monitor.ts"
 import { FpsMonitor } from "./ui/fps-monitor.ts"
 import { SwipeHandler } from "./ui/swipe-handler.ts"
@@ -11,13 +11,13 @@ import {
   fpsSignal,
   isLoadingSignal,
   viewScopeSignal,
-} from "./util/signal.ts"
+} from "../util/signal.ts"
 import { LoadingIndicator } from "./ui/loading-indicator.ts"
-import { CanvasLayer } from "./util/canvas-layer.ts"
-import { ceilN, floorN, modulo } from "./util/math.ts"
-import { BLOCK_SIZE, CELL_SIZE } from "./util/constants.ts"
+import { CanvasLayer } from "../util/canvas-layer.ts"
+import { ceilN, floorN, modulo } from "../util/math.ts"
+import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { BlockMap, Character, TerrainBlock } from "./models.ts"
-import { loadImage } from "./util/load.ts"
+import { loadImage } from "../util/load.ts"
 
 /**
  * Abstract rectangular area, which implements properties of the rectangle.
