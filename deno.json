@@ -3,9 +3,9 @@
   "version": "0.1.14",
   "exports": {
     "./models": "./player/models.ts",
-    "./util/math": "./player/util/math.ts",
-    "./util/memo": "./player/util/memo.ts",
-    "./util/canvas-layer": "./player/util/canvas-layer.ts"
+    "./util/math": "./util/math.ts",
+    "./util/memo": "./util/memo.ts",
+    "./util/canvas-layer": "./util/canvas-layer.ts"
   },
   "lock": false,
   "tasks": {
