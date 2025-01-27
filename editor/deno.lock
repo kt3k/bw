@@ -1,7 +1,6 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@kt3k/bw@~0.1.14": "0.1.14",
     "jsr:@kt3k/cell@~0.7.6": "0.7.6",
     "jsr:@kt3k/signal@0.3": "0.3.0",
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
@@ -10,12 +9,6 @@
     "npm:@types/vscode@^1.96.0": "1.96.0"
   },
   "jsr": {
-    "@kt3k/bw@0.1.14": {
-      "integrity": "eea7c85457538fcf86483931cc1d489296152142fc9c089abb3a21724b1942c2",
-      "dependencies": [
-        "jsr:@kt3k/weak-value-map"
-      ]
-    },
     "@kt3k/cell@0.7.6": {
       "integrity": "f5b7bdf5a75d434959d14d6fa2d426d976ed84f8a8d7d7a60ccd76683bf2deb3",
       "dependencies": [
@@ -42,8 +35,8 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@kt3k/bw@~0.1.14",
       "jsr:@kt3k/cell@~0.7.6",
+      "jsr:@kt3k/weak-value-map@~0.1.2",
       "jsr:@std/encoding@^1.0.6"
     ],
     "packageJson": {

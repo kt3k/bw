@@ -3,10 +3,10 @@
 /// <reference lib="dom" />
 /// <reference types="@types/vscode-webview" />
 
-import { BlockMap, TerrainBlock } from "@kt3k/bw/models"
-import { floorN } from "@kt3k/bw/util/math"
-import { memoizedLoading } from "@kt3k/bw/util/memo"
-import { CanvasLayer } from "@kt3k/bw/util/canvas-layer"
+import { BlockMap, TerrainBlock } from "../player/models.ts"
+import { floorN } from "../util/math.ts"
+import { memoizedLoading } from "../util/memo.ts"
+import { CanvasLayer } from "../util/canvas-layer.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type {
   ExtensionMessage,
