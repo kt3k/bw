@@ -2,17 +2,17 @@
   "name": "@kt3k/bw",
   "version": "0.1.14",
   "exports": {
-    "./models": "./src/models.ts",
-    "./util/math": "./src/util/math.ts",
-    "./util/memo": "./src/util/memo.ts",
-    "./util/canvas-layer": "./src/util/canvas-layer.ts"
+    "./models": "./player/models.ts",
+    "./util/math": "./player/util/math.ts",
+    "./util/memo": "./player/util/memo.ts",
+    "./util/canvas-layer": "./player/util/canvas-layer.ts"
   },
   "lock": false,
   "tasks": {
     "test": "deno test",
     "start": "deno run -A npm:concurrently 'deno task watch:js' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
-    "watch:js": "deno run --watch=src -A jsr:@kt3k/pack@0.1.10 -o dist/main.js src/main.ts",
-    "watch:style": "deno run -A npm:tailwindcss -i ./src/input.css -o ./dist/style.css --watch",
+    "watch:js": "deno run --watch=src -A jsr:@kt3k/pack@0.1.10 -o dist/main.js player/main.ts",
+    "watch:style": "deno run -A npm:tailwindcss -i ./player/input.css -o ./dist/style.css --watch",
     "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' dist",
     "dist": "deno run -A npm:cpx2 'dist/**' docs",
     "serve": "deno run -A jsr:@std/http/file-server dist -p 8000"
