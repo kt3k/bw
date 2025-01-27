@@ -12,7 +12,7 @@
     "test": "deno test",
     "start": "deno run -A npm:concurrently 'deno task watch:js' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
     "watch:js": "deno run --watch=src -A jsr:@kt3k/pack@0.1.10 -o dist/main.js player/main.ts",
-    "watch:style": "deno run -A npm:tailwindcss -o ./dist/style.css --watch",
+    "watch:style": "deno run -A npm:tailwindcss@3 -o ./dist/style.css --watch",
     "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' dist",
     "dist": "deno run -A npm:cpx2 'dist/**' docs",
     "serve": "deno run -A jsr:@std/http/file-server dist -p 8000"
@@ -25,7 +25,8 @@
     "@kt3k/cell": "jsr:@kt3k/cell@^0.7.6",
     "@kt3k/gameloop": "jsr:@kt3k/gameloop@^1.5.0",
     "@kt3k/weak-value-map": "jsr:@kt3k/weak-value-map@^0.1.2",
-    "@std/assert": "jsr:@std/assert@^1.0.0"
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "tailwindcss": "npm:tailwindcss@3"
   },
   "fmt": {
     "semiColons": false
