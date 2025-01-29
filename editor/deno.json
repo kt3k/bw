@@ -10,7 +10,7 @@
     "compile": "deno task extension && deno task webview && deno task webview-style",
     "extension": "deno -A jsr:@kt3k/pack@0.1.14 -o out/extension.js extension.ts --external vscode --format cjs",
     "webview": "deno -A jsr:@kt3k/pack@0.1.14 -o out/webview.js webview.ts",
-    "webview-style": "deno -A npm:tailwindcss -o out/style.css",
+    "webview-style": "deno -A npm:tailwindcss@3 -o out/style.css",
     "package": "deno -A --unstable-unsafe-proto npm:@vscode/vsce package"
   },
   "lint": {

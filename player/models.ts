@@ -354,6 +354,10 @@ export class TerrainBlock {
     return Object.values(this.#cellMap)
   }
 
+  get cellMap(): Record<string, TerrainBlockCell> {
+    return this.#cellMap
+  }
+
   async createCanvas(): Promise<HTMLCanvasElement> {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
@@ -434,5 +438,21 @@ export class TerrainBlock {
       items: this.#items,
       terrain: this.#terrain,
     })
+  }
+
+  /**
+   * Returns the difference between this block and the other block.
+   */
+  diff(other: TerrainBlock): [i: number, j: number, cell: string][] {
+    const diff: [i: number, j: number, cell: string][] = []
+    for (let j = 0; j < BLOCK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_SIZE; i++) {
+        const name = other.get(i, j).name
+        if (this.get(i, j).name !== name) {
+          diff.push([i, j, name])
+        }
+      }
+    }
+    return diff
   }
 }

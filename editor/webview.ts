@@ -4,7 +4,7 @@
 /// <reference types="@types/vscode-webview" />
 
 import { BlockMap, TerrainBlock } from "../player/models.ts"
-import { floorN } from "../util/math.ts"
+import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
@@ -31,7 +31,7 @@ blockMapSource.subscribe(({ uri, text }) => {
   )
 })
 
-function MainContainer({ subscribe, el }: Context) {
+function MainContainer({ subscribe, el, query }: Context) {
   subscribe(terrainBlock, async (terrainBlock) => {
     const prev = prevTerrainBlock
     prevTerrainBlock = terrainBlock
@@ -48,6 +48,14 @@ function MainContainer({ subscribe, el }: Context) {
       mount("terrain-block-canvas", el)
       return
     }
+
+    const diff = prev.diff(terrainBlock)
+
+    if (diff.length === 0) return
+
+    const event = new CustomEvent("diff", { detail: diff })
+
+    query(".terrain-block-canvas")?.dispatchEvent(event)
 
     // TODO(kt3k): compute diff, and apply diff
   })
@@ -124,12 +132,6 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     const block = terrainBlock.get()
     if (block === null) return
     const cell = block.cells[selectedCell.get()!]
-    canvasLayer.ctx.clearRect(x, y, 16, 16)
-    if (cell.href) {
-      canvasLayer.drawImage(await block.loadCellImage(cell.href), x, y)
-    } else {
-      canvasLayer.drawRect(x, y, 16, 16, cell.color || "black")
-    }
     const b = terrainBlock.get()!.clone()
     b.update(i, j, cell.name)
     terrainBlock.update(b)
@@ -137,6 +139,23 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     vscode.postMessage({
       type: "update",
       map: map.toObject(),
+    })
+  })
+
+  on("diff", (e: CustomEvent<[i: number, j: number, name: string][]>) => {
+    const diff = e.detail
+    const block = terrainBlock.get()
+    if (block === null) return
+    diff.forEach(async ([i, j, name]) => {
+      const cell = block.cellMap[name]
+      if (cell === undefined) {
+        return
+      } else if (cell.href) {
+        const img = await block.loadCellImage(cell.href)
+        canvasLayer.drawImage(img, i * 16, j * 16)
+      } else {
+        canvasLayer.drawRect(i * 16, j * 16, 16, 16, cell.color || "black")
+      }
     })
   })
 }
@@ -148,13 +167,13 @@ function KeyHandler({ on }: Context) {
       const block = terrainBlock.get()
       if (currentCell === null) return
       if (block === null) return
-      selectedCell.update((currentCell + 1) % block.cells.length)
+      selectedCell.update(modulo(currentCell + 1, block.cells.length))
     } else if (e.key === "j") {
       const currentCell = selectedCell.get()
       const block = terrainBlock.get()
       if (currentCell === null) return
       if (block === null) return
-      selectedCell.update((currentCell - 1) % block.cells.length)
+      selectedCell.update(modulo(currentCell - 1, block.cells.length))
     }
   })
 }
