@@ -1,3 +1,4 @@
+// Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom" />
@@ -8,11 +9,7 @@ import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
-import type {
-  ExtensionMessage,
-  ExtensionMessageLoadImageResponse,
-  ExtensionMessageUpdate,
-} from "./types.ts"
+import type * as type from "./types.ts"
 
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
@@ -189,26 +186,29 @@ const loadImage = memoizedLoading((uri: string) => {
 type ResolveImage = (image: HTMLImageElement) => void
 const loadImageMap: Record<string, { resolve: ResolveImage }> = {}
 
-function onUpdate(message: ExtensionMessageUpdate) {
+function onUpdate(message: type.Extension.MessageUpdate) {
   const { uri, text } = message
   blockMapSource.update({ uri, text })
   vscode.setState({ uri, text })
 }
 
-function onLoadImageResponse(message: ExtensionMessageLoadImageResponse) {
+function onLoadImageResponse(message: type.Extension.MessageLoadImageResponse) {
   const image = new Image()
   image.src = message.text
   loadImageMap[message.id].resolve(image)
 }
 
-window.addEventListener("message", (event: MessageEvent<ExtensionMessage>) => {
-  const { data } = event
-  if (data.type === "update") {
-    onUpdate(data)
-  } else if (data.type === "loadImageResponse") {
-    onLoadImageResponse(data)
-  }
-})
+window.addEventListener(
+  "message",
+  (event: MessageEvent<type.Extension.Message>) => {
+    const { data } = event
+    if (data.type === "update") {
+      onUpdate(data)
+    } else if (data.type === "loadImageResponse") {
+      onLoadImageResponse(data)
+    }
+  },
+)
 
 const state = vscode.getState()
 if (state) {

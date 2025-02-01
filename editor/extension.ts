@@ -1,11 +1,7 @@
+// Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
 import * as vscode from "vscode"
 import { encodeBase64 } from "@std/encoding/base64"
-import type {
-  ExtensionMessage,
-  WebviewMessage,
-  WebviewMessageLoadImage,
-  WebviewMessageUpdate,
-} from "./types.ts"
+import type * as type from "./types.ts"
 
 const { workspace, window, Uri } = vscode
 
@@ -53,7 +49,7 @@ function editor(
   webview.onDidReceiveMessage(onMessage)
   updateWebview()
 
-  function postMessage(message: ExtensionMessage) {
+  function postMessage(message: type.Extension.Message) {
     webview.postMessage(message)
   }
 
@@ -70,12 +66,12 @@ function editor(
     updateWebview()
   }
 
-  function onMessage(e: WebviewMessage) {
+  function onMessage(e: type.Webview.Message) {
     if (e.type === "loadImage") loadImage(e)
     else if (e.type === "update") update(e)
   }
 
-  function update(e: WebviewMessageUpdate) {
+  function update(e: type.Webview.MessageUpdate) {
     const edit = new vscode.WorkspaceEdit()
     edit.replace(
       document.uri,
@@ -85,7 +81,7 @@ function editor(
     workspace.applyEdit(edit)
   }
 
-  async function loadImage({ uri, id }: WebviewMessageLoadImage) {
+  async function loadImage({ uri, id }: type.Webview.MessageLoadImage) {
     const data = await workspace.fs.readFile(Uri.parse(uri))
     const text = "data:image/png;base64," + encodeBase64(data)
     postMessage({ type: "loadImageResponse", text, id })

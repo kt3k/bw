@@ -1,24 +1,30 @@
-export type ExtensionMessageUpdate = {
-  type: "update"
-  uri: string
-  text: string
-}
-export type ExtensionMessageLoadImageResponse = {
-  type: "loadImageResponse"
-  id: string
-  text: string
-}
-export type ExtensionMessage =
-  | ExtensionMessageUpdate
-  | ExtensionMessageLoadImageResponse
+// Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
 
-export type WebviewMessageLoadImage = {
-  type: "loadImage"
-  id: string
-  uri: string
+// deno-lint-ignore no-namespace
+export namespace Extension {
+  export type MessageUpdate = {
+    type: "update"
+    uri: string
+    text: string
+  }
+  export type MessageLoadImageResponse = {
+    type: "loadImageResponse"
+    id: string
+    text: string
+  }
+  export type Message = MessageUpdate | MessageLoadImageResponse
 }
-export type WebviewMessageUpdate = {
-  type: "update"
-  map: any
+
+// deno-lint-ignore no-namespace
+export namespace Webview {
+  export type MessageLoadImage = {
+    type: "loadImage"
+    id: string
+    uri: string
+  }
+  export type MessageUpdate = {
+    type: "update"
+    map: any
+  }
+  export type Message = MessageLoadImage | MessageUpdate
 }
-export type WebviewMessage = WebviewMessageLoadImage | WebviewMessageUpdate
