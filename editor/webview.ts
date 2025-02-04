@@ -43,18 +43,39 @@ function MainContainer({ subscribe, el, query }: Context) {
       el.innerHTML = ""
       el.appendChild(canvas)
       mount("terrain-block-canvas", el)
+
+      const { i, j } = terrainBlock
+      const x = [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [0, -1],
+        [0, 1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+      ]
+      for (const [dx, dy] of x) {
+        const k = i + dx * 200
+        const l = j + dy * 200
+        const href =
+          `vscode://file/Users/kt3k/oss/bw/static/map/block_${k}.${l}.json`
+        const a = document.createElement("a")
+        a.href = href
+        a.textContent = `block_${k}.${l}.json`
+        el.appendChild(a)
+      }
+      console.log(terrainBlock)
       return
     }
 
     const diff = prev.diff(terrainBlock)
-
-    if (diff.length === 0) return
-
-    const event = new CustomEvent("diff", { detail: diff })
-
-    query(".terrain-block-canvas")?.dispatchEvent(event)
-
-    // TODO(kt3k): compute diff, and apply diff
+    if (diff.length === 0) {
+      return
+    }
+    query(".terrain-block-canvas")?.dispatchEvent(
+      new CustomEvent("diff", { detail: diff }),
+    )
   })
 }
 

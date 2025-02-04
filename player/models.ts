@@ -9,6 +9,7 @@ import type { Input } from "../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
+import { seedrandom } from "../util/random.ts"
 
 type CharacterAppearance =
   | "up0"
@@ -394,6 +395,22 @@ export class TerrainBlock {
             cell.color || "black",
           )
         }
+        if (!cell.canEnter()) {
+          continue
+        }
+        const worldI = this.#i + i
+        const worldJ = this.#j + j
+        const rng = seedrandom(`${worldI}.${worldJ}`)
+        const choice = (arr: number[]) => arr[Math.floor(rng() * arr.length)]
+        const color = `hsla(90, 100%, 50%, ${choice([0, 0.1, 0.3])})`
+        //console.log(color)
+        layer.drawRect(
+          i * CELL_SIZE,
+          j * CELL_SIZE,
+          CELL_SIZE,
+          CELL_SIZE,
+          color,
+        )
       }
     }
   }
