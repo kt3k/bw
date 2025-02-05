@@ -5,7 +5,8 @@
     "jsr:@kt3k/signal@0.3": "0.3.0",
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
     "jsr:@std/encoding@^1.0.6": "1.0.6",
-    "npm:@types/vscode-webview@^1.57.5": "1.57.5"
+    "npm:@types/vscode-webview@^1.57.5": "1.57.5",
+    "npm:seedrandom@^3.0.5": "3.0.5"
   },
   "jsr": {
     "@kt3k/cell@0.7.6": {
@@ -27,6 +28,9 @@
   "npm": {
     "@types/vscode-webview@1.57.5": {
       "integrity": "sha512-iBAUYNYkz+uk1kdsq05fEcoh8gJmwT3lqqFPN7MGyjQ3HVloViMdo7ZJ8DFIP8WOK74PjOEilosqAyxV2iUFUw=="
+    },
+    "seedrandom@3.0.5": {
+      "integrity": "sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg=="
     }
   },
   "workspace": {
@@ -35,6 +39,11 @@
       "jsr:@kt3k/weak-value-map@~0.1.2",
       "jsr:@std/encoding@^1.0.6",
       "npm:@types/vscode-webview@^1.57.5"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:seedrandom@^3.0.5"
+      ]
+    }
   }
 }
