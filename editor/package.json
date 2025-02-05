@@ -29,9 +29,10 @@
         "displayName": "Block",
         "selector": [
           {
-            "filenamePattern": "block_*.json"
+            "filenamePattern": "*.json"
           }
-        ]
+        ],
+        "priority": "option"
       }
     ]
   }
