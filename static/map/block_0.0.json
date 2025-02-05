@@ -5,11 +5,13 @@
     {
       "name": "0",
       "canEnter": true,
+      "type": "floor",
       "href": "../cell/floor0.png"
     },
     {
       "name": "1",
       "canEnter": false,
+      "type": "wall",
       "href": "../cell/wall0.png"
     }
   ],
