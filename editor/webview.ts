@@ -46,14 +46,10 @@ function MainContainer({ subscribe, el, query }: Context) {
 
       const { i, j } = terrainBlock
       const x = [
-        [-1, -1],
         [-1, 0],
-        [-1, 1],
         [0, -1],
         [0, 1],
-        [1, -1],
         [1, 0],
-        [1, 1],
       ]
       for (const [dx, dy] of x) {
         const k = i + dx * 200
@@ -63,9 +59,37 @@ function MainContainer({ subscribe, el, query }: Context) {
         const a = document.createElement("a")
         a.href = href
         a.textContent = `block_${k}.${l}.json`
+        a.style.width = "20px"
+        a.style.height = "20px"
+        a.classList.add(
+          "absolute",
+          "hover:bg-neutral-700",
+          "bg-neutral-800",
+          "break-all",
+        )
+        if (dx === -1) {
+          a.style.left = "0"
+          a.style.top = "0"
+          a.style.height = "100%"
+          a.style.marginLeft = "-20px"
+        } else if (dx === 1) {
+          a.style.right = "0"
+          a.style.top = "0"
+          a.style.height = "100%"
+          a.style.marginRight = "-20px"
+        } else if (dy === -1) {
+          a.style.top = "0"
+          a.style.left = "0"
+          a.style.width = "100%"
+          a.style.marginTop = "-20px"
+        } else if (dy === 1) {
+          a.style.bottom = "0"
+          a.style.left = "0"
+          a.style.width = "100%"
+          a.style.marginBottom = "-20px"
+        }
         el.appendChild(a)
       }
-      console.log(terrainBlock)
       return
     }
 

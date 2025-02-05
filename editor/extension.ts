@@ -37,9 +37,9 @@ function editor(
         </style>
       </head>
       <body class="key-handler">
-        <div class="cell-switch fixed left-0 top-0 px-1 bg-neutral-900 shadow shadow-neutral-600"></div>
         <div class="spacer h-10"></div>
-        <div class="main-container"></div>
+        <div class="main-container relative"></div>
+        <div class="cell-switch fixed left-0 top-0 px-1 bg-neutral-900 shadow shadow-neutral-600"></div>
         <script src="${u("out/webview.js")}" type="module"></script>
       </body>
     </html>
