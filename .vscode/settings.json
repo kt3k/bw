@@ -4,6 +4,7 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
   "workbench.editorAssociations": {
-    "*.png": "kt3k.pixeledit"
+    "*.png": "kt3k.pixeledit",
+    "**/map/*.json": "kt3k.bwBlock"
   }
 }
