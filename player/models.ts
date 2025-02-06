@@ -402,8 +402,7 @@ export class TerrainBlock {
         const worldJ = this.#j + j
         const rng = seedrandom(`${worldI}.${worldJ}`)
         const choice = (arr: number[]) => arr[Math.floor(rng() * arr.length)]
-        const color = `hsla(90, 100%, 50%, ${choice([0, 0.1, 0.3])})`
-        //console.log(color)
+        const color = `hsla(90, 100%, 50%, ${choice([0.1, 0.2])})`
         layer.drawRect(
           i * CELL_SIZE,
           j * CELL_SIZE,
