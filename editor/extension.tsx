@@ -42,7 +42,6 @@ function editor(
       </body>
     </html>
   )
-  console.log(webview.html)
 
   const sub = workspace.onDidChangeTextDocument(onDocChange)
   panel.onDidDispose(() => sub.dispose())
