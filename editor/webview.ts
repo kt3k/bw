@@ -35,7 +35,8 @@ function MainContainer({ subscribe, el, query }: Context) {
     if (terrainBlock === null) return
 
     if (prev === null) {
-      const canvas = await terrainBlock.createCanvas()
+      await terrainBlock.loadAssets()
+      const canvas = terrainBlock.createCanvas()
       canvas.style.left = ""
       canvas.style.top = ""
       canvas.style.position = ""
@@ -184,21 +185,15 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     })
   })
 
-  on("diff", (e: CustomEvent<[i: number, j: number, name: string][]>) => {
+  on("diff", async (e: CustomEvent<[i: number, j: number, name: string][]>) => {
     const diff = e.detail
     const block = terrainBlock.get()
     if (block === null) return
-    diff.forEach(async ([i, j, name]) => {
-      const cell = block.cellMap[name]
-      if (cell === undefined) {
-        return
-      } else if (cell.href) {
-        const img = await block.loadCellImage(cell.href)
-        canvasLayer.drawImage(img, i * 16, j * 16)
-      } else {
-        canvasLayer.drawRect(i * 16, j * 16, 16, 16, cell.color || "black")
-      }
-    })
+    // TODO(kt3k): this shouldn't be necessary
+    await block.loadAssets()
+    for (const [i, j] of diff) {
+      block.drawCell(canvasLayer, i, j)
+    }
   })
 }
 

@@ -209,7 +209,8 @@ class Terrain {
 
   async addDistrict(block: TerrainBlock) {
     this.#blocks[block.id] = block
-    const canvas = await block.createCanvas()
+    await block.loadAssets()
+    const canvas = block.createCanvas()
     this.#blockElements[block.id] = canvas
     this.#el.appendChild(canvas)
   }

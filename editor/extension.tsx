@@ -1,7 +1,7 @@
 // Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
 
-/**@jsxImportSource @kt3k/picojsx*/
-/**@jsxRuntime automatic*/
+/** @jsxImportSource @kt3k/picojsx */
+/** @jsxRuntime automatic */
 
 import * as vscode from "vscode"
 import { encodeBase64 } from "@std/encoding/base64"

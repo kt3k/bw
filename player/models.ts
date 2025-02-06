@@ -306,6 +306,7 @@ export class TerrainBlock {
   // The row of the world coordinates
   #j: number
   #cellMap: Record<string, TerrainBlockCell> = {}
+  #imgMap: Record<string, HTMLImageElement> = {}
   #items: Item[]
   #characters: Character[]
   #terrain: string[]
@@ -359,7 +360,17 @@ export class TerrainBlock {
     return this.#cellMap
   }
 
-  async createCanvas(): Promise<HTMLCanvasElement> {
+  async loadAssets() {
+    await Promise.all(
+      Object.values(this.#cellMap).map(async (cell) => {
+        if (cell.href) {
+          this.#imgMap[cell.href] = await this.loadCellImage(cell.href)
+        }
+      }),
+    )
+  }
+
+  createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
     canvas.style.left = `${this.x}px`
@@ -367,49 +378,44 @@ export class TerrainBlock {
     canvas.width = this.w
     canvas.height = this.h
     canvas.classList.add("crisp-edges")
-    const imgMap = {} as Record<string, HTMLImageElement>
-    await Promise.all(
-      Object.values(this.#cellMap).map(async (cell) => {
-        if (cell.href) {
-          imgMap[cell.href] = await this.loadCellImage(cell.href)
-        }
-      }),
-    )
-
-    this.#renderBlock(new CanvasLayer(canvas), imgMap)
+    this.#renderBlock(new CanvasLayer(canvas))
     return canvas
   }
 
-  #renderBlock(layer: CanvasLayer, imgMap: Record<string, HTMLImageElement>) {
+  drawCell(layer: CanvasLayer, i: number, j: number) {
+    const cell = this.get(i, j)
+    if (cell.href) {
+      layer.drawImage(this.#imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE)
+    } else {
+      layer.drawRect(
+        i * CELL_SIZE,
+        j * CELL_SIZE,
+        CELL_SIZE,
+        CELL_SIZE,
+        cell.color || "black",
+      )
+    }
+    if (!cell.canEnter()) {
+      return
+    }
+    const worldI = this.#i + i
+    const worldJ = this.#j + j
+    const rng = seedrandom(`${worldI}.${worldJ}`)
+    const choice = (arr: number[]) => arr[Math.floor(rng() * arr.length)]
+    const color = `hsla(90, 100%, 50%, ${choice([0.1, 0.2])})`
+    layer.drawRect(
+      i * CELL_SIZE,
+      j * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE,
+      color,
+    )
+  }
+
+  #renderBlock(layer: CanvasLayer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
-        const cell = this.get(i, j)
-        if (cell.href) {
-          layer.drawImage(imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE)
-        } else {
-          layer.drawRect(
-            i * CELL_SIZE,
-            j * CELL_SIZE,
-            CELL_SIZE,
-            CELL_SIZE,
-            cell.color || "black",
-          )
-        }
-        if (!cell.canEnter()) {
-          continue
-        }
-        const worldI = this.#i + i
-        const worldJ = this.#j + j
-        const rng = seedrandom(`${worldI}.${worldJ}`)
-        const choice = (arr: number[]) => arr[Math.floor(rng() * arr.length)]
-        const color = `hsla(90, 100%, 50%, ${choice([0.1, 0.2])})`
-        layer.drawRect(
-          i * CELL_SIZE,
-          j * CELL_SIZE,
-          CELL_SIZE,
-          CELL_SIZE,
-          color,
-        )
+        this.drawCell(layer, i, j)
       }
     }
   }
