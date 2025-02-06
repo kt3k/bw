@@ -1,6 +1,7 @@
 {
   "imports": {
     "@kt3k/cell": "jsr:@kt3k/cell@^0.7.6",
+    "@kt3k/picojsx": "jsr:@kt3k/picojsx@^0.1.5",
     "@kt3k/weak-value-map": "jsr:@kt3k/weak-value-map@^0.1.2",
     "@std/encoding": "jsr:@std/encoding@^1.0.6",
     "@types/vscode-webview": "npm:@types/vscode-webview@^1.57.5",
@@ -8,7 +9,7 @@
   },
   "tasks": {
     "compile": "deno task extension && deno task webview && deno task webview-style",
-    "extension": "deno -A jsr:@kt3k/pack@0.1.14 -o out/extension.js extension.ts --external vscode --format cjs",
+    "extension": "deno -A jsr:@kt3k/pack@0.1.14 -o out/extension.js extension.tsx --external vscode --format cjs",
     "webview": "deno -A jsr:@kt3k/pack@0.1.14 -o out/webview.js webview.ts",
     "webview-style": "deno -A npm:tailwindcss@3 -o out/style.css",
     "package": "deno -A --unstable-unsafe-proto npm:@vscode/vsce package"

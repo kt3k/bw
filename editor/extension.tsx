@@ -1,4 +1,8 @@
 // Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
+
+/**@jsxImportSource @kt3k/picojsx*/
+/**@jsxRuntime automatic*/
+
 import * as vscode from "vscode"
 import { encodeBase64 } from "@std/encoding/base64"
 import type * as type from "./types.ts"
@@ -22,28 +26,24 @@ function editor(
   const webview = panel.webview
   webview.options = { enableScripts: true }
   const u = (path: string) => webview.asWebviewUri(Uri.joinPath(uri, path))
-  webview.html = /* html */ `
-    <!DOCTYPE html>
+  webview.html = (
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link href="${u("out/style.css")}" rel="stylesheet" />
-        <style>
-          canvas {
-            image-rendering: crisp-edges;
-            image-rendering: pixelated
-          }
-        </style>
+        <link href={u("out/style.css")} rel="stylesheet" />
       </head>
       <body class="key-handler">
         <div class="spacer h-10"></div>
         <div class="main-container relative"></div>
-        <div class="cell-switch fixed left-0 top-0 px-1 bg-neutral-900 shadow shadow-neutral-600"></div>
-        <script src="${u("out/webview.js")}" type="module"></script>
+        <div class="cell-switch fixed left-0 top-0 px-1 bg-neutral-900 shadow shadow-neutral-600">
+        </div>
+        <script src={u("out/webview.js")} type="module"></script>
       </body>
     </html>
-  `
+  )
+  console.log(webview.html)
+
   const sub = workspace.onDidChangeTextDocument(onDocChange)
   panel.onDidDispose(() => sub.dispose())
   webview.onDidReceiveMessage(onMessage)

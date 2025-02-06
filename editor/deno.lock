@@ -2,9 +2,10 @@
   "version": "4",
   "specifiers": {
     "jsr:@kt3k/cell@~0.7.6": "0.7.6",
+    "jsr:@kt3k/picojsx@~0.1.5": "0.1.5",
     "jsr:@kt3k/signal@0.3": "0.3.0",
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
-    "jsr:@std/encoding@^1.0.6": "1.0.6",
+    "jsr:@std/encoding@^1.0.6": "1.0.7",
     "npm:@types/vscode-webview@^1.57.5": "1.57.5",
     "npm:seedrandom@^3.0.5": "3.0.5"
   },
@@ -15,6 +16,9 @@
         "jsr:@kt3k/signal"
       ]
     },
+    "@kt3k/picojsx@0.1.5": {
+      "integrity": "ebffa8488f6f9f135e78a5e162102ebd817e7d19bc1bd51c82b17b998fa58205"
+    },
     "@kt3k/signal@0.3.0": {
       "integrity": "5279863b78cbe475a8606864122abaad600e508e08eec7fff126f05c81aad7ff"
     },
@@ -23,6 +27,9 @@
     },
     "@std/encoding@1.0.6": {
       "integrity": "ca87122c196e8831737d9547acf001766618e78cd8c33920776c7f5885546069"
+    },
+    "@std/encoding@1.0.7": {
+      "integrity": "f631247c1698fef289f2de9e2a33d571e46133b38d042905e3eac3715030a82d"
     }
   },
   "npm": {
@@ -36,6 +43,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@kt3k/cell@~0.7.6",
+      "jsr:@kt3k/picojsx@~0.1.5",
       "jsr:@kt3k/weak-value-map@~0.1.2",
       "jsr:@std/encoding@^1.0.6",
       "npm:@types/vscode-webview@^1.57.5"
