@@ -32,6 +32,6 @@
     "semiColons": false
   },
   "exclude": [
-    "dist"
+    "docs"
   ]
 }
