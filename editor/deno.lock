@@ -7,6 +7,7 @@
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
     "jsr:@std/encoding@^1.0.6": "1.0.7",
     "npm:@types/vscode-webview@^1.57.5": "1.57.5",
+    "npm:@types/vscode@^1.96.0": "1.97.0",
     "npm:seedrandom@^3.0.5": "3.0.5"
   },
   "jsr": {
@@ -35,6 +36,9 @@
   "npm": {
     "@types/vscode-webview@1.57.5": {
       "integrity": "sha512-iBAUYNYkz+uk1kdsq05fEcoh8gJmwT3lqqFPN7MGyjQ3HVloViMdo7ZJ8DFIP8WOK74PjOEilosqAyxV2iUFUw=="
+    },
+    "@types/vscode@1.97.0": {
+      "integrity": "sha512-ueE73loeOTe7olaVyqP9mrRI54kVPJifUPjblZo9fYcv1CuVLPOEKEkqW0GkqPC454+nCEoigLWnC2Pp7prZ9w=="
     },
     "seedrandom@3.0.5": {
       "integrity": "sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg=="
