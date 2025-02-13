@@ -50,12 +50,8 @@
       "jsr:@kt3k/picojsx@~0.1.5",
       "jsr:@kt3k/weak-value-map@~0.1.2",
       "jsr:@std/encoding@^1.0.6",
-      "npm:@types/vscode-webview@^1.57.5"
-    ],
-    "packageJson": {
-      "dependencies": [
-        "npm:seedrandom@^3.0.5"
-      ]
-    }
+      "npm:@types/vscode-webview@^1.57.5",
+      "npm:seedrandom@^3.0.5"
+    ]
   }
 }

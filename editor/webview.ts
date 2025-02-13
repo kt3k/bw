@@ -68,26 +68,25 @@ function MainContainer({ subscribe, el, query }: Context) {
           "bg-neutral-800",
           "break-all",
         )
+        const FULL_SIZE = "3200px"
         if (dx === -1) {
           a.style.left = "0"
           a.style.top = "0"
-          a.style.height = "100%"
+          a.style.height = FULL_SIZE
           a.style.marginLeft = "-20px"
         } else if (dx === 1) {
-          a.style.right = "0"
+          a.style.left = FULL_SIZE
           a.style.top = "0"
-          a.style.height = "100%"
-          a.style.marginRight = "-20px"
+          a.style.height = FULL_SIZE
         } else if (dy === -1) {
           a.style.top = "0"
           a.style.left = "0"
-          a.style.width = "100%"
+          a.style.width = FULL_SIZE
           a.style.marginTop = "-20px"
         } else if (dy === 1) {
-          a.style.bottom = "0"
+          a.style.top = FULL_SIZE
           a.style.left = "0"
-          a.style.width = "100%"
-          a.style.marginBottom = "-20px"
+          a.style.width = FULL_SIZE
         }
         el.appendChild(a)
       }
