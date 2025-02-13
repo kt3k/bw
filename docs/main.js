@@ -1662,6 +1662,7 @@ var TerrainBlock = class _TerrainBlock {
   // The row of the world coordinates
   #j;
   #cellMap = {};
+  #imgMap = {};
   #items;
   #characters;
   #terrain;
@@ -1705,7 +1706,16 @@ var TerrainBlock = class _TerrainBlock {
   get cellMap() {
     return this.#cellMap;
   }
-  async createCanvas() {
+  async loadAssets() {
+    await Promise.all(
+      Object.values(this.#cellMap).map(async (cell) => {
+        if (cell.href) {
+          this.#imgMap[cell.href] = await this.loadCellImage(cell.href);
+        }
+      })
+    );
+  }
+  createCanvas() {
     const canvas = document.createElement("canvas");
     canvas.style.position = "absolute";
     canvas.style.left = `${this.x}px`;
@@ -1713,47 +1723,42 @@ var TerrainBlock = class _TerrainBlock {
     canvas.width = this.w;
     canvas.height = this.h;
     canvas.classList.add("crisp-edges");
-    const imgMap = {};
-    await Promise.all(
-      Object.values(this.#cellMap).map(async (cell) => {
-        if (cell.href) {
-          imgMap[cell.href] = await this.loadCellImage(cell.href);
-        }
-      })
-    );
-    this.#renderBlock(new CanvasLayer(canvas), imgMap);
+    this.#renderBlock(new CanvasLayer(canvas));
     return canvas;
   }
-  #renderBlock(layer, imgMap) {
+  drawCell(layer, i, j) {
+    const cell = this.get(i, j);
+    if (cell.href) {
+      layer.drawImage(this.#imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE);
+    } else {
+      layer.drawRect(
+        i * CELL_SIZE,
+        j * CELL_SIZE,
+        CELL_SIZE,
+        CELL_SIZE,
+        cell.color || "black"
+      );
+    }
+    if (!cell.canEnter()) {
+      return;
+    }
+    const worldI = this.#i + i;
+    const worldJ = this.#j + j;
+    const rng2 = (0, import_npm_seedrandom.default)(`${worldI}.${worldJ}`);
+    const choice = (arr) => arr[Math.floor(rng2() * arr.length)];
+    const color = `hsla(90, 100%, 50%, ${choice([0.1, 0.2])})`;
+    layer.drawRect(
+      i * CELL_SIZE,
+      j * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE,
+      color
+    );
+  }
+  #renderBlock(layer) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
-        const cell = this.get(i, j);
-        if (cell.href) {
-          layer.drawImage(imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE);
-        } else {
-          layer.drawRect(
-            i * CELL_SIZE,
-            j * CELL_SIZE,
-            CELL_SIZE,
-            CELL_SIZE,
-            cell.color || "black"
-          );
-        }
-        if (!cell.canEnter()) {
-          continue;
-        }
-        const worldI = this.#i + i;
-        const worldJ = this.#j + j;
-        const rng2 = (0, import_npm_seedrandom.default)(`${worldI}.${worldJ}`);
-        const choice = (arr) => arr[Math.floor(rng2() * arr.length)];
-        const color = `hsla(90, 100%, 50%, ${choice([0, 0.1, 0.3])})`;
-        layer.drawRect(
-          i * CELL_SIZE,
-          j * CELL_SIZE,
-          CELL_SIZE,
-          CELL_SIZE,
-          color
-        );
+        this.drawCell(layer, i, j);
       }
     }
   }
@@ -1941,7 +1946,8 @@ var Terrain = class {
   }
   async addDistrict(block) {
     this.#blocks[block.id] = block;
-    const canvas = await block.createCanvas();
+    await block.loadAssets();
+    const canvas = block.createCanvas();
     this.#blockElements[block.id] = canvas;
     this.#el.appendChild(canvas);
   }
