@@ -52,6 +52,11 @@
       "jsr:@std/encoding@^1.0.6",
       "npm:@types/vscode-webview@^1.57.5",
       "npm:seedrandom@^3.0.5"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:seedrandom@^3.0.5"
+      ]
+    }
   }
 }
