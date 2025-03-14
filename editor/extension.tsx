@@ -3,6 +3,7 @@
 /** @jsxImportSource @kt3k/picojsx */
 /** @jsxRuntime automatic */
 
+// @ts-types="npm:@types/vscode"
 import * as vscode from "vscode"
 import { encodeBase64 } from "@std/encoding/base64"
 import type * as type from "./types.ts"

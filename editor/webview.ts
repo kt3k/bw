@@ -4,14 +4,14 @@
 /// <reference lib="dom" />
 /// <reference types="@types/vscode-webview" />
 
+const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
+
 import { BlockMap, TerrainBlock } from "../player/models.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
-
-const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
 const terrainBlock = new Signal<TerrainBlock | null>(null)
