@@ -1996,7 +1996,7 @@ var Terrain = class {
 };
 function GameScreen({ query }) {
   const layer = new CanvasLayer(query(".canvas1"));
-  const me = new Character(2, 2, 1, "char/kimi/");
+  const me = new Character(2, 2, 1, "char/lena/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
   const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
