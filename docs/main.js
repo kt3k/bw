@@ -1531,9 +1531,9 @@ var Character = class {
   }
   image() {
     if (this.#movePhase >= 8) {
-      return this.#assets[`${this.#dir}0`];
-    } else {
       return this.#assets[`${this.#dir}1`];
+    } else {
+      return this.#assets[`${this.#dir}0`];
     }
   }
   /** Gets the x of the world coordinates */
@@ -2047,7 +2047,4 @@ register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
 register(LoadingIndicator, "js-loading-indicator");
-export {
-  LoadScope
-};
 /*! Cell v0.7.6 | Copyright 2022-2024 Yoshiya Hinosawa and Capsule contributors | MIT license */

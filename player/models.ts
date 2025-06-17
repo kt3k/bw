@@ -145,9 +145,11 @@ export class Character {
 
   image(): HTMLImageElement {
     if (this.#movePhase >= 8) {
-      return this.#assets![`${this.#dir}0`]
-    } else {
+      // active state
       return this.#assets![`${this.#dir}1`]
+    } else {
+      // idle state
+      return this.#assets![`${this.#dir}0`]
     }
   }
 
