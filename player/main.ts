@@ -131,7 +131,7 @@ class WalkScope extends RectScope {
  * The scope to load the terrain block. The terrain block belong
  * to this area need to be loaded.
  */
-export class LoadScope extends RectScope {
+class LoadScope extends RectScope {
   static LOAD_UNIT = 200 * CELL_SIZE
 
   constructor() {
