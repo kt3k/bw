@@ -269,13 +269,15 @@ class Terrain {
 function GameScreen({ query }: Context) {
   const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
 
-  const me = new Character(2, 2, 1, "char/joob/")
+  const me = new Character(2, 2, 1, "char/lena/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
+
+  const npc0 = new Character(-4, 3, 1, "char/joob/")
 
   const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
-  const walkers = new Walkers([me])
+  const walkers = new Walkers([me, npc0])
 
   const walkScope = new WalkScope(layer.width * 3, layer.height * 3)
   centerGridSignal.subscribe(({ i, j }) =>
@@ -288,6 +290,7 @@ function GameScreen({ query }: Context) {
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y))
 
   me.loadAssets()
+  npc0.loadAssets()
 
   isLoadingSignal.subscribe((v) => {
     if (!v) {
