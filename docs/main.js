@@ -1429,6 +1429,12 @@ var loadImage = memoizedLoading(loadImage_);
 // util/random.ts
 var import_npm_seedrandom = __toESM(require_seedrandom2());
 var rng = (0, import_npm_seedrandom.default)("Hello.");
+function randomInt(n) {
+  return Math.floor(rng() * n);
+}
+function choice(arr) {
+  return arr[randomInt(arr.length)];
+}
 
 // player/models.ts
 var Character = class {
@@ -1461,39 +1467,44 @@ var Character = class {
   setState(state) {
     this.#dir = state;
   }
-  #readInput(input) {
-    if (input.up) {
-      this.setState(UP);
-    } else if (input.down) {
-      this.setState(DOWN);
-    } else if (input.left) {
-      this.setState(LEFT);
-    } else if (input.right) {
-      this.setState(RIGHT);
-    }
-  }
   /** Returns the grid coordinates of the 1 cell front of the character. */
-  front() {
-    if (this.#dir === UP) {
+  frontCoord() {
+    return this.nextCoord(this.#dir);
+  }
+  /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
+  nextCoord(dir) {
+    if (dir === UP) {
       return [this.#i, this.#j - 1];
-    } else if (this.#dir === DOWN) {
+    } else if (dir === DOWN) {
       return [this.#i, this.#j + 1];
-    } else if (this.#dir === LEFT) {
+    } else if (dir === LEFT) {
       return [this.#i - 1, this.#j];
     } else {
       return [this.#i + 1, this.#j];
     }
   }
+  /** Returns true if the character can go to the given direction */
+  canEnter(dir, terrain) {
+    const [i, j] = this.nextCoord(dir);
+    const cell = terrain.get(i, j);
+    return cell.canEnter();
+  }
+  getNextState(_input, _terrain) {
+    return void 0;
+  }
   step(input, terrain) {
-    if (this.#movePhase === 0 && (input.up || input.down || input.left || input.right)) {
-      this.#isMoving = true;
-      this.#readInput(input);
-      const [i, j] = this.front();
-      const cell = terrain.get(i, j);
-      if (cell.canEnter()) {
-        this.#moveType = "linear";
-      } else {
-        this.#moveType = "bounce";
+    if (this.#movePhase === 0) {
+      const nextState = this.getNextState(input, terrain);
+      if (nextState) {
+        this.setState(nextState);
+        this.#isMoving = true;
+        const [i, j] = this.frontCoord();
+        const cell = terrain.get(i, j);
+        if (cell.canEnter()) {
+          this.#moveType = "linear";
+        } else {
+          this.#moveType = "bounce";
+        }
       }
     }
     if (this.#isMoving) {
@@ -1535,6 +1546,9 @@ var Character = class {
     } else {
       return this.#assets[`${this.#dir}0`];
     }
+  }
+  get dir() {
+    return this.#dir;
   }
   /** Gets the x of the world coordinates */
   get x() {
@@ -1596,6 +1610,40 @@ var Character = class {
   }
   get assetsReady() {
     return !!this.#assets;
+  }
+};
+var MainCharacter = class extends Character {
+  getNextState(input, _terrain) {
+    if (input.up) {
+      return UP;
+    } else if (input.down) {
+      return DOWN;
+    } else if (input.left) {
+      return LEFT;
+    } else if (input.right) {
+      return RIGHT;
+    }
+    return void 0;
+  }
+};
+var NPC = class extends Character {
+  #counter = 32;
+  constructor(i, j, speed, assetPrefix) {
+    super(i, j, speed, assetPrefix);
+  }
+  getNextState(_input, terrain) {
+    this.#counter -= 1;
+    if (this.#counter <= 0) {
+      this.#counter = randomInt(8) + 4;
+      if (this.canEnter(this.dir, terrain) && Math.random() < 0.96) {
+        return this.dir;
+      }
+      const nextCandidate = [UP, DOWN, LEFT, RIGHT];
+      return choice(nextCandidate.filter((d) => {
+        return this.canEnter(d, terrain);
+      }));
+    }
+    return void 0;
   }
 };
 var TerrainBlockCell = class {
@@ -1745,8 +1793,8 @@ var TerrainBlock = class _TerrainBlock {
     const worldI = this.#i + i;
     const worldJ = this.#j + j;
     const rng2 = (0, import_npm_seedrandom.default)(`${worldI}.${worldJ}`);
-    const choice = (arr) => arr[Math.floor(rng2() * arr.length)];
-    const color = `hsla(90, 100%, 50%, ${choice([0.1, 0.2])})`;
+    const choice2 = (arr) => arr[Math.floor(rng2() * arr.length)];
+    const color = `hsla(90, 100%, 50%, ${choice2([0.1, 0.2])})`;
     layer.drawRect(
       i * CELL_SIZE,
       j * CELL_SIZE,
@@ -1996,12 +2044,14 @@ var Terrain = class {
 };
 function GameScreen({ query }) {
   const layer = new CanvasLayer(query(".canvas1"));
-  const me = new Character(2, 2, 1, "char/lena/");
+  const me = new MainCharacter(2, 2, 1, "char/lena/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
-  const npc0 = new Character(-4, 3, 1, "char/joob/");
+  const mobs = [...Array(4).keys()].map(
+    (_, i) => new NPC(-5 + i, 2 - i, 1, "char/joob/")
+  );
   const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
-  const walkers = new Walkers([me, npc0]);
+  const walkers = new Walkers([me, ...mobs]);
   const walkScope = new WalkScope(layer.width * 3, layer.height * 3);
   centerGridSignal.subscribe(
     ({ i, j }) => walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
@@ -2011,7 +2061,7 @@ function GameScreen({ query }) {
   centerGrid10Signal.subscribe(({ i, j }) => terrain.checkUnload(i, j));
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y));
   me.loadAssets();
-  npc0.loadAssets();
+  mobs.forEach((mob) => mob.loadAssets());
   isLoadingSignal.subscribe((v) => {
     if (!v) {
       query(".curtain").style.opacity = "0";

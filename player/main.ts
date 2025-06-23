@@ -16,7 +16,7 @@ import { LoadingIndicator } from "./ui/loading-indicator.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import { BlockMap, Character, TerrainBlock } from "./models.ts"
+import { BlockMap, MainCharacter, NPC, TerrainBlock } from "./models.ts"
 import { loadImage } from "../util/load.ts"
 
 /**
@@ -269,15 +269,17 @@ class Terrain {
 function GameScreen({ query }: Context) {
   const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
 
-  const me = new Character(2, 2, 1, "char/lena/")
+  const me = new MainCharacter(2, 2, 1, "char/lena/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
-  const npc0 = new Character(-4, 3, 1, "char/joob/")
+  const mobs = [...Array(4).keys()].map((_, i) =>
+    new NPC(-5 + i, 2 - i, 1, "char/joob/")
+  )
 
   const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
-  const walkers = new Walkers([me, npc0])
+  const walkers = new Walkers([me, ...mobs])
 
   const walkScope = new WalkScope(layer.width * 3, layer.height * 3)
   centerGridSignal.subscribe(({ i, j }) =>
@@ -290,7 +292,7 @@ function GameScreen({ query }: Context) {
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y))
 
   me.loadAssets()
-  npc0.loadAssets()
+  mobs.forEach((mob) => mob.loadAssets())
 
   isLoadingSignal.subscribe((v) => {
     if (!v) {

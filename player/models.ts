@@ -9,7 +9,7 @@ import type { Input } from "../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import { seedrandom } from "../util/random.ts"
+import { choice, randomInt, seedrandom } from "../util/random.ts"
 
 type CharacterAppearance =
   | "up0"
@@ -25,8 +25,10 @@ type CharacterAssets = {
   [K in CharacterAppearance]: HTMLImageElement
 }
 
-/** The character */
-export class Character {
+/** The abstract character class
+ * The parent class of MainCharacter and NPC.
+ */
+abstract class Character {
   /** The current direction of the character */
   #dir: Dir = "down"
   /** The column of the world coordinates */
@@ -64,48 +66,58 @@ export class Character {
     this.#dir = state
   }
 
-  #readInput(input: typeof Input) {
-    if (input.up) {
-      this.setState(UP)
-    } else if (input.down) {
-      this.setState(DOWN)
-    } else if (input.left) {
-      this.setState(LEFT)
-    } else if (input.right) {
-      this.setState(RIGHT)
-    }
+  /** Returns the grid coordinates of the 1 cell front of the character. */
+  frontCoord(): [i: number, j: number] {
+    return this.nextCoord(this.#dir)
   }
 
-  /** Returns the grid coordinates of the 1 cell front of the character. */
-  front(): [i: number, j: number] {
-    if (this.#dir === UP) {
+  /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
+  nextCoord(dir: Dir): [i: number, j: number] {
+    if (dir === UP) {
       return [this.#i, this.#j - 1]
-    } else if (this.#dir === DOWN) {
+    } else if (dir === DOWN) {
       return [this.#i, this.#j + 1]
-    } else if (this.#dir === LEFT) {
+    } else if (dir === LEFT) {
       return [this.#i - 1, this.#j]
     } else {
       return [this.#i + 1, this.#j]
     }
   }
 
+  /** Returns true if the character can go to the given direction */
+  canEnter(
+    dir: Dir,
+    terrain: { get(i: number, j: number): TerrainBlockCell },
+  ): boolean {
+    const [i, j] = this.nextCoord(dir)
+    const cell = terrain.get(i, j)
+    return cell.canEnter()
+  }
+
+  getNextState(
+    _input: typeof Input,
+    _terrain: { get(i: number, j: number): TerrainBlockCell },
+  ): Dir | undefined {
+    return undefined
+  }
+
   step(
     input: typeof Input,
     terrain: { get(i: number, j: number): TerrainBlockCell },
   ) {
-    if (
-      this.#movePhase === 0 &&
-      (input.up || input.down || input.left || input.right)
-    ) {
-      this.#isMoving = true
-      this.#readInput(input)
-      const [i, j] = this.front()
-      const cell = terrain.get(i, j)
+    if (this.#movePhase === 0) {
+      const nextState = this.getNextState(input, terrain)
+      if (nextState) {
+        this.setState(nextState)
+        this.#isMoving = true
+        const [i, j] = this.frontCoord()
+        const cell = terrain.get(i, j)
 
-      if (cell.canEnter()) {
-        this.#moveType = "linear"
-      } else {
-        this.#moveType = "bounce"
+        if (cell.canEnter()) {
+          this.#moveType = "linear"
+        } else {
+          this.#moveType = "bounce"
+        }
       }
     }
 
@@ -151,6 +163,10 @@ export class Character {
       // idle state
       return this.#assets![`${this.#dir}0`]
     }
+  }
+
+  get dir(): Dir {
+    return this.#dir
   }
 
   /** Gets the x of the world coordinates */
@@ -221,6 +237,56 @@ export class Character {
 
   get assetsReady(): boolean {
     return !!this.#assets
+  }
+}
+
+export class MainCharacter extends Character {
+  override getNextState(
+    input: typeof Input,
+    _terrain: { get(i: number, j: number): TerrainBlockCell },
+  ): Dir | undefined {
+    if (input.up) {
+      return UP
+    } else if (input.down) {
+      return DOWN
+    } else if (input.left) {
+      return LEFT
+    } else if (input.right) {
+      return RIGHT
+    }
+    return undefined
+  }
+}
+
+export class NPC extends Character {
+  #counter = 32
+  constructor(
+    i: number,
+    j: number,
+    speed: 1 | 2 | 4 | 8 | 16,
+    assetPrefix: string,
+  ) {
+    super(i, j, speed, assetPrefix)
+  }
+
+  override getNextState(
+    _input: typeof Input,
+    terrain: { get(i: number, j: number): TerrainBlockCell },
+  ): Dir | undefined {
+    this.#counter -= 1
+    if (this.#counter <= 0) {
+      this.#counter = randomInt(8) + 4
+      // If the character can keep going in the current direction,
+      // it will keep going with 80% probability.
+      if (this.canEnter(this.dir, terrain) && Math.random() < 0.96) {
+        return this.dir
+      }
+      const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
+      return choice(nextCandidate.filter((d) => {
+        return this.canEnter(d, terrain)
+      }))
+    }
+    return undefined
   }
 }
 
