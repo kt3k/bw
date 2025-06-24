@@ -10,7 +10,7 @@
   "lock": false,
   "tasks": {
     "test": "deno test",
-    "start": "deno run -A npm:concurrently 'deno task watch:js' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
+    "dev": "deno run -A npm:concurrently 'deno task watch:js' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
     "watch:js": "deno run --watch=player,util -A jsr:@kt3k/pack@0.1.10 -o dist/main.js player/main.ts",
     "watch:style": "deno run -A npm:tailwindcss@3 -o ./dist/style.css --watch",
     "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' dist",

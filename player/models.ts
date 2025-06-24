@@ -43,6 +43,8 @@ abstract class Character {
   #isMoving: boolean = false
   /** The phase of the move */
   #movePhase: number = 0
+  /** The counter of the idle state */
+  #idleCounter: number = 0
   /** Type of the move */
   #moveType: "linear" | "bounce" = "linear"
   /** The prefix of assets */
@@ -110,10 +112,9 @@ abstract class Character {
       if (nextState) {
         this.setState(nextState)
         this.#isMoving = true
-        const [i, j] = this.frontCoord()
-        const cell = terrain.get(i, j)
+        this.#idleCounter = 0
 
-        if (cell.canEnter()) {
+        if (this.canEnter(nextState, terrain)) {
           this.#moveType = "linear"
         } else {
           this.#moveType = "bounce"
@@ -152,16 +153,29 @@ abstract class Character {
           this.#d = 0
         }
       }
+    } else {
+      this.#idleCounter += 1
     }
   }
 
   image(): HTMLImageElement {
-    if (this.#movePhase >= 8) {
-      // active state
-      return this.#assets![`${this.#dir}1`]
+    if (this.#isMoving) {
+      if (this.#movePhase < 8) {
+        // idle state
+        return this.#assets![`${this.#dir}0`]
+      } else {
+        // active state
+        return this.#assets![`${this.#dir}1`]
+      }
     } else {
-      // idle state
-      return this.#assets![`${this.#dir}0`]
+      // idle stat
+      if (this.#idleCounter % 128 < 64) {
+        // idle state
+        return this.#assets![`${this.#dir}0`]
+      } else {
+        // active state
+        return this.#assets![`${this.#dir}1`]
+      }
     }
   }
 
