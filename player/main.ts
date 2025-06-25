@@ -319,15 +319,17 @@ class Terrain {
   }
 }
 
+const range = (n: number) => [...Array(n).keys()]
+
 function GameScreen({ query }: Context) {
   const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
 
   const me = new MainCharacter(2, 2, 1, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
-  const mobs = [...Array(4).keys()].map((_, i) =>
-    new NPC(-5 + i, 2 - i, 1, "char/joob/")
-  )
+  const mobs = range(6).map((j) =>
+    range(3).map((i) => new NPC(-4 + i, -2 + j, 1, "char/joob/"))
+  ).flat()
 
   const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
