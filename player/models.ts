@@ -25,6 +25,8 @@ type CharacterAssets = {
   [K in CharacterAppearance]: HTMLImageElement
 }
 
+export type CollisionChecker = (i: number, j: number) => boolean
+
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
  */
@@ -47,6 +49,8 @@ abstract class Character {
   #idleCounter: number = 0
   /** Type of the move */
   #moveType: "linear" | "bounce" = "linear"
+  /** The key of the physical grid, which is used for collision detection */
+  #physicalGridKey: string
   /** The prefix of assets */
   #assetPrefix: string
   /** The images necessary to render this character */
@@ -62,6 +66,7 @@ abstract class Character {
     this.#j = j
     this.#speed = speed
     this.#assetPrefix = assetPrefix
+    this.#physicalGridKey = this.#calcPhysicalGridKey()
   }
 
   setState(state: Dir) {
@@ -90,15 +95,23 @@ abstract class Character {
   canEnter(
     dir: Dir,
     terrain: { get(i: number, j: number): TerrainBlockCell },
+    collisionChecker: CollisionChecker,
   ): boolean {
     const [i, j] = this.nextCoord(dir)
     const cell = terrain.get(i, j)
-    return cell.canEnter()
+    return cell.canEnter() && !collisionChecker(i, j)
   }
 
+  /** Returns the next state of the character.
+   * This method is called in each step.
+   *
+   * Returning the direction causes the character to move in that direction.
+   * Returning undefined causes the character to stay in the current state.
+   */
   getNextState(
     _input: typeof Input,
     _terrain: { get(i: number, j: number): TerrainBlockCell },
+    _collisionChecker: CollisionChecker,
   ): Dir | undefined {
     return undefined
   }
@@ -106,15 +119,16 @@ abstract class Character {
   step(
     input: typeof Input,
     terrain: { get(i: number, j: number): TerrainBlockCell },
+    collisionChecker: CollisionChecker,
   ) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextState(input, terrain)
+      const nextState = this.getNextState(input, terrain, collisionChecker)
       if (nextState) {
         this.setState(nextState)
         this.#isMoving = true
         this.#idleCounter = 0
 
-        if (this.canEnter(nextState, terrain)) {
+        if (this.canEnter(nextState, terrain, collisionChecker)) {
           this.#moveType = "linear"
         } else {
           this.#moveType = "bounce"
@@ -156,6 +170,8 @@ abstract class Character {
     } else {
       this.#idleCounter += 1
     }
+
+    this.#physicalGridKey = this.#calcPhysicalGridKey()
   }
 
   image(): HTMLImageElement {
@@ -252,12 +268,49 @@ abstract class Character {
   get assetsReady(): boolean {
     return !!this.#assets
   }
+
+  #calcPhysicalGridKey(): string {
+    return `${this.#physicalI}.${this.#physicalJ}`
+  }
+
+  get physicalGridKey(): string {
+    return this.#physicalGridKey
+  }
+
+  /** Physical coordinate is the grid coordinate
+   * where the character is currently located.
+   * This is used to for collision detection with other characters.
+   * Physical coordinate is different from display coordinate #i and #j
+   * when the character is moving.
+   */
+  get #physicalI(): number {
+    if (this.#isMoving && this.#moveType === "linear") {
+      if (this.#dir === LEFT) {
+        return this.#i - 1
+      } else if (this.#dir === RIGHT) {
+        return this.#i + 1
+      }
+    }
+    return this.#i
+  }
+
+  get #physicalJ(): number {
+    if (this.#isMoving && this.#moveType === "linear") {
+      if (this.#dir === UP) {
+        return this.#j - 1
+      } else if (this.#dir === DOWN) {
+        return this.#j + 1
+      }
+    }
+    return this.#j
+  }
 }
 
 export class MainCharacter extends Character {
   override getNextState(
     input: typeof Input,
     _terrain: { get(i: number, j: number): TerrainBlockCell },
+    _collisionChecker: CollisionChecker,
   ): Dir | undefined {
     if (input.up) {
       return UP
@@ -286,18 +339,22 @@ export class NPC extends Character {
   override getNextState(
     _input: typeof Input,
     terrain: { get(i: number, j: number): TerrainBlockCell },
+    collisionChecker: CollisionChecker,
   ): Dir | undefined {
     this.#counter -= 1
     if (this.#counter <= 0) {
       this.#counter = randomInt(8) + 4
       // If the character can keep going in the current direction,
       // it will keep going with 80% probability.
-      if (this.canEnter(this.dir, terrain) && Math.random() < 0.96) {
+      if (
+        this.canEnter(this.dir, terrain, collisionChecker) &&
+        Math.random() < 0.96
+      ) {
         return this.dir
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
       return choice(nextCandidate.filter((d) => {
-        return this.canEnter(d, terrain)
+        return this.canEnter(d, terrain, collisionChecker)
       }))
     }
     return undefined

@@ -16,7 +16,13 @@ import { LoadingIndicator } from "./ui/loading-indicator.ts"
 import { CanvasLayer } from "../util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import { BlockMap, MainCharacter, NPC, TerrainBlock } from "./models.ts"
+import {
+  BlockMap,
+  CollisionChecker,
+  MainCharacter,
+  NPC,
+  TerrainBlock,
+} from "./models.ts"
 import { loadImage } from "../util/load.ts"
 
 /**
@@ -86,9 +92,46 @@ type IBox = {
 
 /** The interface represents a character */
 type IChar = IBox & {
-  step(input: typeof Input, terrain: Terrain): void
+  step(
+    input: typeof Input,
+    terrain: Terrain,
+    collisionChecker: CollisionChecker,
+  ): void
   image(): HTMLImageElement
   get assetsReady(): boolean
+  get physicalGridKey(): string
+}
+
+/** A map that counts characters at each coordinate */
+class CoordCountMap {
+  #map: Record<string, number> = {}
+
+  increment(key: string, value = 1) {
+    if (this.#map[key] === undefined) {
+      this.#map[key] = 0
+    }
+    this.#map[key] += value
+  }
+
+  decrement(key: string, value = 1) {
+    if (this.#map[key] === undefined) {
+      return
+    }
+    this.#map[key] -= value
+    if (this.#map[key] <= 0) {
+      delete this.#map[key]
+    }
+  }
+
+  get(key: string): number {
+    return this.#map[key] ?? 0
+  }
+
+  display() {
+    Object.entries(this.#map).forEach(([key, value]) => {
+      console.log(`${key}=${value}`)
+    })
+  }
 }
 
 /**
@@ -97,9 +140,17 @@ type IChar = IBox & {
  */
 class Walkers {
   #walkers: IChar[] = []
+  #coordCountMap = new CoordCountMap()
+
+  checkCollision = (i: number, j: number): boolean => {
+    return this.#coordCountMap.get(`${i}.${j}`) > 0
+  }
 
   constructor(chars: IChar[] = []) {
     this.#walkers = chars
+    for (const walker of chars) {
+      this.#coordCountMap.increment(walker.physicalGridKey)
+    }
   }
 
   add(walker: IChar) {
@@ -108,7 +159,9 @@ class Walkers {
 
   step(input: typeof Input, terrain: Terrain) {
     for (const walker of this.#walkers) {
-      walker.step(input, terrain)
+      this.#coordCountMap.decrement(walker.physicalGridKey)
+      walker.step(input, terrain, this.checkCollision)
+      this.#coordCountMap.increment(walker.physicalGridKey)
     }
   }
 
@@ -269,7 +322,7 @@ class Terrain {
 function GameScreen({ query }: Context) {
   const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
 
-  const me = new MainCharacter(2, 2, 1, "char/lena/")
+  const me = new MainCharacter(2, 2, 1, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
   const mobs = [...Array(4).keys()].map((_, i) =>
