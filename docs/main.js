@@ -1452,8 +1452,12 @@ var Character = class {
   #isMoving = false;
   /** The phase of the move */
   #movePhase = 0;
+  /** The counter of the idle state */
+  #idleCounter = 0;
   /** Type of the move */
   #moveType = "linear";
+  /** The key of the physical grid, which is used for collision detection */
+  #physicalGridKey;
   /** The prefix of assets */
   #assetPrefix;
   /** The images necessary to render this character */
@@ -1463,6 +1467,7 @@ var Character = class {
     this.#j = j;
     this.#speed = speed;
     this.#assetPrefix = assetPrefix;
+    this.#physicalGridKey = this.#calcPhysicalGridKey();
   }
   setState(state) {
     this.#dir = state;
@@ -1484,23 +1489,28 @@ var Character = class {
     }
   }
   /** Returns true if the character can go to the given direction */
-  canEnter(dir, terrain) {
+  canEnter(dir, terrain, collisionChecker) {
     const [i, j] = this.nextCoord(dir);
     const cell = terrain.get(i, j);
-    return cell.canEnter();
+    return cell.canEnter() && !collisionChecker(i, j);
   }
-  getNextState(_input, _terrain) {
+  /** Returns the next state of the character.
+   * This method is called in each step.
+   *
+   * Returning the direction causes the character to move in that direction.
+   * Returning undefined causes the character to stay in the current state.
+   */
+  getNextState(_input, _terrain, _collisionChecker) {
     return void 0;
   }
-  step(input, terrain) {
+  step(input, terrain, collisionChecker) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextState(input, terrain);
+      const nextState = this.getNextState(input, terrain, collisionChecker);
       if (nextState) {
         this.setState(nextState);
         this.#isMoving = true;
-        const [i, j] = this.frontCoord();
-        const cell = terrain.get(i, j);
-        if (cell.canEnter()) {
+        this.#idleCounter = 0;
+        if (this.canEnter(nextState, terrain, collisionChecker)) {
           this.#moveType = "linear";
         } else {
           this.#moveType = "bounce";
@@ -1538,13 +1548,24 @@ var Character = class {
           this.#d = 0;
         }
       }
+    } else {
+      this.#idleCounter += 1;
     }
+    this.#physicalGridKey = this.#calcPhysicalGridKey();
   }
   image() {
-    if (this.#movePhase >= 8) {
-      return this.#assets[`${this.#dir}1`];
+    if (this.#isMoving) {
+      if (this.#movePhase < 8) {
+        return this.#assets[`${this.#dir}0`];
+      } else {
+        return this.#assets[`${this.#dir}1`];
+      }
     } else {
-      return this.#assets[`${this.#dir}0`];
+      if (this.#idleCounter % 128 < 64) {
+        return this.#assets[`${this.#dir}0`];
+      } else {
+        return this.#assets[`${this.#dir}1`];
+      }
     }
   }
   get dir() {
@@ -1611,9 +1632,41 @@ var Character = class {
   get assetsReady() {
     return !!this.#assets;
   }
+  #calcPhysicalGridKey() {
+    return `${this.#physicalI}.${this.#physicalJ}`;
+  }
+  get physicalGridKey() {
+    return this.#physicalGridKey;
+  }
+  /** Physical coordinate is the grid coordinate
+   * where the character is currently located.
+   * This is used to for collision detection with other characters.
+   * Physical coordinate is different from display coordinate #i and #j
+   * when the character is moving.
+   */
+  get #physicalI() {
+    if (this.#isMoving && this.#moveType === "linear") {
+      if (this.#dir === LEFT) {
+        return this.#i - 1;
+      } else if (this.#dir === RIGHT) {
+        return this.#i + 1;
+      }
+    }
+    return this.#i;
+  }
+  get #physicalJ() {
+    if (this.#isMoving && this.#moveType === "linear") {
+      if (this.#dir === UP) {
+        return this.#j - 1;
+      } else if (this.#dir === DOWN) {
+        return this.#j + 1;
+      }
+    }
+    return this.#j;
+  }
 };
 var MainCharacter = class extends Character {
-  getNextState(input, _terrain) {
+  getNextState(input, _terrain, _collisionChecker) {
     if (input.up) {
       return UP;
     } else if (input.down) {
@@ -1631,16 +1684,16 @@ var NPC = class extends Character {
   constructor(i, j, speed, assetPrefix) {
     super(i, j, speed, assetPrefix);
   }
-  getNextState(_input, terrain) {
+  getNextState(_input, terrain, collisionChecker) {
     this.#counter -= 1;
     if (this.#counter <= 0) {
       this.#counter = randomInt(8) + 4;
-      if (this.canEnter(this.dir, terrain) && Math.random() < 0.96) {
+      if (this.canEnter(this.dir, terrain, collisionChecker) && Math.random() < 0.96) {
         return this.dir;
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT];
       return choice(nextCandidate.filter((d) => {
-        return this.canEnter(d, terrain);
+        return this.canEnter(d, terrain, collisionChecker);
       }));
     }
     return void 0;
@@ -1909,17 +1962,52 @@ var ViewScope = class extends RectScope {
     viewScopeSignal.update({ x: -this.left, y: -this.top });
   }
 };
+var CoordCountMap = class {
+  #map = {};
+  increment(key, value = 1) {
+    if (this.#map[key] === void 0) {
+      this.#map[key] = 0;
+    }
+    this.#map[key] += value;
+  }
+  decrement(key, value = 1) {
+    if (this.#map[key] === void 0) {
+      return;
+    }
+    this.#map[key] -= value;
+    if (this.#map[key] <= 0) {
+      delete this.#map[key];
+    }
+  }
+  get(key) {
+    return this.#map[key] ?? 0;
+  }
+  display() {
+    Object.entries(this.#map).forEach(([key, value]) => {
+      console.log(`${key}=${value}`);
+    });
+  }
+};
 var Walkers = class {
   #walkers = [];
+  #coordCountMap = new CoordCountMap();
+  checkCollision = (i, j) => {
+    return this.#coordCountMap.get(`${i}.${j}`) > 0;
+  };
   constructor(chars = []) {
     this.#walkers = chars;
+    for (const walker of chars) {
+      this.#coordCountMap.increment(walker.physicalGridKey);
+    }
   }
   add(walker) {
     this.#walkers.push(walker);
   }
   step(input, terrain) {
     for (const walker of this.#walkers) {
-      walker.step(input, terrain);
+      this.#coordCountMap.decrement(walker.physicalGridKey);
+      walker.step(input, terrain, this.checkCollision);
+      this.#coordCountMap.increment(walker.physicalGridKey);
     }
   }
   get assetsReady() {
@@ -2042,13 +2130,14 @@ var Terrain = class {
     return !this.#mapLoader.isLoading;
   }
 };
+var range = (n) => [...Array(n).keys()];
 function GameScreen({ query }) {
   const layer = new CanvasLayer(query(".canvas1"));
-  const me = new MainCharacter(2, 2, 1, "char/lena/");
+  const me = new MainCharacter(2, 2, 1, "char/kimi/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
-  const mobs = [...Array(4).keys()].map(
-    (_, i) => new NPC(-5 + i, 2 - i, 1, "char/joob/")
-  );
+  const mobs = range(6).map(
+    (j) => range(3).map((i) => new NPC(-4 + i, -2 + j, 1, "char/joob/"))
+  ).flat();
   const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
   const walkers = new Walkers([me, ...mobs]);
