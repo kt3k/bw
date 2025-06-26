@@ -17,12 +17,13 @@ import { CanvasLayer } from "../util/canvas-layer.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
-  BlockMap,
   type CollisionChecker,
+  type ItemContainer,
   MainCharacter,
   NPC,
-  TerrainBlock,
-} from "./model/models.ts"
+} from "./model/character.ts"
+import { BlockMap, TerrainBlock } from "./model/terrain-block.ts"
+import { Item } from "./model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { AppleCounter } from "./ui/apple-counter.ts"
 
@@ -91,18 +92,65 @@ type IBox = {
   get h(): number
 }
 
+type IObj = IBox & {
+  i: number
+  j: number
+  loadAssets(): Promise<void>
+  get assetsReady(): boolean
+  image(): HTMLImageElement
+}
+
 /** The interface represents a character */
-type IChar = IBox & {
+type IChar = IObj & {
   step(
     input: typeof Input,
     terrain: Terrain,
     collisionChecker: CollisionChecker,
+    items: ItemContainer,
   ): void
-  image(): HTMLImageElement
-  get assetsReady(): boolean
   get physicalGridKey(): string
 }
 
+class Items {
+  #items: Set<IObj> = new Set()
+  #coordMap = {} as Record<string, IObj>
+
+  add(item: IObj) {
+    this.#items.add(item)
+    this.#coordMap[`${item.i}.${item.j}`] = item
+  }
+
+  get(i: number, j: number): IObj | undefined {
+    return this.#coordMap[`${i}.${j}`]
+  }
+
+  remove(i: number, j: number) {
+    const key = `${i}.${j}`
+    const item = this.#coordMap[key]
+    if (!item) {
+      return
+    }
+    this.#items.delete(item)
+    delete this.#coordMap[key]
+  }
+
+  step() {
+    // add or remove items based on some scope
+  }
+
+  async loadAssets(): Promise<void> {
+    const promises = [...this.#items].map((item) => item.loadAssets())
+    await Promise.all(promises)
+  }
+
+  get assetsReady(): boolean {
+    return [...this.#items].every((x) => x.assetsReady)
+  }
+
+  [Symbol.iterator]() {
+    return this.#items[Symbol.iterator]()
+  }
+}
 /** A map that counts characters at each coordinate */
 class CoordCountMap {
   #map: Record<string, number> = {}
@@ -158,10 +206,10 @@ class Walkers {
     this.#walkers.push(walker)
   }
 
-  step(input: typeof Input, terrain: Terrain) {
+  step(input: typeof Input, terrain: Terrain, items: ItemContainer) {
     for (const walker of this.#walkers) {
       this.#coordCountMap.decrement(walker.physicalGridKey)
-      walker.step(input, terrain, this.checkCollision)
+      walker.step(input, terrain, this.checkCollision, items)
       this.#coordCountMap.increment(walker.physicalGridKey)
     }
   }
@@ -323,7 +371,8 @@ class Terrain {
 const range = (n: number) => [...Array(n).keys()]
 
 function GameScreen({ query }: Context) {
-  const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas1")!)
+  const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas-chars")!)
+  const itemLayer = new CanvasLayer(query<HTMLCanvasElement>(".canvas-items")!)
 
   const me = new MainCharacter(2, 2, 1, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
@@ -331,6 +380,15 @@ function GameScreen({ query }: Context) {
   const mobs = range(6).map((j) =>
     range(3).map((i) => new NPC(-4 + i, -2 + j, 1, "char/joob/"))
   ).flat()
+
+  const items = new Items()
+  items.add(new Item(1, 1, "item/apple.png"))
+  items.add(new Item(2, 4, "item/apple.png"))
+  items.add(new Item(3, 5, "item/apple.png"))
+  items.add(new Item(4, 1, "item/apple.png"))
+  items.add(new Item(5, 1, "item/apple.png"))
+  items.add(new Item(6, 1, "item/apple.png"))
+  items.add(new Item(7, 1, "item/apple.png"))
 
   const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
@@ -350,6 +408,18 @@ function GameScreen({ query }: Context) {
   me.loadAssets()
   mobs.forEach((mob) => mob.loadAssets())
 
+  items.loadAssets().then(() => {
+    for (const item of items) {
+      if (viewScope.overlaps(item)) {
+        layer.drawImage(
+          item.image(),
+          item.x - viewScope.left,
+          item.y - viewScope.top,
+        )
+      }
+    }
+  })
+
   isLoadingSignal.subscribe((v) => {
     if (!v) {
       query(".curtain")!.style.opacity = "0"
@@ -357,19 +427,30 @@ function GameScreen({ query }: Context) {
   })
 
   const loop = gameloop(() => {
-    if (!walkers.assetsReady || !terrain.assetsReady) {
+    if (!walkers.assetsReady || !terrain.assetsReady || !items.assetsReady) {
       isLoadingSignal.update(true)
       return
     }
     isLoadingSignal.update(false)
 
-    walkers.step(Input, terrain)
+    walkers.step(Input, terrain, items)
     centerPixelSignal.update({
       x: me.centerX,
       y: me.centerY,
     })
 
+    itemLayer.clear()
     layer.clear()
+
+    for (const item of items) {
+      if (viewScope.overlaps(item)) {
+        itemLayer.drawImage(
+          item.image(),
+          item.x - viewScope.left,
+          item.y - viewScope.top,
+        )
+      }
+    }
 
     for (const walker of walkers) {
       if (!viewScope.overlaps(walker)) {

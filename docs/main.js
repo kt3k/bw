@@ -1172,6 +1172,7 @@ var BLOCK_SIZE = 200;
 
 // util/signal.ts
 var fpsSignal = new Signal(0);
+var appleCountSignal = new Signal(0);
 var viewScopeSignal = new GroupSignal({ x: 0, y: 0 });
 var isLoadingSignal = new Signal(true);
 var centerPixelSignal = new GroupSignal({ x: 0, y: 0 });
@@ -1436,7 +1437,7 @@ function choice(arr) {
   return arr[randomInt(arr.length)];
 }
 
-// player/models.ts
+// player/model/character.ts
 var Character = class {
   /** The current direction of the character */
   #dir = "down";
@@ -1462,6 +1463,11 @@ var Character = class {
   #assetPrefix;
   /** The images necessary to render this character */
   #assets;
+  /**
+   * @param i The column of the grid coordinate
+   * @param j The row of the grid coordinate
+   * @param assetPrefix The prefix of the asset URL
+   */
   constructor(i, j, speed, assetPrefix) {
     this.#i = i;
     this.#j = j;
@@ -1503,7 +1509,9 @@ var Character = class {
   getNextState(_input, _terrain, _collisionChecker) {
     return void 0;
   }
-  step(input, terrain, collisionChecker) {
+  onMoveEnd(_terrain, _itemContainer) {
+  }
+  step(input, terrain, collisionChecker, itemContainer) {
     if (this.#movePhase === 0) {
       const nextState = this.getNextState(input, terrain, collisionChecker);
       if (nextState) {
@@ -1534,6 +1542,7 @@ var Character = class {
           } else if (this.#dir === RIGHT) {
             this.#i += 1;
           }
+          this.onMoveEnd(terrain, itemContainer);
         }
       } else if (this.#moveType === "bounce") {
         this.#movePhase += this.#speed;
@@ -1638,6 +1647,12 @@ var Character = class {
   get physicalGridKey() {
     return this.#physicalGridKey;
   }
+  get i() {
+    return this.#i;
+  }
+  get j() {
+    return this.#j;
+  }
   /** Physical coordinate is the grid coordinate
    * where the character is currently located.
    * This is used to for collision detection with other characters.
@@ -1678,6 +1693,17 @@ var MainCharacter = class extends Character {
     }
     return void 0;
   }
+  onMoveEnd(_terrain, itemContainer) {
+    console.log(`Character moved to (${this.i}, ${this.j})`);
+    const item = itemContainer.get(this.i, this.j);
+    if (item) {
+      itemContainer.remove(this.i, this.j);
+      setTimeout(() => {
+        const count = appleCountSignal.get();
+        appleCountSignal.update(count + 1);
+      }, 300);
+    }
+  }
 };
 var NPC = class extends Character {
   #counter = 32;
@@ -1699,6 +1725,8 @@ var NPC = class extends Character {
     return void 0;
   }
 };
+
+// player/model/terrain-block.ts
 var TerrainBlockCell = class {
   #color;
   #href;
@@ -1919,6 +1947,61 @@ var TerrainBlock = class _TerrainBlock {
   }
 };
 
+// player/model/item.ts
+var Item = class {
+  #i;
+  #j;
+  #assetPath;
+  #assets;
+  /**
+   * @param i The column of the grid coordinate
+   * @param j The row of the grid coordinate
+   * @param assetPath The path to the asset image
+   */
+  constructor(i, j, assetPath) {
+    this.#i = i;
+    this.#j = j;
+    this.#assetPath = assetPath;
+  }
+  async loadAssets() {
+    this.#assets = await loadImage(this.#assetPath);
+  }
+  get assetsReady() {
+    return !!this.#assets;
+  }
+  image() {
+    return this.#assets;
+  }
+  get x() {
+    return this.#i * CELL_SIZE;
+  }
+  get y() {
+    return this.#j * CELL_SIZE;
+  }
+  get w() {
+    return CELL_SIZE;
+  }
+  get h() {
+    return CELL_SIZE;
+  }
+  get i() {
+    return this.#i;
+  }
+  get j() {
+    return this.#j;
+  }
+};
+
+// player/ui/apple-counter.ts
+function AppleCounter({ query, subscribe }) {
+  subscribe(appleCountSignal, (apples) => {
+    const counter = query(".count-label");
+    if (counter) {
+      counter.textContent = apples.toString();
+    }
+  });
+}
+
 // player/main.ts
 var RectScope = class {
   #w;
@@ -1962,6 +2045,38 @@ var ViewScope = class extends RectScope {
     viewScopeSignal.update({ x: -this.left, y: -this.top });
   }
 };
+var Items = class {
+  #items = /* @__PURE__ */ new Set();
+  #coordMap = {};
+  add(item) {
+    this.#items.add(item);
+    this.#coordMap[`${item.i}.${item.j}`] = item;
+  }
+  get(i, j) {
+    return this.#coordMap[`${i}.${j}`];
+  }
+  remove(i, j) {
+    const key = `${i}.${j}`;
+    const item = this.#coordMap[key];
+    if (!item) {
+      return;
+    }
+    this.#items.delete(item);
+    delete this.#coordMap[key];
+  }
+  step() {
+  }
+  async loadAssets() {
+    const promises = [...this.#items].map((item) => item.loadAssets());
+    await Promise.all(promises);
+  }
+  get assetsReady() {
+    return [...this.#items].every((x) => x.assetsReady);
+  }
+  [Symbol.iterator]() {
+    return this.#items[Symbol.iterator]();
+  }
+};
 var CoordCountMap = class {
   #map = {};
   increment(key, value = 1) {
@@ -2003,10 +2118,10 @@ var Walkers = class {
   add(walker) {
     this.#walkers.push(walker);
   }
-  step(input, terrain) {
+  step(input, terrain, items) {
     for (const walker of this.#walkers) {
       this.#coordCountMap.decrement(walker.physicalGridKey);
-      walker.step(input, terrain, this.checkCollision);
+      walker.step(input, terrain, this.checkCollision, items);
       this.#coordCountMap.increment(walker.physicalGridKey);
     }
   }
@@ -2132,12 +2247,21 @@ var Terrain = class {
 };
 var range = (n) => [...Array(n).keys()];
 function GameScreen({ query }) {
-  const layer = new CanvasLayer(query(".canvas1"));
+  const layer = new CanvasLayer(query(".canvas-chars"));
+  const itemLayer = new CanvasLayer(query(".canvas-items"));
   const me = new MainCharacter(2, 2, 1, "char/kimi/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
   const mobs = range(6).map(
     (j) => range(3).map((i) => new NPC(-4 + i, -2 + j, 1, "char/joob/"))
   ).flat();
+  const items = new Items();
+  items.add(new Item(1, 1, "item/apple.png"));
+  items.add(new Item(2, 4, "item/apple.png"));
+  items.add(new Item(3, 5, "item/apple.png"));
+  items.add(new Item(4, 1, "item/apple.png"));
+  items.add(new Item(5, 1, "item/apple.png"));
+  items.add(new Item(6, 1, "item/apple.png"));
+  items.add(new Item(7, 1, "item/apple.png"));
   const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
   const walkers = new Walkers([me, ...mobs]);
@@ -2151,23 +2275,44 @@ function GameScreen({ query }) {
   viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y));
   me.loadAssets();
   mobs.forEach((mob) => mob.loadAssets());
+  items.loadAssets().then(() => {
+    for (const item of items) {
+      if (viewScope.overlaps(item)) {
+        layer.drawImage(
+          item.image(),
+          item.x - viewScope.left,
+          item.y - viewScope.top
+        );
+      }
+    }
+  });
   isLoadingSignal.subscribe((v) => {
     if (!v) {
       query(".curtain").style.opacity = "0";
     }
   });
   const loop = gameloop(() => {
-    if (!walkers.assetsReady || !terrain.assetsReady) {
+    if (!walkers.assetsReady || !terrain.assetsReady || !items.assetsReady) {
       isLoadingSignal.update(true);
       return;
     }
     isLoadingSignal.update(false);
-    walkers.step(Input, terrain);
+    walkers.step(Input, terrain, items);
     centerPixelSignal.update({
       x: me.centerX,
       y: me.centerY
     });
+    itemLayer.clear();
     layer.clear();
+    for (const item of items) {
+      if (viewScope.overlaps(item)) {
+        itemLayer.drawImage(
+          item.image(),
+          item.x - viewScope.left,
+          item.y - viewScope.top
+        );
+      }
+    }
     for (const walker of walkers) {
       if (!viewScope.overlaps(walker)) {
         continue;
@@ -2188,4 +2333,5 @@ register(FpsMonitor, "js-fps-monitor");
 register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
 register(LoadingIndicator, "js-loading-indicator");
+register(AppleCounter, "js-apple-counter");
 /*! Cell v0.7.6 | Copyright 2022-2024 Yoshiya Hinosawa and Capsule contributors | MIT license */

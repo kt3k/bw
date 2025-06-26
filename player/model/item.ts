@@ -36,4 +36,16 @@ export class Item {
   get y(): number {
     return this.#j * CELL_SIZE
   }
+  get w(): number {
+    return CELL_SIZE
+  }
+  get h(): number {
+    return CELL_SIZE
+  }
+  get i(): number {
+    return this.#i
+  }
+  get j(): number {
+    return this.#j
+  }
 }

@@ -4,6 +4,23 @@ import { type Dir, DOWN, LEFT, RIGHT, UP } from "../../util/dir.ts"
 import { CELL_SIZE } from "../../util/constants.ts"
 import { choice, randomInt } from "../../util/random.ts"
 import type { TerrainBlockCell } from "./terrain-block.ts"
+import { appleCountSignal } from "../../util/signal.ts"
+
+/** The interface represents a box */
+type IBox = {
+  get x(): number
+  get y(): number
+  get w(): number
+  get h(): number
+}
+
+type IObj = IBox & {
+  i: number
+  j: number
+  loadAssets(): Promise<void>
+  get assetsReady(): boolean
+  image(): HTMLImageElement
+}
 
 type CharacterAppearance =
   | "up0"
@@ -20,6 +37,10 @@ type CharacterAssets = {
 }
 
 export type CollisionChecker = (i: number, j: number) => boolean
+export type ItemContainer = {
+  get(i: number, j: number): IObj | undefined
+  remove(i: number, j: number): void
+}
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -115,10 +136,17 @@ export abstract class Character {
     return undefined
   }
 
+  onMoveEnd(
+    _terrain: { get(i: number, j: number): TerrainBlockCell },
+    _itemContainer: ItemContainer,
+  ) {
+  }
+
   step(
     input: typeof Input,
     terrain: { get(i: number, j: number): TerrainBlockCell },
     collisionChecker: CollisionChecker,
+    itemContainer: ItemContainer,
   ) {
     if (this.#movePhase === 0) {
       const nextState = this.getNextState(input, terrain, collisionChecker)
@@ -152,6 +180,7 @@ export abstract class Character {
           } else if (this.#dir === RIGHT) {
             this.#i += 1
           }
+          this.onMoveEnd(terrain, itemContainer)
         }
       } else if (this.#moveType === "bounce") {
         this.#movePhase += this.#speed
@@ -276,6 +305,13 @@ export abstract class Character {
     return this.#physicalGridKey
   }
 
+  get i(): number {
+    return this.#i
+  }
+  get j(): number {
+    return this.#j
+  }
+
   /** Physical coordinate is the grid coordinate
    * where the character is currently located.
    * This is used to for collision detection with other characters.
@@ -321,6 +357,21 @@ export class MainCharacter extends Character {
       return RIGHT
     }
     return undefined
+  }
+
+  override onMoveEnd(
+    _terrain: { get(i: number, j: number): TerrainBlockCell },
+    itemContainer: ItemContainer,
+  ): void {
+    console.log(`Character moved to (${this.i}, ${this.j})`)
+    const item = itemContainer.get(this.i, this.j)
+    if (item) {
+      itemContainer.remove(this.i, this.j)
+      setTimeout(() => {
+        const count = appleCountSignal.get()
+        appleCountSignal.update(count + 1)
+      }, 300)
+    }
   }
 }
 
