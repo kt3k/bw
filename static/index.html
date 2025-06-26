@@ -24,24 +24,38 @@
           fill="currentColor"
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M4.929 4.929c3.905 -3.905 10.237 -3.905 14.142 0c3.905 3.905 3.905 10.237 0 14.142c-3.905 3.905 -10.237 3.905 -14.142 0c-3.905 -3.905 -3.905 -10.237 0 -14.142zm3.535 2.121a1 1 0 0 0 -1.414 0a7 7 0 0 0 0 9.9a1 1 0 1 0 1.414 -1.414a5 5 0 0 1 0 -7.072a1 1 0 0 0 0 -1.414z" />
+          <path
+            d="M4.929 4.929c3.905 -3.905 10.237 -3.905 14.142 0c3.905 3.905 3.905 10.237 0 14.142c-3.905 3.905 -10.237 3.905 -14.142 0c-3.905 -3.905 -3.905 -10.237 0 -14.142zm3.535 2.121a1 1 0 0 0 -1.414 0a7 7 0 0 0 0 9.9a1 1 0 1 0 1.414 -1.414a5 5 0 0 1 0 -7.072a1 1 0 0 0 0 -1.414z"
+          />
         </svg>
       </span>
     </p>
     <div class="js-game-screen relative h-[320px] w-[320px] overflow-hidden">
+      <!-- TerrainBlocks loaded in this div -->
       <div class="terrain absolute"></div>
       <canvas
         class="canvas1 absolute crisp-edges"
         width="320"
         height="320"
       ></canvas>
+      <!-- The ui panel -->
+      <div
+        class="ui-panel absolute px-0.5 text-xs text-gray-400 bg-black right-[8px] top-[8px] h-[64px] w-[64px]"
+      >
+        <p class="flex items-center">
+          <img class="inline" src="./obj/apple.png" /><span>0</span>
+        </p>
+      </div>
+      <!-- Black curtain in front of the game screen -->
       <div
         class="curtain absolute w-full h-full bg-black"
-        style="opacity: 1; transition-property: opacity; transition-duration: 1000ms"
+        style="opacity: 1; transition-property: opacity; transition-duration: 2000ms"
       >
       </div>
     </div>
-    <div class="w-full text-center text-neutral-500 text-sm fixed bottom-5 sm:hidden">
+    <div
+      class="w-full text-center text-neutral-500 text-sm fixed bottom-5 sm:hidden"
+    >
       swipe ↑↓←→ and hold to move
     </div>
   </body>

@@ -18,7 +18,7 @@ import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
   BlockMap,
-  CollisionChecker,
+  type CollisionChecker,
   MainCharacter,
   NPC,
   TerrainBlock,
