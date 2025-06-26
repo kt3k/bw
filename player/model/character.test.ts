@@ -1,4 +1,4 @@
-import { MainCharacter, NPC } from "./models.ts"
+import { MainCharacter, NPC } from "./character.ts"
 import { assertEquals } from "@std/assert"
 
 Deno.test("Character", async (t) => {

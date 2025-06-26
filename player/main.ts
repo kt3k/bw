@@ -22,8 +22,9 @@ import {
   MainCharacter,
   NPC,
   TerrainBlock,
-} from "./models.ts"
+} from "./model/models.ts"
 import { loadImage } from "../util/load.ts"
+import { AppleCounter } from "./ui/apple-counter.ts"
 
 /**
  * Abstract rectangular area, which implements properties of the rectangle.
@@ -392,3 +393,4 @@ register(FpsMonitor, "js-fps-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
 register(LoadingIndicator, "js-loading-indicator")
+register(AppleCounter, "js-apple-counter")
