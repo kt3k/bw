@@ -11,7 +11,7 @@ export function ItemGetEffector({ el, query, subscribe }: Context) {
     }
 
     const img = new Image()
-    img.src = "/item/apple.png"
+    img.src = "./item/apple.png"
     img.className = "absolute"
     img.style.right = "47%"
     img.style.top = "48%"
