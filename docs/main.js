@@ -1239,6 +1239,36 @@ function SwipeHandler({ on }) {
   });
 }
 
+// player/ui/item-get-effector.ts
+function ItemGetEffector({ el, query, subscribe }) {
+  let prevCount = appleCountSignal.get();
+  subscribe(appleCountSignal, (count) => {
+    const increased = count > prevCount;
+    prevCount = count;
+    if (!increased) {
+      return;
+    }
+    const img = new Image();
+    img.src = "/item/apple.png";
+    img.className = "absolute";
+    img.style.right = "47%";
+    img.style.top = "48%";
+    img.style.opacity = "1";
+    img.style.transition = "right 0.3s ease, top 0.3s ease, opacity 0.3s ease";
+    img.onload = () => {
+      el.appendChild(img);
+      setTimeout(() => {
+        img.style.right = "58px";
+        img.style.top = "10px";
+        img.style.opacity = "0.7";
+      }, 30);
+      img.addEventListener("transitionend", () => {
+        el.removeChild(img);
+      }, { once: true });
+    };
+  });
+}
+
 // player/ui/loading-indicator.ts
 function LoadingIndicator({ el }) {
   isLoadingSignal.subscribe((v) => el.classList.toggle("hidden", !v));
@@ -1698,10 +1728,8 @@ var MainCharacter = class extends Character {
     const item = itemContainer.get(this.i, this.j);
     if (item) {
       itemContainer.remove(this.i, this.j);
-      setTimeout(() => {
-        const count = appleCountSignal.get();
-        appleCountSignal.update(count + 1);
-      }, 300);
+      const count = appleCountSignal.get();
+      appleCountSignal.update(count + 1);
     }
   }
 };
@@ -1995,10 +2023,12 @@ var Item = class {
 // player/ui/apple-counter.ts
 function AppleCounter({ query, subscribe }) {
   subscribe(appleCountSignal, (apples) => {
-    const counter = query(".count-label");
-    if (counter) {
-      counter.textContent = apples.toString();
-    }
+    setTimeout(() => {
+      const counter = query(".count-label");
+      if (counter) {
+        counter.textContent = apples.toString();
+      }
+    }, 300);
   });
 }
 
@@ -2262,6 +2292,23 @@ function GameScreen({ query }) {
   items.add(new Item(5, 1, "item/apple.png"));
   items.add(new Item(6, 1, "item/apple.png"));
   items.add(new Item(7, 1, "item/apple.png"));
+  items.add(new Item(-1, -5, "item/apple.png"));
+  items.add(new Item(-1, -6, "item/apple.png"));
+  items.add(new Item(-2, -5, "item/apple.png"));
+  items.add(new Item(-2, -6, "item/apple.png"));
+  items.add(new Item(-3, 6, "item/apple.png"));
+  items.add(new Item(-4, 6, "item/apple.png"));
+  items.add(new Item(-5, 6, "item/apple.png"));
+  items.add(new Item(-6, 6, "item/apple.png"));
+  items.add(new Item(-3, 7, "item/apple.png"));
+  items.add(new Item(-4, 7, "item/apple.png"));
+  items.add(new Item(-5, 7, "item/apple.png"));
+  items.add(new Item(-6, 7, "item/apple.png"));
+  items.add(new Item(-3, 8, "item/apple.png"));
+  items.add(new Item(-4, 8, "item/apple.png"));
+  items.add(new Item(-5, 8, "item/apple.png"));
+  items.add(new Item(-6, 8, "item/apple.png"));
+  items.add(new Item(-7, 1, "item/apple.png"));
   const viewScope = new ViewScope(layer.width, layer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
   const walkers = new Walkers([me, ...mobs]);
@@ -2334,4 +2381,5 @@ register(KeyMonitor, "js-key-monitor");
 register(SwipeHandler, "js-swipe-handler");
 register(LoadingIndicator, "js-loading-indicator");
 register(AppleCounter, "js-apple-counter");
+register(ItemGetEffector, "js-item-get-effector");
 /*! Cell v0.7.6 | Copyright 2022-2024 Yoshiya Hinosawa and Capsule contributors | MIT license */

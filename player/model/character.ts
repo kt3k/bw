@@ -367,10 +367,8 @@ export class MainCharacter extends Character {
     const item = itemContainer.get(this.i, this.j)
     if (item) {
       itemContainer.remove(this.i, this.j)
-      setTimeout(() => {
-        const count = appleCountSignal.get()
-        appleCountSignal.update(count + 1)
-      }, 300)
+      const count = appleCountSignal.get()
+      appleCountSignal.update(count + 1)
     }
   }
 }

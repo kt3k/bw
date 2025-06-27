@@ -4,6 +4,7 @@ import { clearInput, Input } from "../util/dir.ts"
 import { KeyMonitor } from "./ui/key-monitor.ts"
 import { FpsMonitor } from "./ui/fps-monitor.ts"
 import { SwipeHandler } from "./ui/swipe-handler.ts"
+import { ItemGetEffector } from "./ui/item-get-effector.ts"
 import {
   centerGrid10Signal,
   centerGridSignal,
@@ -390,6 +391,28 @@ function GameScreen({ query }: Context) {
   items.add(new Item(6, 1, "item/apple.png"))
   items.add(new Item(7, 1, "item/apple.png"))
 
+  items.add(new Item(-1, -5, "item/apple.png"))
+  items.add(new Item(-1, -6, "item/apple.png"))
+  items.add(new Item(-2, -5, "item/apple.png"))
+  items.add(new Item(-2, -6, "item/apple.png"))
+
+  items.add(new Item(-3, 6, "item/apple.png"))
+  items.add(new Item(-4, 6, "item/apple.png"))
+  items.add(new Item(-5, 6, "item/apple.png"))
+  items.add(new Item(-6, 6, "item/apple.png"))
+
+  items.add(new Item(-3, 7, "item/apple.png"))
+  items.add(new Item(-4, 7, "item/apple.png"))
+  items.add(new Item(-5, 7, "item/apple.png"))
+  items.add(new Item(-6, 7, "item/apple.png"))
+
+  items.add(new Item(-3, 8, "item/apple.png"))
+  items.add(new Item(-4, 8, "item/apple.png"))
+  items.add(new Item(-5, 8, "item/apple.png"))
+  items.add(new Item(-6, 8, "item/apple.png"))
+
+  items.add(new Item(-7, 1, "item/apple.png"))
+
   const viewScope = new ViewScope(layer.width, layer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
@@ -475,3 +498,4 @@ register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
 register(LoadingIndicator, "js-loading-indicator")
 register(AppleCounter, "js-apple-counter")
+register(ItemGetEffector, "js-item-get-effector")
