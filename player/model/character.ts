@@ -3,24 +3,47 @@ import type { Input } from "../../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../../util/dir.ts"
 import { CELL_SIZE } from "../../util/constants.ts"
 import { choice, randomInt } from "../../util/random.ts"
-import type { TerrainBlockCell } from "./terrain-block.ts"
 import { appleCountSignal } from "../../util/signal.ts"
 
 /** The interface represents a box */
-type IBox = {
+export type IBox = {
   get x(): number
   get y(): number
   get w(): number
   get h(): number
 }
 
-type IObj = IBox & {
+export type IObj = IBox & {
   i: number
   j: number
   loadAssets(): Promise<void>
   get assetsReady(): boolean
   image(): HTMLImageElement
 }
+
+export type IFieldTester = {
+  get(i: number, j: number): {
+    canEnter(): boolean
+  }
+}
+
+/** The implementor of 'step' function */
+export type IStepper = {
+  step(
+    input: typeof Input,
+    fieldTester: IFieldTester,
+    collisionChecker: CollisionChecker,
+    items: ItemContainer,
+  ): void
+}
+
+/** The interface represents a character */
+export type IChar =
+  & IObj
+  & IStepper
+  & {
+    get physicalGridKey(): string
+  }
 
 type CharacterAppearance =
   | "up0"
@@ -45,7 +68,7 @@ export type ItemContainer = {
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
  */
-export abstract class Character {
+export abstract class Character implements IChar {
   /** The current direction of the character */
   #dir: Dir = "down"
   /** The column of the world coordinates */
@@ -114,11 +137,11 @@ export abstract class Character {
   /** Returns true if the character can go to the given direction */
   canEnter(
     dir: Dir,
-    terrain: { get(i: number, j: number): TerrainBlockCell },
+    fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
   ): boolean {
     const [i, j] = this.nextCoord(dir)
-    const cell = terrain.get(i, j)
+    const cell = fieldTester.get(i, j)
     return cell.canEnter() && !collisionChecker(i, j)
   }
 
@@ -128,34 +151,31 @@ export abstract class Character {
    * Returning the direction causes the character to move in that direction.
    * Returning undefined causes the character to stay in the current state.
    */
-  getNextState(
+  abstract getNextState(
     _input: typeof Input,
-    _terrain: { get(i: number, j: number): TerrainBlockCell },
+    _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
-  ): Dir | undefined {
-    return undefined
-  }
+  ): Dir | undefined
 
-  onMoveEnd(
-    _terrain: { get(i: number, j: number): TerrainBlockCell },
+  abstract onMoveEnd(
+    _fieldTester: IFieldTester,
     _itemContainer: ItemContainer,
-  ) {
-  }
+  ): void
 
   step(
     input: typeof Input,
-    terrain: { get(i: number, j: number): TerrainBlockCell },
+    fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
     itemContainer: ItemContainer,
   ) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextState(input, terrain, collisionChecker)
+      const nextState = this.getNextState(input, fieldTester, collisionChecker)
       if (nextState) {
         this.setState(nextState)
         this.#isMoving = true
         this.#idleCounter = 0
 
-        if (this.canEnter(nextState, terrain, collisionChecker)) {
+        if (this.canEnter(nextState, fieldTester, collisionChecker)) {
           this.#moveType = "linear"
         } else {
           this.#moveType = "bounce"
@@ -180,7 +200,7 @@ export abstract class Character {
           } else if (this.#dir === RIGHT) {
             this.#i += 1
           }
-          this.onMoveEnd(terrain, itemContainer)
+          this.onMoveEnd(fieldTester, itemContainer)
         }
       } else if (this.#moveType === "bounce") {
         this.#movePhase += this.#speed
@@ -344,7 +364,7 @@ export abstract class Character {
 export class MainCharacter extends Character {
   override getNextState(
     input: typeof Input,
-    _terrain: { get(i: number, j: number): TerrainBlockCell },
+    _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
   ): Dir | undefined {
     if (input.up) {
@@ -360,7 +380,7 @@ export class MainCharacter extends Character {
   }
 
   override onMoveEnd(
-    _terrain: { get(i: number, j: number): TerrainBlockCell },
+    _fieldTester: IFieldTester,
     itemContainer: ItemContainer,
   ): void {
     console.log(`Character moved to (${this.i}, ${this.j})`)
@@ -386,7 +406,7 @@ export class NPC extends Character {
 
   override getNextState(
     _input: typeof Input,
-    terrain: { get(i: number, j: number): TerrainBlockCell },
+    fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
   ): Dir | undefined {
     this.#counter -= 1
@@ -395,16 +415,23 @@ export class NPC extends Character {
       // If the character can keep going in the current direction,
       // it will keep going with 80% probability.
       if (
-        this.canEnter(this.dir, terrain, collisionChecker) &&
+        this.canEnter(this.dir, fieldTester, collisionChecker) &&
         Math.random() < 0.96
       ) {
         return this.dir
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
       return choice(nextCandidate.filter((d) => {
-        return this.canEnter(d, terrain, collisionChecker)
+        return this.canEnter(d, fieldTester, collisionChecker)
       }))
     }
     return undefined
+  }
+
+  override onMoveEnd(
+    _fieldTester: IFieldTester,
+    _itemContainer: ItemContainer,
+  ): void {
+    // NPCs do not have any special actions on move end
   }
 }

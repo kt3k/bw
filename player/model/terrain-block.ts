@@ -50,7 +50,7 @@ export class BlockMap {
     href?: string
   }[]
   characters: {}[]
-  items: {}[]
+  items: Item[]
   terrain: string[]
   #obj: any
   // deno-lint-ignore no-explicit-any

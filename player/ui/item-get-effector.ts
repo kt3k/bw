@@ -1,7 +1,7 @@
 import type { Context } from "@kt3k/cell"
 import { appleCountSignal } from "../../util/signal.ts"
 
-export function ItemGetEffector({ el, query, subscribe }: Context) {
+export function ItemGetEffector({ el, subscribe }: Context) {
   let prevCount = appleCountSignal.get()
   subscribe(appleCountSignal, (count) => {
     const increased = count > prevCount

@@ -19,6 +19,11 @@ import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
   type CollisionChecker,
+  type IBox,
+  type IChar,
+  type IFieldTester,
+  type IObj,
+  type IStepper,
   type ItemContainer,
   MainCharacter,
   NPC,
@@ -83,33 +88,6 @@ class ViewScope extends RectScope {
     super.setCenter(x, y)
     viewScopeSignal.update({ x: -this.left, y: -this.top })
   }
-}
-
-/** The interface represents a box */
-type IBox = {
-  get x(): number
-  get y(): number
-  get w(): number
-  get h(): number
-}
-
-type IObj = IBox & {
-  i: number
-  j: number
-  loadAssets(): Promise<void>
-  get assetsReady(): boolean
-  image(): HTMLImageElement
-}
-
-/** The interface represents a character */
-type IChar = IObj & {
-  step(
-    input: typeof Input,
-    terrain: Terrain,
-    collisionChecker: CollisionChecker,
-    items: ItemContainer,
-  ): void
-  get physicalGridKey(): string
 }
 
 class Items {
@@ -188,11 +166,11 @@ class CoordCountMap {
  * The characters who can walk,
  * i.e. the characters who are evaluated in each frame
  */
-class Walkers {
+class Walkers implements IStepper {
   #walkers: IChar[] = []
   #coordCountMap = new CoordCountMap()
 
-  checkCollision = (i: number, j: number): boolean => {
+  checkCollision(i: number, j: number) {
     return this.#coordCountMap.get(`${i}.${j}`) > 0
   }
 
@@ -207,10 +185,15 @@ class Walkers {
     this.#walkers.push(walker)
   }
 
-  step(input: typeof Input, terrain: Terrain, items: ItemContainer) {
+  step(
+    input: typeof Input,
+    fieldTester: IFieldTester,
+    collisionChecker: CollisionChecker,
+    items: ItemContainer,
+  ) {
     for (const walker of this.#walkers) {
       this.#coordCountMap.decrement(walker.physicalGridKey)
-      walker.step(input, terrain, this.checkCollision, items)
+      walker.step(input, fieldTester, collisionChecker, items)
       this.#coordCountMap.increment(walker.physicalGridKey)
     }
   }
@@ -298,7 +281,7 @@ class UnloadScope extends RectScope {
     super(UnloadScope.UNLOAD_UNIT, UnloadScope.UNLOAD_UNIT)
   }
 }
-class Terrain {
+class Field implements IFieldTester {
   #el: HTMLElement
   #blocks: Record<string, TerrainBlock> = {}
   #blockElements: Record<string, HTMLCanvasElement> = {}
@@ -423,10 +406,10 @@ function GameScreen({ query }: Context) {
     walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
 
-  const terrain = new Terrain(query(".terrain")!)
-  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkLoad(i, j))
-  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkUnload(i, j))
-  viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y))
+  const field = new Field(query(".terrain")!)
+  centerGrid10Signal.subscribe(({ i, j }) => field.checkLoad(i, j))
+  centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j))
+  viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y))
 
   me.loadAssets()
   mobs.forEach((mob) => mob.loadAssets())
@@ -449,14 +432,17 @@ function GameScreen({ query }: Context) {
     }
   })
 
+  const collisionChecker = (i: number, j: number) =>
+    walkers.checkCollision(i, j)
+
   const loop = gameloop(() => {
-    if (!walkers.assetsReady || !terrain.assetsReady || !items.assetsReady) {
+    if (!walkers.assetsReady || !field.assetsReady || !items.assetsReady) {
       isLoadingSignal.update(true)
       return
     }
     isLoadingSignal.update(false)
 
-    walkers.step(Input, terrain, items)
+    walkers.step(Input, field, collisionChecker, items)
     centerPixelSignal.update({
       x: me.centerX,
       y: me.centerY,
