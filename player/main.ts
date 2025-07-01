@@ -32,6 +32,7 @@ import { BlockMap, FieldBlock } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { AppleCounter } from "./ui/apple-counter.ts"
+import { DrawLayer } from "./draw-layer.ts"
 
 /**
  * Abstract rectangular area, which implements properties of the rectangle.
@@ -355,12 +356,8 @@ class Field implements IFieldTester {
 const range = (n: number) => [...Array(n).keys()]
 
 function GameScreen({ query }: Context) {
-  const charLayer = new CanvasWrapper(
-    query<HTMLCanvasElement>(".canvas-chars")!,
-  )
-  const itemLayer = new CanvasWrapper(
-    query<HTMLCanvasElement>(".canvas-items")!,
-  )
+  const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
+  const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
 
   const me = new MainCharacter(2, 2, 1, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
@@ -400,12 +397,15 @@ function GameScreen({ query }: Context) {
 
   items.add(new Item(-7, 1, "item/apple.png"))
 
-  const viewScope = new ViewScope(charLayer.width, charLayer.height)
+  const viewScope = new ViewScope(charCanvas.width, charCanvas.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
+
+  const charLayer = new DrawLayer(charCanvas, viewScope)
+  const itemLayer = new DrawLayer(itemCanvas, viewScope)
 
   const walkers = new Walkers([me, ...mobs])
 
-  const walkScope = new WalkScope(charLayer.width * 3, charLayer.height * 3)
+  const walkScope = new WalkScope(charCanvas.width * 3, charCanvas.height * 3)
   centerGridSignal.subscribe(({ i, j }) =>
     walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
@@ -417,18 +417,7 @@ function GameScreen({ query }: Context) {
 
   me.loadAssets()
   mobs.forEach((mob) => mob.loadAssets())
-
-  items.loadAssets().then(() => {
-    for (const item of items) {
-      if (viewScope.overlaps(item)) {
-        charLayer.drawImage(
-          item.image(),
-          item.x - viewScope.left,
-          item.y - viewScope.top,
-        )
-      }
-    }
-  })
+  items.loadAssets()
 
   isLoadingSignal.subscribe((v) => {
     if (!v) {
@@ -453,27 +442,17 @@ function GameScreen({ query }: Context) {
     })
 
     itemLayer.clear()
-    charLayer.clear()
-
     for (const item of items) {
       if (viewScope.overlaps(item)) {
-        itemLayer.drawImage(
-          item.image(),
-          item.x - viewScope.left,
-          item.y - viewScope.top,
-        )
+        itemLayer.draw(item)
       }
     }
 
+    charLayer.clear()
     for (const walker of walkers) {
-      if (!viewScope.overlaps(walker)) {
-        continue
+      if (viewScope.overlaps(walker)) {
+        charLayer.draw(walker)
       }
-      charLayer.drawImage(
-        walker.image(),
-        walker.x - viewScope.left,
-        walker.y - viewScope.top,
-      )
     }
   }, 60)
   loop.onStep((fps) => fpsSignal.update(fps))
