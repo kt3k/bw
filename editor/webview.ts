@@ -6,7 +6,7 @@
 
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
-import { BlockMap, FieldBlock } from "../player/model/models.ts"
+import { BlockMap, FieldBlock } from "../player/model/field-block.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
