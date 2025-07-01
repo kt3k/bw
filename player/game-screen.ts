@@ -16,6 +16,7 @@ import {
   type IBox,
   type IChar,
   type IFieldTester,
+  type ILoader,
   type IObj,
   type IStepper,
   type ItemContainer,
@@ -84,7 +85,7 @@ class ViewScope extends RectScope {
   }
 }
 
-class Items {
+class Items implements ILoader, ItemContainer {
   #items: Set<IObj> = new Set()
   #coordMap = {} as Record<string, IObj>
 
@@ -112,8 +113,11 @@ class Items {
   }
 
   async loadAssets(): Promise<void> {
-    const promises = [...this.#items].map((item) => item.loadAssets())
-    await Promise.all(promises)
+    await Promise.all(
+      [...this.#items]
+        .filter((item) => !item.assetsReady)
+        .map((item) => item.loadAssets()),
+    )
   }
 
   get assetsReady(): boolean {
@@ -160,7 +164,7 @@ class CoordCountMap {
  * The characters who can walk,
  * i.e. the characters who are evaluated in each frame
  */
-class Walkers implements IStepper {
+class Walkers implements IStepper, ILoader {
   #walkers: IChar[] = []
   #coordCountMap = new CoordCountMap()
 
@@ -190,6 +194,14 @@ class Walkers implements IStepper {
       walker.step(input, fieldTester, collisionChecker, items)
       this.#coordCountMap.increment(walker.physicalGridKey)
     }
+  }
+
+  async loadAssets(): Promise<void> {
+    await Promise.all(
+      this.#walkers
+        .filter((w) => !w.assetsReady)
+        .map((w) => w.loadAssets()),
+    )
   }
 
   get assetsReady(): boolean {
@@ -408,8 +420,7 @@ export function GameScreen({ query }: Context) {
   centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j))
   viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y))
 
-  me.loadAssets()
-  mobs.forEach((mob) => mob.loadAssets())
+  walkers.loadAssets()
   items.loadAssets()
 
   isLoadingSignal.subscribe((v) => {
@@ -429,10 +440,7 @@ export function GameScreen({ query }: Context) {
     isLoadingSignal.update(false)
 
     walkers.step(Input, field, collisionChecker, items)
-    centerPixelSignal.update({
-      x: me.centerX,
-      y: me.centerY,
-    })
+    centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
     itemLayer.clear()
     for (const item of items) {
