@@ -1240,7 +1240,7 @@ function SwipeHandler({ on }) {
 }
 
 // player/ui/item-get-effector.ts
-function ItemGetEffector({ el, query, subscribe }) {
+function ItemGetEffector({ el, subscribe }) {
   let prevCount = appleCountSignal.get();
   subscribe(appleCountSignal, (count) => {
     const increased = count > prevCount;
@@ -1274,8 +1274,8 @@ function LoadingIndicator({ el }) {
   isLoadingSignal.subscribe((v) => el.classList.toggle("hidden", !v));
 }
 
-// util/canvas-layer.ts
-var CanvasLayer = class {
+// util/canvas-wrapper.ts
+var CanvasWrapper = class {
   #ctx;
   constructor(canvas) {
     this.#ctx = canvas.getContext("2d");
@@ -1525,30 +1525,19 @@ var Character = class {
     }
   }
   /** Returns true if the character can go to the given direction */
-  canEnter(dir, terrain, collisionChecker) {
+  canEnter(dir, fieldTester, collisionChecker) {
     const [i, j] = this.nextCoord(dir);
-    const cell = terrain.get(i, j);
+    const cell = fieldTester.get(i, j);
     return cell.canEnter() && !collisionChecker(i, j);
   }
-  /** Returns the next state of the character.
-   * This method is called in each step.
-   *
-   * Returning the direction causes the character to move in that direction.
-   * Returning undefined causes the character to stay in the current state.
-   */
-  getNextState(_input, _terrain, _collisionChecker) {
-    return void 0;
-  }
-  onMoveEnd(_terrain, _itemContainer) {
-  }
-  step(input, terrain, collisionChecker, itemContainer) {
+  step(input, fieldTester, collisionChecker, itemContainer) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextState(input, terrain, collisionChecker);
+      const nextState = this.getNextState(input, fieldTester, collisionChecker);
       if (nextState) {
         this.setState(nextState);
         this.#isMoving = true;
         this.#idleCounter = 0;
-        if (this.canEnter(nextState, terrain, collisionChecker)) {
+        if (this.canEnter(nextState, fieldTester, collisionChecker)) {
           this.#moveType = "linear";
         } else {
           this.#moveType = "bounce";
@@ -1572,7 +1561,7 @@ var Character = class {
           } else if (this.#dir === RIGHT) {
             this.#i += 1;
           }
-          this.onMoveEnd(terrain, itemContainer);
+          this.onMoveEnd(fieldTester, itemContainer);
         }
       } else if (this.#moveType === "bounce") {
         this.#movePhase += this.#speed;
@@ -1711,7 +1700,7 @@ var Character = class {
   }
 };
 var MainCharacter = class extends Character {
-  getNextState(input, _terrain, _collisionChecker) {
+  getNextState(input, _fieldTester, _collisionChecker) {
     if (input.up) {
       return UP;
     } else if (input.down) {
@@ -1723,7 +1712,7 @@ var MainCharacter = class extends Character {
     }
     return void 0;
   }
-  onMoveEnd(_terrain, itemContainer) {
+  onMoveEnd(_fieldTester, itemContainer) {
     console.log(`Character moved to (${this.i}, ${this.j})`);
     const item = itemContainer.get(this.i, this.j);
     if (item) {
@@ -1738,24 +1727,26 @@ var NPC = class extends Character {
   constructor(i, j, speed, assetPrefix) {
     super(i, j, speed, assetPrefix);
   }
-  getNextState(_input, terrain, collisionChecker) {
+  getNextState(_input, fieldTester, collisionChecker) {
     this.#counter -= 1;
     if (this.#counter <= 0) {
       this.#counter = randomInt(8) + 4;
-      if (this.canEnter(this.dir, terrain, collisionChecker) && Math.random() < 0.96) {
+      if (this.canEnter(this.dir, fieldTester, collisionChecker) && Math.random() < 0.96) {
         return this.dir;
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT];
       return choice(nextCandidate.filter((d) => {
-        return this.canEnter(d, terrain, collisionChecker);
+        return this.canEnter(d, fieldTester, collisionChecker);
       }));
     }
     return void 0;
   }
+  onMoveEnd(_fieldTester, _itemContainer) {
+  }
 };
 
-// player/model/terrain-block.ts
-var TerrainBlockCell = class {
+// player/model/field-block.ts
+var FieldBlockCell = class {
   #color;
   #href;
   #canEnter;
@@ -1789,7 +1780,7 @@ var BlockMap = class _BlockMap {
   cells;
   characters;
   items;
-  terrain;
+  field;
   #obj;
   // deno-lint-ignore no-explicit-any
   constructor(url, obj) {
@@ -1799,7 +1790,7 @@ var BlockMap = class _BlockMap {
     this.cells = obj.cells;
     this.characters = obj.characters;
     this.items = obj.items;
-    this.terrain = obj.terrain;
+    this.field = obj.field;
     this.#obj = obj;
   }
   clone() {
@@ -1809,7 +1800,7 @@ var BlockMap = class _BlockMap {
     return this.#obj;
   }
 };
-var TerrainBlock = class _TerrainBlock {
+var FieldBlock = class _FieldBlock {
   #x;
   #y;
   #w;
@@ -1822,7 +1813,7 @@ var TerrainBlock = class _TerrainBlock {
   #imgMap = {};
   #items;
   #characters;
-  #terrain;
+  #field;
   #loadImage;
   #map;
   constructor(map, loadImage2) {
@@ -1833,14 +1824,14 @@ var TerrainBlock = class _TerrainBlock {
     this.#h = BLOCK_SIZE * CELL_SIZE;
     this.#w = BLOCK_SIZE * CELL_SIZE;
     for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new TerrainBlockCell(
+      this.#cellMap[cell.name] = new FieldBlockCell(
         cell.name,
         cell.canEnter,
         cell.color,
         cell.href
       );
     }
-    this.#terrain = map.terrain;
+    this.#field = map.field;
     this.#items = map.items;
     this.#characters = [];
     this.#loadImage = loadImage2;
@@ -1852,7 +1843,7 @@ var TerrainBlock = class _TerrainBlock {
     );
   }
   clone() {
-    return new _TerrainBlock(this.#map.clone(), this.#loadImage);
+    return new _FieldBlock(this.#map.clone(), this.#loadImage);
   }
   get id() {
     return `${this.#i}.${this.#j}`;
@@ -1880,7 +1871,7 @@ var TerrainBlock = class _TerrainBlock {
     canvas.width = this.w;
     canvas.height = this.h;
     canvas.classList.add("crisp-edges");
-    this.#renderBlock(new CanvasLayer(canvas));
+    this.#renderBlock(new CanvasWrapper(canvas));
     return canvas;
   }
   drawCell(layer, i, j) {
@@ -1920,10 +1911,10 @@ var TerrainBlock = class _TerrainBlock {
     }
   }
   get(i, j) {
-    return this.#cellMap[this.#terrain[j][i]];
+    return this.#cellMap[this.#field[j][i]];
   }
   update(i, j, cell) {
-    this.#terrain[j] = this.#terrain[j].substring(0, i) + cell + this.#terrain[j].substring(i + 1);
+    this.#field[j] = this.#field[j].substring(0, i) + cell + this.#field[j].substring(i + 1);
   }
   get i() {
     return this.#i;
@@ -1955,7 +1946,7 @@ var TerrainBlock = class _TerrainBlock {
       })),
       characters: this.#characters,
       items: this.#items,
-      terrain: this.#terrain
+      field: this.#field
     });
   }
   /**
@@ -2136,9 +2127,9 @@ var CoordCountMap = class {
 var Walkers = class {
   #walkers = [];
   #coordCountMap = new CoordCountMap();
-  checkCollision = (i, j) => {
+  checkCollision(i, j) {
     return this.#coordCountMap.get(`${i}.${j}`) > 0;
-  };
+  }
   constructor(chars = []) {
     this.#walkers = chars;
     for (const walker of chars) {
@@ -2148,10 +2139,10 @@ var Walkers = class {
   add(walker) {
     this.#walkers.push(walker);
   }
-  step(input, terrain, items) {
+  step(input, fieldTester, collisionChecker, items) {
     for (const walker of this.#walkers) {
       this.#coordCountMap.decrement(walker.physicalGridKey);
-      walker.step(input, terrain, this.checkCollision, items);
+      walker.step(input, fieldTester, collisionChecker, items);
       this.#coordCountMap.increment(walker.physicalGridKey);
     }
   }
@@ -2215,7 +2206,7 @@ var UnloadScope = class _UnloadScope extends RectScope {
     super(_UnloadScope.UNLOAD_UNIT, _UnloadScope.UNLOAD_UNIT);
   }
 };
-var Terrain = class {
+var Field = class {
   #el;
   #blocks = {};
   #blockElements = {};
@@ -2260,7 +2251,7 @@ var Terrain = class {
       (id) => !this.hasBlock(id)
     );
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.addDistrict(new TerrainBlock(map, loadImage));
+      this.addDistrict(new FieldBlock(map, loadImage));
     }
   }
   checkUnload(i, j) {
@@ -2277,8 +2268,12 @@ var Terrain = class {
 };
 var range = (n) => [...Array(n).keys()];
 function GameScreen({ query }) {
-  const layer = new CanvasLayer(query(".canvas-chars"));
-  const itemLayer = new CanvasLayer(query(".canvas-items"));
+  const charLayer = new CanvasWrapper(
+    query(".canvas-chars")
+  );
+  const itemLayer = new CanvasWrapper(
+    query(".canvas-items")
+  );
   const me = new MainCharacter(2, 2, 1, "char/kimi/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
   const mobs = range(6).map(
@@ -2309,23 +2304,23 @@ function GameScreen({ query }) {
   items.add(new Item(-5, 8, "item/apple.png"));
   items.add(new Item(-6, 8, "item/apple.png"));
   items.add(new Item(-7, 1, "item/apple.png"));
-  const viewScope = new ViewScope(layer.width, layer.height);
+  const viewScope = new ViewScope(charLayer.width, charLayer.height);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
   const walkers = new Walkers([me, ...mobs]);
-  const walkScope = new WalkScope(layer.width * 3, layer.height * 3);
+  const walkScope = new WalkScope(charLayer.width * 3, charLayer.height * 3);
   centerGridSignal.subscribe(
     ({ i, j }) => walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
-  const terrain = new Terrain(query(".terrain"));
-  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkLoad(i, j));
-  centerGrid10Signal.subscribe(({ i, j }) => terrain.checkUnload(i, j));
-  viewScopeSignal.subscribe(({ x, y }) => terrain.translateElement(x, y));
+  const field = new Field(query(".field"));
+  centerGrid10Signal.subscribe(({ i, j }) => field.checkLoad(i, j));
+  centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j));
+  viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y));
   me.loadAssets();
   mobs.forEach((mob) => mob.loadAssets());
   items.loadAssets().then(() => {
     for (const item of items) {
       if (viewScope.overlaps(item)) {
-        layer.drawImage(
+        charLayer.drawImage(
           item.image(),
           item.x - viewScope.left,
           item.y - viewScope.top
@@ -2338,19 +2333,20 @@ function GameScreen({ query }) {
       query(".curtain").style.opacity = "0";
     }
   });
+  const collisionChecker = (i, j) => walkers.checkCollision(i, j);
   const loop = gameloop(() => {
-    if (!walkers.assetsReady || !terrain.assetsReady || !items.assetsReady) {
+    if (!walkers.assetsReady || !field.assetsReady || !items.assetsReady) {
       isLoadingSignal.update(true);
       return;
     }
     isLoadingSignal.update(false);
-    walkers.step(Input, terrain, items);
+    walkers.step(Input, field, collisionChecker, items);
     centerPixelSignal.update({
       x: me.centerX,
       y: me.centerY
     });
     itemLayer.clear();
-    layer.clear();
+    charLayer.clear();
     for (const item of items) {
       if (viewScope.overlaps(item)) {
         itemLayer.drawImage(
@@ -2364,7 +2360,7 @@ function GameScreen({ query }) {
       if (!viewScope.overlaps(walker)) {
         continue;
       }
-      layer.drawImage(
+      charLayer.drawImage(
         walker.image(),
         walker.x - viewScope.left,
         walker.y - viewScope.top

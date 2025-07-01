@@ -6,7 +6,7 @@
 
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
-import { BlockMap, TerrainBlock } from "../player/model/models.ts"
+import { BlockMap, FieldBlock } from "../player/model/models.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
@@ -14,38 +14,38 @@ import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
 
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
-const terrainBlock = new Signal<TerrainBlock | null>(null)
-let prevTerrainBlock: TerrainBlock | null = null
+const fieldBlock = new Signal<FieldBlock | null>(null)
+let prevFieldBlock: FieldBlock | null = null
 const selectedCell = new Signal<number | null>(null)
 
 blockMapSource.subscribe(({ uri, text }) => {
   if (uri === "" || text === "") {
-    terrainBlock.update(null)
+    fieldBlock.update(null)
     return
   }
-  terrainBlock.update(
-    new TerrainBlock(new BlockMap(uri, JSON.parse(text)), loadImage),
+  fieldBlock.update(
+    new FieldBlock(new BlockMap(uri, JSON.parse(text)), loadImage),
   )
 })
 
 function MainContainer({ subscribe, el, query }: Context) {
-  subscribe(terrainBlock, async (terrainBlock) => {
-    const prev = prevTerrainBlock
-    prevTerrainBlock = terrainBlock
-    if (terrainBlock === null) return
+  subscribe(fieldBlock, async (fieldBlock) => {
+    const prev = prevFieldBlock
+    prevFieldBlock = fieldBlock
+    if (fieldBlock === null) return
 
     if (prev === null) {
-      await terrainBlock.loadAssets()
-      const canvas = terrainBlock.createCanvas()
+      await fieldBlock.loadAssets()
+      const canvas = fieldBlock.createCanvas()
       canvas.style.left = ""
       canvas.style.top = ""
       canvas.style.position = ""
-      canvas.classList.add("terrain-block-canvas")
+      canvas.classList.add("field-block-canvas")
       el.innerHTML = ""
       el.appendChild(canvas)
-      mount("terrain-block-canvas", el)
+      mount("field-block-canvas", el)
 
-      const { i, j } = terrainBlock
+      const { i, j } = fieldBlock
       const x = [
         [-1, 0],
         [0, -1],
@@ -93,20 +93,20 @@ function MainContainer({ subscribe, el, query }: Context) {
       return
     }
 
-    const diff = prev.diff(terrainBlock)
+    const diff = prev.diff(fieldBlock)
     if (diff.length === 0) {
       return
     }
-    query(".terrain-block-canvas")?.dispatchEvent(
+    query(".field-block-canvas")?.dispatchEvent(
       new CustomEvent("diff", { detail: diff }),
     )
   })
 }
 
 function CellSwitch({ on, el, subscribe }: Context) {
-  subscribe(terrainBlock, async (terrainBlock) => {
-    if (terrainBlock === null) return
-    const cells = await Promise.all(terrainBlock.cells.map(async (cell) => {
+  subscribe(fieldBlock, async (fieldBlock) => {
+    if (fieldBlock === null) return
+    const cells = await Promise.all(fieldBlock.cells.map(async (cell) => {
       let div = el.querySelector<HTMLDivElement>(
         '[name="' + cell.name + '"]',
       )
@@ -124,7 +124,7 @@ function CellSwitch({ on, el, subscribe }: Context) {
         canvas.style.backgroundColor = cell.color
       }
       if (cell.href) {
-        const img = await terrainBlock.loadCellImage(cell.href)
+        const img = await fieldBlock.loadCellImage(cell.href)
         const ctx = canvas.getContext("2d")!
         ctx.drawImage(img, 0, 0, 16, 16)
       }
@@ -162,7 +162,7 @@ function CellSwitch({ on, el, subscribe }: Context) {
   })
 }
 
-function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
+function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 
   on("click", async (e) => {
@@ -171,12 +171,12 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     const y = floorN(e.clientY - top, 16)
     const i = x / 16
     const j = y / 16
-    const block = terrainBlock.get()
+    const block = fieldBlock.get()
     if (block === null) return
     const cell = block.cells[selectedCell.get()!]
-    const b = terrainBlock.get()!.clone()
+    const b = fieldBlock.get()!.clone()
     b.update(i, j, cell.name)
-    terrainBlock.update(b)
+    fieldBlock.update(b)
     const map = b.toMap()
     vscode.postMessage({
       type: "update",
@@ -186,7 +186,7 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
 
   on("diff", async (e: CustomEvent<[i: number, j: number, name: string][]>) => {
     const diff = e.detail
-    const block = terrainBlock.get()
+    const block = fieldBlock.get()
     if (block === null) return
     // TODO(kt3k): this shouldn't be necessary
     await block.loadAssets()
@@ -200,13 +200,13 @@ function KeyHandler({ on }: Context) {
   on("keydown", (e) => {
     if (e.key === "k") {
       const currentCell = selectedCell.get()
-      const block = terrainBlock.get()
+      const block = fieldBlock.get()
       if (currentCell === null) return
       if (block === null) return
       selectedCell.update(modulo(currentCell + 1, block.cells.length))
     } else if (e.key === "j") {
       const currentCell = selectedCell.get()
-      const block = terrainBlock.get()
+      const block = fieldBlock.get()
       if (currentCell === null) return
       if (block === null) return
       selectedCell.update(modulo(currentCell - 1, block.cells.length))
@@ -255,6 +255,6 @@ if (state) {
 }
 
 register(MainContainer, "main-container")
-register(TerrainBlockCanvas, "terrain-block-canvas")
+register(FieldBlockCanvas, "field-block-canvas")
 register(CellSwitch, "cell-switch")
 register(KeyHandler, "key-handler")

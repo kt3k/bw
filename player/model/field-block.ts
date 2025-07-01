@@ -5,9 +5,9 @@ import type { Character } from "./character.ts"
 import type { Item } from "./item.ts"
 
 /**
- * TerrainCell represents the cell in the terrain block
+ * FieldBlockCell represents the cell in the field block
  */
-export class TerrainBlockCell {
+export class FieldBlockCell {
   #color?: string
   #href?: string
   #canEnter: boolean
@@ -34,7 +34,7 @@ export class TerrainBlockCell {
 }
 
 /**
- * Map represents the map of terrain
+ * Map represents the map of field
  */
 export class BlockMap {
   /** The URL of the map */
@@ -51,7 +51,7 @@ export class BlockMap {
   }[]
   characters: {}[]
   items: Item[]
-  terrain: string[]
+  field: string[]
   #obj: any
   // deno-lint-ignore no-explicit-any
   constructor(url: string, obj: any) {
@@ -61,7 +61,7 @@ export class BlockMap {
     this.cells = obj.cells
     this.characters = obj.characters
     this.items = obj.items
-    this.terrain = obj.terrain
+    this.field = obj.field
     this.#obj = obj
   }
 
@@ -74,8 +74,8 @@ export class BlockMap {
   }
 }
 
-/** TerrainBlock represents a block of a terrain */
-export class TerrainBlock {
+/** FieldBlock represents a block of a field */
+export class FieldBlock {
   #x: number
   #y: number
   #w: number
@@ -84,11 +84,11 @@ export class TerrainBlock {
   #i: number
   // The row of the world coordinates
   #j: number
-  #cellMap: Record<string, TerrainBlockCell> = {}
+  #cellMap: Record<string, FieldBlockCell> = {}
   #imgMap: Record<string, HTMLImageElement> = {}
   #items: Item[]
   #characters: Character[]
-  #terrain: string[]
+  #field: string[]
   #loadImage: (url: string) => Promise<HTMLImageElement>
   #map: BlockMap
 
@@ -103,14 +103,14 @@ export class TerrainBlock {
     this.#h = BLOCK_SIZE * CELL_SIZE
     this.#w = BLOCK_SIZE * CELL_SIZE
     for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new TerrainBlockCell(
+      this.#cellMap[cell.name] = new FieldBlockCell(
         cell.name,
         cell.canEnter,
         cell.color,
         cell.href,
       )
     }
-    this.#terrain = map.terrain
+    this.#field = map.field
     this.#items = map.items
     this.#characters = []
     this.#loadImage = loadImage
@@ -123,19 +123,19 @@ export class TerrainBlock {
     )
   }
 
-  clone(): TerrainBlock {
-    return new TerrainBlock(this.#map.clone(), this.#loadImage)
+  clone(): FieldBlock {
+    return new FieldBlock(this.#map.clone(), this.#loadImage)
   }
 
   get id(): string {
     return `${this.#i}.${this.#j}`
   }
 
-  get cells(): TerrainBlockCell[] {
+  get cells(): FieldBlockCell[] {
     return Object.values(this.#cellMap)
   }
 
-  get cellMap(): Record<string, TerrainBlockCell> {
+  get cellMap(): Record<string, FieldBlockCell> {
     return this.#cellMap
   }
 
@@ -199,12 +199,12 @@ export class TerrainBlock {
     }
   }
 
-  get(i: number, j: number): TerrainBlockCell {
-    return this.#cellMap[this.#terrain[j][i]]
+  get(i: number, j: number): FieldBlockCell {
+    return this.#cellMap[this.#field[j][i]]
   }
   update(i: number, j: number, cell: string): void {
-    this.#terrain[j] = this.#terrain[j].substring(0, i) + cell +
-      this.#terrain[j].substring(i + 1)
+    this.#field[j] = this.#field[j].substring(0, i) + cell +
+      this.#field[j].substring(i + 1)
   }
   get i(): number {
     return this.#i
@@ -237,14 +237,14 @@ export class TerrainBlock {
       })),
       characters: this.#characters,
       items: this.#items,
-      terrain: this.#terrain,
+      field: this.#field,
     })
   }
 
   /**
    * Returns the difference between this block and the other block.
    */
-  diff(other: TerrainBlock): [i: number, j: number, cell: string][] {
+  diff(other: FieldBlock): [i: number, j: number, cell: string][] {
     const diff: [i: number, j: number, cell: string][] = []
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {

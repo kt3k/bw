@@ -28,7 +28,7 @@ import {
   MainCharacter,
   NPC,
 } from "./model/character.ts"
-import { BlockMap, TerrainBlock } from "./model/terrain-block.ts"
+import { BlockMap, FieldBlock } from "./model/field-block.ts"
 import { Item } from "./model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { AppleCounter } from "./ui/apple-counter.ts"
@@ -214,7 +214,7 @@ class WalkScope extends RectScope {
 }
 
 /**
- * The scope to load the terrain block. The terrain block belong
+ * The scope to load the field block. The field block belong
  * to this area need to be loaded.
  */
 class LoadScope extends RectScope {
@@ -272,7 +272,7 @@ class BlockMapLoader {
 }
 
 /**
- * The scope to unload the terrain fragment. The terrain fragment which
+ * The scope to unload the field block. The field block which
  * doesn't belong to this scope need to be unloaded
  */
 class UnloadScope extends RectScope {
@@ -283,7 +283,7 @@ class UnloadScope extends RectScope {
 }
 class Field implements IFieldTester {
   #el: HTMLElement
-  #blocks: Record<string, TerrainBlock> = {}
+  #blocks: Record<string, FieldBlock> = {}
   #blockElements: Record<string, HTMLCanvasElement> = {}
   #loadScope = new LoadScope()
   #unloadScope = new UnloadScope()
@@ -293,7 +293,7 @@ class Field implements IFieldTester {
     this.#el = el
   }
 
-  async addDistrict(block: TerrainBlock) {
+  async addDistrict(block: FieldBlock) {
     this.#blocks[block.id] = block
     await block.loadAssets()
     const canvas = block.createCanvas()
@@ -301,7 +301,7 @@ class Field implements IFieldTester {
     this.#el.appendChild(canvas)
   }
 
-  removeBlock(block: TerrainBlock) {
+  removeBlock(block: FieldBlock) {
     delete this.#blocks[block.id]
     this.#el.removeChild(this.#blockElements[block.id])
     delete this.#blockElements[block.id]
@@ -334,7 +334,7 @@ class Field implements IFieldTester {
       !this.hasBlock(id)
     )
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.addDistrict(new TerrainBlock(map, loadImage))
+      this.addDistrict(new FieldBlock(map, loadImage))
     }
   }
 
