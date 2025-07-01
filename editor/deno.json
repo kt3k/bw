@@ -27,5 +27,6 @@
   },
   "fmt": {
     "semiColons": false
-  }
+  },
+  "nodeModulesDir": "none"
 }
