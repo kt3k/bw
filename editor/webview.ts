@@ -9,7 +9,7 @@ const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 import { BlockMap, TerrainBlock } from "../player/model/models.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
-import { CanvasLayer } from "../util/canvas-layer.ts"
+import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
 
@@ -163,7 +163,7 @@ function CellSwitch({ on, el, subscribe }: Context) {
 }
 
 function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
-  const canvasLayer = new CanvasLayer(el)
+  const canvasWrapper = new CanvasWrapper(el)
 
   on("click", async (e) => {
     const { left, top } = el.getBoundingClientRect()
@@ -191,7 +191,7 @@ function TerrainBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     // TODO(kt3k): this shouldn't be necessary
     await block.loadAssets()
     for (const [i, j] of diff) {
-      block.drawCell(canvasLayer, i, j)
+      block.drawCell(canvasWrapper, i, j)
     }
   })
 }

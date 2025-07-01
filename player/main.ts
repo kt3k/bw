@@ -14,7 +14,7 @@ import {
   viewScopeSignal,
 } from "../util/signal.ts"
 import { LoadingIndicator } from "./ui/loading-indicator.ts"
-import { CanvasLayer } from "../util/canvas-layer.ts"
+import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
@@ -355,8 +355,12 @@ class Field implements IFieldTester {
 const range = (n: number) => [...Array(n).keys()]
 
 function GameScreen({ query }: Context) {
-  const layer = new CanvasLayer(query<HTMLCanvasElement>(".canvas-chars")!)
-  const itemLayer = new CanvasLayer(query<HTMLCanvasElement>(".canvas-items")!)
+  const charLayer = new CanvasWrapper(
+    query<HTMLCanvasElement>(".canvas-chars")!,
+  )
+  const itemLayer = new CanvasWrapper(
+    query<HTMLCanvasElement>(".canvas-items")!,
+  )
 
   const me = new MainCharacter(2, 2, 1, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
@@ -396,17 +400,17 @@ function GameScreen({ query }: Context) {
 
   items.add(new Item(-7, 1, "item/apple.png"))
 
-  const viewScope = new ViewScope(layer.width, layer.height)
+  const viewScope = new ViewScope(charLayer.width, charLayer.height)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
   const walkers = new Walkers([me, ...mobs])
 
-  const walkScope = new WalkScope(layer.width * 3, layer.height * 3)
+  const walkScope = new WalkScope(charLayer.width * 3, charLayer.height * 3)
   centerGridSignal.subscribe(({ i, j }) =>
     walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
 
-  const field = new Field(query(".terrain")!)
+  const field = new Field(query(".field")!)
   centerGrid10Signal.subscribe(({ i, j }) => field.checkLoad(i, j))
   centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j))
   viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y))
@@ -417,7 +421,7 @@ function GameScreen({ query }: Context) {
   items.loadAssets().then(() => {
     for (const item of items) {
       if (viewScope.overlaps(item)) {
-        layer.drawImage(
+        charLayer.drawImage(
           item.image(),
           item.x - viewScope.left,
           item.y - viewScope.top,
@@ -449,7 +453,7 @@ function GameScreen({ query }: Context) {
     })
 
     itemLayer.clear()
-    layer.clear()
+    charLayer.clear()
 
     for (const item of items) {
       if (viewScope.overlaps(item)) {
@@ -465,7 +469,7 @@ function GameScreen({ query }: Context) {
       if (!viewScope.overlaps(walker)) {
         continue
       }
-      layer.drawImage(
+      charLayer.drawImage(
         walker.image(),
         walker.x - viewScope.left,
         walker.y - viewScope.top,

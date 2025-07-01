@@ -1,4 +1,4 @@
-import { CanvasLayer } from "../../util/canvas-layer.ts"
+import { CanvasWrapper } from "../../util/canvas-wrapper.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../../util/constants.ts"
 import { seedrandom } from "../../util/random.ts"
 import type { Character } from "./character.ts"
@@ -157,11 +157,11 @@ export class TerrainBlock {
     canvas.width = this.w
     canvas.height = this.h
     canvas.classList.add("crisp-edges")
-    this.#renderBlock(new CanvasLayer(canvas))
+    this.#renderBlock(new CanvasWrapper(canvas))
     return canvas
   }
 
-  drawCell(layer: CanvasLayer, i: number, j: number) {
+  drawCell(layer: CanvasWrapper, i: number, j: number) {
     const cell = this.get(i, j)
     if (cell.href) {
       layer.drawImage(this.#imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE)
@@ -191,7 +191,7 @@ export class TerrainBlock {
     )
   }
 
-  #renderBlock(layer: CanvasLayer) {
+  #renderBlock(layer: CanvasWrapper) {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         this.drawCell(layer, i, j)
