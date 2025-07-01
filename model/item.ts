@@ -1,7 +1,8 @@
 import { loadImage } from "../util/load.ts"
 import { CELL_SIZE } from "../util/constants.ts"
+import type { IObj } from "./character.ts"
 
-export class Item {
+export class Item implements IObj {
   #i: number
   #j: number
   #assetPath: string

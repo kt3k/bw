@@ -5,6 +5,11 @@ import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
 import { appleCountSignal } from "../util/signal.ts"
 
+export type ILoader = {
+  loadAssets(): Promise<void>
+  get assetsReady(): boolean
+}
+
 /** The interface represents a box */
 export type IBox = {
   get x(): number
@@ -13,11 +18,9 @@ export type IBox = {
   get h(): number
 }
 
-export type IObj = IBox & {
+export type IObj = IBox & ILoader & {
   i: number
   j: number
-  loadAssets(): Promise<void>
-  get assetsReady(): boolean
   image(): HTMLImageElement
 }
 
