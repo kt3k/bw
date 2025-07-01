@@ -1,9 +1,9 @@
-import { loadImage } from "../../util/load.ts"
-import type { Input } from "../../util/dir.ts"
-import { type Dir, DOWN, LEFT, RIGHT, UP } from "../../util/dir.ts"
-import { CELL_SIZE } from "../../util/constants.ts"
-import { choice, randomInt } from "../../util/random.ts"
-import { appleCountSignal } from "../../util/signal.ts"
+import { loadImage } from "../util/load.ts"
+import type { Input } from "../util/dir.ts"
+import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
+import { CELL_SIZE } from "../util/constants.ts"
+import { choice, randomInt } from "../util/random.ts"
+import { appleCountSignal } from "../util/signal.ts"
 
 /** The interface represents a box */
 export type IBox = {

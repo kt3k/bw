@@ -27,9 +27,9 @@ import {
   type ItemContainer,
   MainCharacter,
   NPC,
-} from "./model/character.ts"
-import { BlockMap, FieldBlock } from "./model/field-block.ts"
-import { Item } from "./model/item.ts"
+} from "../model/character.ts"
+import { BlockMap, FieldBlock } from "../model/field-block.ts"
+import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { AppleCounter } from "./ui/apple-counter.ts"
 

@@ -1,5 +1,5 @@
-import { loadImage } from "../../util/load.ts"
-import { CELL_SIZE } from "../../util/constants.ts"
+import { loadImage } from "../util/load.ts"
+import { CELL_SIZE } from "../util/constants.ts"
 
 export class Item {
   #i: number

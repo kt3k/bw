@@ -1,6 +1,6 @@
-import { CanvasWrapper } from "../../util/canvas-wrapper.ts"
-import { BLOCK_SIZE, CELL_SIZE } from "../../util/constants.ts"
-import { seedrandom } from "../../util/random.ts"
+import { CanvasWrapper } from "../util/canvas-wrapper.ts"
+import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
+import { seedrandom } from "../util/random.ts"
 import type { Character } from "./character.ts"
 import type { Item } from "./item.ts"
 
