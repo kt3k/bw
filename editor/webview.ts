@@ -123,10 +123,12 @@ function CellSwitch({ on, el, subscribe }: Context) {
       if (cell.color) {
         canvas.style.backgroundColor = cell.color
       }
-      if (cell.href) {
-        const img = await fieldBlock.loadCellImage(cell.href)
-        const ctx = canvas.getContext("2d")!
-        ctx.drawImage(img, 0, 0, 16, 16)
+      if (cell.src) {
+        for (const src of cell.src) {
+          const img = await fieldBlock.loadCellImage(src)
+          const ctx = canvas.getContext("2d")!
+          ctx.drawImage(img, 0, 0, 16, 16)
+        }
       }
       div.appendChild(canvas)
       return div

@@ -1,6 +1,7 @@
 // Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
 
 /** @jsxImportSource @kt3k/picojsx */
+/** @jsxRuntime automatic */
 
 // @ts-types="@types/vscode"
 import * as vscode from "vscode"

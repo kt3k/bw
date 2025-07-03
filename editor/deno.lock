@@ -2358,8 +2358,7 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@vscode/vsce@^3.6.0",
-        "npm:seedrandom@^3.0.5"
+        "npm:@vscode/vsce@^3.6.0"
       ]
     }
   }

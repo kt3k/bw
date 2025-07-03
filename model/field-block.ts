@@ -5,18 +5,23 @@ import type { Character } from "./character.ts"
 import type { Item } from "./item.ts"
 
 /**
- * FieldBlockCell represents the cell in the field block
+ * {@linkcode FieldCell} represents the cell in the field block
  */
-export class FieldBlockCell {
+export class FieldCell {
   #color?: string
-  #href?: string
+  #src?: string[]
   #canEnter: boolean
   #name: string
-  constructor(name: string, canEnter: boolean, color?: string, href?: string) {
+  constructor(
+    name: string,
+    canEnter: boolean,
+    color?: string,
+    src?: string[],
+  ) {
     this.#name = name
     this.#canEnter = canEnter
     this.#color = color
-    this.#href = href
+    this.#src = src
   }
 
   canEnter(): boolean {
@@ -28,13 +33,13 @@ export class FieldBlockCell {
   get color(): string | undefined {
     return this.#color
   }
-  get href(): string | undefined {
-    return this.#href
+  get src(): string[] | undefined {
+    return this.#src
   }
 }
 
 /**
- * Map represents the map of field
+ * {@linkcode BlockMap} is a map (serialized form) of {@linkcode FieldBlock}
  */
 export class BlockMap {
   /** The URL of the map */
@@ -47,7 +52,7 @@ export class BlockMap {
     name: string
     canEnter: boolean
     color?: string
-    href?: string
+    href?: string | string[]
   }[]
   characters: {}[]
   items: Item[]
@@ -74,7 +79,7 @@ export class BlockMap {
   }
 }
 
-/** FieldBlock represents a block of a field */
+/** {@linkcode FieldBlock} represents a block of a field */
 export class FieldBlock {
   #x: number
   #y: number
@@ -84,7 +89,7 @@ export class FieldBlock {
   #i: number
   // The row of the world coordinates
   #j: number
-  #cellMap: Record<string, FieldBlockCell> = {}
+  #cellMap: Record<string, FieldCell> = {}
   #imgMap: Record<string, HTMLImageElement> = {}
   #items: Item[]
   #characters: Character[]
@@ -103,11 +108,13 @@ export class FieldBlock {
     this.#h = BLOCK_SIZE * CELL_SIZE
     this.#w = BLOCK_SIZE * CELL_SIZE
     for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new FieldBlockCell(
+      this.#cellMap[cell.name] = new FieldCell(
         cell.name,
         cell.canEnter,
         cell.color,
-        cell.href,
+        cell.href
+          ? Array.isArray(cell.href) ? cell.href : [cell.href]
+          : undefined,
       )
     }
     this.#field = map.field
@@ -131,19 +138,21 @@ export class FieldBlock {
     return `${this.#i}.${this.#j}`
   }
 
-  get cells(): FieldBlockCell[] {
+  get cells(): FieldCell[] {
     return Object.values(this.#cellMap)
   }
 
-  get cellMap(): Record<string, FieldBlockCell> {
+  get cellMap(): Record<string, FieldCell> {
     return this.#cellMap
   }
 
   async loadAssets() {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
-        if (cell.href) {
-          this.#imgMap[cell.href] = await this.loadCellImage(cell.href)
+        if (cell.src) {
+          for (const src of cell.src) {
+            this.#imgMap[src] = await this.loadCellImage(src)
+          }
         }
       }),
     )
@@ -163,8 +172,10 @@ export class FieldBlock {
 
   drawCell(layer: CanvasWrapper, i: number, j: number) {
     const cell = this.get(i, j)
-    if (cell.href) {
-      layer.drawImage(this.#imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE)
+    if (cell.src) {
+      for (const src of cell.src) {
+        layer.drawImage(this.#imgMap[src], i * CELL_SIZE, j * CELL_SIZE)
+      }
     } else {
       layer.drawRect(
         i * CELL_SIZE,
@@ -199,7 +210,7 @@ export class FieldBlock {
     }
   }
 
-  get(i: number, j: number): FieldBlockCell {
+  get(i: number, j: number): FieldCell {
     return this.#cellMap[this.#field[j][i]]
   }
   update(i: number, j: number, cell: string): void {
@@ -233,7 +244,9 @@ export class FieldBlock {
         name: cell.name,
         canEnter: cell.canEnter(),
         color: cell.color,
-        href: cell.href,
+        href: cell.src
+          ? cell.src.length === 1 ? cell.src[0] : cell.src
+          : undefined,
       })),
       characters: this.#characters,
       items: this.#items,
