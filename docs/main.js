@@ -1056,63 +1056,6 @@ function mount(name, el) {
   });
 }
 
-// https://jsr.io/@kt3k/gameloop/1.5.0/mod.ts
-var GameloopImpl = class {
-  #main;
-  #timer;
-  #frame;
-  #resolve;
-  #onStep;
-  #fps;
-  constructor(main, fps) {
-    this.#main = main;
-    this.#fps = fps;
-    this.#frame = 1e3 / fps;
-  }
-  /** Starts the game loop. */
-  run() {
-    if (this.#resolve) {
-      return Promise.reject(new Error("The gameloop is already running."));
-    }
-    return new Promise((resolve, _) => {
-      this.#resolve = resolve;
-      this.#step();
-    });
-  }
-  /** Returns true iff the loop is running. */
-  get isRunning() {
-    return this.#resolve != null;
-  }
-  /** Performs the step routine. */
-  #step = () => {
-    const startedAt = Date.now();
-    this.#main();
-    const endedAt = Date.now();
-    const duration = endedAt - startedAt;
-    const wait = this.#frame - duration;
-    const fps = Math.min(1e3 / duration, this.#fps);
-    if (this.#onStep) {
-      this.#onStep(fps);
-    }
-    this.#timer = setTimeout(this.#step, wait);
-  };
-  /** Stops the game loop. */
-  stop() {
-    if (!this.#resolve) {
-      throw new Error("The gameloop isn't running.");
-    }
-    this.#resolve();
-    this.#resolve = void 0;
-    clearTimeout(this.#timer);
-  }
-  onStep(callback) {
-    this.#onStep = callback;
-  }
-};
-function gameloop(main, fps) {
-  return new GameloopImpl(main, fps);
-}
-
 // util/dir.ts
 var UP = "up";
 var DOWN = "down";
@@ -1274,34 +1217,74 @@ function LoadingIndicator({ el }) {
   isLoadingSignal.subscribe((v) => el.classList.toggle("hidden", !v));
 }
 
-// util/canvas-wrapper.ts
-var CanvasWrapper = class {
-  #ctx;
-  constructor(canvas) {
-    this.#ctx = canvas.getContext("2d");
+// player/ui/apple-counter.ts
+function AppleCounter({ query, subscribe }) {
+  subscribe(appleCountSignal, (apples) => {
+    setTimeout(() => {
+      const counter = query(".count-label");
+      if (counter) {
+        counter.textContent = apples.toString();
+      }
+    }, 300);
+  });
+}
+
+// https://jsr.io/@kt3k/gameloop/1.5.0/mod.ts
+var GameloopImpl = class {
+  #main;
+  #timer;
+  #frame;
+  #resolve;
+  #onStep;
+  #fps;
+  constructor(main, fps) {
+    this.#main = main;
+    this.#fps = fps;
+    this.#frame = 1e3 / fps;
   }
-  drawImage(img, x, y) {
-    this.#ctx.drawImage(img, x, y);
+  /** Starts the game loop. */
+  run() {
+    if (this.#resolve) {
+      return Promise.reject(new Error("The gameloop is already running."));
+    }
+    return new Promise((resolve, _) => {
+      this.#resolve = resolve;
+      this.#step();
+    });
   }
-  drawRect(x, y, w, h, color) {
-    this.#ctx.fillStyle = color;
-    this.#ctx.fillRect(x, y, w, h);
+  /** Returns true iff the loop is running. */
+  get isRunning() {
+    return this.#resolve != null;
   }
-  clear() {
-    this.#ctx.clearRect(0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height);
+  /** Performs the step routine. */
+  #step = () => {
+    const startedAt = Date.now();
+    this.#main();
+    const endedAt = Date.now();
+    const duration = endedAt - startedAt;
+    const wait = this.#frame - duration;
+    const fps = Math.min(1e3 / duration, this.#fps);
+    if (this.#onStep) {
+      this.#onStep(fps);
+    }
+    this.#timer = setTimeout(this.#step, wait);
+  };
+  /** Stops the game loop. */
+  stop() {
+    if (!this.#resolve) {
+      throw new Error("The gameloop isn't running.");
+    }
+    this.#resolve();
+    this.#resolve = void 0;
+    clearTimeout(this.#timer);
   }
-  /** The width of the canvas */
-  get width() {
-    return this.#ctx.canvas.width;
-  }
-  /** The height of the canvas */
-  get height() {
-    return this.#ctx.canvas.height;
-  }
-  get ctx() {
-    return this.#ctx;
+  onStep(callback) {
+    this.#onStep = callback;
   }
 };
+function gameloop(main, fps) {
+  return new GameloopImpl(main, fps);
+}
 
 // util/math.ts
 function floorN(x, n) {
@@ -1467,7 +1450,7 @@ function choice(arr) {
   return arr[randomInt(arr.length)];
 }
 
-// player/model/character.ts
+// model/character.ts
 var Character = class {
   /** The current direction of the character */
   #dir = "down";
@@ -1745,17 +1728,46 @@ var NPC = class extends Character {
   }
 };
 
-// player/model/field-block.ts
-var FieldBlockCell = class {
+// util/canvas-wrapper.ts
+var CanvasWrapper = class {
+  #ctx;
+  constructor(canvas) {
+    this.#ctx = canvas.getContext("2d");
+  }
+  drawImage(img, x, y) {
+    this.#ctx.drawImage(img, x, y);
+  }
+  drawRect(x, y, w, h, color) {
+    this.#ctx.fillStyle = color;
+    this.#ctx.fillRect(x, y, w, h);
+  }
+  clear() {
+    this.#ctx.clearRect(0, 0, this.#ctx.canvas.width, this.#ctx.canvas.height);
+  }
+  /** The width of the canvas */
+  get width() {
+    return this.#ctx.canvas.width;
+  }
+  /** The height of the canvas */
+  get height() {
+    return this.#ctx.canvas.height;
+  }
+  get ctx() {
+    return this.#ctx;
+  }
+};
+
+// model/field-block.ts
+var FieldCell = class {
   #color;
-  #href;
+  #src;
   #canEnter;
   #name;
-  constructor(name, canEnter, color, href) {
+  constructor(name, canEnter, color, src) {
     this.#name = name;
     this.#canEnter = canEnter;
     this.#color = color;
-    this.#href = href;
+    this.#src = src;
   }
   canEnter() {
     return this.#canEnter;
@@ -1766,8 +1778,8 @@ var FieldBlockCell = class {
   get color() {
     return this.#color;
   }
-  get href() {
-    return this.#href;
+  get src() {
+    return this.#src;
   }
 };
 var BlockMap = class _BlockMap {
@@ -1824,11 +1836,11 @@ var FieldBlock = class _FieldBlock {
     this.#h = BLOCK_SIZE * CELL_SIZE;
     this.#w = BLOCK_SIZE * CELL_SIZE;
     for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new FieldBlockCell(
+      this.#cellMap[cell.name] = new FieldCell(
         cell.name,
         cell.canEnter,
         cell.color,
-        cell.href
+        cell.href ? Array.isArray(cell.href) ? cell.href : [cell.href] : void 0
       );
     }
     this.#field = map.field;
@@ -1857,8 +1869,10 @@ var FieldBlock = class _FieldBlock {
   async loadAssets() {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
-        if (cell.href) {
-          this.#imgMap[cell.href] = await this.loadCellImage(cell.href);
+        if (cell.src) {
+          for (const src of cell.src) {
+            this.#imgMap[src] = await this.loadCellImage(src);
+          }
         }
       })
     );
@@ -1876,8 +1890,10 @@ var FieldBlock = class _FieldBlock {
   }
   drawCell(layer, i, j) {
     const cell = this.get(i, j);
-    if (cell.href) {
-      layer.drawImage(this.#imgMap[cell.href], i * CELL_SIZE, j * CELL_SIZE);
+    if (cell.src) {
+      for (const src of cell.src) {
+        layer.drawImage(this.#imgMap[src], i * CELL_SIZE, j * CELL_SIZE);
+      }
     } else {
       layer.drawRect(
         i * CELL_SIZE,
@@ -1942,7 +1958,7 @@ var FieldBlock = class _FieldBlock {
         name: cell.name,
         canEnter: cell.canEnter(),
         color: cell.color,
-        href: cell.href
+        href: cell.src ? cell.src.length === 1 ? cell.src[0] : cell.src : void 0
       })),
       characters: this.#characters,
       items: this.#items,
@@ -1966,7 +1982,7 @@ var FieldBlock = class _FieldBlock {
   }
 };
 
-// player/model/item.ts
+// model/item.ts
 var Item = class {
   #i;
   #j;
@@ -2011,19 +2027,28 @@ var Item = class {
   }
 };
 
-// player/ui/apple-counter.ts
-function AppleCounter({ query, subscribe }) {
-  subscribe(appleCountSignal, (apples) => {
-    setTimeout(() => {
-      const counter = query(".count-label");
-      if (counter) {
-        counter.textContent = apples.toString();
-      }
-    }, 300);
-  });
-}
+// player/draw-layer.ts
+var DrawLayer = class {
+  #canvasWrapper;
+  #viewScope;
+  constructor(canvas, viewScope) {
+    this.#canvasWrapper = new CanvasWrapper(canvas);
+    this.#viewScope = viewScope;
+  }
+  draw(obj) {
+    this.#canvasWrapper.drawImage(
+      obj.image(),
+      obj.x - this.#viewScope.left,
+      obj.y - this.#viewScope.top
+    );
+  }
+  clear() {
+    this.#canvasWrapper.clear();
+  }
+};
 
-// player/main.ts
+// player/game-screen.ts
+var toEven = (n) => n % 2 === 0 ? n : Math.floor(n / 2) * 2;
 var RectScope = class {
   #w;
   #h;
@@ -2032,8 +2057,8 @@ var RectScope = class {
   #bottom = 0;
   #right = 0;
   constructor(w, h) {
-    this.#w = w;
-    this.#h = h;
+    this.#w = toEven(w);
+    this.#h = toEven(h);
     this.setCenter(0, 0);
   }
   setCenter(x, y) {
@@ -2088,8 +2113,9 @@ var Items = class {
   step() {
   }
   async loadAssets() {
-    const promises = [...this.#items].map((item) => item.loadAssets());
-    await Promise.all(promises);
+    await Promise.all(
+      [...this.#items].filter((item) => !item.assetsReady).map((item) => item.loadAssets())
+    );
   }
   get assetsReady() {
     return [...this.#items].every((x) => x.assetsReady);
@@ -2145,6 +2171,11 @@ var Walkers = class {
       walker.step(input, fieldTester, collisionChecker, items);
       this.#coordCountMap.increment(walker.physicalGridKey);
     }
+  }
+  async loadAssets() {
+    await Promise.all(
+      this.#walkers.filter((w) => !w.assetsReady).map((w) => w.loadAssets())
+    );
   }
   get assetsReady() {
     return this.#walkers.every((x) => x.assetsReady);
@@ -2267,13 +2298,16 @@ var Field = class {
   }
 };
 var range = (n) => [...Array(n).keys()];
-function GameScreen({ query }) {
-  const charLayer = new CanvasWrapper(
-    query(".canvas-chars")
-  );
-  const itemLayer = new CanvasWrapper(
-    query(".canvas-items")
-  );
+function GameScreen({ el, query }) {
+  const charCanvas = query(".canvas-chars");
+  const itemCanvas = query(".canvas-items");
+  const screenSize = Math.min(globalThis.screen.width, 400);
+  charCanvas.width = screenSize;
+  charCanvas.height = screenSize;
+  itemCanvas.width = screenSize;
+  itemCanvas.height = screenSize;
+  el.style.width = screenSize + "px";
+  el.style.height = screenSize + "px";
   const me = new MainCharacter(2, 2, 1, "char/kimi/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
   const mobs = range(6).map(
@@ -2304,10 +2338,12 @@ function GameScreen({ query }) {
   items.add(new Item(-5, 8, "item/apple.png"));
   items.add(new Item(-6, 8, "item/apple.png"));
   items.add(new Item(-7, 1, "item/apple.png"));
-  const viewScope = new ViewScope(charLayer.width, charLayer.height);
+  const viewScope = new ViewScope(screenSize, screenSize);
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y));
+  const charLayer = new DrawLayer(charCanvas, viewScope);
+  const itemLayer = new DrawLayer(itemCanvas, viewScope);
   const walkers = new Walkers([me, ...mobs]);
-  const walkScope = new WalkScope(charLayer.width * 3, charLayer.height * 3);
+  const walkScope = new WalkScope(screenSize * 3, screenSize * 3);
   centerGridSignal.subscribe(
     ({ i, j }) => walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   );
@@ -2315,19 +2351,8 @@ function GameScreen({ query }) {
   centerGrid10Signal.subscribe(({ i, j }) => field.checkLoad(i, j));
   centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j));
   viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y));
-  me.loadAssets();
-  mobs.forEach((mob) => mob.loadAssets());
-  items.loadAssets().then(() => {
-    for (const item of items) {
-      if (viewScope.overlaps(item)) {
-        charLayer.drawImage(
-          item.image(),
-          item.x - viewScope.left,
-          item.y - viewScope.top
-        );
-      }
-    }
-  });
+  walkers.loadAssets();
+  items.loadAssets();
   isLoadingSignal.subscribe((v) => {
     if (!v) {
       query(".curtain").style.opacity = "0";
@@ -2341,35 +2366,25 @@ function GameScreen({ query }) {
     }
     isLoadingSignal.update(false);
     walkers.step(Input, field, collisionChecker, items);
-    centerPixelSignal.update({
-      x: me.centerX,
-      y: me.centerY
-    });
+    centerPixelSignal.update({ x: me.centerX, y: me.centerY });
     itemLayer.clear();
-    charLayer.clear();
     for (const item of items) {
       if (viewScope.overlaps(item)) {
-        itemLayer.drawImage(
-          item.image(),
-          item.x - viewScope.left,
-          item.y - viewScope.top
-        );
+        itemLayer.draw(item);
       }
     }
+    charLayer.clear();
     for (const walker of walkers) {
-      if (!viewScope.overlaps(walker)) {
-        continue;
+      if (viewScope.overlaps(walker)) {
+        charLayer.draw(walker);
       }
-      charLayer.drawImage(
-        walker.image(),
-        walker.x - viewScope.left,
-        walker.y - viewScope.top
-      );
     }
   }, 60);
   loop.onStep((fps) => fpsSignal.update(fps));
   loop.run();
 }
+
+// player/main.ts
 globalThis.addEventListener("blur", clearInput);
 register(GameScreen, "js-game-screen");
 register(FpsMonitor, "js-fps-monitor");

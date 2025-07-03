@@ -28,6 +28,7 @@ import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { DrawLayer } from "./draw-layer.ts"
 
+const toEven = (n: number) => n % 2 === 0 ? n : Math.floor(n / 2) * 2
 /**
  * Abstract rectangular area, which implements properties of the rectangle.
  * Various areas, which have special meanings, are implemented by extending this class.
@@ -40,8 +41,8 @@ abstract class RectScope {
   #bottom: number = 0
   #right: number = 0
   constructor(w: number, h: number) {
-    this.#w = w
-    this.#h = h
+    this.#w = toEven(w)
+    this.#h = toEven(h)
     this.setCenter(0, 0)
   }
 
@@ -360,9 +361,18 @@ class Field implements IFieldTester {
 
 const range = (n: number) => [...Array(n).keys()]
 
-export function GameScreen({ query }: Context) {
+export function GameScreen({ el, query }: Context) {
   const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
   const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
+
+  const screenSize = Math.min(globalThis.screen.width, 400)
+
+  charCanvas.width = screenSize
+  charCanvas.height = screenSize
+  itemCanvas.width = screenSize
+  itemCanvas.height = screenSize
+  el.style.width = screenSize + "px"
+  el.style.height = screenSize + "px"
 
   const me = new MainCharacter(2, 2, 1, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
@@ -402,7 +412,7 @@ export function GameScreen({ query }: Context) {
 
   items.add(new Item(-7, 1, "item/apple.png"))
 
-  const viewScope = new ViewScope(charCanvas.width, charCanvas.height)
+  const viewScope = new ViewScope(screenSize, screenSize)
   centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
   const charLayer = new DrawLayer(charCanvas, viewScope)
@@ -410,7 +420,7 @@ export function GameScreen({ query }: Context) {
 
   const walkers = new Walkers([me, ...mobs])
 
-  const walkScope = new WalkScope(charCanvas.width * 3, charCanvas.height * 3)
+  const walkScope = new WalkScope(screenSize * 3, screenSize * 3)
   centerGridSignal.subscribe(({ i, j }) =>
     walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
