@@ -365,7 +365,7 @@ export function GameScreen({ el, query }: Context) {
   const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
   const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
 
-  const screenSize = Math.min(globalThis.screen.width, 400)
+  const screenSize = Math.min(globalThis.screen.width, 450)
 
   charCanvas.width = screenSize
   charCanvas.height = screenSize

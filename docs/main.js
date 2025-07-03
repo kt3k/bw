@@ -2301,7 +2301,7 @@ var range = (n) => [...Array(n).keys()];
 function GameScreen({ el, query }) {
   const charCanvas = query(".canvas-chars");
   const itemCanvas = query(".canvas-items");
-  const screenSize = Math.min(globalThis.screen.width, 400);
+  const screenSize = Math.min(globalThis.screen.width, 450);
   charCanvas.width = screenSize;
   charCanvas.height = screenSize;
   itemCanvas.width = screenSize;
