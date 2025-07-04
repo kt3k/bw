@@ -185,14 +185,15 @@ export class FieldBlock {
         cell.color || "black",
       )
     }
-    if (!cell.canEnter()) {
-      return
-    }
     const worldI = this.#i + i
     const worldJ = this.#j + j
     const rng = seedrandom(`${worldI}.${worldJ}`)
-    const choice = (arr: number[]) => arr[Math.floor(rng() * arr.length)]
-    const color = `hsla(90, 100%, 50%, ${choice([0.1, 0.2])})`
+    let color: string
+    if (cell.canEnter()) {
+      color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
+    } else {
+      color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
+    }
     layer.drawRect(
       i * CELL_SIZE,
       j * CELL_SIZE,
