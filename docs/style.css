@@ -578,6 +578,10 @@ video {
   top: 8px;
 }
 
+.mt-0\.5 {
+  margin-top: 0.125rem;
+}
+
 .inline {
   display: inline;
 }
@@ -638,6 +642,10 @@ video {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.gap-0\.5 {
+  gap: 0.125rem;
 }
 
 .overflow-hidden {

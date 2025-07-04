@@ -1903,14 +1903,15 @@ var FieldBlock = class _FieldBlock {
         cell.color || "black"
       );
     }
-    if (!cell.canEnter()) {
-      return;
-    }
     const worldI = this.#i + i;
     const worldJ = this.#j + j;
     const rng2 = (0, import_npm_seedrandom.default)(`${worldI}.${worldJ}`);
-    const choice2 = (arr) => arr[Math.floor(rng2() * arr.length)];
-    const color = `hsla(90, 100%, 50%, ${choice2([0.1, 0.2])})`;
+    let color;
+    if (cell.canEnter()) {
+      color = `hsla(${rng2() * 100 + 100}, 50%, 20%, ${rng2() * 0.1 + 0.1})`;
+    } else {
+      color = `hsla(240, 100%, 10%, ${rng2() * 0.2 + 0.15})`;
+    }
     layer.drawRect(
       i * CELL_SIZE,
       j * CELL_SIZE,
