@@ -54,9 +54,11 @@ export class BlockMap {
     color?: string
     href?: string | string[]
   }[]
+  // deno-lint-ignore ban-types
   characters: {}[]
   items: Item[]
   field: string[]
+  // deno-lint-ignore no-explicit-any
   #obj: any
   // deno-lint-ignore no-explicit-any
   constructor(url: string, obj: any) {
@@ -74,7 +76,7 @@ export class BlockMap {
     return new BlockMap(this.url, structuredClone(this.#obj))
   }
 
-  toObject(): any {
+  toObject() {
     return this.#obj
   }
 }

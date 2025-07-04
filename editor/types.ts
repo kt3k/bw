@@ -24,6 +24,7 @@ export namespace Webview {
   }
   export type MessageUpdate = {
     type: "update"
+    // deno-lint-ignore no-explicit-any
     map: any
   }
   export type Message = MessageLoadImage | MessageUpdate

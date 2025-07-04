@@ -147,12 +147,13 @@ function CellSwitch({ on, el, subscribe }: Context) {
     const ACTIVE_CLASSES = ["bg-orange-400"]
     const ACTIVE_CANVAS_CLASSES = ["opacity-70"]
     children.forEach((child, i) => {
+      const firstChild = child.firstChild as HTMLElement
       if (i === index) {
         child.classList.add(...ACTIVE_CLASSES)
-        ;(child.firstChild as any).classList.add(...ACTIVE_CANVAS_CLASSES)
+        firstChild.classList.add(...ACTIVE_CANVAS_CLASSES)
       } else {
         child.classList.remove(...ACTIVE_CLASSES)
-        ;(child.firstChild as any).classList.remove(...ACTIVE_CANVAS_CLASSES)
+        firstChild.classList.remove(...ACTIVE_CANVAS_CLASSES)
       }
     })
   })
@@ -167,7 +168,7 @@ function CellSwitch({ on, el, subscribe }: Context) {
 function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 
-  on("click", async (e) => {
+  on("click", (e) => {
     const { left, top } = el.getBoundingClientRect()
     const x = floorN(e.clientX - left, 16)
     const y = floorN(e.clientY - top, 16)
@@ -239,7 +240,7 @@ function onLoadImageResponse(message: type.Extension.MessageLoadImageResponse) {
   loadImageMap[message.id].resolve(image)
 }
 
-window.addEventListener(
+globalThis.addEventListener(
   "message",
   (event: MessageEvent<type.Extension.Message>) => {
     const { data } = event
