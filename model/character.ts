@@ -105,14 +105,16 @@ export abstract class Character implements IChar {
   constructor(
     i: number,
     j: number,
-    speed: 1 | 2 | 4 | 8 | 16,
     assetPrefix: string,
+    dir: Dir = DOWN,
+    speed: 1 | 2 | 4 | 8 | 16 = 1,
   ) {
     this.#i = i
     this.#j = j
     this.#speed = speed
     this.#assetPrefix = assetPrefix
     this.#physicalGridKey = this.#calcPhysicalGridKey()
+    this.#dir = dir
   }
 
   setState(state: Dir) {
@@ -154,16 +156,18 @@ export abstract class Character implements IChar {
    * Returning the direction causes the character to move in that direction.
    * Returning undefined causes the character to stay in the current state.
    */
-  abstract getNextState(
+  getNextState(
     _input: typeof Input,
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
-  ): Dir | undefined
+  ): Dir | undefined {
+    return undefined
+  }
 
-  abstract onMoveEnd(
+  onMoveEnd(
     _fieldTester: IFieldTester,
     _itemContainer: ItemContainer,
-  ): void
+  ): void {}
 
   step(
     input: typeof Input,
@@ -396,16 +400,8 @@ export class MainCharacter extends Character {
   }
 }
 
-export class NPC extends Character {
+export class RandomWalkNPC extends Character {
   #counter = 32
-  constructor(
-    i: number,
-    j: number,
-    speed: 1 | 2 | 4 | 8 | 16,
-    assetPrefix: string,
-  ) {
-    super(i, j, speed, assetPrefix)
-  }
 
   override getNextState(
     _input: typeof Input,
@@ -430,11 +426,7 @@ export class NPC extends Character {
     }
     return undefined
   }
+}
 
-  override onMoveEnd(
-    _fieldTester: IFieldTester,
-    _itemContainer: ItemContainer,
-  ): void {
-    // NPCs do not have any special actions on move end
-  }
+export class StaticNPC extends Character {
 }

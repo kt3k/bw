@@ -21,7 +21,8 @@ import {
   type IStepper,
   type ItemContainer,
   MainCharacter,
-  NPC,
+  RandomWalkNPC,
+  StaticNPC,
 } from "../model/character.ts"
 import { BlockMap, FieldBlock } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
@@ -374,12 +375,19 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, 2, 1, "char/kimi/")
+  const me = new MainCharacter(2, 2, "char/kimi/")
   centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
-  const mobs = range(6).map((j) =>
-    range(3).map((i) => new NPC(-4 + i, -2 + j, 1, "char/joob/"))
+  const mobs: IChar[] = range(6).map((j) =>
+    range(3).map((i) => new RandomWalkNPC(-4 + i, -2 + j, "char/joob/"))
   ).flat()
+
+  mobs.push(
+    new StaticNPC(4, 2, "char/joob/", "up"),
+    new StaticNPC(5, 2, "char/joob/", "up"),
+    new StaticNPC(7, 4, "char/joob/", "down"),
+    new StaticNPC(8, 4, "char/joob/", "down"),
+  )
 
   const items = new Items()
   items.add(new Item(1, 1, "item/apple.png"))

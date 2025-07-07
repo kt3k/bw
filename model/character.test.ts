@@ -1,4 +1,4 @@
-import { MainCharacter, NPC } from "./character.ts"
+import { MainCharacter, RandomWalkNPC } from "./character.ts"
 import { assertEquals } from "@std/assert"
 
 Deno.test("Character", async (t) => {
@@ -6,7 +6,7 @@ Deno.test("Character", async (t) => {
     const mc = new MainCharacter(100, 100, 1, "main/")
     assertEquals(mc.physicalGridKey, "100.100")
 
-    const npc = new NPC(200, 200, 1, "npc/")
+    const npc = new RandomWalkNPC(200, 200, 1, "npc/")
     assertEquals(npc.physicalGridKey, "200.200")
   })
 })
