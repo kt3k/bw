@@ -387,6 +387,18 @@ export function GameScreen({ el, query }: Context) {
     new StaticNPC(5, 2, "char/joob/", "up"),
     new StaticNPC(7, 4, "char/joob/", "down"),
     new StaticNPC(8, 4, "char/joob/", "down"),
+    new StaticNPC(11, -2, "char/joob/", "down"),
+    new StaticNPC(12, -2, "char/joob/", "down"),
+    new StaticNPC(13, -2, "char/joob/", "down"),
+    new StaticNPC(11, -3, "char/joob/", "down"),
+    new StaticNPC(12, -3, "char/joob/", "down"),
+    new StaticNPC(13, -3, "char/joob/", "down"),
+    new StaticNPC(11, -4, "char/joob/", "down"),
+    new StaticNPC(12, -4, "char/joob/", "down"),
+    new StaticNPC(13, -4, "char/joob/", "down"),
+    new StaticNPC(12, -5, "char/joob/", "down"),
+    new StaticNPC(13, -5, "char/joob/", "down"),
+    new StaticNPC(13, -6, "char/joob/", "down"),
   )
 
   const items = new Items()
