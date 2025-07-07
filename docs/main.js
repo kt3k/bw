@@ -1481,12 +1481,13 @@ var Character = class {
    * @param j The row of the grid coordinate
    * @param assetPrefix The prefix of the asset URL
    */
-  constructor(i, j, speed, assetPrefix) {
+  constructor(i, j, assetPrefix, dir = DOWN, speed = 1) {
     this.#i = i;
     this.#j = j;
     this.#speed = speed;
     this.#assetPrefix = assetPrefix;
     this.#physicalGridKey = this.#calcPhysicalGridKey();
+    this.#dir = dir;
   }
   setState(state) {
     this.#dir = state;
@@ -1512,6 +1513,17 @@ var Character = class {
     const [i, j] = this.nextCoord(dir);
     const cell = fieldTester.get(i, j);
     return cell.canEnter() && !collisionChecker(i, j);
+  }
+  /** Returns the next state of the character.
+   * This method is called in each step.
+   *
+   * Returning the direction causes the character to move in that direction.
+   * Returning undefined causes the character to stay in the current state.
+   */
+  getNextState(_input, _fieldTester, _collisionChecker) {
+    return void 0;
+  }
+  onMoveEnd(_fieldTester, _itemContainer) {
   }
   step(input, fieldTester, collisionChecker, itemContainer) {
     if (this.#movePhase === 0) {
@@ -1705,11 +1717,8 @@ var MainCharacter = class extends Character {
     }
   }
 };
-var NPC = class extends Character {
+var RandomWalkNPC = class extends Character {
   #counter = 32;
-  constructor(i, j, speed, assetPrefix) {
-    super(i, j, speed, assetPrefix);
-  }
   getNextState(_input, fieldTester, collisionChecker) {
     this.#counter -= 1;
     if (this.#counter <= 0) {
@@ -1724,8 +1733,8 @@ var NPC = class extends Character {
     }
     return void 0;
   }
-  onMoveEnd(_fieldTester, _itemContainer) {
-  }
+};
+var StaticNPC = class extends Character {
 };
 
 // util/canvas-wrapper.ts
@@ -1790,9 +1799,11 @@ var BlockMap = class _BlockMap {
   // The row of the world coordinates
   j;
   cells;
+  // deno-lint-ignore ban-types
   characters;
   items;
   field;
+  // deno-lint-ignore no-explicit-any
   #obj;
   // deno-lint-ignore no-explicit-any
   constructor(url, obj) {
@@ -2309,11 +2320,29 @@ function GameScreen({ el, query }) {
   itemCanvas.height = screenSize;
   el.style.width = screenSize + "px";
   el.style.height = screenSize + "px";
-  const me = new MainCharacter(2, 2, 1, "char/kimi/");
+  const me = new MainCharacter(2, 2, "char/kimi/");
   centerPixelSignal.update({ x: me.centerX, y: me.centerY });
   const mobs = range(6).map(
-    (j) => range(3).map((i) => new NPC(-4 + i, -2 + j, 1, "char/joob/"))
+    (j) => range(3).map((i) => new RandomWalkNPC(-4 + i, -2 + j, "char/joob/"))
   ).flat();
+  mobs.push(
+    new StaticNPC(4, 2, "char/joob/", "up"),
+    new StaticNPC(5, 2, "char/joob/", "up"),
+    new StaticNPC(7, 4, "char/joob/", "down"),
+    new StaticNPC(8, 4, "char/joob/", "down"),
+    new StaticNPC(11, -2, "char/joob/", "down"),
+    new StaticNPC(12, -2, "char/joob/", "down"),
+    new StaticNPC(13, -2, "char/joob/", "down"),
+    new StaticNPC(11, -3, "char/joob/", "down"),
+    new StaticNPC(12, -3, "char/joob/", "down"),
+    new StaticNPC(13, -3, "char/joob/", "down"),
+    new StaticNPC(11, -4, "char/joob/", "down"),
+    new StaticNPC(12, -4, "char/joob/", "down"),
+    new StaticNPC(13, -4, "char/joob/", "down"),
+    new StaticNPC(12, -5, "char/joob/", "down"),
+    new StaticNPC(13, -5, "char/joob/", "down"),
+    new StaticNPC(13, -6, "char/joob/", "down")
+  );
   const items = new Items();
   items.add(new Item(1, 1, "item/apple.png"));
   items.add(new Item(2, 4, "item/apple.png"));
