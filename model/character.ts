@@ -21,7 +21,7 @@ export type IBox = {
 export type IObj = IBox & ILoader & {
   i: number
   j: number
-  image(): HTMLImageElement
+  image(): ImageBitmap
 }
 
 export type IFieldTester = {
@@ -59,7 +59,7 @@ type CharacterAppearance =
   | "right1"
 
 type CharacterAssets = {
-  [K in CharacterAppearance]: HTMLImageElement
+  [K in CharacterAppearance]: ImageBitmap
 }
 
 export type CollisionChecker = (i: number, j: number) => boolean
@@ -229,7 +229,7 @@ export abstract class Character implements IChar {
     this.#physicalGridKey = this.#calcPhysicalGridKey()
   }
 
-  image(): HTMLImageElement {
+  image(): ImageBitmap {
     if (this.#isMoving) {
       if (this.#movePhase < 8) {
         // idle state

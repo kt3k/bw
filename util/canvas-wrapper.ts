@@ -1,11 +1,15 @@
 /** A simple wrapper of CanvasRenderingContext2D */
 export class CanvasWrapper {
   #ctx: CanvasRenderingContext2D
-  constructor(canvas: HTMLCanvasElement) {
-    this.#ctx = canvas.getContext("2d")!
+
+  constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
+    // OffscreenCanvasRenderingContext2D is not compatible with CanvasRenderingContext2D
+    // We ignore the difference here for now.
+    // deno-lint-ignore no-explicit-any
+    this.#ctx = canvas.getContext("2d")! as any
   }
 
-  drawImage(img: HTMLImageElement, x: number, y: number) {
+  drawImage(img: ImageBitmap, x: number, y: number) {
     this.#ctx.drawImage(img, x, y)
   }
 

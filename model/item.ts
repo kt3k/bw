@@ -6,7 +6,7 @@ export class Item implements IObj {
   #i: number
   #j: number
   #assetPath: string
-  #assets: HTMLImageElement | undefined
+  #assets: ImageBitmap | undefined
 
   /**
    * @param i The column of the grid coordinate
@@ -27,7 +27,7 @@ export class Item implements IObj {
     return !!this.#assets
   }
 
-  image(): HTMLImageElement {
+  image(): ImageBitmap {
     return this.#assets!
   }
 

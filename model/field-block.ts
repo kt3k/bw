@@ -38,6 +38,9 @@ export class FieldCell {
   }
 }
 
+class ItemData {
+}
+
 /**
  * {@linkcode BlockMap} is a map (serialized form) of {@linkcode FieldBlock}
  */
@@ -92,16 +95,16 @@ export class FieldBlock {
   // The row of the world coordinates
   #j: number
   #cellMap: Record<string, FieldCell> = {}
-  #imgMap: Record<string, HTMLImageElement> = {}
+  #imgMap: Record<string, ImageBitmap> = {}
   #items: Item[]
   #characters: Character[]
   #field: string[]
-  #loadImage: (url: string) => Promise<HTMLImageElement>
+  #loadImage: (url: string) => Promise<ImageBitmap>
   #map: BlockMap
 
   constructor(
     map: BlockMap,
-    loadImage: (url: string) => Promise<HTMLImageElement>,
+    loadImage: (url: string) => Promise<ImageBitmap>,
   ) {
     this.#i = map.i
     this.#j = map.j
@@ -126,7 +129,7 @@ export class FieldBlock {
     this.#map = map
   }
 
-  loadCellImage(href: string): Promise<HTMLImageElement> {
+  loadCellImage(href: string): Promise<ImageBitmap> {
     return this.#loadImage(
       new URL(href, this.#map.url).href,
     )
@@ -158,6 +161,17 @@ export class FieldBlock {
         }
       }),
     )
+  }
+
+  renderInOffscreenCanvas(): OffscreenCanvas {
+    const canvas = new OffscreenCanvas(this.w, this.h)
+    const layer = new CanvasWrapper(canvas)
+    for (let j = 0; j < BLOCK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_SIZE; i++) {
+        this.drawCell(layer, i, j)
+      }
+    }
+    return canvas
   }
 
   createCanvas(): HTMLCanvasElement {
@@ -206,11 +220,15 @@ export class FieldBlock {
   }
 
   #renderBlock(layer: CanvasWrapper) {
-    for (let j = 0; j < BLOCK_SIZE; j++) {
-      for (let i = 0; i < BLOCK_SIZE; i++) {
-        this.drawCell(layer, i, j)
-      }
+    const worker = new Worker("./canvas-worker.js")
+    worker.onmessage = (event) => {
+      const { imageData } = event.data
+      layer.ctx.putImageData(imageData, 0, 0)
     }
+    worker.postMessage({
+      url: this.#map.url,
+      obj: this.toMap(),
+    })
   }
 
   get(i: number, j: number): FieldCell {

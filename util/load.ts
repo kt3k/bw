@@ -1,16 +1,12 @@
 import { memoizedLoading } from "./memo.ts"
 
-function loadImage_(path: string): Promise<HTMLImageElement> {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => {
-      resolve(img)
-    }
-    img.onerror = (e) => {
-      reject(e)
-    }
-    img.src = path
-  })
+async function loadImage_(path: string): Promise<ImageBitmap> {
+  const res = await fetch(path)
+  if (!res.ok) {
+    throw new Error(`Failed to load image from ${path}: ${res.statusText}`)
+  }
+  const blob = await res.blob()
+  return createImageBitmap(blob)
 }
 
 /**
