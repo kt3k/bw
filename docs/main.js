@@ -1426,17 +1426,13 @@ function memoizedLoading(fn) {
 }
 
 // util/load.ts
-function loadImage_(path) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      resolve(img);
-    };
-    img.onerror = (e) => {
-      reject(e);
-    };
-    img.src = path;
-  });
+async function loadImage_(path) {
+  const res = await fetch(path);
+  if (!res.ok) {
+    throw new Error(`Failed to load image from ${path}: ${res.statusText}`);
+  }
+  const blob = await res.blob();
+  return createImageBitmap(blob);
 }
 var loadImage = memoizedLoading(loadImage_);
 
@@ -1888,6 +1884,16 @@ var FieldBlock = class _FieldBlock {
       })
     );
   }
+  renderInOffscreenCanvas() {
+    const canvas = new OffscreenCanvas(this.w, this.h);
+    const layer = new CanvasWrapper(canvas);
+    for (let j = 0; j < BLOCK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_SIZE; i++) {
+        this.drawCell(layer, i, j);
+      }
+    }
+    return canvas;
+  }
   createCanvas() {
     const canvas = document.createElement("canvas");
     canvas.style.position = "absolute";
@@ -1932,11 +1938,15 @@ var FieldBlock = class _FieldBlock {
     );
   }
   #renderBlock(layer) {
-    for (let j = 0; j < BLOCK_SIZE; j++) {
-      for (let i = 0; i < BLOCK_SIZE; i++) {
-        this.drawCell(layer, i, j);
-      }
-    }
+    const worker = new Worker("./canvas-worker.js");
+    worker.onmessage = (event) => {
+      const { imageData } = event.data;
+      layer.ctx.putImageData(imageData, 0, 0);
+    };
+    worker.postMessage({
+      url: this.#map.url,
+      obj: this.toMap()
+    });
   }
   get(i, j) {
     return this.#cellMap[this.#field[j][i]];
