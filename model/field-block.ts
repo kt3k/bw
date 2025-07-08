@@ -101,6 +101,8 @@ export class FieldBlock {
   #field: string[]
   #loadImage: (url: string) => Promise<ImageBitmap>
   #map: BlockMap
+  #canvas: HTMLCanvasElement | undefined
+  #assetsReady = false
 
   constructor(
     map: BlockMap,
@@ -151,7 +153,14 @@ export class FieldBlock {
     return this.#cellMap
   }
 
-  async loadAssets() {
+  get canvas(): HTMLCanvasElement {
+    if (!this.#canvas) {
+      this.#canvas = this.#createCanvas()
+    }
+    return this.#canvas
+  }
+
+  async loadCellImages() {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
         if (cell.src) {
@@ -161,6 +170,15 @@ export class FieldBlock {
         }
       }),
     )
+  }
+
+  async loadAssets() {
+    await this.#renderBlock(new CanvasWrapper(this.canvas))
+    this.#assetsReady = true
+  }
+
+  get assetsReady(): boolean {
+    return this.#assetsReady
   }
 
   renderInOffscreenCanvas(): OffscreenCanvas {
@@ -174,7 +192,7 @@ export class FieldBlock {
     return canvas
   }
 
-  createCanvas(): HTMLCanvasElement {
+  #createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
     canvas.style.left = `${this.x}px`
@@ -182,7 +200,6 @@ export class FieldBlock {
     canvas.width = this.w
     canvas.height = this.h
     canvas.classList.add("crisp-edges")
-    this.#renderBlock(new CanvasWrapper(canvas))
     return canvas
   }
 
@@ -224,6 +241,7 @@ export class FieldBlock {
     worker.onmessage = (event) => {
       const { imageData } = event.data
       layer.ctx.putImageData(imageData, 0, 0)
+      worker.terminate()
     }
     worker.postMessage({
       url: this.#map.url,

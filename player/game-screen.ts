@@ -303,10 +303,10 @@ class Field implements IFieldTester {
 
   async addDistrict(block: FieldBlock) {
     this.#blocks[block.id] = block
-    await block.loadAssets()
-    const canvas = block.createCanvas()
+    const canvas = block.canvas
     this.#blockElements[block.id] = canvas
     this.#el.appendChild(canvas)
+    await block.loadAssets()
   }
 
   removeBlock(block: FieldBlock) {
@@ -356,7 +356,8 @@ class Field implements IFieldTester {
   }
 
   get assetsReady() {
-    return !this.#mapLoader.isLoading
+    return !this.#mapLoader.isLoading &&
+      Object.values(this.#blocks).every((block) => block.assetsReady)
   }
 }
 

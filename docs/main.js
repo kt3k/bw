@@ -1835,6 +1835,8 @@ var FieldBlock = class _FieldBlock {
   #field;
   #loadImage;
   #map;
+  #canvas;
+  #assetsReady = false;
   constructor(map, loadImage2) {
     this.#i = map.i;
     this.#j = map.j;
@@ -1873,7 +1875,13 @@ var FieldBlock = class _FieldBlock {
   get cellMap() {
     return this.#cellMap;
   }
-  async loadAssets() {
+  get canvas() {
+    if (!this.#canvas) {
+      this.#canvas = this.#createCanvas();
+    }
+    return this.#canvas;
+  }
+  async loadCellImages() {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
         if (cell.src) {
@@ -1883,6 +1891,13 @@ var FieldBlock = class _FieldBlock {
         }
       })
     );
+  }
+  async loadAssets() {
+    await this.#renderBlock(new CanvasWrapper(this.canvas));
+    this.#assetsReady = true;
+  }
+  get assetsReady() {
+    return this.#assetsReady;
   }
   renderInOffscreenCanvas() {
     const canvas = new OffscreenCanvas(this.w, this.h);
@@ -1894,7 +1909,7 @@ var FieldBlock = class _FieldBlock {
     }
     return canvas;
   }
-  createCanvas() {
+  #createCanvas() {
     const canvas = document.createElement("canvas");
     canvas.style.position = "absolute";
     canvas.style.left = `${this.x}px`;
@@ -1902,7 +1917,6 @@ var FieldBlock = class _FieldBlock {
     canvas.width = this.w;
     canvas.height = this.h;
     canvas.classList.add("crisp-edges");
-    this.#renderBlock(new CanvasWrapper(canvas));
     return canvas;
   }
   drawCell(layer, i, j) {
@@ -1942,6 +1956,7 @@ var FieldBlock = class _FieldBlock {
     worker.onmessage = (event) => {
       const { imageData } = event.data;
       layer.ctx.putImageData(imageData, 0, 0);
+      worker.terminate();
     };
     worker.postMessage({
       url: this.#map.url,
@@ -2271,10 +2286,10 @@ var Field = class {
   }
   async addDistrict(block) {
     this.#blocks[block.id] = block;
-    await block.loadAssets();
-    const canvas = block.createCanvas();
+    const canvas = block.canvas;
     this.#blockElements[block.id] = canvas;
     this.#el.appendChild(canvas);
+    await block.loadAssets();
   }
   removeBlock(block) {
     delete this.#blocks[block.id];
@@ -2316,7 +2331,7 @@ var Field = class {
     }
   }
   get assetsReady() {
-    return !this.#mapLoader.isLoading;
+    return !this.#mapLoader.isLoading && Object.values(this.#blocks).every((block) => block.assetsReady);
   }
 };
 var range = (n) => [...Array(n).keys()];

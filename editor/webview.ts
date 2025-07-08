@@ -36,7 +36,7 @@ function MainContainer({ subscribe, el, query }: Context) {
 
     if (prev === null) {
       await fieldBlock.loadAssets()
-      const canvas = fieldBlock.createCanvas()
+      const canvas = fieldBlock.#createCanvas()
       canvas.style.left = ""
       canvas.style.top = ""
       canvas.style.position = ""

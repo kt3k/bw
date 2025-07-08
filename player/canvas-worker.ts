@@ -5,7 +5,7 @@ addEventListener("message", async (event) => {
   const { url, obj } = event.data
   const blockMap = new BlockMap(url, obj)
   const fieldBlock = new FieldBlock(blockMap, loadImage)
-  await fieldBlock.loadAssets()
+  await fieldBlock.loadCellImages()
   const canvas = fieldBlock.renderInOffscreenCanvas()
   const imageData = canvas.getContext("2d")!.getImageData(
     0,
