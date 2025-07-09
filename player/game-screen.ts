@@ -344,6 +344,9 @@ class Field implements IFieldTester {
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
       this.addDistrict(new FieldBlock(map, loadImage))
     }
+    for (const block of this) {
+      block.renderNeighborhood(i, j)
+    }
   }
 
   checkUnload(i: number, j: number) {

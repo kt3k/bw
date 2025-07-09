@@ -769,10 +769,16 @@ var CanvasWrapper = class {
 // util/constants.ts
 var CELL_SIZE = 16;
 var BLOCK_SIZE = 200;
+var BLOCK_CHUNK_SIZE = 20;
 
 // util/random.ts
 var import_npm_seedrandom = __toESM(require_seedrandom2());
 var rng = (0, import_npm_seedrandom.default)("Hello.");
+
+// util/math.ts
+function ceilN(x, n) {
+  return Math.ceil(x / n) * n;
+}
 
 // model/field-block.ts
 var FieldCell = class {
@@ -849,6 +855,7 @@ var FieldBlock = class _FieldBlock {
   #map;
   #canvas;
   #assetsReady = false;
+  #chunks = {};
   constructor(map, loadImage2) {
     this.#i = map.i;
     this.#j = map.j;
@@ -905,7 +912,7 @@ var FieldBlock = class _FieldBlock {
     );
   }
   async loadAssets() {
-    await this.#renderBlock(new CanvasWrapper(this.canvas));
+    await void 0;
     this.#assetsReady = true;
   }
   get assetsReady() {
@@ -917,6 +924,24 @@ var FieldBlock = class _FieldBlock {
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
         this.drawCell(layer, i, j);
+      }
+    }
+    return canvas;
+  }
+  renderChunkInOffscreenCanvas(k, l) {
+    const canvas = new OffscreenCanvas(
+      CELL_SIZE * BLOCK_SIZE,
+      CELL_SIZE * BLOCK_SIZE
+    );
+    const layer = new CanvasWrapper(canvas);
+    for (let j = 0; j < BLOCK_CHUNK_SIZE; j++) {
+      for (let i = 0; i < BLOCK_CHUNK_SIZE; i++) {
+        const cellI = k * BLOCK_CHUNK_SIZE + i;
+        const cellJ = l * BLOCK_CHUNK_SIZE + j;
+        if (cellI >= BLOCK_SIZE || cellJ >= BLOCK_SIZE) {
+          continue;
+        }
+        this.drawCell(layer, cellI, cellJ);
       }
     }
     return canvas;
@@ -963,7 +988,66 @@ var FieldBlock = class _FieldBlock {
       color
     );
   }
+  renderNeighborhood(i, j) {
+    const wrapper = new CanvasWrapper(this.canvas);
+    const k = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
+    const l = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
+    console.log("#i, #j", this.#i, this.#j);
+    console.log("k, l", k, l);
+    for (let chunkJ = l; chunkJ < l + 2; chunkJ++) {
+      if (chunkJ < 0 || chunkJ >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
+        continue;
+      }
+      for (let chunkI = k; chunkI < k + 2; chunkI++) {
+        if (chunkI < 0 || chunkI >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
+          continue;
+        }
+        this.#renderChunk(wrapper, chunkI, chunkJ).catch((error) => {
+          console.error("Failed to render chunk", chunkI, chunkJ, error);
+        });
+      }
+    }
+  }
+  async #renderChunk(layer, k, l) {
+    console.log("Rendering chunk", this.id, k, l);
+    const chunkKey = `${k}.${l}`;
+    const chunkState = this.#chunks[chunkKey];
+    if (chunkState === true || chunkState === "loading") {
+      return;
+    }
+    this.#chunks[chunkKey] = "loading";
+    const render = Promise.withResolvers();
+    const worker = new Worker("./canvas-worker.js");
+    worker.onmessage = (event) => {
+      const { imageData } = event.data;
+      const offsetX = k * BLOCK_CHUNK_SIZE * CELL_SIZE;
+      const offsetY = l * BLOCK_CHUNK_SIZE * CELL_SIZE;
+      console.log("Rendering chunk done", {
+        k,
+        l,
+        offsetX,
+        offsetY
+      });
+      layer.ctx.putImageData(
+        imageData,
+        offsetX,
+        offsetY
+      );
+      worker.terminate();
+      render.resolve();
+      this.#chunks[chunkKey] = true;
+    };
+    worker.postMessage({
+      url: this.#map.url,
+      obj: this.toMap(),
+      k,
+      l
+    });
+    await render.promise;
+    return;
+  }
   #renderBlock(layer) {
+    console.log("Rendering block", this.id);
     const render = Promise.withResolvers();
     const worker = new Worker("./canvas-worker.js");
     worker.onmessage = (event) => {
@@ -1175,18 +1259,20 @@ var loadImage = memoizedLoading(loadImage_);
 // player/canvas-worker.ts
 addEventListener("message", async (event) => {
   const start = performance.now();
-  const { url, obj } = event.data;
+  const { url, obj, k, l } = event.data;
   const blockMap = new BlockMap(url, obj);
   const fieldBlock = new FieldBlock(blockMap, loadImage);
   await fieldBlock.loadCellImages();
-  const canvas = fieldBlock.renderInOffscreenCanvas();
+  const canvas = fieldBlock.renderChunkInOffscreenCanvas(k, l);
   const imageData = canvas.getContext("2d").getImageData(
-    0,
-    0,
-    canvas.width,
-    canvas.height
+    BLOCK_CHUNK_SIZE * CELL_SIZE * k,
+    BLOCK_CHUNK_SIZE * CELL_SIZE * l,
+    BLOCK_CHUNK_SIZE * CELL_SIZE,
+    BLOCK_CHUNK_SIZE * CELL_SIZE
   );
   console.log("Canvas worker: Image data prepared", {
+    k,
+    l,
     width: imageData.width,
     height: imageData.height,
     elapsed: (performance.now() - start).toFixed(0) + "ms"

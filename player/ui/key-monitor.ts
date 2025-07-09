@@ -12,6 +12,7 @@ const KEY_RIGHT = new Set(["ArrowRight", "d", "l"])
  */
 export function KeyMonitor({ on }: Context) {
   on("keydown", (e) => {
+    e.preventDefault() // Prevent default browser behavior like scrolling
     if (KEY_UP.has(e.key)) {
       Input.up = true
     } else if (KEY_DOWN.has(e.key)) {
