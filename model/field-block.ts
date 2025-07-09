@@ -237,16 +237,19 @@ export class FieldBlock {
   }
 
   #renderBlock(layer: CanvasWrapper) {
+    const render = Promise.withResolvers<void>()
     const worker = new Worker("./canvas-worker.js")
     worker.onmessage = (event) => {
       const { imageData } = event.data
       layer.ctx.putImageData(imageData, 0, 0)
       worker.terminate()
+      render.resolve()
     }
     worker.postMessage({
       url: this.#map.url,
       obj: this.toMap(),
     })
+    return render.promise
   }
 
   get(i: number, j: number): FieldCell {

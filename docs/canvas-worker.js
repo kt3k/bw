@@ -964,16 +964,19 @@ var FieldBlock = class _FieldBlock {
     );
   }
   #renderBlock(layer) {
+    const render = Promise.withResolvers();
     const worker = new Worker("./canvas-worker.js");
     worker.onmessage = (event) => {
       const { imageData } = event.data;
       layer.ctx.putImageData(imageData, 0, 0);
       worker.terminate();
+      render.resolve();
     };
     worker.postMessage({
       url: this.#map.url,
       obj: this.toMap()
     });
+    return render.promise;
   }
   get(i, j) {
     return this.#cellMap[this.#field[j][i]];
@@ -1182,6 +1185,10 @@ addEventListener("message", async (event) => {
     canvas.width,
     canvas.height
   );
+  console.log("Canvas worker: Image data prepared", {
+    width: imageData.width,
+    height: imageData.height
+  });
   postMessage({
     imageData
   });

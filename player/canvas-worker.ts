@@ -13,6 +13,10 @@ addEventListener("message", async (event) => {
     canvas.width,
     canvas.height,
   )
+  console.log("Canvas worker: Image data prepared", {
+    width: imageData.width,
+    height: imageData.height,
+  })
   postMessage({
     imageData,
   })
