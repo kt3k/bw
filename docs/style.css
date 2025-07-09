@@ -626,6 +626,10 @@ video {
   width: 100%;
 }
 
+.max-w-\[450px\] {
+  max-width: 450px;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -638,6 +642,10 @@ video {
 
 .items-start {
   align-items: flex-start;
+}
+
+.items-center {
+  align-items: center;
 }
 
 .justify-between {
