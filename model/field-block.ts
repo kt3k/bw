@@ -184,12 +184,12 @@ export class FieldBlock {
     return this.#assetsReady
   }
 
-  renderRangeInOffscreenCanvas(
+  createImageDataForRange(
     i: number,
     j: number,
     gridWidth: number,
     gridHeight: number,
-  ): OffscreenCanvas {
+  ): ImageData {
     const canvas = new OffscreenCanvas(
       CELL_SIZE * BLOCK_SIZE,
       CELL_SIZE * BLOCK_SIZE,
@@ -200,7 +200,12 @@ export class FieldBlock {
         this.drawCell(layer, i + ii, j + jj)
       }
     }
-    return canvas
+    return canvas.getContext("2d")!.getImageData(
+      CELL_SIZE * i,
+      CELL_SIZE * j,
+      CELL_SIZE * gridWidth,
+      CELL_SIZE * gridHeight,
+    )
   }
 
   #createCanvas(): HTMLCanvasElement {
@@ -314,23 +319,6 @@ export class FieldBlock {
     })
     await render.promise
     return
-  }
-
-  #renderBlock(layer: CanvasWrapper) {
-    console.log("Rendering block", this.id)
-    const render = Promise.withResolvers<void>()
-    const worker = new Worker("./canvas-worker.js")
-    worker.onmessage = (event) => {
-      const { imageData } = event.data
-      layer.ctx.putImageData(imageData, 0, 0)
-      worker.terminate()
-      render.resolve()
-    }
-    worker.postMessage({
-      url: this.#map.url,
-      obj: this.toMap(),
-    })
-    return render.promise
   }
 
   get(i: number, j: number): FieldCell {
