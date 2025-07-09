@@ -1,23 +1,28 @@
 import { BlockMap, FieldBlock } from "../model/field-block.ts"
 import { loadImage } from "../util/load.ts"
-import { BLOCK_CHUNK_SIZE, CELL_SIZE } from "../util/constants.ts"
+import { CELL_SIZE } from "../util/constants.ts"
 
 addEventListener("message", async (event) => {
   const start = performance.now()
-  const { url, obj, k, l } = event.data
+  const { url, obj, i, j, gridWidth, gridHeight } = event.data
   const blockMap = new BlockMap(url, obj)
   const fieldBlock = new FieldBlock(blockMap, loadImage)
   await fieldBlock.loadCellImages()
-  const canvas = fieldBlock.renderChunkInOffscreenCanvas(k, l)
+  const canvas = fieldBlock.renderRangeInOffscreenCanvas(
+    i,
+    j,
+    gridWidth,
+    gridHeight,
+  )
   const imageData = canvas.getContext("2d")!.getImageData(
-    BLOCK_CHUNK_SIZE * CELL_SIZE * k,
-    BLOCK_CHUNK_SIZE * CELL_SIZE * l,
-    BLOCK_CHUNK_SIZE * CELL_SIZE,
-    BLOCK_CHUNK_SIZE * CELL_SIZE,
+    CELL_SIZE * i,
+    CELL_SIZE * j,
+    CELL_SIZE * gridWidth,
+    CELL_SIZE * gridHeight,
   )
   console.log("Canvas worker: Image data prepared", {
-    k,
-    l,
+    i: i,
+    j: j,
     width: imageData.width,
     height: imageData.height,
     elapsed: (performance.now() - start).toFixed(0) + "ms",

@@ -1904,30 +1904,15 @@ var FieldBlock = class _FieldBlock {
   get assetsReady() {
     return this.#assetsReady;
   }
-  renderInOffscreenCanvas() {
-    const canvas = new OffscreenCanvas(this.w, this.h);
-    const layer = new CanvasWrapper(canvas);
-    for (let j = 0; j < BLOCK_SIZE; j++) {
-      for (let i = 0; i < BLOCK_SIZE; i++) {
-        this.drawCell(layer, i, j);
-      }
-    }
-    return canvas;
-  }
-  renderChunkInOffscreenCanvas(k, l) {
+  renderRangeInOffscreenCanvas(i, j, gridWidth, gridHeight) {
     const canvas = new OffscreenCanvas(
       CELL_SIZE * BLOCK_SIZE,
       CELL_SIZE * BLOCK_SIZE
     );
     const layer = new CanvasWrapper(canvas);
-    for (let j = 0; j < BLOCK_CHUNK_SIZE; j++) {
-      for (let i = 0; i < BLOCK_CHUNK_SIZE; i++) {
-        const cellI = k * BLOCK_CHUNK_SIZE + i;
-        const cellJ = l * BLOCK_CHUNK_SIZE + j;
-        if (cellI >= BLOCK_SIZE || cellJ >= BLOCK_SIZE) {
-          continue;
-        }
-        this.drawCell(layer, cellI, cellJ);
+    for (let jj = 0; jj < gridHeight; jj++) {
+      for (let ii = 0; ii < gridWidth; ii++) {
+        this.drawCell(layer, i + ii, j + jj);
       }
     }
     return canvas;
@@ -1978,8 +1963,6 @@ var FieldBlock = class _FieldBlock {
     const wrapper = new CanvasWrapper(this.canvas);
     const k = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
     const l = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
-    console.log("#i, #j", this.#i, this.#j);
-    console.log("k, l", k, l);
     for (let chunkJ = l; chunkJ < l + 2; chunkJ++) {
       if (chunkJ < 0 || chunkJ >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
         continue;
@@ -2008,12 +1991,6 @@ var FieldBlock = class _FieldBlock {
       const { imageData } = event.data;
       const offsetX = k * BLOCK_CHUNK_SIZE * CELL_SIZE;
       const offsetY = l * BLOCK_CHUNK_SIZE * CELL_SIZE;
-      console.log("Rendering chunk done", {
-        k,
-        l,
-        offsetX,
-        offsetY
-      });
       layer.ctx.putImageData(
         imageData,
         offsetX,
@@ -2026,8 +2003,10 @@ var FieldBlock = class _FieldBlock {
     worker.postMessage({
       url: this.#map.url,
       obj: this.toMap(),
-      k,
-      l
+      i: k * BLOCK_CHUNK_SIZE,
+      j: l * BLOCK_CHUNK_SIZE,
+      gridWidth: BLOCK_CHUNK_SIZE,
+      gridHeight: BLOCK_CHUNK_SIZE
     });
     await render.promise;
     return;
