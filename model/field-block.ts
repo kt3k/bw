@@ -252,6 +252,18 @@ export class FieldBlock {
     )
   }
 
+  renderAllChuncks() {
+    const wrapper = new CanvasWrapper(this.canvas)
+    for (let k = 0; k < BLOCK_SIZE / BLOCK_CHUNK_SIZE; k++) {
+      for (let l = 0; l < BLOCK_SIZE / BLOCK_CHUNK_SIZE; l++) {
+        this.#renderChunk(wrapper, k, l)
+          .catch((error) => {
+            console.error("Failed to render chunk", k, l, error)
+          })
+      }
+    }
+  }
+
   renderNeighborhood(
     i: number,
     j: number,
