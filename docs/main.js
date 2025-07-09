@@ -1086,7 +1086,6 @@ var KEY_LEFT = /* @__PURE__ */ new Set(["ArrowLeft", "a", "h"]);
 var KEY_RIGHT = /* @__PURE__ */ new Set(["ArrowRight", "d", "l"]);
 function KeyMonitor({ on }) {
   on("keydown", (e) => {
-    e.preventDefault();
     if (KEY_UP.has(e.key)) {
       Input.up = true;
     } else if (KEY_DOWN.has(e.key)) {
@@ -1095,7 +1094,10 @@ function KeyMonitor({ on }) {
       Input.left = true;
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = true;
+    } else {
+      return;
     }
+    e.preventDefault();
   });
   on("keyup", (e) => {
     if (KEY_UP.has(e.key)) {
