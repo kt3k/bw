@@ -1904,7 +1904,7 @@ var FieldBlock = class _FieldBlock {
   get assetsReady() {
     return this.#assetsReady;
   }
-  renderRangeInOffscreenCanvas(i, j, gridWidth, gridHeight) {
+  createImageDataForRange(i, j, gridWidth, gridHeight) {
     const canvas = new OffscreenCanvas(
       CELL_SIZE * BLOCK_SIZE,
       CELL_SIZE * BLOCK_SIZE
@@ -1915,7 +1915,12 @@ var FieldBlock = class _FieldBlock {
         this.drawCell(layer, i + ii, j + jj);
       }
     }
-    return canvas;
+    return canvas.getContext("2d").getImageData(
+      CELL_SIZE * i,
+      CELL_SIZE * j,
+      CELL_SIZE * gridWidth,
+      CELL_SIZE * gridHeight
+    );
   }
   #createCanvas() {
     const canvas = document.createElement("canvas");
@@ -1958,6 +1963,16 @@ var FieldBlock = class _FieldBlock {
       CELL_SIZE,
       color
     );
+  }
+  renderAllChuncks() {
+    const wrapper = new CanvasWrapper(this.canvas);
+    for (let k = 0; k < BLOCK_SIZE / BLOCK_CHUNK_SIZE; k++) {
+      for (let l = 0; l < BLOCK_SIZE / BLOCK_CHUNK_SIZE; l++) {
+        this.#renderChunk(wrapper, k, l).catch((error) => {
+          console.error("Failed to render chunk", k, l, error);
+        });
+      }
+    }
   }
   renderNeighborhood(i, j) {
     const wrapper = new CanvasWrapper(this.canvas);
@@ -2010,22 +2025,6 @@ var FieldBlock = class _FieldBlock {
     });
     await render.promise;
     return;
-  }
-  #renderBlock(layer) {
-    console.log("Rendering block", this.id);
-    const render = Promise.withResolvers();
-    const worker = new Worker("./canvas-worker.js");
-    worker.onmessage = (event) => {
-      const { imageData } = event.data;
-      layer.ctx.putImageData(imageData, 0, 0);
-      worker.terminate();
-      render.resolve();
-    };
-    worker.postMessage({
-      url: this.#map.url,
-      obj: this.toMap()
-    });
-    return render.promise;
   }
   get(i, j) {
     return this.#cellMap[this.#field[j][i]];
