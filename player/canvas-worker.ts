@@ -14,10 +14,10 @@ addEventListener("message", async (event) => {
     gridHeight,
   )
   console.log("Canvas worker: Image data prepared", {
-    i: i,
-    j: j,
-    width: imageData.width,
-    height: imageData.height,
+    i,
+    j,
+    gridWidth,
+    gridHeight,
     elapsed: (performance.now() - start).toFixed(0) + "ms",
   })
   postMessage({

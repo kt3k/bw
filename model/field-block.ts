@@ -45,6 +45,14 @@ class CharacterData {}
 
 /**
  * {@linkcode BlockMap} is a map (serialized form) of {@linkcode FieldBlock}
+ *
+ * Convension of coordinates symbols:
+ * - `i`: column of the world grid coordinates
+ * - `j`: row of the world grid coordinates
+ * - `x`: column of the word pixel coordinates
+ * - `y`: row of the word pixel coordinates
+ * - `k`: column of the relative chunk coordinates (0 to 9)
+ * - `l`: row of the relative chunk coordinates (0 to 9)
  */
 export class BlockMap {
   /** The URL of the map */
@@ -273,22 +281,22 @@ export class FieldBlock {
     // The max of screen size is 450px (about 28.125 cells = 1.40625 chunks)
     // Let's calculate the overlap with 2 chunks square around the center cell.
 
-    const k = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
+    const k0 = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
       BLOCK_CHUNK_SIZE
-    const l = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
+    const l0 = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
       BLOCK_CHUNK_SIZE
 
-    for (let chunkJ = l; chunkJ < l + 2; chunkJ++) {
-      if (chunkJ < 0 || chunkJ >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
+    for (let l = l0; l < l0 + 2; l++) {
+      if (l < 0 || l >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
         continue // Out of bounds
       }
-      for (let chunkI = k; chunkI < k + 2; chunkI++) {
-        if (chunkI < 0 || chunkI >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
+      for (let k = k0; k < k0 + 2; k++) {
+        if (k < 0 || k >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
           continue // Out of bounds
         }
-        this.#renderChunk(wrapper, chunkI, chunkJ)
+        this.#renderChunk(wrapper, k, l)
           .catch((error) => {
-            console.error("Failed to render chunk", chunkI, chunkJ, error)
+            console.error("Failed to render chunk", k, l, error)
           })
       }
     }
