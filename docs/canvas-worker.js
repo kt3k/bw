@@ -946,6 +946,25 @@ var FieldBlock = class _FieldBlock {
     canvas.classList.add("crisp-edges");
     return canvas;
   }
+  #createOverlay(k, l) {
+    const overlay = document.createElement("div");
+    overlay.style.position = "absolute";
+    overlay.style.left = `${this.x + k * BLOCK_CHUNK_SIZE * CELL_SIZE}px`;
+    overlay.style.top = `${this.y + l * BLOCK_CHUNK_SIZE * CELL_SIZE}px`;
+    overlay.style.width = `${BLOCK_CHUNK_SIZE * CELL_SIZE}px`;
+    overlay.style.height = `${BLOCK_CHUNK_SIZE * CELL_SIZE}px`;
+    overlay.style.pointerEvents = "none";
+    overlay.style.zIndex = "1";
+    overlay.style.backgroundColor = "hsla(0, 0%, 10%, 1)";
+    overlay.style.transition = "background-color 1s linear";
+    this.canvas.parentElement?.appendChild(overlay);
+    return () => {
+      overlay.style.backgroundColor = "hsla(0, 0%, 10%, 0)";
+      overlay.addEventListener("transitionend", () => {
+        overlay.remove();
+      });
+    };
+  }
   drawCell(layer, i, j) {
     const cell = this.get(i, j);
     if (cell.src) {
@@ -990,18 +1009,18 @@ var FieldBlock = class _FieldBlock {
   }
   renderNeighborhood(i, j) {
     const wrapper = new CanvasWrapper(this.canvas);
-    const k = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
-    const l = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
-    for (let chunkJ = l; chunkJ < l + 2; chunkJ++) {
-      if (chunkJ < 0 || chunkJ >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
+    const k0 = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
+    const l0 = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE;
+    for (let l = l0; l < l0 + 2; l++) {
+      if (l < 0 || l >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
         continue;
       }
-      for (let chunkI = k; chunkI < k + 2; chunkI++) {
-        if (chunkI < 0 || chunkI >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
+      for (let k = k0; k < k0 + 2; k++) {
+        if (k < 0 || k >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
           continue;
         }
-        this.#renderChunk(wrapper, chunkI, chunkJ).catch((error) => {
-          console.error("Failed to render chunk", chunkI, chunkJ, error);
+        this.#renderChunk(wrapper, k, l).catch((error) => {
+          console.error("Failed to render chunk", k, l, error);
         });
       }
     }
@@ -1013,6 +1032,7 @@ var FieldBlock = class _FieldBlock {
     if (chunkState === true || chunkState === "loading") {
       return;
     }
+    const removeOverlay = this.#createOverlay(k, l);
     this.#chunks[chunkKey] = "loading";
     const render = Promise.withResolvers();
     const worker = new Worker("./canvas-worker.js");
@@ -1028,6 +1048,7 @@ var FieldBlock = class _FieldBlock {
       worker.terminate();
       render.resolve();
       this.#chunks[chunkKey] = true;
+      removeOverlay();
     };
     worker.postMessage({
       url: this.#map.url,
@@ -1250,8 +1271,8 @@ addEventListener("message", async (event) => {
   console.log("Canvas worker: Image data prepared", {
     i,
     j,
-    width: imageData.width,
-    height: imageData.height,
+    gridWidth,
+    gridHeight,
     elapsed: (performance.now() - start).toFixed(0) + "ms"
   });
   postMessage({

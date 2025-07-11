@@ -227,6 +227,26 @@ export class FieldBlock {
     return canvas
   }
 
+  #createOverlay(k: number, l: number) {
+    const overlay = document.createElement("div")
+    overlay.style.position = "absolute"
+    overlay.style.left = `${this.x + k * BLOCK_CHUNK_SIZE * CELL_SIZE}px`
+    overlay.style.top = `${this.y + l * BLOCK_CHUNK_SIZE * CELL_SIZE}px`
+    overlay.style.width = `${BLOCK_CHUNK_SIZE * CELL_SIZE}px`
+    overlay.style.height = `${BLOCK_CHUNK_SIZE * CELL_SIZE}px`
+    overlay.style.pointerEvents = "none"
+    overlay.style.zIndex = "1"
+    overlay.style.backgroundColor = "hsla(0, 0%, 10%, 1)"
+    overlay.style.transition = "background-color 1s linear"
+    this.canvas.parentElement?.appendChild(overlay)
+    return () => {
+      overlay.style.backgroundColor = "hsla(0, 0%, 10%, 0)"
+      overlay.addEventListener("transitionend", () => {
+        overlay.remove()
+      })
+    }
+  }
+
   drawCell(layer: CanvasWrapper, i: number, j: number) {
     const cell = this.get(i, j)
     if (cell.src) {
@@ -313,6 +333,7 @@ export class FieldBlock {
     if (chunkState === true || chunkState === "loading") {
       return
     }
+    const removeOverlay = this.#createOverlay(k, l)
     this.#chunks[chunkKey] = "loading"
     const render = Promise.withResolvers<void>()
     const worker = new Worker("./canvas-worker.js")
@@ -328,6 +349,7 @@ export class FieldBlock {
       worker.terminate()
       render.resolve()
       this.#chunks[chunkKey] = true
+      removeOverlay()
     }
     worker.postMessage({
       url: this.#map.url,
