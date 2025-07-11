@@ -38,10 +38,10 @@ export class FieldCell {
   }
 }
 
-class ItemData {
+class _ItemData {
 }
 
-class CharacterData {}
+class _CharacterData {}
 
 /**
  * {@linkcode BlockMap} is a map (serialized form) of {@linkcode FieldBlock}
