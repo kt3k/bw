@@ -36,13 +36,14 @@ function MainContainer({ subscribe, el, query }: Context) {
 
     if (prev === null) {
       await fieldBlock.loadAssets()
-      const canvas = fieldBlock.#createCanvas()
+      const canvas = fieldBlock.canvas
       canvas.style.left = ""
       canvas.style.top = ""
       canvas.style.position = ""
       canvas.classList.add("field-block-canvas")
       el.innerHTML = ""
       el.appendChild(canvas)
+      fieldBlock.renderAllChuncks()
       mount("field-block-canvas", el)
 
       const { i, j } = fieldBlock
@@ -218,14 +219,14 @@ function KeyHandler({ on }: Context) {
 }
 
 const loadImage = memoizedLoading((uri: string) => {
-  const { resolve, promise } = Promise.withResolvers<HTMLImageElement>()
+  const { resolve, promise } = Promise.withResolvers<ImageBitmap>()
   const id = Math.random().toString()
   loadImageMap[id] = { resolve }
   vscode.postMessage({ type: "loadImage", uri, id })
   return promise
 })
 
-type ResolveImage = (image: HTMLImageElement) => void
+type ResolveImage = (image: ImageBitmap) => void
 const loadImageMap: Record<string, { resolve: ResolveImage }> = {}
 
 function onUpdate(message: type.Extension.MessageUpdate) {
@@ -237,7 +238,13 @@ function onUpdate(message: type.Extension.MessageUpdate) {
 function onLoadImageResponse(message: type.Extension.MessageLoadImageResponse) {
   const image = new Image()
   image.src = message.text
-  loadImageMap[message.id].resolve(image)
+  image.onload = () => {
+    const bitmap = createImageBitmap(image)
+    bitmap.then((bitmap) => {
+      loadImageMap[message.id].resolve(bitmap)
+      delete loadImageMap[message.id]
+    })
+  }
 }
 
 globalThis.addEventListener(

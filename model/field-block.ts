@@ -148,6 +148,18 @@ export class FieldBlock {
     )
   }
 
+  async loadCellImages() {
+    await Promise.all(
+      Object.values(this.#cellMap).map(async (cell) => {
+        if (cell.src) {
+          for (const src of cell.src) {
+            this.#imgMap[src] = await this.loadCellImage(src)
+          }
+        }
+      }),
+    )
+  }
+
   clone(): FieldBlock {
     return new FieldBlock(this.#map.clone(), this.#loadImage)
   }
@@ -171,20 +183,8 @@ export class FieldBlock {
     return this.#canvas
   }
 
-  async loadCellImages() {
-    await Promise.all(
-      Object.values(this.#cellMap).map(async (cell) => {
-        if (cell.src) {
-          for (const src of cell.src) {
-            this.#imgMap[src] = await this.loadCellImage(src)
-          }
-        }
-      }),
-    )
-  }
-
   async loadAssets() {
-    await void 0 // Placeholder for future asset loading logic
+    await this.loadCellImages()
     this.#assetsReady = true
   }
 
@@ -282,12 +282,9 @@ export class FieldBlock {
 
   renderAllChuncks() {
     const wrapper = new CanvasWrapper(this.canvas)
-    for (let k = 0; k < BLOCK_SIZE / BLOCK_CHUNK_SIZE; k++) {
-      for (let l = 0; l < BLOCK_SIZE / BLOCK_CHUNK_SIZE; l++) {
-        this.#renderChunk(wrapper, k, l)
-          .catch((error) => {
-            console.error("Failed to render chunk", k, l, error)
-          })
+    for (let i = 0; i < BLOCK_SIZE; i++) {
+      for (let j = 0; j < BLOCK_SIZE; j++) {
+        this.drawCell(wrapper, i, j)
       }
     }
   }
