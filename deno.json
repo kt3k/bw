@@ -3,12 +3,12 @@
   "tasks": {
     "test": "deno test",
     "dev": "deno run -A npm:concurrently 'deno task watch:main' 'deno task watch:worker' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
-    "watch:main": "deno run --watch=player,util,model -A jsr:@kt3k/pack@0.1.10 -o dist/main.js player/main.ts",
-    "watch:worker": "deno run --watch=player,util,model -A jsr:@kt3k/pack@0.1.10 -o dist/canvas-worker.js player/canvas-worker.ts",
-    "watch:style": "deno run -A npm:tailwindcss@3 -o ./dist/style.css --watch",
-    "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' dist",
-    "dist": "deno run -A npm:cpx2 'dist/**' docs",
-    "serve": "deno run -A jsr:@std/http/file-server dist -p 8000"
+    "watch:main": "deno run --watch=player,util,model -A jsr:@kt3k/pack@0.1.10 -o out/main.js player/main.ts",
+    "watch:worker": "deno run --watch=player,util,model -A jsr:@kt3k/pack@0.1.10 -o out/canvas-worker.js player/canvas-worker.ts",
+    "watch:style": "deno run -A npm:tailwindcss@3 -o ./out/style.css --watch",
+    "watch:static": "deno run -A npm:cpx2 --watch 'static/**/*' out",
+    "dist": "deno run -A npm:cpx2 'out/**' dist",
+    "serve": "deno run -A jsr:@std/http/file-server out -p 8000"
   },
   "compilerOptions": {
     "lib": ["deno.ns", "esnext", "dom", "dom.iterable"]
