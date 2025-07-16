@@ -1,11 +1,19 @@
 # bw
 
-> block walker or black and white
+> A prototype of topdown 2D game
 
-Clone the repo and run the command:
+# development
+
+Clone the repo and run:
 
 ```
-deno task start
+deno task dev
 ```
 
 Go to `http://localhost:8000`
+
+# vscode extensions
+
+Install [./editor/vscode-bw-block-editor-0.4.0.vsix](./editor/vscode-bw-block-editor-0.4.0.vsix) for editing maps.
+
+Install [vscode-pixeledit](https://github.com/kt3k/vscode-pixeledit) for editing characters and items.
