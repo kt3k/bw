@@ -29,7 +29,7 @@ import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { DrawLayer } from "./draw-layer.ts"
 
-const toEven = (n: number) => n % 2 === 0 ? n : Math.floor(n / 2) * 2
+const toEven = (n: number) => floorN(n, 2)
 /**
  * Abstract rectangular area, which implements properties of the rectangle.
  * Various areas, which have special meanings, are implemented by extending this class.
@@ -216,28 +216,33 @@ class Walkers implements IStepper, ILoader {
 }
 
 /**
- * The characters in this scope are evaluated in each frame
+ * When the chunk of {@linkcode FieldBlock} overlaps with this scope,
+ * the {@linkcode Character}s in that chunk start walking.
  */
-class WalkScope extends RectScope {
+class ActivateScope extends RectScope {
+  static MARGIN = 20 * CELL_SIZE
+  constructor(screenSize: number) {
+    super(screenSize + ActivateScope.MARGIN, screenSize + ActivateScope.MARGIN)
+  }
 }
 
 /**
  * The scope to load the field block. The field block belong
  * to this area need to be loaded.
  */
-class LoadScope extends RectScope {
+class BlockLoadScope extends RectScope {
   static LOAD_UNIT = 200 * CELL_SIZE
 
   constructor() {
-    super(LoadScope.LOAD_UNIT, LoadScope.LOAD_UNIT)
+    super(BlockLoadScope.LOAD_UNIT, BlockLoadScope.LOAD_UNIT)
   }
 
   blockIds(): string[] {
-    const { LOAD_UNIT } = LoadScope
-    const left = floorN(this.left, LoadScope.LOAD_UNIT)
-    const right = ceilN(this.right, LoadScope.LOAD_UNIT)
-    const top = floorN(this.top, LoadScope.LOAD_UNIT)
-    const bottom = ceilN(this.bottom, LoadScope.LOAD_UNIT)
+    const { LOAD_UNIT } = BlockLoadScope
+    const left = floorN(this.left, BlockLoadScope.LOAD_UNIT)
+    const right = ceilN(this.right, BlockLoadScope.LOAD_UNIT)
+    const top = floorN(this.top, BlockLoadScope.LOAD_UNIT)
+    const bottom = ceilN(this.bottom, BlockLoadScope.LOAD_UNIT)
     const list = [] as string[]
     for (let x = left; x < right; x += LOAD_UNIT) {
       for (let y = top; y < bottom; y += LOAD_UNIT) {
@@ -283,18 +288,18 @@ class BlockMapLoader {
  * The scope to unload the field block. The field block which
  * doesn't belong to this scope need to be unloaded
  */
-class UnloadScope extends RectScope {
+class BlockUnloadScope extends RectScope {
   static UNLOAD_UNIT = 200 * CELL_SIZE
   constructor() {
-    super(UnloadScope.UNLOAD_UNIT, UnloadScope.UNLOAD_UNIT)
+    super(BlockUnloadScope.UNLOAD_UNIT, BlockUnloadScope.UNLOAD_UNIT)
   }
 }
 class Field implements IFieldTester {
   #el: HTMLElement
   #blocks: Record<string, FieldBlock> = {}
   #blockElements: Record<string, HTMLCanvasElement> = {}
-  #loadScope = new LoadScope()
-  #unloadScope = new UnloadScope()
+  #loadScope = new BlockLoadScope()
+  #unloadScope = new BlockUnloadScope()
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
 
   constructor(el: HTMLElement) {
@@ -444,9 +449,9 @@ export function GameScreen({ el, query }: Context) {
 
   const walkers = new Walkers([me, ...mobs])
 
-  const walkScope = new WalkScope(screenSize * 3, screenSize * 3)
+  const activateScope = new ActivateScope(screenSize)
   centerGridSignal.subscribe(({ i, j }) =>
-    walkScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+    activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
 
   const field = new Field(query(".field")!)
