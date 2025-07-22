@@ -13,7 +13,6 @@ import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
   type CollisionChecker,
-  type IBox,
   type IChar,
   type IFieldTester,
   type ILoader,
@@ -28,52 +27,7 @@ import { BlockMap, FieldBlock } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { DrawLayer } from "./draw-layer.ts"
-
-const toEven = (n: number) => floorN(n, 2)
-/**
- * Abstract rectangular area, which implements properties of the rectangle.
- * Various areas, which have special meanings, are implemented by extending this class.
- */
-abstract class RectScope {
-  #w: number
-  #h: number
-  #left: number = 0
-  #top: number = 0
-  #bottom: number = 0
-  #right: number = 0
-  constructor(w: number, h: number) {
-    this.#w = toEven(w)
-    this.#h = toEven(h)
-    this.setCenter(0, 0)
-  }
-
-  setCenter(x: number, y: number) {
-    this.#left = x - this.#w / 2
-    this.#top = y - this.#h / 2
-    this.#right = x + this.#w / 2
-    this.#bottom = y + this.#h / 2
-  }
-  get left() {
-    return this.#left
-  }
-  get top() {
-    return this.#top
-  }
-  get right() {
-    return this.#right
-  }
-  get bottom() {
-    return this.#bottom
-  }
-  /** The given IBox overlaps with this rectangle scope. */
-  overlaps(char: IBox): boolean {
-    const { x, y, w, h } = char
-    return this.left <= x + w &&
-      this.right >= x &&
-      this.top <= y + h &&
-      this.bottom >= y
-  }
-}
+import { RectScope } from "../util/rect-scope.ts"
 
 /**
  * The area which is visible to the user
@@ -87,7 +41,8 @@ class ViewScope extends RectScope {
   }
 }
 
-class Items implements ILoader, ItemContainer {
+/** The items on the field */
+class FieldItems implements ILoader, ItemContainer {
   #items: Set<IObj> = new Set()
   #coordMap = {} as Record<string, IObj>
 
@@ -159,10 +114,9 @@ class CoordCountMap {
 }
 
 /**
- * The characters who can walk,
- * i.e. the characters who are evaluated in each frame
+ * The characters who step (evaluates) in each frame
  */
-class Walkers implements IStepper, ILoader {
+class Actors implements IStepper, ILoader {
   #walkers: IChar[] = []
   #coordCountMap = new CoordCountMap()
 
@@ -406,7 +360,7 @@ export function GameScreen({ el, query }: Context) {
     new StaticNPC(13, -6, "char/joob/", "down"),
   )
 
-  const items = new Items()
+  const items = new FieldItems()
   items.add(new Item(1, 1, "item/apple.png"))
   items.add(new Item(2, 4, "item/apple.png"))
   items.add(new Item(3, 5, "item/apple.png"))
@@ -443,7 +397,7 @@ export function GameScreen({ el, query }: Context) {
   const charLayer = new DrawLayer(charCanvas, viewScope)
   const itemLayer = new DrawLayer(itemCanvas, viewScope)
 
-  const walkers = new Walkers([me, ...mobs])
+  const actors = new Actors([me, ...mobs])
 
   const activateScope = new ActivateScope(screenSize)
   centerGridSignal.subscribe(({ i, j }) =>
@@ -455,7 +409,7 @@ export function GameScreen({ el, query }: Context) {
   centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j))
   viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y))
 
-  walkers.loadAssets()
+  actors.loadAssets()
   items.loadAssets()
 
   isLoadingSignal.subscribe((v) => {
@@ -464,32 +418,20 @@ export function GameScreen({ el, query }: Context) {
     }
   })
 
-  const collisionChecker = (i: number, j: number) =>
-    walkers.checkCollision(i, j)
+  const collisionChecker = (i: number, j: number) => actors.checkCollision(i, j)
 
   const loop = gameloop(() => {
-    if (!walkers.assetsReady || !field.assetsReady || !items.assetsReady) {
+    if (!actors.assetsReady || !field.assetsReady || !items.assetsReady) {
       isLoadingSignal.update(true)
       return
     }
     isLoadingSignal.update(false)
 
-    walkers.step(Input, field, collisionChecker, items)
+    actors.step(Input, field, collisionChecker, items)
     centerPixelSignal.update({ x: me.centerX, y: me.centerY })
 
-    itemLayer.clear()
-    for (const item of items) {
-      if (viewScope.overlaps(item)) {
-        itemLayer.draw(item)
-      }
-    }
-
-    charLayer.clear()
-    for (const walker of walkers) {
-      if (viewScope.overlaps(walker)) {
-        charLayer.draw(walker)
-      }
-    }
+    itemLayer.drawIterable(items)
+    charLayer.drawIterable(actors)
   }, 60)
   loop.onStep((fps) => fpsSignal.update(fps))
   loop.run()
