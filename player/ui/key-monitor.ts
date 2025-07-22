@@ -12,18 +12,21 @@ const KEY_RIGHT = new Set(["ArrowRight", "d", "l"])
  */
 export function KeyMonitor({ on }: Context) {
   on("keydown", (e) => {
-    if (KEY_UP.has(e.key)) {
+    if (e.metaKey || e.ctrlKey) {
+      return
+    } else if (KEY_UP.has(e.key)) {
+      e.preventDefault()
       Input.up = true
     } else if (KEY_DOWN.has(e.key)) {
+      e.preventDefault()
       Input.down = true
     } else if (KEY_LEFT.has(e.key)) {
+      e.preventDefault()
       Input.left = true
     } else if (KEY_RIGHT.has(e.key)) {
+      e.preventDefault()
       Input.right = true
-    } else {
-      return
     }
-    e.preventDefault() // Prevent default browser behavior
   })
   on("keyup", (e) => {
     if (KEY_UP.has(e.key)) {
