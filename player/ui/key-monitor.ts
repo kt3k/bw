@@ -29,6 +29,7 @@ export function KeyMonitor({ on }: Context) {
     }
   })
   on("keyup", (e) => {
+    console.log("keyup", e.key)
     if (KEY_UP.has(e.key)) {
       Input.up = false
     } else if (KEY_DOWN.has(e.key)) {

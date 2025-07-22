@@ -130,7 +130,9 @@ class Items implements ILoader, ItemContainer {
     return this.#items[Symbol.iterator]()
   }
 }
-/** A map that counts characters at each coordinate */
+/** A map that counts characters at each coordinate
+ * TODO(kt3k): move to util and write tests for this class
+ */
 class CoordCountMap {
   #map: Record<string, number> = {}
 
@@ -153,12 +155,6 @@ class CoordCountMap {
 
   get(key: string): number {
     return this.#map[key] ?? 0
-  }
-
-  display() {
-    Object.entries(this.#map).forEach(([key, value]) => {
-      console.log(`${key}=${value}`)
-    })
   }
 }
 

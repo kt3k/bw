@@ -390,7 +390,6 @@ export class MainCharacter extends Character {
     _fieldTester: IFieldTester,
     itemContainer: ItemContainer,
   ): void {
-    console.log(`Character moved to (${this.i}, ${this.j})`)
     const item = itemContainer.get(this.i, this.j)
     if (item) {
       itemContainer.remove(this.i, this.j)

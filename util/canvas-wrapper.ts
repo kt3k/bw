@@ -10,7 +10,6 @@ export class CanvasWrapper {
   }
 
   drawImage(img: ImageBitmap, x: number, y: number) {
-    console.log(img.constructor.name, img.width, img.height)
     this.#ctx.drawImage(img, x, y)
   }
 
