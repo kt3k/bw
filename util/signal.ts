@@ -5,7 +5,7 @@ import { CELL_SIZE } from "./constants.ts"
 export const fpsSignal = new Signal(0)
 // The current count of apples
 export const appleCountSignal = new Signal(0)
-// The center of the view scope
+// The top-left corner of the view scope
 export const viewScopeSignal = new GroupSignal({ x: 0, y: 0 })
 // The current loading state
 export const isLoadingSignal = new Signal(true)
