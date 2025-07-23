@@ -45,6 +45,7 @@ export type IChar =
   & IObj
   & IStepper
   & {
+    get id(): string
     get physicalGridKey(): string
   }
 
@@ -78,6 +79,8 @@ export abstract class Character implements IChar {
   #i: number
   /** The row of the world coordinates */
   #j: number
+  /** The id of the character */
+  #id: string
   /** The distance of the current movement */
   #d: number = 0
   /** The speed of the move */
@@ -106,12 +109,14 @@ export abstract class Character implements IChar {
     i: number,
     j: number,
     assetPrefix: string,
+    id: string,
     dir: Dir = DOWN,
     speed: 1 | 2 | 4 | 8 | 16 = 1,
   ) {
     this.#i = i
     this.#j = j
     this.#speed = speed
+    this.#id = id
     this.#assetPrefix = assetPrefix
     this.#physicalGridKey = this.#calcPhysicalGridKey()
     this.#dir = dir
@@ -248,6 +253,10 @@ export abstract class Character implements IChar {
         return this.#assets![`${this.#dir}1`]
       }
     }
+  }
+
+  get id(): string {
+    return this.#id
   }
 
   get dir(): Dir {

@@ -105,22 +105,27 @@ class CoordCountMap {
  * The characters who step (evaluates) in each frame
  */
 class Actors implements IStepper, ILoader {
-  #walkers: IChar[] = []
+  #actors: IChar[] = []
   #coordCountMap = new CoordCountMap()
+  #activateScope: RectScope
+  #idSet: Set<string>
 
   checkCollision(i: number, j: number) {
     return this.#coordCountMap.get(`${i}.${j}`) > 0
   }
 
-  constructor(chars: IChar[] = []) {
-    this.#walkers = chars
+  constructor(chars: IChar[] = [], activateScope: RectScope) {
+    this.#actors = chars
+    this.#activateScope = activateScope
+    this.#idSet = new Set(chars.map((c) => c.id))
     for (const walker of chars) {
       this.#coordCountMap.increment(walker.physicalGridKey)
     }
   }
 
   add(walker: IChar) {
-    this.#walkers.push(walker)
+    this.#actors.push(walker)
+    this.#idSet.add(walker.id)
   }
 
   step(
@@ -129,7 +134,7 @@ class Actors implements IStepper, ILoader {
     collisionChecker: CollisionChecker,
     items: ItemContainer,
   ) {
-    for (const walker of this.#walkers) {
+    for (const walker of this.#actors) {
       this.#coordCountMap.decrement(walker.physicalGridKey)
       walker.step(input, fieldTester, collisionChecker, items)
       this.#coordCountMap.increment(walker.physicalGridKey)
@@ -138,18 +143,35 @@ class Actors implements IStepper, ILoader {
 
   async loadAssets(): Promise<void> {
     await Promise.all(
-      this.#walkers
+      this.#actors
         .filter((w) => !w.assetsReady)
         .map((w) => w.loadAssets()),
     )
   }
 
   get assetsReady(): boolean {
-    return this.#walkers.every((x) => x.assetsReady)
+    return this.#actors.every((x) => x.assetsReady)
+  }
+
+  checkDeactivate(i: number, j: number) {
+    this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
+    const actors = [] as IChar[]
+    for (const actor of this.#actors) {
+      if (this.#activateScope.overlaps(actor)) {
+        actors.push(actor)
+        continue
+      }
+      this.#idSet.delete(actor.id)
+    }
+    this.#actors = actors
   }
 
   [Symbol.iterator]() {
-    return this.#walkers[Symbol.iterator]()
+    return this.#actors[Symbol.iterator]()
+  }
+
+  has(id: string) {
+    return this.#idSet.has(id)
   }
 }
 
@@ -238,10 +260,12 @@ class Field implements IFieldTester {
   #blockElements: Record<string, HTMLCanvasElement> = {}
   #loadScope = new BlockLoadScope()
   #unloadScope = new BlockUnloadScope()
+  #activateScope: RectScope
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
 
-  constructor(el: HTMLElement) {
+  constructor(el: HTMLElement, activateScope: RectScope) {
     this.#el = el
+    this.#activateScope = activateScope
   }
 
   async addDistrict(block: FieldBlock) {
@@ -279,7 +303,7 @@ class Field implements IFieldTester {
     this.#el.style.transform = `translateX(${x}px) translateY(${y}px)`
   }
 
-  async checkLoad(i: number, j: number) {
+  async checkBlockLoad(i: number, j: number) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
       !this.hasBlock(id)
@@ -292,13 +316,17 @@ class Field implements IFieldTester {
     }
   }
 
-  checkUnload(i: number, j: number) {
+  checkBlockUnload(i: number, j: number) {
     this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     for (const block of this) {
       if (!this.#unloadScope.overlaps(block)) {
         this.removeBlock(block)
       }
     }
+  }
+
+  checkObjectActivation(i: number, j: number) {
+    // TODO(kt3k): implement this
   }
 
   get assetsReady() {
@@ -322,30 +350,32 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, 2, "char/kimi/")
+  const me = new MainCharacter(2, 2, "char/kimi/", "kimi")
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const mobs: IChar[] = range(6).map((j) =>
-    range(3).map((i) => new RandomWalkNPC(-4 + i, -2 + j, "char/joob/"))
+    range(3).map((i) =>
+      new RandomWalkNPC(-4 + i, -2 + j, "char/joob/", `${i}-${j}`)
+    )
   ).flat()
 
   mobs.push(
-    new StaticNPC(4, 2, "char/joob/", "up"),
-    new StaticNPC(5, 2, "char/joob/", "up"),
-    new StaticNPC(7, 4, "char/joob/", "down"),
-    new StaticNPC(8, 4, "char/joob/", "down"),
-    new StaticNPC(11, -2, "char/joob/", "down"),
-    new StaticNPC(12, -2, "char/joob/", "down"),
-    new StaticNPC(13, -2, "char/joob/", "down"),
-    new StaticNPC(11, -3, "char/joob/", "down"),
-    new StaticNPC(12, -3, "char/joob/", "down"),
-    new StaticNPC(13, -3, "char/joob/", "down"),
-    new StaticNPC(11, -4, "char/joob/", "down"),
-    new StaticNPC(12, -4, "char/joob/", "down"),
-    new StaticNPC(13, -4, "char/joob/", "down"),
-    new StaticNPC(12, -5, "char/joob/", "down"),
-    new StaticNPC(13, -5, "char/joob/", "down"),
-    new StaticNPC(13, -6, "char/joob/", "down"),
+    new StaticNPC(4, 2, "char/joob/", Math.random() + "", "up"),
+    new StaticNPC(5, 2, "char/joob/", Math.random() + "", "up"),
+    new StaticNPC(7, 4, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(8, 4, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(11, -2, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(12, -2, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(13, -2, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(11, -3, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(12, -3, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(13, -3, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(11, -4, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(12, -4, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(13, -4, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(12, -5, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(13, -5, "char/joob/", Math.random() + "", "down"),
+    new StaticNPC(13, -6, "char/joob/", Math.random() + "", "down"),
   )
 
   const items = new FieldItems()
@@ -384,17 +414,13 @@ export function GameScreen({ el, query }: Context) {
   const charLayer = new DrawLayer(charCanvas, viewScope)
   const itemLayer = new DrawLayer(itemCanvas, viewScope)
 
-  const actors = new Actors([me, ...mobs])
-
   const activateScope = new ActivateScope(screenSize)
-  signal.centerGrid.subscribe(({ i, j }) =>
-    activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-  )
 
-  const field = new Field(query(".field")!)
+  const actors = new Actors([me, ...mobs], activateScope)
+  const field = new Field(query(".field")!, activateScope)
   signal.centerGrid10.subscribe(({ i, j }) => {
-    field.checkLoad(i, j)
-    field.checkUnload(i, j)
+    field.checkBlockLoad(i, j)
+    field.checkBlockUnload(i, j)
   })
   signal.centerPixel.subscribe(({ x, y }) => {
     viewScope.setCenter(x, y)
