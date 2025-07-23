@@ -392,8 +392,10 @@ export function GameScreen({ el, query }: Context) {
   )
 
   const field = new Field(query(".field")!)
-  signal.centerGrid10.subscribe(({ i, j }) => field.checkLoad(i, j))
-  signal.centerGrid10.subscribe(({ i, j }) => field.checkUnload(i, j))
+  signal.centerGrid10.subscribe(({ i, j }) => {
+    field.checkLoad(i, j)
+    field.checkUnload(i, j)
+  })
   signal.centerPixel.subscribe(({ x, y }) => {
     viewScope.setCenter(x, y)
     field.translateElement(-viewScope.left, -viewScope.top)
