@@ -7,7 +7,6 @@ import {
   centerPixelSignal,
   fpsSignal,
   isLoadingSignal,
-  viewScopeSignal,
 } from "../util/signal.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
@@ -34,12 +33,7 @@ import { RectScope } from "../util/rect-scope.ts"
  * The center of this area is the center of the screen
  * The center of this area usually follows the 'me' character
  */
-class ViewScope extends RectScope {
-  override setCenter(x: number, y: number): void {
-    super.setCenter(x, y)
-    viewScopeSignal.update({ x: -this.left, y: -this.top })
-  }
-}
+class ViewScope extends RectScope {}
 
 /** The items on the field */
 class FieldItems implements ILoader, ItemContainer {
@@ -392,7 +386,6 @@ export function GameScreen({ el, query }: Context) {
   items.add(new Item(-7, 1, "item/apple.png"))
 
   const viewScope = new ViewScope(screenSize, screenSize)
-  centerPixelSignal.subscribe(({ x, y }) => viewScope.setCenter(x, y))
 
   const charLayer = new DrawLayer(charCanvas, viewScope)
   const itemLayer = new DrawLayer(itemCanvas, viewScope)
@@ -407,7 +400,10 @@ export function GameScreen({ el, query }: Context) {
   const field = new Field(query(".field")!)
   centerGrid10Signal.subscribe(({ i, j }) => field.checkLoad(i, j))
   centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j))
-  viewScopeSignal.subscribe(({ x, y }) => field.translateElement(x, y))
+  centerPixelSignal.subscribe(({ x, y }) => {
+    viewScope.setCenter(x, y)
+    field.translateElement(-viewScope.left, -viewScope.top)
+  })
 
   actors.loadAssets()
   items.loadAssets()
