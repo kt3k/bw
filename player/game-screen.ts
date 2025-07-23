@@ -1,13 +1,7 @@
 import type { Context } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
 import { Input } from "../util/dir.ts"
-import {
-  centerGrid10Signal,
-  centerGridSignal,
-  centerPixelSignal,
-  fpsSignal,
-  isLoadingSignal,
-} from "../util/signal.ts"
+import * as signal from "../util/signal.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
@@ -329,7 +323,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.height = screenSize + "px"
 
   const me = new MainCharacter(2, 2, "char/kimi/")
-  centerPixelSignal.update({ x: me.centerX, y: me.centerY })
+  signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const mobs: IChar[] = range(6).map((j) =>
     range(3).map((i) => new RandomWalkNPC(-4 + i, -2 + j, "char/joob/"))
@@ -393,14 +387,14 @@ export function GameScreen({ el, query }: Context) {
   const actors = new Actors([me, ...mobs])
 
   const activateScope = new ActivateScope(screenSize)
-  centerGridSignal.subscribe(({ i, j }) =>
+  signal.centerGrid.subscribe(({ i, j }) =>
     activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
   )
 
   const field = new Field(query(".field")!)
-  centerGrid10Signal.subscribe(({ i, j }) => field.checkLoad(i, j))
-  centerGrid10Signal.subscribe(({ i, j }) => field.checkUnload(i, j))
-  centerPixelSignal.subscribe(({ x, y }) => {
+  signal.centerGrid10.subscribe(({ i, j }) => field.checkLoad(i, j))
+  signal.centerGrid10.subscribe(({ i, j }) => field.checkUnload(i, j))
+  signal.centerPixel.subscribe(({ x, y }) => {
     viewScope.setCenter(x, y)
     field.translateElement(-viewScope.left, -viewScope.top)
   })
@@ -408,7 +402,7 @@ export function GameScreen({ el, query }: Context) {
   actors.loadAssets()
   items.loadAssets()
 
-  isLoadingSignal.subscribe((v) => {
+  signal.isGameLoading.subscribe((v) => {
     if (!v) {
       query(".curtain")!.style.opacity = "0"
     }
@@ -418,17 +412,17 @@ export function GameScreen({ el, query }: Context) {
 
   const loop = gameloop(() => {
     if (!actors.assetsReady || !field.assetsReady || !items.assetsReady) {
-      isLoadingSignal.update(true)
+      signal.isGameLoading.update(true)
       return
     }
-    isLoadingSignal.update(false)
+    signal.isGameLoading.update(false)
 
     actors.step(Input, field, collisionChecker, items)
-    centerPixelSignal.update({ x: me.centerX, y: me.centerY })
+    signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
     itemLayer.drawIterable(items)
     charLayer.drawIterable(actors)
   }, 60)
-  loop.onStep((fps) => fpsSignal.update(fps))
+  loop.onStep((fps) => signal.fps.update(fps))
   loop.run()
 }

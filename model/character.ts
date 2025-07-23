@@ -3,7 +3,7 @@ import type { Input } from "../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
-import { appleCountSignal } from "../util/signal.ts"
+import * as signal from "../util/signal.ts"
 
 export type ILoader = {
   loadAssets(): Promise<void>
@@ -393,8 +393,8 @@ export class MainCharacter extends Character {
     const item = itemContainer.get(this.i, this.j)
     if (item) {
       itemContainer.remove(this.i, this.j)
-      const count = appleCountSignal.get()
-      appleCountSignal.update(count + 1)
+      const count = signal.appleCount.get()
+      signal.appleCount.update(count + 1)
     }
   }
 }
