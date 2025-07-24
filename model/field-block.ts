@@ -293,6 +293,7 @@ export class FieldBlock {
   async renderNeighborhood(
     i: number,
     j: number,
+    { initialLoad = false } = {},
   ) {
     const wrapper = new CanvasWrapper(this.canvas)
 
@@ -327,6 +328,7 @@ export class FieldBlock {
     layer: CanvasWrapper,
     k: number,
     l: number,
+    { initialLoad = false } = {},
   ): Promise<void> {
     console.log("Rendering chunk", this.id, k, l)
     const chunkKey = `${k}.${l}`
@@ -334,7 +336,10 @@ export class FieldBlock {
     if (chunkState === true || chunkState === "loading") {
       return
     }
-    const removeOverlay = this.#createOverlay(k, l)
+    let removeOverlay: () => void = () => {}
+    if (initialLoad) {
+      removeOverlay = this.#createOverlay(k, l)
+    }
     this.#chunks[chunkKey] = "loading"
     const render = Promise.withResolvers<void>()
     const worker = new Worker("./canvas-worker.js")

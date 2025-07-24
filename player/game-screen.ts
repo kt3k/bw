@@ -315,7 +315,11 @@ class Field implements IFieldTester {
     }
     const promises = [] as Promise<void>[]
     for (const block of this) {
-      promises.push(block.renderNeighborhood(i, j))
+      promises.push(
+        block.renderNeighborhood(i, j, {
+          initialLoad: !this.#initialBlocksLoaded,
+        }),
+      )
     }
     await Promise.all(promises)
     if (!this.#initialBlocksLoaded) {
