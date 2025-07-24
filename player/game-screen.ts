@@ -375,7 +375,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, -80, "char/kimi/", "kimi", "down", 4)
+  const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down")
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const mobs: IChar[] = range(6).map((j) =>
