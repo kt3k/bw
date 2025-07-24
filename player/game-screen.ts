@@ -54,7 +54,7 @@ class FieldItems implements ILoader, ItemContainer {
   }
 
   step() {
-    // add or remove items based on some scope
+    // some items might need updates in the future
   }
 
   async loadAssets(): Promise<void> {
@@ -254,6 +254,7 @@ class BlockUnloadScope extends RectScope {
     super(BlockUnloadScope.UNLOAD_UNIT, BlockUnloadScope.UNLOAD_UNIT)
   }
 }
+
 class Field implements IFieldTester {
   #el: HTMLElement
   #blocks: Record<string, FieldBlock> = {}
@@ -262,6 +263,7 @@ class Field implements IFieldTester {
   #unloadScope = new BlockUnloadScope()
   #activateScope: RectScope
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
+  #initialBlocksLoaded = false
 
   constructor(el: HTMLElement, activateScope: RectScope) {
     this.#el = el
@@ -311,8 +313,13 @@ class Field implements IFieldTester {
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
       this.addDistrict(new FieldBlock(map, loadImage))
     }
+    const promises = [] as Promise<void>[]
     for (const block of this) {
-      block.renderNeighborhood(i, j)
+      promises.push(block.renderNeighborhood(i, j))
+    }
+    await Promise.all(promises)
+    if (!this.#initialBlocksLoaded) {
+      this.#initialBlocksLoaded = true
     }
   }
 
@@ -330,8 +337,7 @@ class Field implements IFieldTester {
   }
 
   get assetsReady() {
-    return !this.#mapLoader.isLoading &&
-      Object.values(this.#blocks).every((block) => block.assetsReady)
+    return this.#initialBlocksLoaded
   }
 }
 
@@ -418,10 +424,12 @@ export function GameScreen({ el, query }: Context) {
 
   const actors = new Actors([me, ...mobs], activateScope)
   const field = new Field(query(".field")!, activateScope)
+
   signal.centerGrid10.subscribe(({ i, j }) => {
     field.checkBlockLoad(i, j)
     field.checkBlockUnload(i, j)
   })
+
   signal.centerPixel.subscribe(({ x, y }) => {
     viewScope.setCenter(x, y)
     field.translateElement(-viewScope.left, -viewScope.top)
@@ -446,6 +454,7 @@ export function GameScreen({ el, query }: Context) {
     signal.isGameLoading.update(false)
 
     actors.step(Input, field, collisionChecker, items)
+    items.step() // currently, this is a no-op
     signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
     itemLayer.drawIterable(items)

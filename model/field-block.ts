@@ -289,13 +289,13 @@ export class FieldBlock {
     }
   }
 
-  renderNeighborhood(
+  async renderNeighborhood(
     i: number,
     j: number,
   ) {
     const wrapper = new CanvasWrapper(this.canvas)
 
-    // The max of screen size is 450px (about 28.125 cells = 1.40625 chunks)
+    // The max of screen size is 450px (about 28 cells / 1.4 chunks)
     // Let's calculate the overlap with 2 chunks square around the center cell.
 
     const k0 = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
@@ -303,6 +303,7 @@ export class FieldBlock {
     const l0 = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
       BLOCK_CHUNK_SIZE
 
+    const promises: Promise<void>[] = []
     for (let l = l0; l < l0 + 2; l++) {
       if (l < 0 || l >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
         continue // Out of bounds
@@ -311,12 +312,14 @@ export class FieldBlock {
         if (k < 0 || k >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
           continue // Out of bounds
         }
-        this.#renderChunk(wrapper, k, l)
+        const promise = this.#renderChunk(wrapper, k, l)
           .catch((error) => {
             console.error("Failed to render chunk", k, l, error)
           })
+        promises.push(promise)
       }
     }
+    await Promise.all(promises)
   }
 
   async #renderChunk(
