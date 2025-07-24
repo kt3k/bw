@@ -161,6 +161,7 @@ class Actors implements IStepper, ILoader {
         actors.push(actor)
         continue
       }
+      console.log("deactivating actor", actor.id)
       this.#idSet.delete(actor.id)
     }
     this.#actors = actors
@@ -225,18 +226,26 @@ class BlockMapLoader {
   }
 
   loadMaps(mapIds: string[]) {
-    const maps = mapIds.map((mapId) =>
-      new URL(`block_${mapId}.json`, this.#root).href
-    )
-    return Promise.all(maps.map((map) => this.loadMap(map)))
+    return Promise.all(mapIds.map((mapId) => this.loadMap(mapId)))
   }
 
-  async loadMap(url: string) {
+  async loadMap(mapId: string) {
+    const url = new URL(`block_${mapId}.json`, this.#root).href
     this.#loading.add(url)
-    const resp = await fetch(url)
-    const map = new BlockMap(url, await resp.json())
-    this.#loading.delete(url)
-    return map
+    try {
+      const resp = await fetch(url)
+      return new BlockMap(url, await resp.json())
+    } catch {
+      const fallbackUrl = new URL("block_not_found.json", this.#root).href
+      const resp = await fetch(fallbackUrl)
+      const obj = await resp.json()
+      // Fix the map grid coordinates
+      const [i, j] = mapId.split(".").map(Number) // mapId is in the form "i.j"
+      return new BlockMap(fallbackUrl, Object.assign(obj, { i, j }))
+    } finally {
+      // ensure the loading is removed even if an error occurs
+      this.#loading.delete(url)
+    }
   }
 
   get isLoading() {
@@ -271,6 +280,7 @@ class Field implements IFieldTester {
   }
 
   async addDistrict(block: FieldBlock) {
+    console.log("adding district i", block.i, "j", block.j, "id", block.id)
     this.#blocks[block.id] = block
     const canvas = block.canvas
     this.#blockElements[block.id] = canvas
@@ -284,6 +294,10 @@ class Field implements IFieldTester {
     delete this.#blockElements[block.id]
   }
 
+  /**
+   * Gets the cell for the given grid coordinate
+   * Mainly used by characters to get the cell they are trying to enter
+   */
   get(i: number, j: number) {
     const k = floorN(i, BLOCK_SIZE)
     const l = floorN(j, BLOCK_SIZE)
@@ -331,6 +345,7 @@ class Field implements IFieldTester {
     this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     for (const block of this) {
       if (!this.#unloadScope.overlaps(block)) {
+        console.log("unloading block", block.id)
         this.removeBlock(block)
       }
     }
@@ -360,7 +375,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, 2, "char/kimi/", "kimi")
+  const me = new MainCharacter(2, -80, "char/kimi/", "kimi", "down", 4)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const mobs: IChar[] = range(6).map((j) =>
@@ -450,7 +465,10 @@ export function GameScreen({ el, query }: Context) {
 
   const collisionChecker = (i: number, j: number) => actors.checkCollision(i, j)
 
+  let i = 0
+
   const loop = gameloop(() => {
+    i++
     if (!actors.assetsReady || !field.assetsReady || !items.assetsReady) {
       signal.isGameLoading.update(true)
       return
@@ -463,6 +481,10 @@ export function GameScreen({ el, query }: Context) {
 
     itemLayer.drawIterable(items)
     charLayer.drawIterable(actors)
+
+    if (i % 60 === 0) {
+      actors.checkDeactivate(me.i, me.j)
+    }
   }, 60)
   loop.onStep((fps) => signal.fps.update(fps))
   loop.run()

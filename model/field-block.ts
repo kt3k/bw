@@ -314,7 +314,7 @@ export class FieldBlock {
         if (k < 0 || k >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
           continue // Out of bounds
         }
-        const promise = this.#renderChunk(wrapper, k, l)
+        const promise = this.#renderChunk(wrapper, k, l, { initialLoad })
           .catch((error) => {
             console.error("Failed to render chunk", k, l, error)
           })
@@ -337,7 +337,7 @@ export class FieldBlock {
       return
     }
     let removeOverlay: () => void = () => {}
-    if (initialLoad) {
+    if (!initialLoad) {
       removeOverlay = this.#createOverlay(k, l)
     }
     this.#chunks[chunkKey] = "loading"
