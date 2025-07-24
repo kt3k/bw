@@ -4,6 +4,7 @@ import { seedrandom } from "../util/random.ts"
 import { ceilN } from "../util/math.ts"
 import type { Character } from "./character.ts"
 import type { Item } from "./item.ts"
+
 /**
  * {@linkcode FieldCell} represents the cell in the field block
  */

@@ -417,8 +417,8 @@ export function GameScreen({ el, query }: Context) {
 
   const viewScope = new ViewScope(screenSize, screenSize)
 
-  const charLayer = new DrawLayer(charCanvas, viewScope)
   const itemLayer = new DrawLayer(itemCanvas, viewScope)
+  const charLayer = new DrawLayer(charCanvas, viewScope, { enableNoise: true })
 
   const activateScope = new ActivateScope(screenSize)
 
