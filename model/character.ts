@@ -1,5 +1,5 @@
 import { loadImage } from "../util/load.ts"
-import type { Input } from "../util/dir.ts"
+import { Input } from "../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
@@ -172,6 +172,7 @@ export abstract class Character implements IChar {
   onMoveEnd(
     _fieldTester: IFieldTester,
     _itemContainer: ItemContainer,
+    _moveType: "linear" | "bounce",
   ): void {}
 
   step(
@@ -212,7 +213,7 @@ export abstract class Character implements IChar {
           } else if (this.#dir === RIGHT) {
             this.#i += 1
           }
-          this.onMoveEnd(fieldTester, itemContainer)
+          this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
         }
       } else if (this.#moveType === "bounce") {
         this.#movePhase += this.#speed
@@ -225,6 +226,7 @@ export abstract class Character implements IChar {
           this.#movePhase = 0
           this.#isMoving = false
           this.#d = 0
+          this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
         }
       }
     } else {
@@ -378,6 +380,7 @@ export abstract class Character implements IChar {
 }
 
 export class MainCharacter extends Character {
+  #lastMoveTypes: ("linear" | "bounce")[] = []
   override getNextState(
     input: typeof Input,
     _fieldTester: IFieldTester,
@@ -398,6 +401,7 @@ export class MainCharacter extends Character {
   override onMoveEnd(
     _fieldTester: IFieldTester,
     itemContainer: ItemContainer,
+    moveType: "linear" | "bounce",
   ): void {
     const item = itemContainer.get(this.i, this.j)
     if (item) {
@@ -405,6 +409,26 @@ export class MainCharacter extends Character {
       const count = signal.appleCount.get()
       signal.appleCount.update(count + 1)
     }
+
+    this.#lastMoveTypes.push(moveType)
+    if (this.#lastMoveTypes.length > 4) {
+      this.#lastMoveTypes.shift()
+    }
+    if (this.#lastMoveTypes.length === 4) {
+      if (this.#lastMoveTypes.every((t) => t === "bounce")) {
+        document.removeEventListener("keyup", toggleFullscreen)
+        document.addEventListener("keyup", toggleFullscreen, { once: true })
+        this.#lastMoveTypes = []
+      }
+    }
+  }
+}
+
+function toggleFullscreen() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen()
+  } else {
+    document.documentElement.requestFullscreen()
   }
 }
 
