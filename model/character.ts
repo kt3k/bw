@@ -416,12 +416,18 @@ export class MainCharacter extends Character {
     }
     if (this.#lastMoveTypes.length === 4) {
       if (this.#lastMoveTypes.every((t) => t === "bounce")) {
-        document.removeEventListener("keyup", toggleFullscreen)
-        document.addEventListener("keyup", toggleFullscreen, { once: true })
+        bindToggleFullscreen()
         this.#lastMoveTypes = []
       }
     }
   }
+}
+
+function bindToggleFullscreen() {
+  document.removeEventListener("keyup", toggleFullscreen)
+  document.addEventListener("keyup", toggleFullscreen, { once: true })
+  document.body.removeEventListener("touchend", toggleFullscreen)
+  document.body.addEventListener("touchend", toggleFullscreen, { once: true })
 }
 
 function toggleFullscreen() {
