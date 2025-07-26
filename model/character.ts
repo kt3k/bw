@@ -3,6 +3,7 @@ import { Input } from "../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
+import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import * as signal from "../util/signal.ts"
 
 export type ILoader = {
@@ -416,25 +417,10 @@ export class MainCharacter extends Character {
     }
     if (this.#lastMoveTypes.length === 4) {
       if (this.#lastMoveTypes.every((t) => t === "bounce")) {
-        bindToggleFullscreen()
+        bindToggleFullscreenOnce()
         this.#lastMoveTypes = []
       }
     }
-  }
-}
-
-function bindToggleFullscreen() {
-  document.removeEventListener("keyup", toggleFullscreen)
-  document.addEventListener("keyup", toggleFullscreen, { once: true })
-  document.body.removeEventListener("touchend", toggleFullscreen)
-  document.body.addEventListener("touchend", toggleFullscreen, { once: true })
-}
-
-function toggleFullscreen() {
-  if (document.fullscreenElement) {
-    document.exitFullscreen()
-  } else {
-    document.documentElement.requestFullscreen()
   }
 }
 
