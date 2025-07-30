@@ -3,7 +3,7 @@ import { gameloop } from "@kt3k/gameloop"
 import { Input } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
-import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
+import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import {
   type CollisionChecker,
   type IChar,
@@ -14,9 +14,9 @@ import {
   type ItemContainer,
   MainCharacter,
   RandomWalkNPC,
-  StaticNPC,
+  spawnCharacter,
 } from "../model/character.ts"
-import { BlockMap, FieldBlock } from "../model/field-block.ts"
+import { BlockMap, FieldBlock, SpawnInfo } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { DrawLayer } from "./draw-layer.ts"
@@ -273,6 +273,7 @@ class Field implements IFieldTester {
   #activateScope: RectScope
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
   #initialBlocksLoaded = false
+  #initialActorsReady = false
 
   constructor(el: HTMLElement, activateScope: RectScope) {
     this.#el = el
@@ -319,7 +320,12 @@ class Field implements IFieldTester {
     this.#el.style.transform = `translateX(${x}px) translateY(${y}px)`
   }
 
-  async checkBlockLoad(i: number, j: number) {
+  async checkBlockLoad(
+    i: number,
+    j: number,
+    viewScope: ViewScope,
+    actors: Actors,
+  ) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
       !this.hasBlock(id)
@@ -338,6 +344,18 @@ class Field implements IFieldTester {
     await Promise.all(promises)
     if (!this.#initialBlocksLoaded) {
       this.#initialBlocksLoaded = true
+      this.checkActivate(
+        i,
+        j,
+        {
+          viewScope,
+          actors,
+          initialLoad: true,
+        },
+      ).then(() => {
+        console.log("initial actors ready")
+        this.#initialActorsReady = true
+      })
     }
   }
 
@@ -351,12 +369,91 @@ class Field implements IFieldTester {
     }
   }
 
-  checkObjectActivation(i: number, j: number) {
-    // TODO(kt3k): implement this
+  async checkActivate(
+    i: number,
+    j: number,
+    { viewScope, actors, initialLoad = false }: {
+      viewScope: RectScope
+      actors: {
+        has(id: string): boolean
+        add(char: IChar): void
+        loadAssets(): Promise<void>
+      }
+      initialLoad?: boolean
+    },
+  ) {
+    console.log("checkActivate", i, j, initialLoad)
+    this.#activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+    const left = floorN(this.#activateScope.left, CELL_SIZE * BLOCK_CHUNK_SIZE)
+    const right = floorN(
+      this.#activateScope.right,
+      CELL_SIZE * BLOCK_CHUNK_SIZE,
+    )
+    const top = floorN(this.#activateScope.top, CELL_SIZE * BLOCK_CHUNK_SIZE)
+    const bottom = floorN(
+      this.#activateScope.bottom,
+      CELL_SIZE * BLOCK_CHUNK_SIZE,
+    )
+    for (let x = left; x < right; x += CELL_SIZE * BLOCK_CHUNK_SIZE) {
+      for (let y = top; y < bottom; y += CELL_SIZE * BLOCK_CHUNK_SIZE) {
+        const i = x / CELL_SIZE
+        const j = y / CELL_SIZE
+        const info = this.#getSpawnInfoForChunk(i, j)
+        const spawns = [] as IChar[]
+        for (const spanInfo of info) {
+          if (actors.has(spanInfo.id)) {
+            continue // already activated
+          }
+          if (!initialLoad && viewScope.overlaps(spanInfo)) {
+            // except for the initial load,
+            // we don't activate characters that are in the view scope
+            continue
+          }
+          if (this.#activateScope.overlaps(spanInfo)) {
+            const char = spawnCharacter(
+              spanInfo.id,
+              spanInfo.type,
+              spanInfo.i,
+              spanInfo.j,
+              spanInfo.assetPrefix,
+              {
+                dir: spanInfo.dir,
+                speed: spanInfo.speed,
+              },
+            )
+            spawns.push(char)
+          }
+        }
+        if (spawns.length > 0) {
+          console.log(`Spawning ${spawns.length} characters`)
+          for (const char of spawns) {
+            actors.add(char)
+          }
+          await actors.loadAssets()
+        }
+      }
+    }
+  }
+
+  #getSpawnInfoForChunk(chunkI: number, chunkJ: number): SpawnInfo[] {
+    const i = floorN(chunkI, BLOCK_SIZE)
+    const j = floorN(chunkJ, BLOCK_SIZE)
+    const relI = modulo(chunkI, BLOCK_SIZE)
+    const relJ = modulo(chunkJ, BLOCK_SIZE)
+    const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+    const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+    const blockId = `${i}.${j}`
+    const block = this.#blocks[blockId]
+    if (!block) {
+      console.error("Block not found", blockId)
+      console.error(`Unable to check spawn info for chunk ${chunkI}, ${chunkJ}`)
+      return []
+    }
+    return block.getSpawnInfoForChunk(k, l)
   }
 
   get assetsReady() {
-    return this.#initialBlocksLoaded
+    return this.#initialActorsReady
   }
 }
 
@@ -375,33 +472,8 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down")
+  const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down", 2)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
-
-  const mobs: IChar[] = range(6).map((j) =>
-    range(3).map((i) =>
-      new RandomWalkNPC(-4 + i, -2 + j, "char/joob/", `${i}-${j}`)
-    )
-  ).flat()
-
-  mobs.push(
-    new StaticNPC(4, 2, "char/joob/", Math.random() + "", "up"),
-    new StaticNPC(5, 2, "char/joob/", Math.random() + "", "up"),
-    new StaticNPC(7, 4, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(8, 4, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(11, -2, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(12, -2, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(13, -2, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(11, -3, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(12, -3, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(13, -3, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(11, -4, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(12, -4, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(13, -4, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(12, -5, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(13, -5, "char/joob/", Math.random() + "", "down"),
-    new StaticNPC(13, -6, "char/joob/", Math.random() + "", "down"),
-  )
 
   const items = new FieldItems()
   items.add(new Item(1, 1, "item/apple.png"))
@@ -441,11 +513,11 @@ export function GameScreen({ el, query }: Context) {
 
   const activateScope = new ActivateScope(screenSize)
 
-  const actors = new Actors([me, ...mobs], activateScope)
+  const actors = new Actors([me], activateScope)
   const field = new Field(query(".field")!, activateScope)
 
   signal.centerGrid10.subscribe(({ i, j }) => {
-    field.checkBlockLoad(i, j)
+    field.checkBlockLoad(i, j, viewScope, actors)
     field.checkBlockUnload(i, j)
   })
 
@@ -454,7 +526,6 @@ export function GameScreen({ el, query }: Context) {
     field.translateElement(-viewScope.left, -viewScope.top)
   })
 
-  actors.loadAssets()
   items.loadAssets()
 
   signal.isGameLoading.subscribe((v) => {
@@ -482,8 +553,11 @@ export function GameScreen({ el, query }: Context) {
     itemLayer.drawIterable(items)
     charLayer.drawIterable(actors)
 
-    if (i % 60 === 0) {
+    if (i % 300 === 299) {
       actors.checkDeactivate(me.i, me.j)
+    }
+    if (i % 60 === 59) {
+      field.checkActivate(me.i, me.j, { viewScope, actors })
     }
   }, 60)
   loop.onStep((fps) => signal.fps.update(fps))

@@ -70,6 +70,22 @@ export type ItemContainer = {
   remove(i: number, j: number): void
 }
 
+export function spawnCharacter(
+  id: string,
+  type: "random" | "static",
+  i: number,
+  j: number,
+  assetPrefix: string,
+  { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
+): IChar {
+  if (type === "random") {
+    return new RandomWalkNPC(i, j, assetPrefix, id, dir, speed)
+  } else if (type === "static") {
+    return new StaticNPC(i, j, assetPrefix, id, dir, speed)
+  }
+  throw new Error(`Unknown character type: ${type}`)
+}
+
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
  */

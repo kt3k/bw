@@ -1,8 +1,8 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seedrandom } from "../util/random.ts"
-import { ceilN } from "../util/math.ts"
-import type { Character } from "./character.ts"
+import { ceilN, floorN, modulo } from "../util/math.ts"
+import type { IBox } from "./character.ts"
 import type { Item } from "./item.ts"
 
 /**
@@ -42,7 +42,92 @@ export class FieldCell {
 class _ItemData {
 }
 
-class _CharacterData {}
+type CharacterType = "static" | "random"
+type CharacterSpeed = 1 | 2 | 4 | 8 | 16
+type Dir = "up" | "down" | "left" | "right"
+
+export class SpawnInfo implements IBox {
+  id: string
+  i: number
+  j: number
+  type: CharacterType
+  assetPrefix: string
+  dir?: Dir
+  speed?: CharacterSpeed
+  constructor(
+    i: number,
+    j: number,
+    type: CharacterType,
+    assetPrefix: string,
+    { dir, speed }: {
+      dir?: Dir
+      speed?: CharacterSpeed
+    },
+  ) {
+    this.id = `${i}.${j}.${type}.${speed}.${dir}`
+    this.i = i
+    this.j = j
+    this.dir = dir
+    this.speed = speed
+    this.type = type
+    this.assetPrefix = assetPrefix
+  }
+
+  toJSON() {
+    return {
+      i: this.i,
+      j: this.j,
+      type: this.type,
+      assetPrefix: this.assetPrefix,
+      dir: this.dir,
+      speed: this.speed,
+    }
+  }
+
+  get x(): number {
+    return this.i * CELL_SIZE
+  }
+
+  get y(): number {
+    return this.j * CELL_SIZE
+  }
+
+  get h(): number {
+    return CELL_SIZE
+  }
+  get w(): number {
+    return CELL_SIZE
+  }
+}
+
+const CHUNK_COUNT_X = BLOCK_SIZE / BLOCK_CHUNK_SIZE
+const CHUNK_COUNT_Y = BLOCK_SIZE / BLOCK_CHUNK_SIZE
+
+export class SpawnInfoByChunk {
+  #spawnInfo: SpawnInfo[][][] = Array.from(
+    { length: CHUNK_COUNT_X },
+    () => Array.from({ length: CHUNK_COUNT_Y }, () => []),
+  )
+
+  constructor(spawnInfo: SpawnInfo[]) {
+    for (const info of spawnInfo) {
+      const relI = modulo(info.i, BLOCK_SIZE)
+      const relJ = modulo(info.j, BLOCK_SIZE)
+      const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+      const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+      this.#spawnInfo[k][l].push(info)
+      console.log("spawnInfoForChunk", JSON.stringify(info, null, 2))
+    }
+  }
+
+  get(k: number, l: number): SpawnInfo[] {
+    return this.#spawnInfo[k][l]
+  }
+
+  getAll(): SpawnInfo[] {
+    return this.#spawnInfo.flat(2)
+  }
+}
 
 /**
  * {@linkcode BlockMap} is a map (serialized form) of {@linkcode FieldBlock}
@@ -68,8 +153,7 @@ export class BlockMap {
     color?: string
     href?: string | string[]
   }[]
-  // deno-lint-ignore ban-types
-  characters: {}[]
+  characters: SpawnInfo[]
   items: Item[]
   field: string[]
   // deno-lint-ignore no-explicit-any
@@ -80,7 +164,27 @@ export class BlockMap {
     this.i = obj.i
     this.j = obj.j
     this.cells = obj.cells
-    this.characters = obj.characters
+    this.characters = obj.characters.map((
+      spawn: {
+        i: number
+        j: number
+        type: CharacterType
+        assetPrefix: string
+        dir?: Dir
+        speed?: CharacterSpeed
+      },
+    ) =>
+      new SpawnInfo(
+        spawn.i,
+        spawn.j,
+        spawn.type,
+        spawn.assetPrefix,
+        {
+          dir: spawn.dir,
+          speed: spawn.speed,
+        },
+      )
+    )
     this.items = obj.items
     this.field = obj.field
     this.#obj = obj
@@ -108,7 +212,7 @@ export class FieldBlock {
   #cellMap: Record<string, FieldCell> = {}
   #imgMap: Record<string, ImageBitmap> = {}
   #items: Item[]
-  #characters: Character[]
+  #spawnInfoByChunk: SpawnInfoByChunk
   #field: string[]
   #loadImage: (url: string) => Promise<ImageBitmap>
   #map: BlockMap
@@ -138,9 +242,9 @@ export class FieldBlock {
     }
     this.#field = map.field
     this.#items = map.items
-    this.#characters = []
     this.#loadImage = loadImage
     this.#map = map
+    this.#spawnInfoByChunk = new SpawnInfoByChunk(map.characters)
   }
 
   loadCellImage(href: string): Promise<ImageBitmap> {
@@ -372,6 +476,9 @@ export class FieldBlock {
   get(i: number, j: number): FieldCell {
     return this.#cellMap[this.#field[j][i]]
   }
+  /** Updates a cell at the given coordinates with the given cell name.
+   * This is for editor use.
+   */
   update(i: number, j: number, cell: string): void {
     this.#field[j] = this.#field[j].substring(0, i) + cell +
       this.#field[j].substring(i + 1)
@@ -407,7 +514,9 @@ export class FieldBlock {
           ? cell.src.length === 1 ? cell.src[0] : cell.src
           : undefined,
       })),
-      characters: this.#characters,
+      characters: this.#spawnInfoByChunk.getAll().map((spawn) =>
+        spawn.toJSON()
+      ),
       items: this.#items,
       field: this.#field,
     })
@@ -415,6 +524,7 @@ export class FieldBlock {
 
   /**
    * Returns the difference between this block and the other block.
+   * This is for editor use.
    */
   diff(other: FieldBlock): [i: number, j: number, cell: string][] {
     const diff: [i: number, j: number, cell: string][] = []
@@ -427,5 +537,10 @@ export class FieldBlock {
       }
     }
     return diff
+  }
+
+  /** Gets the spawn info for the given chunk ( (0,0) ~ (9,9) ) */
+  getSpawnInfoForChunk(k: number, l: number): SpawnInfo[] {
+    return this.#spawnInfoByChunk.get(k, l)
   }
 }
