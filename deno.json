@@ -24,8 +24,5 @@
   },
   "fmt": {
     "semiColons": false
-  },
-  "exclude": [
-    "docs"
-  ]
+  }
 }
