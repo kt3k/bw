@@ -2,12 +2,8 @@
   "lock": false,
   "tasks": {
     "test": "deno test",
-    "dev": "deno run -A npm:concurrently 'deno task watch:main' 'deno task watch:worker' 'deno task watch:style' 'deno task watch:static' 'deno task serve'",
+    "dev": "deno run -A npm:concurrently 'deno task build:main --watch' 'deno task build:worker --watch' 'deno task build:style --watch' 'deno task build:static --watch' 'deno task serve'",
     "build": "deno task build:main && deno task build:worker && deno task build:style && deno task build:static",
-    "watch:main": "deno task build:main --watch",
-    "watch:worker": "deno task build:worker --watch",
-    "watch:style": "deno task build:style --watch",
-    "watch:static": "deno task build:static --watch",
     "build:main": "deno bundle --platform browser -o out/main.js player/main.ts",
     "build:worker": "deno bundle --platform browser -o out/canvas-worker.js player/canvas-worker.ts",
     "build:style": "deno run -A npm:tailwindcss@3 -o ./out/style.css",
