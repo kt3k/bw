@@ -457,8 +457,6 @@ class Field implements IFieldTester {
   }
 }
 
-const range = (n: number) => [...Array(n).keys()]
-
 export function GameScreen({ el, query }: Context) {
   const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
   const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
@@ -472,7 +470,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down", 2)
+  const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down", 1)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const items = new FieldItems()
