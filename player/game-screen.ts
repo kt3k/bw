@@ -13,7 +13,6 @@ import {
   type IStepper,
   type ItemContainer,
   MainCharacter,
-  RandomWalkNPC,
   spawnCharacter,
 } from "../model/character.ts"
 import { BlockMap, FieldBlock, SpawnInfo } from "../model/field-block.ts"
