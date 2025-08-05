@@ -6,6 +6,14 @@ import { choice, randomInt } from "../util/random.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import * as signal from "../util/signal.ts"
 
+const fallbackImagePhase0 = await fetch(
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
+).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
+
+const fallbackImagePhase1 = await fetch(
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD5JREFUOE9jZGBg+M+AChjR+HjlQYqHgQFoXibNS+gBBjKMpDAZHAaQ5GQGBgYUV4+mA7QAgaYokgJ14NMBAK1TIAlUJpxYAAAAAElFTkSuQmCC",
+).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
+
 export type ILoader = {
   loadAssets(): Promise<void>
   get assetsReady(): boolean
@@ -256,20 +264,19 @@ export abstract class Character implements IChar {
   image(): ImageBitmap {
     if (this.#isMoving) {
       if (this.#movePhase < 8) {
-        // idle state
-        return this.#assets![`${this.#dir}0`]
+        return this.getImage(this.#dir, 0)
       } else {
         // active state
-        return this.#assets![`${this.#dir}1`]
+        return this.getImage(this.#dir, 1)
       }
     } else {
-      // idle stat
+      // idle state
       if (this.#idleCounter % 128 < 64) {
         // idle state
-        return this.#assets![`${this.#dir}0`]
+        return this.getImage(this.#dir, 0)
       } else {
         // active state
-        return this.#assets![`${this.#dir}1`]
+        return this.getImage(this.#dir, 1)
       }
     }
   }
@@ -320,10 +327,7 @@ export abstract class Character implements IChar {
     return this.y + CELL_SIZE / 2
   }
 
-  /**
-   * Loads the assets and store resulted HTMLImageElement in the fields.
-   * Assets are managed like this way to make garbage collection easier.
-   */
+  /** Loads the assets and store ImageBitmaps in #assets. */
   async loadAssets() {
     const [up0, up1, down0, down1, left0, left1, right0, right1] = await Promise
       .all([
@@ -346,6 +350,17 @@ export abstract class Character implements IChar {
       right0,
       right1,
     }
+  }
+
+  getImage(dir: Dir, phase: 0 | 1): ImageBitmap {
+    if (!this.#assets) {
+      if (phase === 0) {
+        return fallbackImagePhase0
+      } else {
+        return fallbackImagePhase1
+      }
+    }
+    return this.#assets[`${dir}${phase}`]
   }
 
   get assetsReady(): boolean {

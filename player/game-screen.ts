@@ -428,7 +428,7 @@ class Field implements IFieldTester {
           for (const char of spawns) {
             actors.add(char)
           }
-          await actors.loadAssets()
+          actors.loadAssets()
         }
       }
     }
@@ -537,7 +537,7 @@ export function GameScreen({ el, query }: Context) {
 
   const loop = gameloop(() => {
     i++
-    if (!actors.assetsReady || !field.assetsReady || !items.assetsReady) {
+    if (!field.assetsReady || !items.assetsReady) {
       signal.isGameLoading.update(true)
       return
     }
