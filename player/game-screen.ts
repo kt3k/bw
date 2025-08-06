@@ -428,7 +428,7 @@ class Field implements IFieldTester {
           for (const char of spawns) {
             actors.add(char)
           }
-          actors.loadAssets()
+          await actors.loadAssets()
         }
       }
     }
