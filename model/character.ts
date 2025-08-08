@@ -147,17 +147,17 @@ export abstract class Character implements IChar {
     this.#dir = dir
   }
 
-  setState(state: Dir) {
+  setDir(state: Dir) {
     this.#dir = state
   }
 
   /** Returns the grid coordinates of the 1 cell front of the character. */
-  frontCoord(): [i: number, j: number] {
-    return this.nextCoord(this.#dir)
+  frontGrid(): [i: number, j: number] {
+    return this.nextGrid(this.#dir)
   }
 
   /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
-  nextCoord(dir: Dir): [i: number, j: number] {
+  nextGrid(dir: Dir): [i: number, j: number] {
     if (dir === UP) {
       return [this.#i, this.#j - 1]
     } else if (dir === DOWN) {
@@ -175,7 +175,7 @@ export abstract class Character implements IChar {
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
   ): boolean {
-    const [i, j] = this.nextCoord(dir)
+    const [i, j] = this.nextGrid(dir)
     const cell = fieldTester.get(i, j)
     return cell.canEnter() && !collisionChecker(i, j)
   }
@@ -209,7 +209,7 @@ export abstract class Character implements IChar {
     if (this.#movePhase === 0) {
       const nextState = this.getNextState(input, fieldTester, collisionChecker)
       if (nextState) {
-        this.setState(nextState)
+        this.setDir(nextState)
         this.#isMoving = true
         this.#idleCounter = 0
 
