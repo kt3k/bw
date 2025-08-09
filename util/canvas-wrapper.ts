@@ -10,7 +10,7 @@ export class CanvasWrapper {
   }
 
   drawImage(img: ImageBitmap, x: number, y: number) {
-    this.#ctx.drawImage(img, x, y)
+    this.#ctx.drawImage(img, Math.floor(x), Math.floor(y))
   }
 
   drawRect(x: number, y: number, w: number, h: number, color: string) {
