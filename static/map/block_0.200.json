@@ -11,6 +11,19 @@
       "name": "1",
       "canEnter": false,
       "href": "../cell/wall0.png"
+    },
+    {
+      "name": "2",
+      "canEnter": false,
+      "href": "../cell/wall1.png"
+    },
+    {
+      "name": "d",
+      "canEnter": true,
+      "href": [
+        "../cell/floor0.png",
+        "../cell/d.png"
+      ]
     }
   ],
   "characters": [],
