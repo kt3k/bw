@@ -18,22 +18,1664 @@
       "href": "../cell/wall1.png"
     }
   ],
-  "characters": [{
-    "type": "random",
-    "assetPrefix": "char/joob/",
-    "i": -3,
-    "j": -1
-  }, {
-    "type": "random",
-    "assetPrefix": "char/joob/",
-    "i": -3,
-    "j": -2
-  }, {
-    "type": "static",
-    "assetPrefix": "char/joob/",
-    "i": -2,
-    "j": -2
-  }],
+  "characters": [
+    {
+      "i": -197,
+      "j": -185,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -187,
+      "j": -181,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -192,
+      "j": -192,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -191,
+      "j": -199,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -182,
+      "j": -163,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -182,
+      "j": -165,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -200,
+      "j": -162,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -191,
+      "j": -176,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -189,
+      "j": -141,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -184,
+      "j": -160,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -182,
+      "j": -157,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -191,
+      "j": -123,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -200,
+      "j": -122,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -187,
+      "j": -138,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -192,
+      "j": -133,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -197,
+      "j": -107,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -189,
+      "j": -108,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -183,
+      "j": -105,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -194,
+      "j": -61,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -183,
+      "j": -77,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -191,
+      "j": -77,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -194,
+      "j": -74,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -197,
+      "j": -50,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -197,
+      "j": -56,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -192,
+      "j": -28,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -185,
+      "j": -39,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -191,
+      "j": -23,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -182,
+      "j": -14,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -175,
+      "j": -193,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -170,
+      "j": -170,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -169,
+      "j": -170,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -173,
+      "j": -180,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -162,
+      "j": -176,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -164,
+      "j": -149,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -174,
+      "j": -149,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -166,
+      "j": -149,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -178,
+      "j": -157,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -178,
+      "j": -127,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -167,
+      "j": -128,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -180,
+      "j": -114,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -179,
+      "j": -104,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -173,
+      "j": -103,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -169,
+      "j": -89,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -175,
+      "j": -85,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -164,
+      "j": -61,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -161,
+      "j": -77,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -178,
+      "j": -68,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -172,
+      "j": -57,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -162,
+      "j": -49,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -173,
+      "j": -60,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -171,
+      "j": -33,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -179,
+      "j": -17,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -167,
+      "j": -12,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -175,
+      "j": -10,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -153,
+      "j": -162,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -157,
+      "j": -180,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -155,
+      "j": -177,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -149,
+      "j": -162,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -145,
+      "j": -155,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -155,
+      "j": -144,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -148,
+      "j": -147,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -158,
+      "j": -122,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -146,
+      "j": -130,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -156,
+      "j": -123,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -157,
+      "j": -107,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -156,
+      "j": -106,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -145,
+      "j": -101,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -145,
+      "j": -110,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -152,
+      "j": -111,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -149,
+      "j": -99,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -151,
+      "j": -99,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -143,
+      "j": -100,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -152,
+      "j": -93,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -153,
+      "j": -66,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -155,
+      "j": -45,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -150,
+      "j": -47,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -160,
+      "j": -47,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -158,
+      "j": -30,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -151,
+      "j": -39,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -158,
+      "j": -18,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -145,
+      "j": -2,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -151,
+      "j": -5,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -133,
+      "j": -198,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -135,
+      "j": -192,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -121,
+      "j": -197,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -129,
+      "j": -181,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -128,
+      "j": -194,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -123,
+      "j": -193,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -125,
+      "j": -169,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -124,
+      "j": -155,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -122,
+      "j": -135,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -131,
+      "j": -130,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -139,
+      "j": -113,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -122,
+      "j": -119,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -137,
+      "j": -100,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -136,
+      "j": -81,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -125,
+      "j": -88,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -130,
+      "j": -69,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -121,
+      "j": -64,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -134,
+      "j": -67,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -139,
+      "j": -52,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -130,
+      "j": -55,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -126,
+      "j": -51,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -122,
+      "j": -21,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -140,
+      "j": -25,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -129,
+      "j": -33,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -124,
+      "j": -37,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -126,
+      "j": -39,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -137,
+      "j": -18,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -116,
+      "j": -199,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -111,
+      "j": -198,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -113,
+      "j": -183,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -104,
+      "j": -181,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -116,
+      "j": -176,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -119,
+      "j": -174,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -118,
+      "j": -178,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -105,
+      "j": -156,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -115,
+      "j": -148,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -112,
+      "j": -130,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -120,
+      "j": -137,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -114,
+      "j": -137,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -111,
+      "j": -103,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -113,
+      "j": -120,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -108,
+      "j": -87,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -116,
+      "j": -92,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -111,
+      "j": -93,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -116,
+      "j": -94,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -109,
+      "j": -64,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -101,
+      "j": -79,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -119,
+      "j": -67,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -114,
+      "j": -61,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -107,
+      "j": -60,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -110,
+      "j": -44,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -106,
+      "j": -57,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -109,
+      "j": -36,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -101,
+      "j": -39,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -101,
+      "j": -14,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -119,
+      "j": -16,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -96,
+      "j": -182,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -99,
+      "j": -178,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -86,
+      "j": -176,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -90,
+      "j": -155,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -86,
+      "j": -156,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -100,
+      "j": -150,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -96,
+      "j": -144,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -98,
+      "j": -140,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -81,
+      "j": -134,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -100,
+      "j": -126,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -85,
+      "j": -140,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -98,
+      "j": -107,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -98,
+      "j": -111,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -82,
+      "j": -84,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -100,
+      "j": -89,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -87,
+      "j": -98,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -93,
+      "j": -87,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -81,
+      "j": -85,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -100,
+      "j": -45,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -89,
+      "j": -54,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -93,
+      "j": -50,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -89,
+      "j": -55,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -90,
+      "j": -21,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -84,
+      "j": -33,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -84,
+      "j": -17,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -90,
+      "j": -11,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -92,
+      "j": -9,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -78,
+      "j": -189,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -67,
+      "j": -194,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -74,
+      "j": -198,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -74,
+      "j": -188,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -80,
+      "j": -188,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -71,
+      "j": -161,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -70,
+      "j": -167,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -70,
+      "j": -166,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -79,
+      "j": -157,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -80,
+      "j": -157,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -64,
+      "j": -128,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -73,
+      "j": -131,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -71,
+      "j": -140,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -69,
+      "j": -133,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -73,
+      "j": -103,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -62,
+      "j": -101,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -62,
+      "j": -101,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -64,
+      "j": -119,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -62,
+      "j": -103,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -61,
+      "j": -83,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -61,
+      "j": -89,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -76,
+      "j": -87,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -66,
+      "j": -79,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -67,
+      "j": -75,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -66,
+      "j": -69,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -61,
+      "j": -53,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -80,
+      "j": -58,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -71,
+      "j": -45,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -74,
+      "j": -24,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -73,
+      "j": -11,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -71,
+      "j": -6,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -62,
+      "j": -7,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -44,
+      "j": -188,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -44,
+      "j": -188,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -50,
+      "j": -191,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -48,
+      "j": -170,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -55,
+      "j": -166,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -54,
+      "j": -159,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -56,
+      "j": -159,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -43,
+      "j": -123,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -56,
+      "j": -115,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -52,
+      "j": -120,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -46,
+      "j": -104,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -47,
+      "j": -120,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -60,
+      "j": -93,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -59,
+      "j": -91,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -42,
+      "j": -98,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -41,
+      "j": -91,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -43,
+      "j": -97,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -52,
+      "j": -87,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -47,
+      "j": -63,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -53,
+      "j": -63,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -54,
+      "j": -80,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -41,
+      "j": -44,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -58,
+      "j": -52,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -41,
+      "j": -50,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -48,
+      "j": -48,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -55,
+      "j": -24,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -51,
+      "j": -29,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -42,
+      "j": -34,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -57,
+      "j": -7,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -21,
+      "j": -197,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -22,
+      "j": -183,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -21,
+      "j": -164,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -27,
+      "j": -164,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -32,
+      "j": -174,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -30,
+      "j": -174,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -26,
+      "j": -170,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -37,
+      "j": -172,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -30,
+      "j": -174,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -40,
+      "j": -171,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -25,
+      "j": -142,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -31,
+      "j": -141,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -34,
+      "j": -132,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -31,
+      "j": -103,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -25,
+      "j": -109,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -39,
+      "j": -116,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -32,
+      "j": -119,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -26,
+      "j": -87,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -23,
+      "j": -90,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -21,
+      "j": -64,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -23,
+      "j": -41,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -40,
+      "j": -47,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -40,
+      "j": -48,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -39,
+      "j": -36,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -23,
+      "j": -25,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -37,
+      "j": -4,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -17,
+      "j": -187,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -2,
+      "j": -196,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -12,
+      "j": -151,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -11,
+      "j": -145,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -15,
+      "j": -137,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -17,
+      "j": -140,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -14,
+      "j": -135,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -9,
+      "j": -104,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -14,
+      "j": -113,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -7,
+      "j": -107,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -9,
+      "j": -89,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -13,
+      "j": -84,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -17,
+      "j": -83,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -3,
+      "j": -78,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -12,
+      "j": -45,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -6,
+      "j": -57,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -4,
+      "j": -40,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -16,
+      "j": -31,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -3,
+      "j": -33,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -3,
+      "j": -1,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -3,
+      "j": -2,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -2,
+      "j": -2,
+      "type": "static",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": -7,
+      "j": -6,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": -3,
+      "j": -12,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    }
+  ],
   "items": [],
   "field": [
     "00010011010000100100000000010001000000011101110011100111100110100001101001100100001001000010111101010100001000000001001100000011100110000000100000111110110000100000011001000000000100100000010011010000",

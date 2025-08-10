@@ -26,7 +26,902 @@
       ]
     }
   ],
-  "characters": [],
+  "characters": [
+    {
+      "i": 15,
+      "j": 207,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 5,
+      "j": 239,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 8,
+      "j": 227,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 0,
+      "j": 245,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 4,
+      "j": 274,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 8,
+      "j": 283,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 17,
+      "j": 344,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 6,
+      "j": 358,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 12,
+      "j": 351,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 2,
+      "j": 369,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 11,
+      "j": 362,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 18,
+      "j": 361,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 18,
+      "j": 377,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 8,
+      "j": 390,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 27,
+      "j": 205,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 21,
+      "j": 202,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 33,
+      "j": 257,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 31,
+      "j": 286,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 22,
+      "j": 286,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 38,
+      "j": 320,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 20,
+      "j": 349,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 26,
+      "j": 341,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 38,
+      "j": 347,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 22,
+      "j": 345,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 24,
+      "j": 386,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 29,
+      "j": 388,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 55,
+      "j": 205,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 57,
+      "j": 221,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 59,
+      "j": 235,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 52,
+      "j": 220,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 50,
+      "j": 235,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 42,
+      "j": 235,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 45,
+      "j": 262,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 50,
+      "j": 287,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 52,
+      "j": 283,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 49,
+      "j": 318,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 57,
+      "j": 304,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 55,
+      "j": 326,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 49,
+      "j": 327,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 56,
+      "j": 350,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 40,
+      "j": 342,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 55,
+      "j": 360,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 48,
+      "j": 361,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 54,
+      "j": 377,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 78,
+      "j": 216,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 66,
+      "j": 201,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 66,
+      "j": 221,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 77,
+      "j": 259,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 73,
+      "j": 267,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 67,
+      "j": 280,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 64,
+      "j": 294,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 69,
+      "j": 305,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 77,
+      "j": 335,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 61,
+      "j": 330,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 72,
+      "j": 348,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 60,
+      "j": 357,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 71,
+      "j": 342,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 78,
+      "j": 383,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 67,
+      "j": 385,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 67,
+      "j": 399,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 61,
+      "j": 397,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 86,
+      "j": 201,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 98,
+      "j": 252,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 80,
+      "j": 243,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 99,
+      "j": 280,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 88,
+      "j": 291,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 85,
+      "j": 302,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 94,
+      "j": 313,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 87,
+      "j": 323,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 95,
+      "j": 345,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 94,
+      "j": 373,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 97,
+      "j": 391,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 107,
+      "j": 214,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 118,
+      "j": 243,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 115,
+      "j": 265,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 113,
+      "j": 274,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 108,
+      "j": 276,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 100,
+      "j": 303,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 116,
+      "j": 308,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 105,
+      "j": 336,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 104,
+      "j": 376,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 105,
+      "j": 398,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 110,
+      "j": 388,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 136,
+      "j": 219,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 128,
+      "j": 200,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 138,
+      "j": 215,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 129,
+      "j": 221,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 121,
+      "j": 258,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 123,
+      "j": 278,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 134,
+      "j": 275,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 139,
+      "j": 299,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 132,
+      "j": 284,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 126,
+      "j": 282,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 130,
+      "j": 309,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 121,
+      "j": 312,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 133,
+      "j": 307,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 123,
+      "j": 335,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 130,
+      "j": 338,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 137,
+      "j": 333,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 137,
+      "j": 344,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 135,
+      "j": 359,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 138,
+      "j": 360,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 122,
+      "j": 365,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 126,
+      "j": 389,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 127,
+      "j": 381,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 149,
+      "j": 212,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 144,
+      "j": 208,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 159,
+      "j": 228,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 153,
+      "j": 225,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 143,
+      "j": 252,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 148,
+      "j": 251,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 141,
+      "j": 249,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 149,
+      "j": 267,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 141,
+      "j": 304,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 150,
+      "j": 326,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 141,
+      "j": 348,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 153,
+      "j": 398,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 176,
+      "j": 202,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 162,
+      "j": 231,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 168,
+      "j": 246,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 167,
+      "j": 243,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 170,
+      "j": 264,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 171,
+      "j": 264,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 161,
+      "j": 310,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 178,
+      "j": 305,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 173,
+      "j": 304,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 165,
+      "j": 351,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 177,
+      "j": 375,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 170,
+      "j": 361,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 170,
+      "j": 385,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 191,
+      "j": 210,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 199,
+      "j": 214,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 181,
+      "j": 203,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 194,
+      "j": 210,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 197,
+      "j": 208,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 198,
+      "j": 224,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 194,
+      "j": 239,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 196,
+      "j": 232,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 183,
+      "j": 265,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 182,
+      "j": 269,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 192,
+      "j": 265,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 181,
+      "j": 302,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 199,
+      "j": 315,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 199,
+      "j": 328,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 189,
+      "j": 343,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 192,
+      "j": 364,
+      "type": "random",
+      "assetPrefix": "char/not-found/"
+    },
+    {
+      "i": 194,
+      "j": 373,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 196,
+      "j": 376,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    },
+    {
+      "i": 193,
+      "j": 387,
+      "type": "random",
+      "assetPrefix": "char/joob/"
+    }
+  ],
   "field": [
     "10100100010010001000000001000000001011011000101011001111000000000000101010010000110100001011000000010001000000001010010110110001010000101100011101010000100011101000000000110010101010101000000011101111",
     "00100000010010100110001100001010000001000000111010000000000110101000000010110100100010010111011001001001000000001000010000001001011100000000110101000000000000000000110001100100001001000000101101010110",
