@@ -384,12 +384,12 @@ class Field implements IFieldTester {
     console.log("checkActivate", i, j, initialLoad)
     this.#activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const left = floorN(this.#activateScope.left, CELL_SIZE * BLOCK_CHUNK_SIZE)
-    const right = floorN(
+    const right = ceilN(
       this.#activateScope.right,
       CELL_SIZE * BLOCK_CHUNK_SIZE,
     )
     const top = floorN(this.#activateScope.top, CELL_SIZE * BLOCK_CHUNK_SIZE)
-    const bottom = floorN(
+    const bottom = ceilN(
       this.#activateScope.bottom,
       CELL_SIZE * BLOCK_CHUNK_SIZE,
     )
@@ -403,11 +403,13 @@ class Field implements IFieldTester {
           if (actors.has(spanInfo.id)) {
             continue // already activated
           }
+
           if (!initialLoad && viewScope.overlaps(spanInfo)) {
             // except for the initial load,
             // we don't activate characters that are in the view scope
             continue
           }
+
           if (this.#activateScope.overlaps(spanInfo)) {
             const char = spawnCharacter(
               spanInfo.id,
