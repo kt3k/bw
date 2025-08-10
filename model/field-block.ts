@@ -62,7 +62,7 @@ export class SpawnInfo implements IBox {
     { dir, speed }: {
       dir?: Dir
       speed?: CharacterSpeed
-    },
+    } = {},
   ) {
     this.id = `${i}.${j}.${type}.${speed}.${dir}`
     this.i = i
@@ -110,14 +110,17 @@ export class SpawnInfoByChunk {
   )
 
   constructor(spawnInfo: SpawnInfo[]) {
-    for (const info of spawnInfo) {
-      const relI = modulo(info.i, BLOCK_SIZE)
-      const relJ = modulo(info.j, BLOCK_SIZE)
-      const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-      const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-      this.#spawnInfo[k][l].push(info)
-      console.log("spawnInfoForChunk", JSON.stringify(info, null, 2))
+    for (const spawn of spawnInfo) {
+      this.add(spawn)
     }
+  }
+
+  add(spawn: SpawnInfo): void {
+    const relI = modulo(spawn.i, BLOCK_SIZE)
+    const relJ = modulo(spawn.j, BLOCK_SIZE)
+    const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+    const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+    this.#spawnInfo[k][l].push(spawn)
   }
 
   get(k: number, l: number): SpawnInfo[] {
@@ -542,5 +545,10 @@ export class FieldBlock {
   /** Gets the spawn info for the given chunk ( (0,0) ~ (9,9) ) */
   getSpawnInfoForChunk(k: number, l: number): SpawnInfo[] {
     return this.#spawnInfoByChunk.get(k, l)
+  }
+
+  /** Adds the spawn info */
+  addSpawnInfo(spawn: SpawnInfo): void {
+    this.#spawnInfoByChunk.add(spawn)
   }
 }
