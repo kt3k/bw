@@ -1,6 +1,7 @@
 import { parseArgs } from "@std/cli/parse-args"
 import { BlockMap, FieldBlock, SpawnInfo } from "../model/field-block.ts"
-import { randomInt } from "../util/random.ts"
+
+const randomInt = (n: number) => Math.floor(Math.random() * n)
 
 const args = parseArgs(Deno.args)
 
@@ -22,14 +23,14 @@ const fb = new FieldBlock(bm, async (url: string) => {
   const res = await fetch(url)
   return res.blob().then((blob) => createImageBitmap(blob))
 })
-let i = 0
+let c = 0
 for (const _ of Array(100)) {
   const i = randomInt(200)
   const j = randomInt(200)
   const cell = bm.field[j][i]
   console.log(`cell ${cell}`)
   if (cell === "0" || cell === "D") {
-    i++
+    c++
     console.log(`Adding character at (${i}, ${j}) in cell ${cell}`)
     const si = new SpawnInfo(
       i + bm.i,
@@ -41,7 +42,8 @@ for (const _ of Array(100)) {
   }
 }
 
-console.log(`Added ${i} characters to the map`)
+console.log(`Added ${c} characters to the map`)
+console.log(`${fb.toMap().toObject().characters.length} characters in total`)
 
 await Deno.writeTextFile(
   mapJson,
