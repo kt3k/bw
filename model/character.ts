@@ -1,10 +1,9 @@
 import { loadImage } from "../util/load.ts"
-import { Input } from "../util/dir.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
-import { inputQueue } from "../player/ui/input-queue.ts"
+import { Input, inputQueue } from "../player/ui/input.ts"
 import * as signal from "../util/signal.ts"
 
 const fallbackImagePhase0 = await fetch(

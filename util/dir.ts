@@ -9,20 +9,3 @@ export const DIRS = [
   RIGHT,
 ] as const
 export type Dir = typeof DIRS[number]
-
-/**
- * The current user direction input state.
- */
-export const Input = {
-  up: false,
-  down: false,
-  left: false,
-  right: false,
-}
-
-/** Clear the current direction input state */
-export function clearInput() {
-  for (const dir of DIRS) {
-    Input[dir] = false
-  }
-}

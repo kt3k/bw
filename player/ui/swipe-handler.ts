@@ -1,8 +1,7 @@
 import type { Context } from "@kt3k/cell"
 
-import { clearInput, Input } from "../../util/dir.ts"
 import { getDir, getDistance } from "../../util/touch.ts"
-import { inputQueue } from "./input-queue.ts"
+import { clearInput, Input, inputQueue } from "./input.ts"
 
 const TOUCH_SENSITIVITY_THRESHOLD = 25
 

@@ -1,6 +1,5 @@
 import type { Context } from "@kt3k/cell"
-import { Input } from "../../util/dir.ts"
-import { inputQueue } from "./input-queue.ts"
+import { Input, inputQueue } from "./input.ts"
 
 const KEY_UP = new Set(["ArrowUp", "w", "k"])
 const KEY_DOWN = new Set(["ArrowDown", "s", "j"])
