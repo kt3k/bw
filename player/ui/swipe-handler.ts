@@ -2,6 +2,7 @@ import type { Context } from "@kt3k/cell"
 
 import { clearInput, Input } from "../../util/dir.ts"
 import { getDir, getDistance } from "../../util/touch.ts"
+import { inputQueue } from "./input-queue.ts"
 
 const TOUCH_SENSITIVITY_THRESHOLD = 25
 
@@ -26,6 +27,10 @@ export function SwipeHandler({ on }: Context) {
     prevTouch = touch
   })
   on("touchend", () => {
-    clearInput()
+    if (Input.up || Input.down || Input.left || Input.right) {
+      clearInput()
+    } else {
+      inputQueue.push("touchendempty")
+    }
   })
 }

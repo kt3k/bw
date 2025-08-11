@@ -4,6 +4,7 @@ import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
+import { inputQueue } from "../player/ui/input-queue.ts"
 import * as signal from "../util/signal.ts"
 
 const fallbackImagePhase0 = await fetch(
@@ -462,7 +463,15 @@ export class MainCharacter extends Character {
       return LEFT
     } else if (input.right) {
       return RIGHT
-    } else if (input.space) {
+    }
+
+    const queueHead = inputQueue[0]
+
+    if (
+      queueHead === "space" ||
+      queueHead === "touchendempty"
+    ) {
+      inputQueue.shift()
       return "jump"
     }
     return undefined

@@ -1,10 +1,13 @@
 import type { Context } from "@kt3k/cell"
 import { Input } from "../../util/dir.ts"
+import { inputQueue } from "./input-queue.ts"
 
 const KEY_UP = new Set(["ArrowUp", "w", "k"])
 const KEY_DOWN = new Set(["ArrowDown", "s", "j"])
 const KEY_LEFT = new Set(["ArrowLeft", "a", "h"])
 const KEY_RIGHT = new Set(["ArrowRight", "d", "l"])
+
+let spaceQueued = false
 
 /** The component which monitors the user input.
  *
@@ -27,9 +30,11 @@ export function KeyMonitor({ on }: Context) {
       e.preventDefault()
       Input.right = true
     } else if (e.key === " ") {
-      console.log("Space key pressed, marking Input.space as true")
       e.preventDefault()
-      Input.space = true
+      if (!spaceQueued) {
+        spaceQueued = true
+        inputQueue.push("space")
+      }
     }
   })
   on("keyup", (e) => {
@@ -42,7 +47,7 @@ export function KeyMonitor({ on }: Context) {
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = false
     } else if (e.key === " ") {
-      Input.space = false
+      spaceQueued = false
     }
   })
 }
