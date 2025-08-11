@@ -94,6 +94,9 @@ export function spawnCharacter(
   throw new Error(`Unknown character type: ${type}`)
 }
 
+type MoveType = "linear" | "bounce" | "jump"
+type NextState = Dir | "jump" | undefined
+
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
  */
@@ -117,7 +120,7 @@ export abstract class Character implements IChar {
   /** The counter of the idle state */
   #idleCounter: number = 0
   /** Type of the move */
-  #moveType: "linear" | "bounce" = "linear"
+  #moveType: MoveType = "linear"
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
@@ -190,14 +193,14 @@ export abstract class Character implements IChar {
     _input: typeof Input,
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
-  ): Dir | undefined {
+  ): NextState {
     return undefined
   }
 
   onMoveEnd(
     _fieldTester: IFieldTester,
     _itemContainer: ItemContainer,
-    _moveType: "linear" | "bounce",
+    _moveType: MoveType,
   ): void {}
 
   step(
@@ -208,7 +211,10 @@ export abstract class Character implements IChar {
   ) {
     if (this.#movePhase === 0) {
       const nextState = this.getNextState(input, fieldTester, collisionChecker)
-      if (nextState) {
+      if (
+        nextState === "up" || nextState === "down" ||
+        nextState === "left" || nextState === "right"
+      ) {
         this.setDir(nextState)
         this.#isMoving = true
         this.#idleCounter = 0
@@ -218,6 +224,11 @@ export abstract class Character implements IChar {
         } else {
           this.#moveType = "bounce"
         }
+      } else if (nextState === "jump") {
+        this.#isMoving = true
+        this.#idleCounter = 0
+        this.#moveType = "jump"
+        // Jumping is always allowed.
       }
     }
 
@@ -248,6 +259,19 @@ export abstract class Character implements IChar {
           this.#d -= this.#speed / 2
         }
         if (this.#movePhase == 16) {
+          this.#movePhase = 0
+          this.#isMoving = false
+          this.#d = 0
+          this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
+        }
+      } else if (this.#moveType === "jump") {
+        this.#movePhase += this.#speed
+        if (this.#movePhase < 4) {
+          this.#d += this.#speed * 2
+        } else {
+          this.#d -= this.#speed * 2
+        }
+        if (this.#movePhase == 8) {
           this.#movePhase = 0
           this.#isMoving = false
           this.#d = 0
@@ -291,6 +315,10 @@ export abstract class Character implements IChar {
 
   /** Gets the x of the world coordinates */
   get x(): number {
+    if (this.#isMoving && this.#moveType === "jump") {
+      return this.#i * CELL_SIZE
+    }
+
     if (this.#dir === LEFT) {
       return this.#i * CELL_SIZE - this.#d
     } else if (this.#dir === RIGHT) {
@@ -306,6 +334,10 @@ export abstract class Character implements IChar {
 
   /** Gets the y of the world coordinates */
   get y(): number {
+    if (this.#isMoving && this.#moveType === "jump") {
+      return this.#j * CELL_SIZE - this.#d
+    }
+
     if (this.#dir === UP) {
       return this.#j * CELL_SIZE - this.#d
     } else if (this.#dir === DOWN) {
@@ -417,7 +449,7 @@ export class MainCharacter extends Character {
     input: typeof Input,
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
-  ): Dir | undefined {
+  ): NextState {
     if (input.up) {
       return UP
     } else if (input.down) {
@@ -426,6 +458,8 @@ export class MainCharacter extends Character {
       return LEFT
     } else if (input.right) {
       return RIGHT
+    } else if (input.space) {
+      return "jump"
     }
     return undefined
   }
@@ -462,17 +496,20 @@ export class RandomWalkNPC extends Character {
     _input: typeof Input,
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
-  ): Dir | undefined {
+  ): NextState {
     this.#counter -= 1
     if (this.#counter <= 0) {
       this.#counter = randomInt(8) + 4
       // If the character can keep going in the current direction,
-      // it will keep going with 80% probability.
+      // it will keep going with 96% probability.
       if (
         this.canEnter(this.dir, fieldTester, collisionChecker) &&
         Math.random() < 0.96
       ) {
         return this.dir
+      }
+      if (randomInt(2) === 0) {
+        return "jump"
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
       return choice(nextCandidate.filter((d) => {

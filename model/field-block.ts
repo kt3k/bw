@@ -202,7 +202,7 @@ export class BlockMap {
   }
 }
 
-/** {@linkcode FieldBlock} represents a block of a field */
+/** {@linkcode FieldBlock} represents a {@linkcode BLOCK_SIZE} x {@linkcode BLOCK_SIZE} block of a field */
 export class FieldBlock {
   #x: number
   #y: number

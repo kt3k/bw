@@ -18,6 +18,7 @@ export const Input = {
   down: false,
   left: false,
   right: false,
+  space: false,
 }
 
 /** Clear the current direction input state */
@@ -25,4 +26,5 @@ export function clearInput() {
   for (const dir of DIRS) {
     Input[dir] = false
   }
+  Input.space = false
 }

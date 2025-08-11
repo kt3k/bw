@@ -26,10 +26,13 @@ export function KeyMonitor({ on }: Context) {
     } else if (KEY_RIGHT.has(e.key)) {
       e.preventDefault()
       Input.right = true
+    } else if (e.key === " ") {
+      console.log("Space key pressed, marking Input.space as true")
+      e.preventDefault()
+      Input.space = true
     }
   })
   on("keyup", (e) => {
-    console.log("keyup", e.key)
     if (KEY_UP.has(e.key)) {
       Input.up = false
     } else if (KEY_DOWN.has(e.key)) {
@@ -38,6 +41,8 @@ export function KeyMonitor({ on }: Context) {
       Input.left = false
     } else if (KEY_RIGHT.has(e.key)) {
       Input.right = false
+    } else if (e.key === " ") {
+      Input.space = false
     }
   })
 }
