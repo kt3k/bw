@@ -2,9 +2,6 @@ import { loadImage } from "../util/load.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { choice, randomInt } from "../util/random.ts"
-import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
-import { Input, inputQueue } from "../player/ui/input.ts"
-import * as signal from "../util/signal.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -94,7 +91,7 @@ export function spawnCharacter(
 }
 
 type MoveType = "linear" | "bounce" | "jump"
-type NextState = Dir | "jump" | undefined
+export type NextState = Dir | "jump" | undefined
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -441,59 +438,6 @@ export abstract class Character implements IChar {
       }
     }
     return this.#j
-  }
-}
-
-export class MainCharacter extends Character {
-  #lastMoveTypes: ("linear" | "bounce")[] = []
-  override getNextState(
-    _fieldTester: IFieldTester,
-    _collisionChecker: CollisionChecker,
-  ): NextState {
-    if (Input.up) {
-      return UP
-    } else if (Input.down) {
-      return DOWN
-    } else if (Input.left) {
-      return LEFT
-    } else if (Input.right) {
-      return RIGHT
-    }
-
-    const queueHead = inputQueue[0]
-
-    if (
-      queueHead === "space" ||
-      queueHead === "touchendempty"
-    ) {
-      inputQueue.shift()
-      return "jump"
-    }
-    return undefined
-  }
-
-  override onMoveEnd(
-    _fieldTester: IFieldTester,
-    itemContainer: ItemContainer,
-    moveType: "linear" | "bounce",
-  ): void {
-    const item = itemContainer.get(this.i, this.j)
-    if (item) {
-      itemContainer.remove(this.i, this.j)
-      const count = signal.appleCount.get()
-      signal.appleCount.update(count + 1)
-    }
-
-    this.#lastMoveTypes.push(moveType)
-    if (this.#lastMoveTypes.length > 4) {
-      this.#lastMoveTypes.shift()
-    }
-    if (this.#lastMoveTypes.length === 4) {
-      if (this.#lastMoveTypes.every((t) => t === "bounce")) {
-        bindToggleFullscreenOnce()
-        this.#lastMoveTypes = []
-      }
-    }
   }
 }
 

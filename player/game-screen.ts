@@ -11,9 +11,9 @@ import {
   type IObj,
   type IStepper,
   type ItemContainer,
-  MainCharacter,
   spawnCharacter,
 } from "../model/character.ts"
+import { MainCharacter } from "./main-character.ts"
 import { BlockMap, FieldBlock, SpawnInfo } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
