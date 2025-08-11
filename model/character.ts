@@ -356,6 +356,10 @@ export abstract class Character implements IChar {
   }
 
   get centerY(): number {
+    if (this.#isMoving && this.#moveType === "jump") {
+      return this.#j * CELL_SIZE + CELL_SIZE / 2
+    }
+
     return this.y + CELL_SIZE / 2
   }
 
