@@ -43,7 +43,6 @@ export type IFieldTester = {
 /** The implementor of 'step' function */
 export type IStepper = {
   step(
-    input: typeof Input,
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
     items: ItemContainer,
@@ -191,7 +190,6 @@ export abstract class Character implements IChar {
    * Returning undefined causes the character to stay in the current state.
    */
   getNextState(
-    _input: typeof Input,
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
   ): NextState {
@@ -205,13 +203,12 @@ export abstract class Character implements IChar {
   ): void {}
 
   step(
-    input: typeof Input,
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
     itemContainer: ItemContainer,
   ) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextState(input, fieldTester, collisionChecker)
+      const nextState = this.getNextState(fieldTester, collisionChecker)
       if (
         nextState === "up" || nextState === "down" ||
         nextState === "left" || nextState === "right"
@@ -451,17 +448,16 @@ export abstract class Character implements IChar {
 export class MainCharacter extends Character {
   #lastMoveTypes: ("linear" | "bounce")[] = []
   override getNextState(
-    input: typeof Input,
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
   ): NextState {
-    if (input.up) {
+    if (Input.up) {
       return UP
-    } else if (input.down) {
+    } else if (Input.down) {
       return DOWN
-    } else if (input.left) {
+    } else if (Input.left) {
       return LEFT
-    } else if (input.right) {
+    } else if (Input.right) {
       return RIGHT
     }
 
@@ -506,7 +502,6 @@ export class RandomWalkNPC extends Character {
   #counter = 32
 
   override getNextState(
-    _input: typeof Input,
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
   ): NextState {

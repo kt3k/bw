@@ -1,6 +1,5 @@
 import type { Context } from "@kt3k/cell"
 import { gameloop } from "@kt3k/gameloop"
-import { Input } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
@@ -128,15 +127,14 @@ class Actors implements IStepper, ILoader {
   }
 
   step(
-    input: typeof Input,
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
     items: ItemContainer,
   ) {
-    for (const walker of this.#actors) {
-      this.#coordCountMap.decrement(walker.physicalGridKey)
-      walker.step(input, fieldTester, collisionChecker, items)
-      this.#coordCountMap.increment(walker.physicalGridKey)
+    for (const actor of this.#actors) {
+      this.#coordCountMap.decrement(actor.physicalGridKey)
+      actor.step(fieldTester, collisionChecker, items)
+      this.#coordCountMap.increment(actor.physicalGridKey)
     }
   }
 
@@ -545,7 +543,7 @@ export function GameScreen({ el, query }: Context) {
     }
     signal.isGameLoading.update(false)
 
-    actors.step(Input, field, collisionChecker, items)
+    actors.step(field, collisionChecker, items)
     items.step() // currently, this is a no-op
     signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
