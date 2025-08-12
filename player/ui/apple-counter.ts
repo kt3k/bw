@@ -11,4 +11,13 @@ export function AppleCounter({ query, subscribe }: Context) {
       }
     }, 300)
   })
+
+  subscribe(signal.greenAppleCount, (greenApples) => {
+    setTimeout(() => {
+      const counter = query(".green-apple-count-label")
+      if (counter) {
+        counter.textContent = greenApples.toString()
+      }
+    }, 300)
+  })
 }

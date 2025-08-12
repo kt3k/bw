@@ -1,10 +1,11 @@
 import { loadImage } from "../util/load.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IObj } from "./character.ts"
+import type { IItem, ItemType } from "./character.ts"
 
-export class Item implements IObj {
+export class Item implements IItem {
   #i: number
   #j: number
+  #type: ItemType
   #assetPath: string
   #assets: ImageBitmap | undefined
 
@@ -13,9 +14,10 @@ export class Item implements IObj {
    * @param j The row of the grid coordinate
    * @param assetPath The path to the asset image
    */
-  constructor(i: number, j: number, assetPath: string) {
+  constructor(i: number, j: number, type: ItemType, assetPath: string) {
     this.#i = i
     this.#j = j
+    this.#type = type
     this.#assetPath = assetPath
   }
 
@@ -48,5 +50,8 @@ export class Item implements IObj {
   }
   get j(): number {
     return this.#j
+  }
+  get type(): ItemType {
+    return this.#type
   }
 }

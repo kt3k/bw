@@ -5,6 +5,8 @@ import { CELL_SIZE } from "./constants.ts"
 export const fps = new Signal(0)
 // The current count of apples
 export const appleCount = new Signal(0)
+// The current count of green apples
+export const greenAppleCount = new Signal(0)
 // The current loading state
 export const isGameLoading = new Signal(true)
 // The center pixel coordinate

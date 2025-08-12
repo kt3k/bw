@@ -7,6 +7,7 @@ import {
   type CollisionChecker,
   type IChar,
   type IFieldTester,
+  type IItem,
   type ILoader,
   type IObj,
   type IStepper,
@@ -29,15 +30,15 @@ class ViewScope extends RectScope {}
 
 /** The items on the field */
 class FieldItems implements ILoader, ItemContainer {
-  #items: Set<IObj> = new Set()
-  #coordMap = {} as Record<string, IObj>
+  #items: Set<IItem> = new Set()
+  #coordMap = {} as Record<string, IItem>
 
-  add(item: IObj) {
+  add(item: IItem) {
     this.#items.add(item)
     this.#coordMap[`${item.i}.${item.j}`] = item
   }
 
-  get(i: number, j: number): IObj | undefined {
+  get(i: number, j: number): IItem | undefined {
     return this.#coordMap[`${i}.${j}`]
   }
 
@@ -473,35 +474,35 @@ export function GameScreen({ el, query }: Context) {
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const items = new FieldItems()
-  items.add(new Item(1, 1, "item/apple.png"))
-  items.add(new Item(2, 4, "item/apple.png"))
-  items.add(new Item(3, 5, "item/apple.png"))
-  items.add(new Item(4, 1, "item/apple.png"))
-  items.add(new Item(5, 1, "item/apple.png"))
-  items.add(new Item(6, 1, "item/apple.png"))
-  items.add(new Item(7, 1, "item/apple.png"))
+  items.add(new Item(1, 1, "apple", "item/apple.png"))
+  items.add(new Item(2, 4, "apple", "item/apple.png"))
+  items.add(new Item(3, 5, "apple", "item/apple.png"))
+  items.add(new Item(4, 1, "apple", "item/apple.png"))
+  items.add(new Item(5, 1, "apple", "item/apple.png"))
+  items.add(new Item(6, 1, "apple", "item/apple.png"))
+  items.add(new Item(7, 1, "apple", "item/apple.png"))
 
-  items.add(new Item(-1, -5, "item/apple.png"))
-  items.add(new Item(-1, -6, "item/apple.png"))
-  items.add(new Item(-2, -5, "item/apple.png"))
-  items.add(new Item(-2, -6, "item/apple.png"))
+  items.add(new Item(-1, -5, "green-apple", "item/green-apple.png"))
+  items.add(new Item(-1, -6, "green-apple", "item/green-apple.png"))
+  items.add(new Item(-2, -5, "green-apple", "item/green-apple.png"))
+  items.add(new Item(-2, -6, "green-apple", "item/green-apple.png"))
 
-  items.add(new Item(-3, 6, "item/apple.png"))
-  items.add(new Item(-4, 6, "item/apple.png"))
-  items.add(new Item(-5, 6, "item/apple.png"))
-  items.add(new Item(-6, 6, "item/apple.png"))
+  items.add(new Item(-3, 6, "apple", "item/apple.png"))
+  items.add(new Item(-4, 6, "green-apple", "item/green-apple.png"))
+  items.add(new Item(-5, 6, "apple", "item/apple.png"))
+  items.add(new Item(-6, 6, "apple", "item/apple.png"))
 
-  items.add(new Item(-3, 7, "item/apple.png"))
-  items.add(new Item(-4, 7, "item/apple.png"))
-  items.add(new Item(-5, 7, "item/apple.png"))
-  items.add(new Item(-6, 7, "item/apple.png"))
+  items.add(new Item(-3, 7, "apple", "item/apple.png"))
+  items.add(new Item(-4, 7, "apple", "item/apple.png"))
+  items.add(new Item(-5, 7, "apple", "item/apple.png"))
+  items.add(new Item(-6, 7, "apple", "item/apple.png"))
 
-  items.add(new Item(-3, 8, "item/apple.png"))
-  items.add(new Item(-4, 8, "item/apple.png"))
-  items.add(new Item(-5, 8, "item/apple.png"))
-  items.add(new Item(-6, 8, "item/apple.png"))
+  items.add(new Item(-3, 8, "apple", "item/apple.png"))
+  items.add(new Item(-4, 8, "apple", "item/apple.png"))
+  items.add(new Item(-5, 8, "apple", "item/apple.png"))
+  items.add(new Item(-6, 8, "apple", "item/apple.png"))
 
-  items.add(new Item(-7, 1, "item/apple.png"))
+  items.add(new Item(-7, 1, "green-apple", "item/green-apple.png"))
 
   const viewScope = new ViewScope(screenSize, screenSize)
 

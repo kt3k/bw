@@ -10,23 +10,38 @@ export function ItemGetEffector({ el, subscribe }: Context) {
       return
     }
 
-    const img = new Image()
-    img.src = "./item/apple.png"
-    img.className = "absolute"
-    img.style.right = "47%"
-    img.style.top = "48%"
-    img.style.opacity = "1"
-    img.style.transition = "right 0.3s ease, top 0.3s ease, opacity 0.3s ease"
-    img.onload = () => {
-      el.appendChild(img)
-      setTimeout(() => {
-        img.style.right = "58px"
-        img.style.top = "10px"
-        img.style.opacity = "0.7"
-      }, 30)
-      img.addEventListener("transitionend", () => {
-        el.removeChild(img)
-      }, { once: true })
-    }
+    moveImage(el, "./item/apple.png", "10px")
   })
+
+  let prevGreenAppleCount = signal.greenAppleCount.get()
+  subscribe(signal.greenAppleCount, (count) => {
+    const increased = count > prevGreenAppleCount
+    prevGreenAppleCount = count
+    if (!increased) {
+      return
+    }
+
+    moveImage(el, "./item/green-apple.png", "36px")
+  })
+}
+
+function moveImage(el: HTMLElement, src: string, endTop: string): void {
+  const img = new Image()
+  img.src = src
+  img.className = "absolute"
+  img.style.right = "47%"
+  img.style.top = "48%"
+  img.style.opacity = "1"
+  img.style.transition = "right 0.3s ease, top 0.3s ease, opacity 0.3s ease"
+  img.onload = () => {
+    el.appendChild(img)
+    setTimeout(() => {
+      img.style.right = "58px"
+      img.style.top = endTop
+      img.style.opacity = "0.7"
+    }, 30)
+    img.addEventListener("transitionend", () => {
+      el.removeChild(img)
+    }, { once: true })
+  }
 }

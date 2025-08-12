@@ -45,9 +45,22 @@ export class MainCharacter extends Character {
   ): void {
     const item = itemContainer.get(this.i, this.j)
     if (item) {
-      itemContainer.remove(this.i, this.j)
-      const count = signal.appleCount.get()
-      signal.appleCount.update(count + 1)
+      switch (item.type) {
+        case "apple": {
+          itemContainer.remove(this.i, this.j)
+
+          const count = signal.appleCount.get()
+          signal.appleCount.update(count + 1)
+          break
+        }
+        case "green-apple": {
+          itemContainer.remove(this.i, this.j)
+
+          const count = signal.greenAppleCount.get()
+          signal.greenAppleCount.update(count + 1)
+          break
+        }
+      }
     }
 
     this.#lastMoveTypes.push(moveType)

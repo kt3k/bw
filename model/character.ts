@@ -30,6 +30,12 @@ export type IObj = IBox & ILoader & {
   image(): ImageBitmap
 }
 
+export type ItemType = "apple" | "green-apple"
+
+export type IItem = IObj & {
+  type: ItemType
+}
+
 export type IFieldTester = {
   get(i: number, j: number): {
     canEnter(): boolean
@@ -70,7 +76,7 @@ type CharacterAssets = {
 
 export type CollisionChecker = (i: number, j: number) => boolean
 export type ItemContainer = {
-  get(i: number, j: number): IObj | undefined
+  get(i: number, j: number): IItem | undefined
   remove(i: number, j: number): void
 }
 
