@@ -110,14 +110,12 @@ export abstract class Character implements IChar {
   #d: number = 0
   /** The speed of the move */
   #speed: 1 | 2 | 4 | 8 | 16 = 1
-  /** True when moving, false otherwise */
-  #isMoving: boolean = false
   /** The phase of the move */
   #movePhase: number = 0
   /** The counter of the idle state */
   #idleCounter: number = 0
   /** Type of the move */
-  #moveType: MoveType = "linear"
+  #moveType: MoveType | undefined = undefined
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
@@ -211,7 +209,6 @@ export abstract class Character implements IChar {
         nextState === "left" || nextState === "right"
       ) {
         this.setDir(nextState)
-        this.#isMoving = true
         this.#idleCounter = 0
 
         if (this.canEnter(nextState, fieldTester, collisionChecker)) {
@@ -220,58 +217,58 @@ export abstract class Character implements IChar {
           this.#moveType = "bounce"
         }
       } else if (nextState === "jump") {
-        this.#isMoving = true
         this.#idleCounter = 0
         this.#moveType = "jump"
         // Jumping is always allowed.
       }
     }
 
-    if (this.#isMoving) {
-      if (this.#moveType === "linear") {
-        this.#movePhase += this.#speed
-        this.#d += this.#speed
-        if (this.#movePhase == 16) {
-          this.#movePhase = 0
-          this.#isMoving = false
-          this.#d = 0
-          if (this.#dir === UP) {
-            this.#j -= 1
-          } else if (this.#dir === DOWN) {
-            this.#j += 1
-          } else if (this.#dir === LEFT) {
-            this.#i -= 1
-          } else if (this.#dir === RIGHT) {
-            this.#i += 1
-          }
-          this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
+    if (this.#moveType === "linear") {
+      this.#movePhase += this.#speed
+      this.#d += this.#speed
+      if (this.#movePhase == 16) {
+        if (this.#dir === UP) {
+          this.#j -= 1
+        } else if (this.#dir === DOWN) {
+          this.#j += 1
+        } else if (this.#dir === LEFT) {
+          this.#i -= 1
+        } else if (this.#dir === RIGHT) {
+          this.#i += 1
         }
-      } else if (this.#moveType === "bounce") {
-        this.#movePhase += this.#speed
-        if (this.#movePhase < 8) {
-          this.#d += this.#speed / 2
-        } else {
-          this.#d -= this.#speed / 2
-        }
-        if (this.#movePhase == 16) {
-          this.#movePhase = 0
-          this.#isMoving = false
-          this.#d = 0
-          this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
-        }
-      } else if (this.#moveType === "jump") {
-        this.#movePhase += this.#speed * 2
-        if (this.#movePhase < 8) {
-          this.#d += this.#speed * 2
-        } else {
-          this.#d -= this.#speed * 2
-        }
-        if (this.#movePhase == 16) {
-          this.#movePhase = 0
-          this.#isMoving = false
-          this.#d = 0
-          this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
-        }
+        this.#movePhase = 0
+        const moveType = this.#moveType
+        this.#moveType = undefined
+        this.#d = 0
+        this.onMoveEnd(fieldTester, itemContainer, moveType)
+      }
+    } else if (this.#moveType === "bounce") {
+      this.#movePhase += this.#speed
+      if (this.#movePhase < 8) {
+        this.#d += this.#speed / 2
+      } else {
+        this.#d -= this.#speed / 2
+      }
+      if (this.#movePhase == 16) {
+        this.#movePhase = 0
+        const moveType = this.#moveType
+        this.#moveType = undefined
+        this.#d = 0
+        this.onMoveEnd(fieldTester, itemContainer, moveType)
+      }
+    } else if (this.#moveType === "jump") {
+      this.#movePhase += this.#speed * 2
+      if (this.#movePhase < 8) {
+        this.#d += this.#speed * 2
+      } else {
+        this.#d -= this.#speed * 2
+      }
+      if (this.#movePhase == 16) {
+        this.#movePhase = 0
+        const moveType = this.#moveType
+        this.#moveType = undefined
+        this.#d = 0
+        this.onMoveEnd(fieldTester, itemContainer, moveType)
       }
     } else {
       this.#idleCounter += 1
@@ -281,7 +278,7 @@ export abstract class Character implements IChar {
   }
 
   image(): ImageBitmap {
-    if (this.#isMoving) {
+    if (this.#moveType !== undefined) {
       if (this.#movePhase < 8) {
         return this.getImage(this.#dir, 0)
       } else {
@@ -310,7 +307,8 @@ export abstract class Character implements IChar {
 
   /** Gets the x of the world coordinates */
   get x(): number {
-    if (this.#isMoving && this.#moveType === "jump") {
+    if (this.#moveType === "jump") {
+      // When jumping, the character always moves vertically
       return this.#i * CELL_SIZE
     }
 
@@ -323,13 +321,15 @@ export abstract class Character implements IChar {
     }
   }
 
+  /** Gets the center x of the world coordinates. This is used for setting the center of ViewScope. */
   get centerX(): number {
     return this.x + CELL_SIZE / 2
   }
 
   /** Gets the y of the world coordinates */
   get y(): number {
-    if (this.#isMoving && this.#moveType === "jump") {
+    if (this.#moveType === "jump") {
+      // When jumping, the character always moves vertically
       return this.#j * CELL_SIZE - this.#d
     }
 
@@ -350,8 +350,10 @@ export abstract class Character implements IChar {
     return CELL_SIZE
   }
 
+  /** Gets the center y of the world coordinates. This is used for setting the center of ViewScope. */
   get centerY(): number {
-    if (this.#isMoving && this.#moveType === "jump") {
+    if (this.#moveType === "jump") {
+      // We don't use #d in jump state. Otherwise the screen shakes for each jump.
       return this.#j * CELL_SIZE + CELL_SIZE / 2
     }
 
@@ -420,7 +422,7 @@ export abstract class Character implements IChar {
    * when the character is moving.
    */
   get #physicalI(): number {
-    if (this.#isMoving && this.#moveType === "linear") {
+    if (this.#moveType === "linear") {
       if (this.#dir === LEFT) {
         return this.#i - 1
       } else if (this.#dir === RIGHT) {
@@ -431,7 +433,7 @@ export abstract class Character implements IChar {
   }
 
   get #physicalJ(): number {
-    if (this.#isMoving && this.#moveType === "linear") {
+    if (this.#moveType === "linear") {
       if (this.#dir === UP) {
         return this.#j - 1
       } else if (this.#dir === DOWN) {
