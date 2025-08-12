@@ -91,6 +91,7 @@ export function spawnCharacter(
 }
 
 type MoveType = "linear" | "bounce" | "jump"
+
 export type NextState = Dir | "jump" | undefined
 
 /** The abstract character class
@@ -259,13 +260,13 @@ export abstract class Character implements IChar {
           this.onMoveEnd(fieldTester, itemContainer, this.#moveType)
         }
       } else if (this.#moveType === "jump") {
-        this.#movePhase += this.#speed
-        if (this.#movePhase < 4) {
+        this.#movePhase += this.#speed * 2
+        if (this.#movePhase < 8) {
           this.#d += this.#speed * 2
         } else {
           this.#d -= this.#speed * 2
         }
-        if (this.#movePhase == 8) {
+        if (this.#movePhase == 16) {
           this.#movePhase = 0
           this.#isMoving = false
           this.#d = 0

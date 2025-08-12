@@ -1,5 +1,5 @@
 import { register } from "@kt3k/cell"
-import { clearInput } from "../util/dir.ts"
+import { clearInput } from "./ui/input.ts"
 import { KeyMonitor } from "./ui/key-monitor.ts"
 import { FpsMonitor } from "./ui/fps-monitor.ts"
 import { SwipeHandler } from "./ui/swipe-handler.ts"
