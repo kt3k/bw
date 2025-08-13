@@ -9,7 +9,6 @@ import {
   type IFieldTester,
   type IItem,
   type ILoader,
-  type IObj,
   type IStepper,
   type ItemContainer,
   spawnCharacter,

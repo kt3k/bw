@@ -16,6 +16,8 @@ export type ILoader = {
   get assetsReady(): boolean
 }
 
+export type CellName = "0" | "1" | "2" | "d"
+
 /** The interface represents a box */
 export type IBox = {
   get x(): number
@@ -39,6 +41,7 @@ export type IItem = IObj & {
 export type IFieldTester = {
   get(i: number, j: number): {
     canEnter(): boolean
+    get name(): CellName
   }
 }
 
@@ -96,9 +99,9 @@ export function spawnCharacter(
   throw new Error(`Unknown character type: ${type}`)
 }
 
-type MoveType = "linear" | "bounce" | "jump"
+export type MoveType = "linear" | "bounce" | "jump"
 
-export type NextState = Dir | "jump" | undefined
+export type NextAction = Dir | "jump" | undefined
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -190,10 +193,10 @@ export abstract class Character implements IChar {
    * Returning the direction causes the character to move in that direction.
    * Returning undefined causes the character to stay in the current state.
    */
-  getNextState(
+  getNextAction(
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
-  ): NextState {
+  ): NextAction {
     return undefined
   }
 
@@ -209,7 +212,7 @@ export abstract class Character implements IChar {
     itemContainer: ItemContainer,
   ) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextState(fieldTester, collisionChecker)
+      const nextState = this.getNextAction(fieldTester, collisionChecker)
       if (
         nextState === "up" || nextState === "down" ||
         nextState === "left" || nextState === "right"
@@ -453,10 +456,10 @@ export abstract class Character implements IChar {
 export class RandomWalkNPC extends Character {
   #counter = 32
 
-  override getNextState(
+  override getNextAction(
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
-  ): NextState {
+  ): NextAction {
     this.#counter -= 1
     if (this.#counter <= 0) {
       this.#counter = randomInt(8) + 4

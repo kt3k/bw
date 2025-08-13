@@ -5,17 +5,23 @@ import {
   CollisionChecker,
   IFieldTester,
   ItemContainer,
-  NextState,
+  type MoveType,
+  NextAction,
 } from "../model/character.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 
 export class MainCharacter extends Character {
-  #lastMoveTypes: ("linear" | "bounce")[] = []
-  override getNextState(
+  #lastMoveTypes: MoveType[] = []
+  #nextActionQueue: NextAction[] = []
+  override getNextAction(
     _fieldTester: IFieldTester,
     _collisionChecker: CollisionChecker,
-  ): NextState {
+  ): NextAction {
+    if (this.#nextActionQueue.length > 0) {
+      return this.#nextActionQueue.shift()!
+    }
+
     if (Input.up) {
       return UP
     } else if (Input.down) {
@@ -39,9 +45,9 @@ export class MainCharacter extends Character {
   }
 
   override onMoveEnd(
-    _fieldTester: IFieldTester,
+    fieldTester: IFieldTester,
     itemContainer: ItemContainer,
-    moveType: "linear" | "bounce",
+    moveType: MoveType,
   ): void {
     const item = itemContainer.get(this.i, this.j)
     if (item) {
@@ -58,8 +64,16 @@ export class MainCharacter extends Character {
 
           const count = signal.greenAppleCount.get()
           signal.greenAppleCount.update(count + 1)
+          this.#nextActionQueue.push("jump")
           break
         }
+      }
+    }
+
+    if (moveType === "linear") {
+      const cell = fieldTester.get(this.i, this.j)
+      if (cell.name === "d") {
+        this.#nextActionQueue.push("jump")
       }
     }
 

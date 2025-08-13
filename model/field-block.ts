@@ -2,7 +2,7 @@ import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seedrandom } from "../util/random.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
-import type { IBox } from "./character.ts"
+import type { CellName, IBox } from "./character.ts"
 import type { Item } from "./item.ts"
 
 /**
@@ -12,9 +12,9 @@ export class FieldCell {
   #color?: string
   #src?: string[]
   #canEnter: boolean
-  #name: string
+  #name: CellName
   constructor(
-    name: string,
+    name: CellName,
     canEnter: boolean,
     color?: string,
     src?: string[],
@@ -28,7 +28,7 @@ export class FieldCell {
   canEnter(): boolean {
     return this.#canEnter
   }
-  get name(): string {
+  get name(): CellName {
     return this.#name
   }
   get color(): string | undefined {
@@ -151,7 +151,7 @@ export class BlockMap {
   // The row of the world coordinates
   j: number
   cells: {
-    name: string
+    name: CellName
     canEnter: boolean
     color?: string
     href?: string | string[]
