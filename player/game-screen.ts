@@ -107,24 +107,23 @@ class Actors implements IStepper, ILoader {
   #actors: IChar[] = []
   #coordCountMap = new CoordCountMap()
   #activateScope: RectScope
-  #idSet: Set<string>
+  #idSet: Set<string> = new Set()
 
   checkCollision(i: number, j: number) {
     return this.#coordCountMap.get(`${i}.${j}`) > 0
   }
 
   constructor(chars: IChar[] = [], activateScope: RectScope) {
-    this.#actors = chars
     this.#activateScope = activateScope
-    this.#idSet = new Set(chars.map((c) => c.id))
-    for (const walker of chars) {
-      this.#coordCountMap.increment(walker.physicalGridKey)
+    for (const actor of chars) {
+      this.add(actor)
     }
   }
 
-  add(walker: IChar) {
-    this.#actors.push(walker)
-    this.#idSet.add(walker.id)
+  add(actor: IChar) {
+    this.#actors.push(actor)
+    this.#idSet.add(actor.id)
+    this.#coordCountMap.increment(actor.physicalGridKey)
   }
 
   step(
@@ -161,6 +160,7 @@ class Actors implements IStepper, ILoader {
       }
       console.log("deactivating actor", actor.id)
       this.#idSet.delete(actor.id)
+      this.#coordCountMap.decrement(actor.physicalGridKey)
     }
     this.#actors = actors
   }
