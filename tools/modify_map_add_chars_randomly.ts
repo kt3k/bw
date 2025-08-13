@@ -18,7 +18,7 @@ const map = await Deno.readTextFile(mapJson).then(
   JSON.parse,
 )
 
-const bm = new BlockMap("static/map/" + mapFile + ".json", map)
+const bm = new BlockMap(mapJson, map)
 const fb = new FieldBlock(bm, async (url: string) => {
   const res = await fetch(url)
   return res.blob().then((blob) => createImageBitmap(blob))
@@ -32,11 +32,12 @@ for (const _ of Array(100)) {
   if (cell === "0" || cell === "D") {
     c++
     console.log(`Adding character at (${i}, ${j}) in cell ${cell}`)
+    const isRandom = Math.random() > 0.5
     const si = new SpawnInfo(
       i + bm.i,
       j + bm.j,
-      "random",
-      Math.random() > 0.5 ? "char/joob/" : "char/not-found/",
+      isRandom ? "random" : "random-walk",
+      isRandom ? "char/joob/" : "char/not-found/",
     )
     fb.addSpawnInfo(si)
   }

@@ -2,7 +2,7 @@ import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seedrandom } from "../util/random.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
-import type { CellName, IBox } from "./character.ts"
+import type { CellName, IBox, NPCType } from "./character.ts"
 import type { Item } from "./item.ts"
 
 /**
@@ -42,7 +42,7 @@ export class FieldCell {
 class _ItemData {
 }
 
-type CharacterType = "static" | "random"
+type CharacterType = NPCType
 type CharacterSpeed = 1 | 2 | 4 | 8 | 16
 type Dir = "up" | "down" | "left" | "right"
 
@@ -550,5 +550,10 @@ export class FieldBlock {
   /** Adds the spawn info */
   addSpawnInfo(spawn: SpawnInfo): void {
     this.#spawnInfoByChunk.add(spawn)
+  }
+
+  /** Clears the spawn info */
+  clearSpawnInfo(): void {
+    this.#spawnInfoByChunk = new SpawnInfoByChunk([])
   }
 }

@@ -83,7 +83,7 @@ export type ItemContainer = {
   remove(i: number, j: number): void
 }
 
-type NPCType = "random" | "random-walk" | "static"
+export type NPCType = "random" | "random-walk" | "static"
 
 export function spawnCharacter(
   id: string,
@@ -488,8 +488,6 @@ export class RandomlyTurnNPC extends Character {
 }
 
 export class RandomWalkNPC extends Character {
-  #counter = 32
-
   override getNextAction(
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
