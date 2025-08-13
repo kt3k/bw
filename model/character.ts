@@ -83,15 +83,19 @@ export type ItemContainer = {
   remove(i: number, j: number): void
 }
 
+type NPCType = "random" | "random-walk" | "static"
+
 export function spawnCharacter(
   id: string,
-  type: "random" | "static",
+  type: NPCType,
   i: number,
   j: number,
   assetPrefix: string,
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
 ): IChar {
   if (type === "random") {
+    return new RandomlyTurnNPC(i, j, assetPrefix, id, dir, speed)
+  } else if (type === "random-walk") {
     return new RandomWalkNPC(i, j, assetPrefix, id, dir, speed)
   } else if (type === "static") {
     return new StaticNPC(i, j, assetPrefix, id, dir, speed)
@@ -453,7 +457,7 @@ export abstract class Character implements IChar {
   }
 }
 
-export class RandomWalkNPC extends Character {
+export class RandomlyTurnNPC extends Character {
   #counter = 32
 
   override getNextAction(
@@ -480,6 +484,23 @@ export class RandomWalkNPC extends Character {
       }))
     }
     return undefined
+  }
+}
+
+export class RandomWalkNPC extends Character {
+  #counter = 32
+
+  override getNextAction(
+    fieldTester: IFieldTester,
+    collisionChecker: CollisionChecker,
+  ): NextAction {
+    const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {
+      return this.canEnter(d, fieldTester, collisionChecker)
+    })
+    if (dirs.length === 0) {
+      return undefined
+    }
+    return choice(dirs)
   }
 }
 
