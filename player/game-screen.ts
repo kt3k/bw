@@ -123,6 +123,7 @@ class Actors implements IStepper, ILoader {
     this.#actors.push(actor)
     this.#idSet.add(actor.id)
     this.#coordCountMap.increment(actor.physicalGridKey)
+    signal.actorsCount.update(this.#actors.length)
   }
 
   step(
@@ -162,6 +163,7 @@ class Actors implements IStepper, ILoader {
       this.#coordCountMap.decrement(actor.physicalGridKey)
     }
     this.#actors = actors
+    signal.actorsCount.update(this.#actors.length)
   }
 
   [Symbol.iterator]() {
