@@ -1,9 +1,9 @@
-import { MainCharacter, RandomlyTurnNPC } from "./character.ts"
+import { RandomlyTurnNPC, StaticNPC } from "./character.ts"
 import { assertEquals } from "@std/assert"
 
 Deno.test("Character", async (t) => {
   await t.step("physicalGridKey", () => {
-    const mc = new MainCharacter(100, 100, "main/", "main")
+    const mc = new StaticNPC(100, 100, "main/", "main")
     assertEquals(mc.physicalGridKey, "100.100")
 
     const npc = new RandomlyTurnNPC(200, 200, "npc/", "npc")
@@ -11,7 +11,7 @@ Deno.test("Character", async (t) => {
   })
 
   await t.step("frontGrid", () => {
-    const c = new MainCharacter(100, 100, "main/", "main", "down")
+    const c = new StaticNPC(100, 100, "main/", "main")
     assertEquals(c.frontGrid(), [100, 101])
 
     c.setDir("right")

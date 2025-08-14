@@ -40,7 +40,7 @@ export type IItem = IObj & {
 
 export type IFieldTester = {
   get(i: number, j: number): {
-    canEnter(): boolean
+    canEnter: boolean
     get name(): CellName
   }
 }
@@ -90,15 +90,15 @@ export function spawnCharacter(
   type: NPCType,
   i: number,
   j: number,
-  assetPrefix: string,
+  src: string,
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
 ): IChar {
   if (type === "random") {
-    return new RandomlyTurnNPC(i, j, assetPrefix, id, dir, speed)
+    return new RandomlyTurnNPC(i, j, src, id, dir, speed)
   } else if (type === "random-walk") {
-    return new RandomWalkNPC(i, j, assetPrefix, id, dir, speed)
+    return new RandomWalkNPC(i, j, src, id, dir, speed)
   } else if (type === "static") {
-    return new StaticNPC(i, j, assetPrefix, id, dir, speed)
+    return new StaticNPC(i, j, src, id, dir, speed)
   }
   throw new Error(`Unknown character type: ${type}`)
 }
@@ -132,19 +132,14 @@ export abstract class Character implements IChar {
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
-  #assetPrefix: string
+  #src: string
   /** The images necessary to render this character */
   #assets?: CharacterAssets
 
-  /**
-   * @param i The column of the grid coordinate
-   * @param j The row of the grid coordinate
-   * @param assetPrefix The prefix of the asset URL
-   */
   constructor(
     i: number,
     j: number,
-    assetPrefix: string,
+    src: string,
     id: string,
     dir: Dir = DOWN,
     speed: 1 | 2 | 4 | 8 | 16 = 1,
@@ -153,7 +148,7 @@ export abstract class Character implements IChar {
     this.#j = j
     this.#speed = speed
     this.#id = id
-    this.#assetPrefix = assetPrefix
+    this.#src = src
     this.#physicalGridKey = this.#calcPhysicalGridKey()
     this.#dir = dir
   }
@@ -188,7 +183,7 @@ export abstract class Character implements IChar {
   ): boolean {
     const [i, j] = this.nextGrid(dir)
     const cell = fieldTester.get(i, j)
-    return cell.canEnter() && !collisionChecker(i, j)
+    return cell.canEnter && !collisionChecker(i, j)
   }
 
   /** Returns the next state of the character.
@@ -377,14 +372,14 @@ export abstract class Character implements IChar {
   async loadAssets() {
     const [up0, up1, down0, down1, left0, left1, right0, right1] = await Promise
       .all([
-        `${this.#assetPrefix}up0.png`,
-        `${this.#assetPrefix}up1.png`,
-        `${this.#assetPrefix}down0.png`,
-        `${this.#assetPrefix}down1.png`,
-        `${this.#assetPrefix}left0.png`,
-        `${this.#assetPrefix}left1.png`,
-        `${this.#assetPrefix}right0.png`,
-        `${this.#assetPrefix}right1.png`,
+        `${this.#src}up0.png`,
+        `${this.#src}up1.png`,
+        `${this.#src}down0.png`,
+        `${this.#src}down1.png`,
+        `${this.#src}left0.png`,
+        `${this.#src}left1.png`,
+        `${this.#src}right0.png`,
+        `${this.#src}right1.png`,
       ].map(loadImage))
     this.#assets = {
       up0,

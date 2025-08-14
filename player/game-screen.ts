@@ -14,7 +14,11 @@ import {
   spawnCharacter,
 } from "../model/character.ts"
 import { MainCharacter } from "./main-character.ts"
-import { BlockMap, FieldBlock, SpawnInfo } from "../model/field-block.ts"
+import {
+  BlockMap,
+  CharacterSpawnInfo,
+  FieldBlock,
+} from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { DrawLayer } from "./draw-layer.ts"
@@ -279,7 +283,7 @@ class Field implements IFieldTester {
     this.#activateScope = activateScope
   }
 
-  async addDistrict(block: FieldBlock) {
+  async addBlock(block: FieldBlock) {
     console.log("adding district i", block.i, "j", block.j, "id", block.id)
     this.#blocks[block.id] = block
     const canvas = block.canvas
@@ -330,7 +334,7 @@ class Field implements IFieldTester {
       !this.hasBlock(id)
     )
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.addDistrict(new FieldBlock(map, loadImage))
+      this.addBlock(new FieldBlock(map, loadImage))
     }
     const promises = [] as Promise<void>[]
     for (const block of this) {
@@ -398,45 +402,47 @@ class Field implements IFieldTester {
         const i = x / CELL_SIZE
         const j = y / CELL_SIZE
         const info = this.#getSpawnInfoForChunk(i, j)
-        const spawns = [] as IChar[]
-        for (const spanInfo of info) {
-          if (actors.has(spanInfo.id)) {
+        const newSpawns = [] as IChar[]
+        for (const spawn of info) {
+          if (actors.has(spawn.id)) {
             continue // already activated
           }
 
-          if (!initialLoad && viewScope.overlaps(spanInfo)) {
+          if (!initialLoad && viewScope.overlaps(spawn)) {
             // except for the initial load,
             // we don't activate characters that are in the view scope
             continue
           }
 
-          if (this.#activateScope.overlaps(spanInfo)) {
+          if (this.#activateScope.overlaps(spawn)) {
             const char = spawnCharacter(
-              spanInfo.id,
-              spanInfo.type,
-              spanInfo.i,
-              spanInfo.j,
-              spanInfo.assetPrefix,
+              spawn.id,
+              spawn.type,
+              spawn.i,
+              spawn.j,
+              spawn.src,
               {
-                dir: spanInfo.dir,
-                speed: spanInfo.speed,
+                dir: spawn.dir,
+                speed: spawn.speed,
               },
             )
-            spawns.push(char)
+            newSpawns.push(char)
           }
         }
-        if (spawns.length > 0) {
-          console.log(`Spawning ${spawns.length} characters`)
-          for (const char of spawns) {
+        if (newSpawns.length > 0) {
+          console.log(`Spawning ${newSpawns.length} characters`)
+          for (const char of newSpawns) {
             actors.add(char)
           }
+          await actors.loadAssets()
+        } else if (initialLoad) {
           await actors.loadAssets()
         }
       }
     }
   }
 
-  #getSpawnInfoForChunk(chunkI: number, chunkJ: number): SpawnInfo[] {
+  #getSpawnInfoForChunk(chunkI: number, chunkJ: number): CharacterSpawnInfo[] {
     const i = floorN(chunkI, BLOCK_SIZE)
     const j = floorN(chunkJ, BLOCK_SIZE)
     const relI = modulo(chunkI, BLOCK_SIZE)
@@ -539,7 +545,7 @@ export function GameScreen({ el, query }: Context) {
 
   const loop = gameloop(() => {
     i++
-    if (!field.assetsReady || !items.assetsReady) {
+    if (!field.assetsReady) {
       signal.isGameLoading.update(true)
       return
     }

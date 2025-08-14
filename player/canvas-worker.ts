@@ -4,7 +4,6 @@ import { loadImage } from "../util/load.ts"
 addEventListener("message", async (event) => {
   const start = performance.now()
   const { url, obj, i, j, gridWidth, gridHeight } = event.data
-  console.log("obj", obj)
   const blockMap = new BlockMap(url, obj)
   const fieldBlock = new FieldBlock(blockMap, loadImage)
   await fieldBlock.loadCellImages()

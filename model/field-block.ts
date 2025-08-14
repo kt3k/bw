@@ -1,76 +1,43 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seedrandom } from "../util/random.ts"
+import type { Dir } from "../util/dir.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
-import type { CellName, IBox, NPCType } from "./character.ts"
+import type { CellName, IBox, ItemType, NPCType } from "./character.ts"
 import type { Item } from "./item.ts"
 
 /**
  * {@linkcode FieldCell} represents the cell in the field block
  */
 export class FieldCell {
-  #color?: string
-  #src?: string[]
-  #canEnter: boolean
-  #name: CellName
+  readonly name: CellName
+  readonly canEnter: boolean
+  readonly color?: string
+  readonly src?: string[]
   constructor(
     name: CellName,
     canEnter: boolean,
     color?: string,
     src?: string[],
   ) {
-    this.#name = name
-    this.#canEnter = canEnter
-    this.#color = color
-    this.#src = src
-  }
-
-  canEnter(): boolean {
-    return this.#canEnter
-  }
-  get name(): CellName {
-    return this.#name
-  }
-  get color(): string | undefined {
-    return this.#color
-  }
-  get src(): string[] | undefined {
-    return this.#src
+    this.name = name
+    this.canEnter = canEnter
+    this.color = color
+    this.src = src
   }
 }
 
-class _ItemData {
-}
-
-type CharacterType = NPCType
-type CharacterSpeed = 1 | 2 | 4 | 8 | 16
-type Dir = "up" | "down" | "left" | "right"
-
-export class SpawnInfo implements IBox {
-  id: string
-  i: number
-  j: number
-  type: CharacterType
-  assetPrefix: string
-  dir?: Dir
-  speed?: CharacterSpeed
-  constructor(
-    i: number,
-    j: number,
-    type: CharacterType,
-    assetPrefix: string,
-    { dir, speed }: {
-      dir?: Dir
-      speed?: CharacterSpeed
-    } = {},
-  ) {
-    this.id = `${i}.${j}.${type}.${speed}.${dir}`
+/** {@linkcode ItemSpawnInfo} represents the spawn info for the items in {@linkcode FieldBlock} */
+class ItemSpawnInfo {
+  readonly i: number
+  readonly j: number
+  readonly type: string
+  readonly src: string
+  constructor(i: number, j: number, type: string, src: string) {
     this.i = i
     this.j = j
-    this.dir = dir
-    this.speed = speed
     this.type = type
-    this.assetPrefix = assetPrefix
+    this.src = src
   }
 
   toJSON() {
@@ -78,7 +45,46 @@ export class SpawnInfo implements IBox {
       i: this.i,
       j: this.j,
       type: this.type,
-      assetPrefix: this.assetPrefix,
+      src: this.src,
+    }
+  }
+}
+
+type CharacterSpeed = 1 | 2 | 4 | 8 | 16
+
+export class CharacterSpawnInfo implements IBox {
+  readonly id: string
+  readonly i: number
+  readonly j: number
+  readonly type: NPCType
+  readonly src: string
+  readonly dir?: Dir
+  readonly speed?: CharacterSpeed
+  constructor(
+    i: number,
+    j: number,
+    type: NPCType,
+    src: string,
+    { dir, speed }: {
+      dir?: Dir
+      speed?: CharacterSpeed
+    } = {},
+  ) {
+    this.id = `${i}.${j}.${type}.${speed ?? "-"}.${dir ?? "-"}` // Unique ID for the spawn
+    this.i = i
+    this.j = j
+    this.dir = dir
+    this.speed = speed
+    this.type = type
+    this.src = src
+  }
+
+  toJSON() {
+    return {
+      i: this.i,
+      j: this.j,
+      type: this.type,
+      src: this.src,
       dir: this.dir,
       speed: this.speed,
     }
@@ -103,19 +109,19 @@ export class SpawnInfo implements IBox {
 const CHUNK_COUNT_X = BLOCK_SIZE / BLOCK_CHUNK_SIZE
 const CHUNK_COUNT_Y = BLOCK_SIZE / BLOCK_CHUNK_SIZE
 
-export class SpawnInfoByChunk {
-  #spawnInfo: SpawnInfo[][][] = Array.from(
+export class ByChunk<T extends { i: number; j: number }> {
+  #spawnInfo: T[][][] = Array.from(
     { length: CHUNK_COUNT_X },
     () => Array.from({ length: CHUNK_COUNT_Y }, () => []),
   )
 
-  constructor(spawnInfo: SpawnInfo[]) {
+  constructor(spawnInfo: T[]) {
     for (const spawn of spawnInfo) {
       this.add(spawn)
     }
   }
 
-  add(spawn: SpawnInfo): void {
+  add(spawn: T): void {
     const relI = modulo(spawn.i, BLOCK_SIZE)
     const relJ = modulo(spawn.j, BLOCK_SIZE)
     const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
@@ -123,11 +129,11 @@ export class SpawnInfoByChunk {
     this.#spawnInfo[k][l].push(spawn)
   }
 
-  get(k: number, l: number): SpawnInfo[] {
+  get(k: number, l: number): T[] {
     return this.#spawnInfo[k][l]
   }
 
-  getAll(): SpawnInfo[] {
+  getAll(): T[] {
     return this.#spawnInfo.flat(2)
   }
 }
@@ -145,20 +151,20 @@ export class SpawnInfoByChunk {
  */
 export class BlockMap {
   /** The URL of the map */
-  url: string
+  readonly url: string
   // The column of the world coordinates
-  i: number
+  readonly i: number
   // The row of the world coordinates
-  j: number
-  cells: {
+  readonly j: number
+  readonly cells: {
     name: CellName
     canEnter: boolean
     color?: string
-    href?: string | string[]
+    src?: string | string[]
   }[]
-  characters: SpawnInfo[]
-  items: Item[]
-  field: string[]
+  readonly characters: CharacterSpawnInfo[]
+  readonly items: ItemSpawnInfo[]
+  readonly field: string[]
   // deno-lint-ignore no-explicit-any
   #obj: any
   // deno-lint-ignore no-explicit-any
@@ -171,24 +177,33 @@ export class BlockMap {
       spawn: {
         i: number
         j: number
-        type: CharacterType
-        assetPrefix: string
+        type: NPCType
+        src: string
         dir?: Dir
         speed?: CharacterSpeed
       },
     ) =>
-      new SpawnInfo(
+      new CharacterSpawnInfo(
         spawn.i,
         spawn.j,
         spawn.type,
-        spawn.assetPrefix,
+        new URL(spawn.src, this.url).href,
         {
           dir: spawn.dir,
           speed: spawn.speed,
         },
       )
     )
-    this.items = obj.items
+    this.items = obj.items.map((
+      item: { i: number; j: number; type: ItemType; src: string },
+    ) =>
+      new ItemSpawnInfo(
+        item.i,
+        item.j,
+        item.type,
+        new URL(item.src, this.url).href,
+      )
+    )
     this.field = obj.field
     this.#obj = obj
   }
@@ -214,8 +229,8 @@ export class FieldBlock {
   #j: number
   #cellMap: Record<string, FieldCell> = {}
   #imgMap: Record<string, ImageBitmap> = {}
-  #items: Item[]
-  #spawnInfoByChunk: SpawnInfoByChunk
+  #characterSpawnInfoByChunk: ByChunk<CharacterSpawnInfo>
+  #itemSpawnInfoByChunk: ByChunk<ItemSpawnInfo>
   #field: string[]
   #loadImage: (url: string) => Promise<ImageBitmap>
   #map: BlockMap
@@ -238,16 +253,14 @@ export class FieldBlock {
         cell.name,
         cell.canEnter,
         cell.color,
-        cell.href
-          ? Array.isArray(cell.href) ? cell.href : [cell.href]
-          : undefined,
+        cell.src ? Array.isArray(cell.src) ? cell.src : [cell.src] : undefined,
       )
     }
     this.#field = map.field
-    this.#items = map.items
     this.#loadImage = loadImage
     this.#map = map
-    this.#spawnInfoByChunk = new SpawnInfoByChunk(map.characters)
+    this.#characterSpawnInfoByChunk = new ByChunk(map.characters)
+    this.#itemSpawnInfoByChunk = new ByChunk(map.items)
   }
 
   loadCellImage(href: string): Promise<ImageBitmap> {
@@ -374,7 +387,7 @@ export class FieldBlock {
     const worldJ = this.#j + j
     const rng = seedrandom(`${worldI}.${worldJ}`)
     let color: string
-    if (cell.canEnter()) {
+    if (cell.canEnter) {
       color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
     } else {
       color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
@@ -466,7 +479,7 @@ export class FieldBlock {
     }
     worker.postMessage({
       url: this.#map.url,
-      obj: this.toMap(),
+      obj: { ...this.toMap().toObject(), characters: [], items: [] },
       i: k * BLOCK_CHUNK_SIZE,
       j: l * BLOCK_CHUNK_SIZE,
       gridWidth: BLOCK_CHUNK_SIZE,
@@ -511,16 +524,16 @@ export class FieldBlock {
       j: this.#j,
       cells: this.cells.map((cell) => ({
         name: cell.name,
-        canEnter: cell.canEnter(),
+        canEnter: cell.canEnter,
         color: cell.color,
-        href: cell.src
+        src: cell.src
           ? cell.src.length === 1 ? cell.src[0] : cell.src
           : undefined,
       })),
-      characters: this.#spawnInfoByChunk.getAll().map((spawn) =>
+      characters: this.#characterSpawnInfoByChunk.getAll().map((spawn) =>
         spawn.toJSON()
       ),
-      items: this.#items,
+      items: this.#itemSpawnInfoByChunk.getAll().map((spawn) => spawn.toJSON()),
       field: this.#field,
     })
   }
@@ -543,17 +556,17 @@ export class FieldBlock {
   }
 
   /** Gets the spawn info for the given chunk ( (0,0) ~ (9,9) ) */
-  getSpawnInfoForChunk(k: number, l: number): SpawnInfo[] {
-    return this.#spawnInfoByChunk.get(k, l)
+  getSpawnInfoForChunk(k: number, l: number): CharacterSpawnInfo[] {
+    return this.#characterSpawnInfoByChunk.get(k, l)
   }
 
   /** Adds the spawn info */
-  addSpawnInfo(spawn: SpawnInfo): void {
-    this.#spawnInfoByChunk.add(spawn)
+  addSpawnInfo(spawn: CharacterSpawnInfo): void {
+    this.#characterSpawnInfoByChunk.add(spawn)
   }
 
   /** Clears the spawn info */
   clearSpawnInfo(): void {
-    this.#spawnInfoByChunk = new SpawnInfoByChunk([])
+    this.#characterSpawnInfoByChunk = new ByChunk([])
   }
 }
