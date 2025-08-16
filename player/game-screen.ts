@@ -1,5 +1,5 @@
 import type { Context } from "@kt3k/cell"
-import { gameloop } from "@kt3k/gameloop"
+import { Gameloop } from "@kt3k/gameloop"
 import * as signal from "../util/signal.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
@@ -16,8 +16,10 @@ import {
 import { MainCharacter } from "./main-character.ts"
 import {
   BlockMap,
-  CharacterSpawnInfo,
+  type CharacterSpawnInfo,
   FieldBlock,
+  type FieldCell,
+  type ItemSpawnInfo,
 } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
@@ -276,14 +278,14 @@ class Field implements IFieldTester {
   #activateScope: RectScope
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
   #initialBlocksLoaded = false
-  #initialActorsReady = false
+  #initialActivateReady = false
 
   constructor(el: HTMLElement, activateScope: RectScope) {
     this.#el = el
     this.#activateScope = activateScope
   }
 
-  async addBlock(block: FieldBlock) {
+  async #addBlock(block: FieldBlock) {
     console.log("adding district i", block.i, "j", block.j, "id", block.id)
     this.#blocks[block.id] = block
     const canvas = block.canvas
@@ -292,26 +294,30 @@ class Field implements IFieldTester {
     await block.loadAssets()
   }
 
-  removeBlock(block: FieldBlock) {
+  #removeBlock(block: FieldBlock) {
     delete this.#blocks[block.id]
     this.#el.removeChild(this.#blockElements[block.id])
     delete this.#blockElements[block.id]
+  }
+
+  #getBlock(i: number, j: number): FieldBlock | undefined {
+    const i_ = floorN(i, BLOCK_SIZE)
+    const j_ = floorN(j, BLOCK_SIZE)
+    return this.#blocks[`${i_}.${j_}`]
   }
 
   /**
    * Gets the cell for the given grid coordinate
    * Mainly used by characters to get the cell they are trying to enter
    */
-  get(i: number, j: number) {
-    const k = floorN(i, BLOCK_SIZE)
-    const l = floorN(j, BLOCK_SIZE)
-    return this.#blocks[`${k}.${l}`].get(
+  get(i: number, j: number): FieldCell {
+    return this.#getBlock(i, j)!.get(
       modulo(i, BLOCK_SIZE),
       modulo(j, BLOCK_SIZE),
     )
   }
 
-  hasBlock(blockId: string) {
+  #hasBlock(blockId: string) {
     return !!this.#blocks[blockId]
   }
 
@@ -331,10 +337,10 @@ class Field implements IFieldTester {
   ) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
-      !this.hasBlock(id)
+      !this.#hasBlock(id)
     )
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.addBlock(new FieldBlock(map, loadImage))
+      this.#addBlock(new FieldBlock(map, loadImage))
     }
     const promises = [] as Promise<void>[]
     for (const block of this) {
@@ -357,7 +363,7 @@ class Field implements IFieldTester {
         },
       ).then(() => {
         console.log("initial actors ready")
-        this.#initialActorsReady = true
+        this.#initialActivateReady = true
       })
     }
   }
@@ -367,7 +373,7 @@ class Field implements IFieldTester {
     for (const block of this) {
       if (!this.#unloadScope.overlaps(block)) {
         console.log("unloading block", block.id)
-        this.removeBlock(block)
+        this.#removeBlock(block)
       }
     }
   }
@@ -385,7 +391,60 @@ class Field implements IFieldTester {
       initialLoad?: boolean
     },
   ) {
-    console.log("checkActivate", i, j, initialLoad)
+    const newCharSpawns = this.#getCharacterSpawnInfo(i, j)
+      .filter((spawn) => !actors.has(spawn.id)) // isn't spawned yet
+      .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
+      .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
+      .toArray()
+
+    if (newCharSpawns.length > 0) {
+      console.log(`Spawning ${newCharSpawns.length} characters`)
+      for (const spawn of newCharSpawns) {
+        actors.add(spawnCharacter(
+          spawn.id,
+          spawn.type,
+          spawn.i,
+          spawn.j,
+          spawn.src,
+          {
+            dir: spawn.dir,
+            speed: spawn.speed,
+          },
+        ))
+      }
+      await actors.loadAssets()
+    } else if (initialLoad) {
+      await actors.loadAssets()
+    }
+  }
+
+  *#getCharacterSpawnInfo(i: number, j: number): Generator<CharacterSpawnInfo> {
+    for (const [i_, j_] of this.#getSpawnChunks(i, j)) {
+      const block = this.#getBlock(i_, j_)
+      if (!block) {
+        console.error(`Unable to check spawn info for chunk ${i_}, ${j_}`)
+        continue
+      }
+      yield* block.getCharacterSpawnInfoForChunk(i_, j_)
+    }
+  }
+
+  *#getItemSpawnInfo(i: number, j: number): Generator<ItemSpawnInfo> {
+    for (const [i_, j_] of this.#getSpawnChunks(i, j)) {
+      const block = this.#getBlock(i_, j_)
+      if (!block) {
+        console.error(
+          `Unable to check spawn info for chunk ${i_}, ${j_}`,
+        )
+        continue
+      }
+      for (const spawn of block.getItemSpawnInfoForChunk(i_, j_)) {
+        yield spawn
+      }
+    }
+  }
+
+  *#getSpawnChunks(i: number, j: number): Generator<[number, number]> {
     this.#activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const left = floorN(this.#activateScope.left, CELL_SIZE * BLOCK_CHUNK_SIZE)
     const right = ceilN(
@@ -401,66 +460,13 @@ class Field implements IFieldTester {
       for (let y = top; y < bottom; y += CELL_SIZE * BLOCK_CHUNK_SIZE) {
         const i = x / CELL_SIZE
         const j = y / CELL_SIZE
-        const info = this.#getSpawnInfoForChunk(i, j)
-        const newSpawns = [] as IChar[]
-        for (const spawn of info) {
-          if (actors.has(spawn.id)) {
-            continue // already activated
-          }
-
-          if (!initialLoad && viewScope.overlaps(spawn)) {
-            // except for the initial load,
-            // we don't activate characters that are in the view scope
-            continue
-          }
-
-          if (this.#activateScope.overlaps(spawn)) {
-            const char = spawnCharacter(
-              spawn.id,
-              spawn.type,
-              spawn.i,
-              spawn.j,
-              spawn.src,
-              {
-                dir: spawn.dir,
-                speed: spawn.speed,
-              },
-            )
-            newSpawns.push(char)
-          }
-        }
-        if (newSpawns.length > 0) {
-          console.log(`Spawning ${newSpawns.length} characters`)
-          for (const char of newSpawns) {
-            actors.add(char)
-          }
-          await actors.loadAssets()
-        } else if (initialLoad) {
-          await actors.loadAssets()
-        }
+        yield [i, j]
       }
     }
   }
 
-  #getSpawnInfoForChunk(chunkI: number, chunkJ: number): CharacterSpawnInfo[] {
-    const i = floorN(chunkI, BLOCK_SIZE)
-    const j = floorN(chunkJ, BLOCK_SIZE)
-    const relI = modulo(chunkI, BLOCK_SIZE)
-    const relJ = modulo(chunkJ, BLOCK_SIZE)
-    const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-    const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-    const blockId = `${i}.${j}`
-    const block = this.#blocks[blockId]
-    if (!block) {
-      console.error("Block not found", blockId)
-      console.error(`Unable to check spawn info for chunk ${chunkI}, ${chunkJ}`)
-      return []
-    }
-    return block.getSpawnInfoForChunk(k, l)
-  }
-
   get assetsReady() {
-    return this.#initialActorsReady
+    return this.#initialActivateReady
   }
 }
 
@@ -543,7 +549,7 @@ export function GameScreen({ el, query }: Context) {
 
   let i = 0
 
-  const loop = gameloop(() => {
+  const loop = new Gameloop(60, () => {
     i++
     if (!field.assetsReady) {
       signal.isGameLoading.update(true)
@@ -564,7 +570,12 @@ export function GameScreen({ el, query }: Context) {
     if (i % 60 === 59) {
       field.checkActivate(me.i, me.j, { viewScope, actors })
     }
-  }, 60)
-  loop.onStep((fps) => signal.fps.update(fps))
-  loop.run()
+  })
+  loop.onStep((fps, v) => {
+    signal.fps.update(fps)
+    if (v > 3000) {
+      signal.v.update(3000)
+    }
+  })
+  loop.start()
 }

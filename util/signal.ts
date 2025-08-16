@@ -3,6 +3,8 @@ import { CELL_SIZE } from "./constants.ts"
 
 // The current frame per second (fps)
 export const fps = new Signal(0)
+// The v value
+export const v = new Signal(0)
 // The current number of actors
 export const actorsCount = new Signal(0)
 // The current count of apples

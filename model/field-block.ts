@@ -4,7 +4,6 @@ import { seedrandom } from "../util/random.ts"
 import type { Dir } from "../util/dir.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import type { CellName, IBox, ItemType, NPCType } from "./character.ts"
-import type { Item } from "./item.ts"
 
 /**
  * {@linkcode FieldCell} represents the cell in the field block
@@ -28,7 +27,7 @@ export class FieldCell {
 }
 
 /** {@linkcode ItemSpawnInfo} represents the spawn info for the items in {@linkcode FieldBlock} */
-class ItemSpawnInfo {
+export class ItemSpawnInfo {
   readonly i: number
   readonly j: number
   readonly type: string
@@ -555,18 +554,38 @@ export class FieldBlock {
     return diff
   }
 
-  /** Gets the spawn info for the given chunk ( (0,0) ~ (9,9) ) */
-  getSpawnInfoForChunk(k: number, l: number): CharacterSpawnInfo[] {
+  #gridToChunkIndex(i: number, j: number): [number, number] {
+    const relI = modulo(i, BLOCK_SIZE)
+    const relJ = modulo(j, BLOCK_SIZE)
+    const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+    const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+    return [k, l]
+  }
+
+  /** Gets the character spawn info for the given chunk. The chunk should be given by the i, j coordinates of the
+   * left and top of the chunk.
+   *
+   * @param i world grid coordinate
+   * @param j world grid coordinate
+   */
+  getCharacterSpawnInfoForChunk(i: number, j: number): CharacterSpawnInfo[] {
+    const [k, l] = this.#gridToChunkIndex(i, j)
     return this.#characterSpawnInfoByChunk.get(k, l)
   }
 
   /** Adds the spawn info */
-  addSpawnInfo(spawn: CharacterSpawnInfo): void {
+  addCharacterSpawnInfo(spawn: CharacterSpawnInfo): void {
     this.#characterSpawnInfoByChunk.add(spawn)
+  }
+
+  getItemSpawnInfoForChunk(i: number, j: number): ItemSpawnInfo[] {
+    const [k, l] = this.#gridToChunkIndex(i, j)
+    return this.#itemSpawnInfoByChunk.get(k, l)
   }
 
   /** Clears the spawn info */
   clearSpawnInfo(): void {
     this.#characterSpawnInfoByChunk = new ByChunk([])
+    this.#itemSpawnInfoByChunk = new ByChunk([])
   }
 }

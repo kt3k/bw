@@ -1,7 +1,7 @@
 import { register } from "@kt3k/cell"
 import { clearInput } from "./ui/input.ts"
 import { KeyMonitor } from "./ui/key-monitor.ts"
-import { FpsMonitor } from "./ui/fps-monitor.ts"
+import { FpsMonitor, VMonitor } from "./ui/fps-monitor.ts"
 import { ActorsCounter } from "./ui/actors-counter.ts"
 import { SwipeHandler } from "./ui/swipe-handler.ts"
 import { ItemGetEffector } from "./ui/item-get-effector.ts"
@@ -13,6 +13,7 @@ globalThis.addEventListener("blur", clearInput)
 
 register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")
+register(VMonitor, "js-v-monitor")
 register(KeyMonitor, "js-key-monitor")
 register(SwipeHandler, "js-swipe-handler")
 register(LoadingIndicator, "js-loading-indicator")

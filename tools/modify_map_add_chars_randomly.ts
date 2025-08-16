@@ -46,7 +46,7 @@ async function addCharactersRandomly(mapFile: string) {
         isRandom ? "random" : "random-walk",
         isRandom ? "../char/joob/" : "../char/not-found/",
       )
-      fb.addSpawnInfo(si)
+      fb.addCharacterSpawnInfo(si)
     }
   }
 
