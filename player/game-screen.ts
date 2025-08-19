@@ -43,6 +43,10 @@ class FieldItems implements ILoader, ItemContainer {
     this.#coordMap[`${item.i}.${item.j}`] = item
   }
 
+  isCollected(id: string) {
+    return Item.isCollected(id)
+  }
+
   get(i: number, j: number): IItem | undefined {
     return this.#coordMap[`${i}.${j}`]
   }
@@ -52,6 +56,10 @@ class FieldItems implements ILoader, ItemContainer {
     const item = this.#coordMap[key]
     if (!item) {
       return
+    }
+    if (item.id) {
+      // mark the item as collected
+      Item.collect(item.id)
     }
     this.#items.delete(item)
     delete this.#coordMap[key]
@@ -334,6 +342,7 @@ class Field implements IFieldTester {
     j: number,
     viewScope: ViewScope,
     actors: Actors,
+    items: FieldItems,
   ) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
@@ -359,6 +368,7 @@ class Field implements IFieldTester {
         {
           viewScope,
           actors,
+          items,
           initialLoad: true,
         },
       ).then(() => {
@@ -381,11 +391,17 @@ class Field implements IFieldTester {
   async checkActivate(
     i: number,
     j: number,
-    { viewScope, actors, initialLoad = false }: {
+    { viewScope, actors, items, initialLoad = false }: {
       viewScope: RectScope
       actors: {
         has(id: string): boolean
         add(char: IChar): void
+        loadAssets(): Promise<void>
+      }
+      items: {
+        isCollected(id: string): boolean
+        get(i: number, j: number): IItem | undefined
+        add(item: IItem): void
         loadAssets(): Promise<void>
       }
       initialLoad?: boolean
@@ -393,6 +409,13 @@ class Field implements IFieldTester {
   ) {
     const newCharSpawns = this.#getCharacterSpawnInfo(i, j)
       .filter((spawn) => !actors.has(spawn.id)) // isn't spawned yet
+      .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
+      .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
+      .toArray()
+
+    const newItemSpawns = this.#getItemSpawnInfo(i, j)
+      .filter((spawn) => !items.isCollected(spawn.id)) // isn't collected yet
+      .filter((spawn) => !items.get(spawn.i, spawn.j)) // the place isn't occupied by other item
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
       .toArray()
@@ -416,6 +439,24 @@ class Field implements IFieldTester {
     } else if (initialLoad) {
       await actors.loadAssets()
     }
+
+    if (newItemSpawns.length > 0) {
+      console.log(`Spawning ${newItemSpawns.length} items`)
+      for (const spawn of newItemSpawns) {
+        items.add(
+          new Item(
+            spawn.id,
+            spawn.i,
+            spawn.j,
+            spawn.type,
+            spawn.src,
+          ),
+        )
+      }
+      await items.loadAssets()
+    } else if (initialLoad) {
+      await items.loadAssets()
+    }
   }
 
   *#getCharacterSpawnInfo(i: number, j: number): Generator<CharacterSpawnInfo> {
@@ -438,9 +479,7 @@ class Field implements IFieldTester {
         )
         continue
       }
-      for (const spawn of block.getItemSpawnInfoForChunk(i_, j_)) {
-        yield spawn
-      }
+      yield* block.getItemSpawnInfoForChunk(i_, j_)
     }
   }
 
@@ -487,35 +526,35 @@ export function GameScreen({ el, query }: Context) {
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const items = new FieldItems()
-  items.add(new Item(1, 1, "apple", "item/apple.png"))
-  items.add(new Item(2, 4, "apple", "item/apple.png"))
-  items.add(new Item(3, 5, "apple", "item/apple.png"))
-  items.add(new Item(4, 1, "apple", "item/apple.png"))
-  items.add(new Item(5, 1, "apple", "item/apple.png"))
-  items.add(new Item(6, 1, "apple", "item/apple.png"))
-  items.add(new Item(7, 1, "apple", "item/apple.png"))
+  items.add(new Item(null, 1, 1, "apple", "item/apple.png"))
+  items.add(new Item(null, 2, 4, "apple", "item/apple.png"))
+  items.add(new Item(null, 3, 5, "apple", "item/apple.png"))
+  items.add(new Item(null, 4, 1, "apple", "item/apple.png"))
+  items.add(new Item(null, 5, 1, "apple", "item/apple.png"))
+  items.add(new Item(null, 6, 1, "apple", "item/apple.png"))
+  items.add(new Item(null, 7, 1, "apple", "item/apple.png"))
 
-  items.add(new Item(-1, -5, "green-apple", "item/green-apple.png"))
-  items.add(new Item(-1, -6, "green-apple", "item/green-apple.png"))
-  items.add(new Item(-2, -5, "green-apple", "item/green-apple.png"))
-  items.add(new Item(-2, -6, "green-apple", "item/green-apple.png"))
+  items.add(new Item(null, -1, -5, "green-apple", "item/green-apple.png"))
+  items.add(new Item(null, -1, -6, "green-apple", "item/green-apple.png"))
+  items.add(new Item(null, -2, -5, "green-apple", "item/green-apple.png"))
+  items.add(new Item(null, -2, -6, "green-apple", "item/green-apple.png"))
 
-  items.add(new Item(-3, 6, "apple", "item/apple.png"))
-  items.add(new Item(-4, 6, "green-apple", "item/green-apple.png"))
-  items.add(new Item(-5, 6, "apple", "item/apple.png"))
-  items.add(new Item(-6, 6, "apple", "item/apple.png"))
+  items.add(new Item(null, -3, 6, "apple", "item/apple.png"))
+  items.add(new Item(null, -4, 6, "green-apple", "item/green-apple.png"))
+  items.add(new Item(null, -5, 6, "apple", "item/apple.png"))
+  items.add(new Item(null, -6, 6, "apple", "item/apple.png"))
 
-  items.add(new Item(-3, 7, "apple", "item/apple.png"))
-  items.add(new Item(-4, 7, "apple", "item/apple.png"))
-  items.add(new Item(-5, 7, "apple", "item/apple.png"))
-  items.add(new Item(-6, 7, "apple", "item/apple.png"))
+  items.add(new Item(null, -3, 7, "apple", "item/apple.png"))
+  items.add(new Item(null, -4, 7, "apple", "item/apple.png"))
+  items.add(new Item(null, -5, 7, "apple", "item/apple.png"))
+  items.add(new Item(null, -6, 7, "apple", "item/apple.png"))
 
-  items.add(new Item(-3, 8, "apple", "item/apple.png"))
-  items.add(new Item(-4, 8, "apple", "item/apple.png"))
-  items.add(new Item(-5, 8, "apple", "item/apple.png"))
-  items.add(new Item(-6, 8, "apple", "item/apple.png"))
+  items.add(new Item(null, -3, 8, "apple", "item/apple.png"))
+  items.add(new Item(null, -4, 8, "apple", "item/apple.png"))
+  items.add(new Item(null, -5, 8, "apple", "item/apple.png"))
+  items.add(new Item(null, -6, 8, "apple", "item/apple.png"))
 
-  items.add(new Item(-7, 1, "green-apple", "item/green-apple.png"))
+  items.add(new Item(null, -7, 1, "green-apple", "item/green-apple.png"))
 
   const viewScope = new ViewScope(screenSize, screenSize)
 
@@ -528,7 +567,7 @@ export function GameScreen({ el, query }: Context) {
   const field = new Field(query(".field")!, activateScope)
 
   signal.centerGrid10.subscribe(({ i, j }) => {
-    field.checkBlockLoad(i, j, viewScope, actors)
+    field.checkBlockLoad(i, j, viewScope, actors, items)
     field.checkBlockUnload(i, j)
   })
 
@@ -568,7 +607,7 @@ export function GameScreen({ el, query }: Context) {
       actors.checkDeactivate(me.i, me.j)
     }
     if (i % 60 === 59) {
-      field.checkActivate(me.i, me.j, { viewScope, actors })
+      field.checkActivate(me.i, me.j, { viewScope, actors, items })
     }
   })
   loop.onStep((fps, v) => {

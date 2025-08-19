@@ -7,6 +7,8 @@ const fallbackImage = await fetch(
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
 
 export class Item implements IItem {
+  /** The unique identifier of the item. Only items which are spawned from block map have ids. */
+  readonly id: string | null
   readonly i: number
   readonly j: number
   readonly type: ItemType
@@ -15,13 +17,30 @@ export class Item implements IItem {
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
 
+  static #collectedItemIds = new Set<string>()
+
+  static isCollected(id: string) {
+    return this.#collectedItemIds.has(id)
+  }
+
+  static collect(id: string) {
+    this.#collectedItemIds.add(id)
+  }
+
   /**
    * @param i The column of the grid coordinate
    * @param j The row of the grid coordinate
    * @param type The type of item
    * @param src The path to the asset image
    */
-  constructor(i: number, j: number, type: ItemType, src: string) {
+  constructor(
+    id: string | null,
+    i: number,
+    j: number,
+    type: ItemType,
+    src: string,
+  ) {
+    this.id = id
     this.i = i
     this.j = j
     this.type = type

@@ -35,6 +35,7 @@ export type IObj = IBox & ILoader & {
 export type ItemType = "apple" | "green-apple"
 
 export type IItem = IObj & {
+  id: string | null
   type: ItemType
 }
 

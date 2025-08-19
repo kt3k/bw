@@ -27,16 +27,24 @@ export class FieldCell {
 }
 
 /** {@linkcode ItemSpawnInfo} represents the spawn info for the items in {@linkcode FieldBlock} */
-export class ItemSpawnInfo {
+export class ItemSpawnInfo implements IBox {
+  readonly id: string
   readonly i: number
   readonly j: number
-  readonly type: string
+  readonly type: ItemType
   readonly src: string
-  constructor(i: number, j: number, type: string, src: string) {
+  readonly x: number
+  readonly y: number
+  readonly w = CELL_SIZE
+  readonly h = CELL_SIZE
+  constructor(i: number, j: number, type: ItemType, src: string) {
+    this.id = `${i}.${j}.${type}` // Unique ID for the spawn
     this.i = i
     this.j = j
     this.type = type
     this.src = src
+    this.x = i * CELL_SIZE
+    this.y = j * CELL_SIZE
   }
 
   toJSON() {
@@ -59,6 +67,10 @@ export class CharacterSpawnInfo implements IBox {
   readonly src: string
   readonly dir?: Dir
   readonly speed?: CharacterSpeed
+  readonly x: number
+  readonly y: number
+  readonly w = CELL_SIZE
+  readonly h = CELL_SIZE
   constructor(
     i: number,
     j: number,
@@ -76,6 +88,8 @@ export class CharacterSpawnInfo implements IBox {
     this.speed = speed
     this.type = type
     this.src = src
+    this.x = i * CELL_SIZE
+    this.y = j * CELL_SIZE
   }
 
   toJSON() {
@@ -87,21 +101,6 @@ export class CharacterSpawnInfo implements IBox {
       dir: this.dir,
       speed: this.speed,
     }
-  }
-
-  get x(): number {
-    return this.i * CELL_SIZE
-  }
-
-  get y(): number {
-    return this.j * CELL_SIZE
-  }
-
-  get h(): number {
-    return CELL_SIZE
-  }
-  get w(): number {
-    return CELL_SIZE
   }
 }
 
