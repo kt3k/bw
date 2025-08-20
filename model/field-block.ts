@@ -171,7 +171,7 @@ export class BlockMap {
     this.i = obj.i
     this.j = obj.j
     this.cells = obj.cells
-    this.characters = obj.characters.map((
+    this.characters = (obj.characters ?? []).map((
       spawn: {
         i: number
         j: number
@@ -192,7 +192,7 @@ export class BlockMap {
         },
       )
     )
-    this.items = obj.items.map((
+    this.items = (obj.items ?? []).map((
       item: { i: number; j: number; type: ItemType; src: string },
     ) =>
       new ItemSpawnInfo(
@@ -528,10 +528,10 @@ export class FieldBlock {
           ? cell.src.length === 1 ? cell.src[0] : cell.src
           : undefined,
       })),
-      characters: this.#characterSpawnInfoByChunk.getAll().map((spawn) =>
-        spawn.toJSON()
-      ),
-      items: this.#itemSpawnInfoByChunk.getAll().map((spawn) => spawn.toJSON()),
+      characters: this.#characterSpawnInfoByChunk
+        .getAll().map((spawn) => spawn.toJSON()),
+      items: this.#itemSpawnInfoByChunk
+        .getAll().map((spawn) => spawn.toJSON()),
       field: this.#field,
     })
   }
@@ -580,6 +580,10 @@ export class FieldBlock {
   getItemSpawnInfoForChunk(i: number, j: number): ItemSpawnInfo[] {
     const [k, l] = this.#gridToChunkIndex(i, j)
     return this.#itemSpawnInfoByChunk.get(k, l)
+  }
+
+  addItemSpawnInfo(spawn: ItemSpawnInfo): void {
+    this.#itemSpawnInfoByChunk.add(spawn)
   }
 
   /** Clears the spawn info */

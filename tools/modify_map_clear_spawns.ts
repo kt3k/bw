@@ -4,7 +4,7 @@ import { BlockMap, FieldBlock } from "../model/field-block.ts"
 const args = parseArgs(Deno.args)
 
 if (args._.length === 0) {
-  console.error("Usage: modify_map_clear_chars.ts <map_file>")
+  console.error("Usage: modify_map_clear_spawns.ts <map_file>")
   Deno.exit(1)
 }
 
@@ -13,13 +13,13 @@ for (const mapFile of args._) {
 }
 
 async function clear(mapFile: string) {
-  const mapJson = "static/map/" + mapFile + ".json"
+  const mapJson = new URL("../static/map/" + mapFile + ".json", import.meta.url)
 
   const map = await Deno.readTextFile(mapJson).then(
     JSON.parse,
   )
 
-  const bm = new BlockMap(mapJson, map)
+  const bm = new BlockMap(mapJson.href, map)
   const fb = new FieldBlock(bm, async (url: string) => {
     const res = await fetch(url)
     return res.blob().then((blob) => createImageBitmap(blob))
@@ -27,7 +27,7 @@ async function clear(mapFile: string) {
 
   fb.clearSpawnInfo()
 
-  console.log(`Cleared all characters from the map ${mapFile}`)
+  console.log(`Cleared all characters and items from the map ${mapFile}`)
   await Deno.writeTextFile(
     mapJson,
     JSON.stringify(fb.toMap().toObject(), null, 2),

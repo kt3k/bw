@@ -37,10 +37,30 @@ class ViewScope extends RectScope {}
 class FieldItems implements ILoader, ItemContainer {
   #items: Set<IItem> = new Set()
   #coordMap = {} as Record<string, IItem>
+  #activateScope: RectScope
+
+  constructor(scope: RectScope) {
+    this.#activateScope = scope
+  }
+
+  checkDeactivate(i: number, j: number) {
+    this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
+    const items = new Set<IItem>()
+    for (const item of this.#items) {
+      if (this.#activateScope.overlaps(item)) {
+        items.add(item)
+        continue
+      }
+      console.log("deactivating item", item.id)
+    }
+    this.#items = items
+    signal.itemsCount.update(this.#items.size)
+  }
 
   add(item: IItem) {
     this.#items.add(item)
     this.#coordMap[`${item.i}.${item.j}`] = item
+    signal.itemsCount.update(this.#items.size)
   }
 
   isCollected(id: string) {
@@ -63,6 +83,7 @@ class FieldItems implements ILoader, ItemContainer {
     }
     this.#items.delete(item)
     delete this.#coordMap[key]
+    signal.itemsCount.update(this.#items.size)
   }
 
   step() {
@@ -525,37 +546,6 @@ export function GameScreen({ el, query }: Context) {
   const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down", 1)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
-  const items = new FieldItems()
-  items.add(new Item(null, 1, 1, "apple", "item/apple.png"))
-  items.add(new Item(null, 2, 4, "apple", "item/apple.png"))
-  items.add(new Item(null, 3, 5, "apple", "item/apple.png"))
-  items.add(new Item(null, 4, 1, "apple", "item/apple.png"))
-  items.add(new Item(null, 5, 1, "apple", "item/apple.png"))
-  items.add(new Item(null, 6, 1, "apple", "item/apple.png"))
-  items.add(new Item(null, 7, 1, "apple", "item/apple.png"))
-
-  items.add(new Item(null, -1, -5, "green-apple", "item/green-apple.png"))
-  items.add(new Item(null, -1, -6, "green-apple", "item/green-apple.png"))
-  items.add(new Item(null, -2, -5, "green-apple", "item/green-apple.png"))
-  items.add(new Item(null, -2, -6, "green-apple", "item/green-apple.png"))
-
-  items.add(new Item(null, -3, 6, "apple", "item/apple.png"))
-  items.add(new Item(null, -4, 6, "green-apple", "item/green-apple.png"))
-  items.add(new Item(null, -5, 6, "apple", "item/apple.png"))
-  items.add(new Item(null, -6, 6, "apple", "item/apple.png"))
-
-  items.add(new Item(null, -3, 7, "apple", "item/apple.png"))
-  items.add(new Item(null, -4, 7, "apple", "item/apple.png"))
-  items.add(new Item(null, -5, 7, "apple", "item/apple.png"))
-  items.add(new Item(null, -6, 7, "apple", "item/apple.png"))
-
-  items.add(new Item(null, -3, 8, "apple", "item/apple.png"))
-  items.add(new Item(null, -4, 8, "apple", "item/apple.png"))
-  items.add(new Item(null, -5, 8, "apple", "item/apple.png"))
-  items.add(new Item(null, -6, 8, "apple", "item/apple.png"))
-
-  items.add(new Item(null, -7, 1, "green-apple", "item/green-apple.png"))
-
   const viewScope = new ViewScope(screenSize, screenSize)
 
   const itemLayer = new DrawLayer(itemCanvas, viewScope)
@@ -564,6 +554,7 @@ export function GameScreen({ el, query }: Context) {
   const activateScope = new ActivateScope(screenSize)
 
   const actors = new Actors([me], activateScope)
+  const items = new FieldItems(activateScope)
   const field = new Field(query(".field")!, activateScope)
 
   signal.centerGrid10.subscribe(({ i, j }) => {
@@ -605,6 +596,9 @@ export function GameScreen({ el, query }: Context) {
 
     if (i % 300 === 299) {
       actors.checkDeactivate(me.i, me.j)
+    }
+    if (i % 300 === 199) {
+      items.checkDeactivate(me.i, me.j)
     }
     if (i % 60 === 59) {
       field.checkActivate(me.i, me.j, { viewScope, actors, items })

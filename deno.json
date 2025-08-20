@@ -8,8 +8,8 @@
     "build:worker": "deno bundle --platform browser -o out/canvas-worker.js player/canvas-worker.ts",
     "build:style": "deno run -A npm:tailwindcss@3 -o ./out/style.css",
     "build:static": "deno run -A npm:cpx2 'static/**/*' out",
-    "clear-spawn": "deno -A tools/modify_map_clear_chars.ts block_0.0 block_-200.0 block_0.-200 block_-200.-200 block_-200.200 block_0.200 block_not_found",
-    "add-spawn": "deno -A tools/modify_map_add_chars_randomly.ts block_0.0 block_-200.0 block_0.-200 block_-200.-200 block_-200.200 block_0.200 block_not_found",
+    "clear-spawns": "deno -A tools/modify_map_clear_spawns.ts block_0.0 block_-200.0 block_0.-200 block_-200.-200 block_-200.200 block_0.200 block_not_found",
+    "add-spawns": "deno -A tools/modify_map_add_spawns_randomly.ts block_0.0 block_-200.0 block_0.-200 block_-200.-200 block_-200.200 block_0.200 block_not_found",
     "dist": "deno run -A npm:cpx2 'out/**' dist",
     "serve": "deno run -A jsr:@std/http/file-server out -p 8000"
   },

@@ -1,4 +1,5 @@
 import type { Context } from "@kt3k/cell"
+import { loadImage } from "../../util/load.ts"
 import * as signal from "../../util/signal.ts"
 
 export function ItemGetEffector({ el, subscribe }: Context) {
@@ -25,23 +26,35 @@ export function ItemGetEffector({ el, subscribe }: Context) {
   })
 }
 
-function moveImage(el: HTMLElement, src: string, endTop: string): void {
-  const img = new Image()
-  img.src = src
-  img.className = "absolute"
-  img.style.right = "47%"
-  img.style.top = "48%"
-  img.style.opacity = "1"
-  img.style.transition = "right 0.3s ease, top 0.3s ease, opacity 0.3s ease"
-  img.onload = () => {
-    el.appendChild(img)
-    setTimeout(() => {
-      img.style.right = "58px"
-      img.style.top = endTop
-      img.style.opacity = "0.7"
-    }, 30)
-    img.addEventListener("transitionend", () => {
-      el.removeChild(img)
-    }, { once: true })
-  }
+async function moveImage(
+  el: HTMLElement,
+  src: string,
+  endTop: string,
+): Promise<void> {
+  const bmp = await loadImage(import.meta.resolve(src))
+  const canvas = Object.assign(document.createElement("canvas"), {
+    width: bmp.width,
+    height: bmp.height,
+    className: "absolute",
+  })
+  Object.assign(canvas.style, {
+    right: "47%",
+    top: "48%",
+    opacity: "1",
+    transition: "right 0.3s ease, top 0.3s ease, opacity 0.3s ease",
+  })
+  canvas.getContext("2d")!.drawImage(bmp, 0, 0)
+  el.appendChild(canvas)
+  canvas.addEventListener("transitionend", () => {
+    el.removeChild(canvas)
+  }, { once: true })
+  setTimeout(
+    () =>
+      Object.assign(canvas.style, {
+        right: "58px",
+        top: endTop,
+        opacity: "0.7",
+      }),
+    30,
+  )
 }

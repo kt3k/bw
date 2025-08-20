@@ -7,3 +7,10 @@ export function ActorsCounter({ el, subscribe }: Context) {
     el.textContent = count.toString()
   })
 }
+
+/** The ui which shows the current active items count */
+export function ItemsCounter({ el, subscribe }: Context) {
+  subscribe(signal.itemsCount, (count) => {
+    el.textContent = count.toString()
+  })
+}
