@@ -45,15 +45,12 @@ class FieldItems implements ILoader, ItemContainer {
 
   checkDeactivate(i: number, j: number) {
     this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
-    const items = new Set<IItem>()
-    for (const item of this.#items) {
-      if (this.#activateScope.overlaps(item)) {
-        items.add(item)
-        continue
-      }
-      console.log("deactivating item", item.id)
-    }
-    this.#items = items
+    this.#items.values()
+      .filter((item) => !this.#activateScope.overlaps(item))
+      .forEach((item) => {
+        console.log("deactivating item", item.id)
+        this.#deactivate(item.i, item.j)
+      })
     signal.itemsCount.update(this.#items.size)
   }
 
@@ -71,19 +68,28 @@ class FieldItems implements ILoader, ItemContainer {
     return this.#coordMap[`${i}.${j}`]
   }
 
-  remove(i: number, j: number) {
+  /** Collects an item from the field. */
+  collect(i: number, j: number) {
+    const item = this.#deactivate(i, j)
+    if (item?.id) {
+      Item.collect(item.id)
+    }
+  }
+
+  /**
+   * Removes an item from the field.
+   * The item can be re-spawned later.
+   */
+  #deactivate(i: number, j: number): IItem | undefined {
     const key = `${i}.${j}`
     const item = this.#coordMap[key]
     if (!item) {
       return
     }
-    if (item.id) {
-      // mark the item as collected
-      Item.collect(item.id)
-    }
     this.#items.delete(item)
     delete this.#coordMap[key]
     signal.itemsCount.update(this.#items.size)
+    return item
   }
 
   step() {

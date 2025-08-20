@@ -53,14 +53,14 @@ export class MainCharacter extends Character {
     if (item) {
       switch (item.type) {
         case "apple": {
-          itemContainer.remove(this.i, this.j)
+          itemContainer.collect(this.i, this.j)
 
           const count = signal.appleCount.get()
           signal.appleCount.update(count + 1)
           break
         }
         case "green-apple": {
-          itemContainer.remove(this.i, this.j)
+          itemContainer.collect(this.i, this.j)
 
           const count = signal.greenAppleCount.get()
           signal.greenAppleCount.update(count + 1)

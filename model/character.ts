@@ -81,7 +81,7 @@ type CharacterAssets = {
 export type CollisionChecker = (i: number, j: number) => boolean
 export type ItemContainer = {
   get(i: number, j: number): IItem | undefined
-  remove(i: number, j: number): void
+  collect(i: number, j: number): void
 }
 
 export type NPCType = "random" | "random-walk" | "static"
