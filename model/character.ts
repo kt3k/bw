@@ -1,7 +1,7 @@
 import { loadImage } from "../util/load.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import { choice, randomInt } from "../util/random.ts"
+import { seed } from "../util/random.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -32,7 +32,7 @@ export type IObj = IBox & ILoader & {
   image(): ImageBitmap
 }
 
-export type ItemType = "apple" | "green-apple"
+export type ItemType = "apple" | "green-apple" | "mushroom"
 
 export type IItem = IObj & {
   id: string | null
@@ -124,6 +124,8 @@ export abstract class Character implements IChar {
   #d: number = 0
   /** The speed of the move */
   #speed: 1 | 2 | 4 | 8 | 16 = 1
+  /** The age after spawned in the field. Used for seeding RNG */
+  #age = 0
   /** The phase of the move */
   #movePhase: number = 0
   /** The counter of the idle state */
@@ -206,6 +208,15 @@ export abstract class Character implements IChar {
     _moveType: MoveType,
   ): void {}
 
+  onMoveEndWrap(
+    fieldTester: IFieldTester,
+    itemContainer: ItemContainer,
+    moveType: MoveType,
+  ) {
+    this.#age++
+    this.onMoveEnd(fieldTester, itemContainer, moveType)
+  }
+
   step(
     fieldTester: IFieldTester,
     collisionChecker: CollisionChecker,
@@ -249,7 +260,7 @@ export abstract class Character implements IChar {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEnd(fieldTester, itemContainer, moveType)
+        this.onMoveEndWrap(fieldTester, itemContainer, moveType)
       }
     } else if (this.#moveType === "bounce") {
       this.#movePhase += this.#speed
@@ -263,7 +274,7 @@ export abstract class Character implements IChar {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEnd(fieldTester, itemContainer, moveType)
+        this.onMoveEndWrap(fieldTester, itemContainer, moveType)
       }
     } else if (this.#moveType === "jump") {
       this.#movePhase += this.#speed * 2
@@ -277,7 +288,7 @@ export abstract class Character implements IChar {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEnd(fieldTester, itemContainer, moveType)
+        this.onMoveEndWrap(fieldTester, itemContainer, moveType)
       }
     } else {
       this.#idleCounter += 1
@@ -359,6 +370,10 @@ export abstract class Character implements IChar {
     return CELL_SIZE
   }
 
+  set speed(value: 1 | 2 | 4 | 8 | 16) {
+    this.#speed = value
+  }
+
   /** Gets the center y of the world coordinates. This is used for setting the center of ViewScope. */
   get centerY(): number {
     if (this.#moveType === "jump") {
@@ -424,6 +439,10 @@ export abstract class Character implements IChar {
     return this.#j
   }
 
+  get age(): number {
+    return this.#age
+  }
+
   /** Physical coordinate is the grid coordinate
    * where the character is currently located.
    * This is used to for collision detection with other characters.
@@ -462,6 +481,7 @@ export class RandomlyTurnNPC extends Character {
   ): NextAction {
     this.#counter -= 1
     if (this.#counter <= 0) {
+      const { randomInt, choice } = seed(this.age.toString())
       this.#counter = randomInt(8) + 4
       // If the character can keep going in the current direction,
       // it will keep going with 96% probability.
@@ -494,6 +514,7 @@ export class RandomWalkNPC extends Character {
     if (dirs.length === 0) {
       return undefined
     }
+    const { choice } = seed(this.age.toString())
     return choice(dirs)
   }
 }

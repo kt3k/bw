@@ -37,7 +37,7 @@ async function addCharactersRandomly(mapFile: string) {
   for (const _ of Array(400)) {
     const i = randomInt(200)
     const j = randomInt(200)
-    const cell = fb.get(i, j)
+    const cell = fb.getCell(i, j)
     if (cell.canEnter) {
       c++
       const isRandom = Math.random() > 0.5
@@ -50,6 +50,11 @@ async function addCharactersRandomly(mapFile: string) {
         ),
       )
     }
+  }
+  if (mapFile === "block_0.0") {
+    fb.addItemSpawnInfo(
+      new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png"),
+    )
   }
 
   if (mapFile === "block_-200.0") {
@@ -78,10 +83,15 @@ async function addCharactersRandomly(mapFile: string) {
   for (const _ of Array(1000)) {
     const i = randomInt(200)
     const j = randomInt(200)
-    const cell = fb.get(i, j)
+    const cell = fb.getCell(i, j)
     if (cell.canEnter) {
       itemCount++
-      const type = Math.random() > 0.9 ? "green-apple" : "apple"
+      const random = Math.random()
+      const type = random > 0.9
+        ? "mushroom"
+        : random > 0.7
+        ? "green-apple"
+        : "apple"
       fb.addItemSpawnInfo(
         new ItemSpawnInfo(
           i + fb.i,

@@ -16,10 +16,9 @@ import {
 import { MainCharacter } from "./main-character.ts"
 import {
   BlockMap,
-  type CharacterSpawnInfo,
   FieldBlock,
+  type FieldBlockChunk,
   type FieldCell,
-  type ItemSpawnInfo,
 } from "../model/field-block.ts"
 import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
@@ -335,10 +334,15 @@ class Field implements IFieldTester {
     delete this.#blockElements[block.id]
   }
 
-  #getBlock(i: number, j: number): FieldBlock | undefined {
+  #getBlock(i: number, j: number): FieldBlock {
     const i_ = floorN(i, BLOCK_SIZE)
     const j_ = floorN(j, BLOCK_SIZE)
-    return this.#blocks[`${i_}.${j_}`]
+    const block = this.#blocks[`${i_}.${j_}`]
+    if (!block) {
+      console.error(`Unable to get block at ${i_}, ${j_}`)
+      throw Error("Block not found")
+    }
+    return block
   }
 
   /**
@@ -346,7 +350,7 @@ class Field implements IFieldTester {
    * Mainly used by characters to get the cell they are trying to enter
    */
   get(i: number, j: number): FieldCell {
-    return this.#getBlock(i, j)!.get(
+    return this.#getBlock(i, j).getCell(
       modulo(i, BLOCK_SIZE),
       modulo(j, BLOCK_SIZE),
     )
@@ -354,10 +358,6 @@ class Field implements IFieldTester {
 
   #hasBlock(blockId: string) {
     return !!this.#blocks[blockId]
-  }
-
-  [Symbol.iterator]() {
-    return Object.values(this.#blocks)[Symbol.iterator]()
   }
 
   translateElement(x: number, y: number) {
@@ -378,15 +378,10 @@ class Field implements IFieldTester {
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
       this.#addBlock(new FieldBlock(map, loadImage))
     }
-    const promises = [] as Promise<void>[]
-    for (const block of this) {
-      promises.push(
-        block.renderNeighborhood(i, j, {
-          initialLoad: !this.#initialBlocksLoaded,
-        }),
-      )
-    }
-    await Promise.all(promises)
+    const initialLoad = !this.#initialBlocksLoaded
+    await Promise.all(
+      this.#getChunks(i, j).map((c) => c.render(initialLoad)).toArray(),
+    )
     if (!this.#initialBlocksLoaded) {
       this.#initialBlocksLoaded = true
       this.checkActivate(
@@ -407,7 +402,7 @@ class Field implements IFieldTester {
 
   checkBlockUnload(i: number, j: number) {
     this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    for (const block of this) {
+    for (const block of Object.values(this.#blocks)) {
       if (!this.#unloadScope.overlaps(block)) {
         console.log("unloading block", block.id)
         this.#removeBlock(block)
@@ -434,18 +429,17 @@ class Field implements IFieldTester {
       initialLoad?: boolean
     },
   ) {
-    const newCharSpawns = this.#getCharacterSpawnInfo(i, j)
+    const chunks = [...this.#getChunks(i, j)]
+    const newCharSpawns = chunks.flatMap((c) => c.getCharacterSpawnInfo())
       .filter((spawn) => !actors.has(spawn.id)) // isn't spawned yet
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
-      .toArray()
 
-    const newItemSpawns = this.#getItemSpawnInfo(i, j)
+    const newItemSpawns = chunks.flatMap((c) => c.getItemSpawnInfo())
       .filter((spawn) => !items.isCollected(spawn.id)) // isn't collected yet
       .filter((spawn) => !items.get(spawn.i, spawn.j)) // the place isn't occupied by other item
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
-      .toArray()
 
     if (newCharSpawns.length > 0) {
       console.log(`Spawning ${newCharSpawns.length} characters`)
@@ -486,31 +480,7 @@ class Field implements IFieldTester {
     }
   }
 
-  *#getCharacterSpawnInfo(i: number, j: number): Generator<CharacterSpawnInfo> {
-    for (const [i_, j_] of this.#getSpawnChunks(i, j)) {
-      const block = this.#getBlock(i_, j_)
-      if (!block) {
-        console.error(`Unable to check spawn info for chunk ${i_}, ${j_}`)
-        continue
-      }
-      yield* block.getCharacterSpawnInfoForChunk(i_, j_)
-    }
-  }
-
-  *#getItemSpawnInfo(i: number, j: number): Generator<ItemSpawnInfo> {
-    for (const [i_, j_] of this.#getSpawnChunks(i, j)) {
-      const block = this.#getBlock(i_, j_)
-      if (!block) {
-        console.error(
-          `Unable to check spawn info for chunk ${i_}, ${j_}`,
-        )
-        continue
-      }
-      yield* block.getItemSpawnInfoForChunk(i_, j_)
-    }
-  }
-
-  *#getSpawnChunks(i: number, j: number): Generator<[number, number]> {
+  *#getChunks(i: number, j: number): Generator<FieldBlockChunk> {
     this.#activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const left = floorN(this.#activateScope.left, CELL_SIZE * BLOCK_CHUNK_SIZE)
     const right = ceilN(
@@ -526,7 +496,7 @@ class Field implements IFieldTester {
       for (let y = top; y < bottom; y += CELL_SIZE * BLOCK_CHUNK_SIZE) {
         const i = x / CELL_SIZE
         const j = y / CELL_SIZE
-        yield [i, j]
+        yield this.#getBlock(i, j).getChunk(i, j)
       }
     }
   }

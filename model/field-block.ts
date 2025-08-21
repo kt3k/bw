@@ -1,8 +1,8 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import { seedrandom } from "../util/random.ts"
+import { seed } from "../util/random.ts"
 import type { Dir } from "../util/dir.ts"
-import { ceilN, floorN, modulo } from "../util/math.ts"
+import { floorN, modulo } from "../util/math.ts"
 import type { CellName, IBox, ItemType, NPCType } from "./character.ts"
 
 /**
@@ -367,7 +367,7 @@ export class FieldBlock {
   }
 
   drawCell(layer: CanvasWrapper, i: number, j: number) {
-    const cell = this.get(i, j)
+    const cell = this.getCell(i, j)
     if (cell.src) {
       for (const src of cell.src) {
         layer.drawImage(this.#imgMap[src], i * CELL_SIZE, j * CELL_SIZE)
@@ -383,7 +383,7 @@ export class FieldBlock {
     }
     const worldI = this.#i + i
     const worldJ = this.#j + j
-    const rng = seedrandom(`${worldI}.${worldJ}`)
+    const { rng } = seed(`${worldI}.${worldJ}`)
     let color: string
     if (cell.canEnter) {
       color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
@@ -399,7 +399,7 @@ export class FieldBlock {
     )
   }
 
-  renderAllChuncks() {
+  renderAll() {
     const wrapper = new CanvasWrapper(this.canvas)
     for (let i = 0; i < BLOCK_SIZE; i++) {
       for (let j = 0; j < BLOCK_SIZE; j++) {
@@ -408,52 +408,30 @@ export class FieldBlock {
     }
   }
 
-  async renderNeighborhood(
+  getChunk(i: number, j: number): FieldBlockChunk {
+    if (
+      i < this.#i || i >= this.#i + BLOCK_SIZE || j < this.#j ||
+      j >= this.#j + BLOCK_SIZE
+    ) {
+      throw new Error("Chunk out of bounds")
+    }
+    return new FieldBlockChunk(i, j, this)
+  }
+
+  async renderChunk(
     i: number,
     j: number,
     { initialLoad = false } = {},
-  ) {
-    const wrapper = new CanvasWrapper(this.canvas)
-
-    // The max of screen size is 450px (about 28 cells / 1.4 chunks)
-    // Let's calculate the overlap with 2 chunks square around the center cell.
-
-    const k0 = ceilN(i - this.#i - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
-      BLOCK_CHUNK_SIZE
-    const l0 = ceilN(j - this.#j - BLOCK_CHUNK_SIZE, BLOCK_CHUNK_SIZE) /
-      BLOCK_CHUNK_SIZE
-
-    const promises: Promise<void>[] = []
-    for (let l = l0; l < l0 + 2; l++) {
-      if (l < 0 || l >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
-        continue // Out of bounds
-      }
-      for (let k = k0; k < k0 + 2; k++) {
-        if (k < 0 || k >= BLOCK_SIZE / BLOCK_CHUNK_SIZE) {
-          continue // Out of bounds
-        }
-        const promise = this.#renderChunk(wrapper, k, l, { initialLoad })
-          .catch((error) => {
-            console.error("Failed to render chunk", k, l, error)
-          })
-        promises.push(promise)
-      }
-    }
-    await Promise.all(promises)
-  }
-
-  async #renderChunk(
-    layer: CanvasWrapper,
-    k: number,
-    l: number,
-    { initialLoad = false } = {},
   ): Promise<void> {
-    console.log("Rendering chunk", this.id, k, l)
+    const [k, l] = this.#gridToChunkIndex(i, j)
+    const layer = new CanvasWrapper(this.canvas)
+
     const chunkKey = `${k}.${l}`
     const chunkState = this.#chunks[chunkKey]
     if (chunkState === true || chunkState === "loading") {
       return
     }
+    console.log("Rendering chunk", this.id, k, l)
     let removeOverlay: () => void = () => {}
     if (!initialLoad) {
       removeOverlay = this.#createOverlay(k, l)
@@ -487,7 +465,7 @@ export class FieldBlock {
     return
   }
 
-  get(i: number, j: number): FieldCell {
+  getCell(i: number, j: number): FieldCell {
     return this.#cellMap[this.#field[j][i]]
   }
   /** Updates a cell at the given coordinates with the given cell name.
@@ -544,8 +522,8 @@ export class FieldBlock {
     const diff: [i: number, j: number, cell: string][] = []
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
-        const name = other.get(i, j).name
-        if (this.get(i, j).name !== name) {
+        const name = other.getCell(i, j).name
+        if (this.getCell(i, j).name !== name) {
           diff.push([i, j, name])
         }
       }
@@ -590,5 +568,28 @@ export class FieldBlock {
   clearSpawnInfo(): void {
     this.#characterSpawnInfoByChunk = new ByChunk([])
     this.#itemSpawnInfoByChunk = new ByChunk([])
+  }
+}
+
+export class FieldBlockChunk {
+  #i: number
+  #j: number
+  #fieldBlock: FieldBlock
+  constructor(i: number, j: number, block: FieldBlock) {
+    this.#i = i
+    this.#j = j
+    this.#fieldBlock = block
+  }
+
+  getItemSpawnInfo(): ItemSpawnInfo[] {
+    return this.#fieldBlock.getItemSpawnInfoForChunk(this.#i, this.#j)
+  }
+
+  getCharacterSpawnInfo(): CharacterSpawnInfo[] {
+    return this.#fieldBlock.getCharacterSpawnInfoForChunk(this.#i, this.#j)
+  }
+
+  render(initialLoad: boolean) {
+    return this.#fieldBlock.renderChunk(this.#i, this.#j, { initialLoad })
   }
 }

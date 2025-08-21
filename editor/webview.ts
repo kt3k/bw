@@ -43,7 +43,7 @@ function MainContainer({ subscribe, el, query }: Context) {
       canvas.classList.add("field-block-canvas")
       el.innerHTML = ""
       el.appendChild(canvas)
-      fieldBlock.renderAllChuncks()
+      fieldBlock.renderAll()
       mount("field-block-canvas", el)
 
       const { i, j } = fieldBlock

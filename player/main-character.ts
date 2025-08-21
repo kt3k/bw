@@ -13,13 +13,29 @@ import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 
 export class MainCharacter extends Character {
   #lastMoveTypes: MoveType[] = []
-  #nextActionQueue: NextAction[] = []
+  #nextActionQueue: (NextAction | "speed-up" | "speed-reset")[] = []
+  #speedUpTimer: number | undefined = undefined
   override getNextAction(
-    _fieldTester: IFieldTester,
-    _collisionChecker: CollisionChecker,
+    fieldTester: IFieldTester,
+    collisionChecker: CollisionChecker,
   ): NextAction {
     if (this.#nextActionQueue.length > 0) {
-      return this.#nextActionQueue.shift()!
+      const nextAction = this.#nextActionQueue.shift()!
+      if (nextAction === "speed-up") {
+        this.speed = 2
+        this.#speedUpTimer = setTimeout(() => {
+          this.#nextActionQueue.push("speed-reset", "jump")
+        }, 15000)
+        return this.getNextAction(fieldTester, collisionChecker)
+      } else if (nextAction === "speed-reset") {
+        if (this.#speedUpTimer) {
+          clearTimeout(this.#speedUpTimer)
+          this.#speedUpTimer = undefined
+        }
+        this.speed = 1
+        return this.getNextAction(fieldTester, collisionChecker)
+      }
+      return nextAction
     }
 
     if (Input.up) {
@@ -64,7 +80,11 @@ export class MainCharacter extends Character {
 
           const count = signal.greenAppleCount.get()
           signal.greenAppleCount.update(count + 1)
-          this.#nextActionQueue.push("jump")
+          break
+        }
+        case "mushroom": {
+          itemContainer.collect(this.i, this.j)
+          this.#nextActionQueue.push("speed-reset", "jump", "jump", "speed-up")
           break
         }
       }
@@ -78,11 +98,11 @@ export class MainCharacter extends Character {
     }
 
     this.#lastMoveTypes.push(moveType)
-    if (this.#lastMoveTypes.length > 4) {
+    if (this.#lastMoveTypes.length > 3) {
       this.#lastMoveTypes.shift()
     }
-    if (this.#lastMoveTypes.length === 4) {
-      if (this.#lastMoveTypes.every((t) => t === "bounce")) {
+    if (this.#lastMoveTypes.length === 3) {
+      if (this.#lastMoveTypes.every((t) => t === "jump")) {
         bindToggleFullscreenOnce()
         this.#lastMoveTypes = []
       }
