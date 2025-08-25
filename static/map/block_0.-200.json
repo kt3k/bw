@@ -20,980 +20,962 @@
   ],
   "characters": [
     {
-      "i": 16,
-      "j": -196,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 7,
-      "j": -192,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 4,
-      "j": -186,
+      "i": 15,
+      "j": -182,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 12,
-      "j": -198,
+      "i": 5,
+      "j": -180,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 11,
-      "j": -195,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 9,
+      "i": 14,
       "j": -163,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 11,
-      "j": -168,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 6,
-      "j": -178,
+      "i": 2,
+      "j": -171,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 0,
-      "j": -147,
+      "i": 8,
+      "j": -161,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 19,
       "j": -142,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 13,
-      "j": -133,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 16,
-      "j": -136,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 1,
-      "j": -126,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 15,
-      "j": -110,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 10,
-      "j": -107,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 16,
-      "j": -119,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 15,
-      "j": -110,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 16,
-      "j": -113,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 15,
-      "j": -98,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 14,
-      "j": -90,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 10,
-      "j": -99,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 7,
-      "j": -73,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 2,
-      "j": -80,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 1,
-      "j": -72,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 15,
-      "j": -73,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 12,
-      "j": -73,
+      "i": 8,
+      "j": -155,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 5,
-      "j": -76,
+      "j": -156,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 11,
-      "j": -48,
-      "type": "random",
-      "src": "../char/joob/"
+      "i": 9,
+      "j": -132,
+      "type": "random-walk",
+      "src": "../char/not-found/"
     },
     {
       "i": 0,
-      "j": -56,
+      "j": -108,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 19,
-      "j": -31,
+      "i": 12,
+      "j": -91,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 3,
-      "j": -22,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 16,
-      "j": -24,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 10,
-      "j": -13,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 17,
-      "j": -18,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 5,
-      "j": -18,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 16,
-      "j": -5,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 19,
-      "j": -5,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 26,
-      "j": -184,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 33,
-      "j": -183,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 31,
-      "j": -192,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 21,
-      "j": -166,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 26,
-      "j": -177,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 21,
-      "j": -147,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 22,
-      "j": -150,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 39,
-      "j": -160,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 31,
-      "j": -160,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 29,
-      "j": -134,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 37,
-      "j": -121,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 35,
-      "j": -131,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 39,
-      "j": -135,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 28,
-      "j": -106,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 34,
-      "j": -103,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 32,
-      "j": -113,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 24,
-      "j": -117,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 39,
-      "j": -81,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 26,
-      "j": -84,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 35,
-      "j": -95,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 27,
-      "j": -85,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 30,
-      "j": -99,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 33,
-      "j": -82,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 36,
-      "j": -60,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 21,
-      "j": -59,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 38,
-      "j": -32,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 23,
-      "j": -31,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 26,
-      "j": -5,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 48,
-      "j": -173,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 44,
-      "j": -167,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 43,
-      "j": -171,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 54,
-      "j": -168,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 42,
-      "j": -172,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 54,
-      "j": -153,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 43,
-      "j": -124,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 48,
-      "j": -125,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 41,
-      "j": -130,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 43,
-      "j": -126,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 41,
-      "j": -101,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 56,
-      "j": -110,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 42,
-      "j": -117,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 48,
-      "j": -110,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 45,
-      "j": -115,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 50,
-      "j": -92,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 47,
-      "j": -92,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 45,
-      "j": -99,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 43,
-      "j": -85,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 58,
-      "j": -79,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 59,
-      "j": -72,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 48,
-      "j": -63,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 47,
-      "j": -71,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 41,
-      "j": -76,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 45,
-      "j": -57,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 56,
-      "j": -55,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 44,
-      "j": -58,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 57,
-      "j": -48,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 54,
-      "j": -44,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 42,
-      "j": -26,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 58,
-      "j": -17,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 53,
-      "j": -16,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 60,
-      "j": -196,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 62,
-      "j": -174,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 69,
-      "j": -150,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 63,
-      "j": -141,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 67,
-      "j": -141,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 68,
-      "j": -129,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 76,
-      "j": -124,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 72,
-      "j": -123,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 64,
-      "j": -122,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 61,
-      "j": -112,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 79,
-      "j": -82,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 71,
-      "j": -81,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 66,
-      "j": -78,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 77,
-      "j": -43,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 65,
-      "j": -52,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 78,
-      "j": -34,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 77,
-      "j": -35,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 76,
-      "j": -24,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 66,
-      "j": -15,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 91,
-      "j": -189,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 99,
-      "j": -185,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 90,
-      "j": -189,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 82,
-      "j": -188,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 98,
-      "j": -159,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 93,
-      "j": -121,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 82,
-      "j": -127,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 81,
-      "j": -136,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 83,
-      "j": -118,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 90,
-      "j": -102,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 99,
-      "j": -93,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 81,
-      "j": -85,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 90,
-      "j": -90,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 87,
-      "j": -25,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 81,
-      "j": -29,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 95,
-      "j": -35,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 80,
-      "j": -35,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 84,
-      "j": -8,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 83,
-      "j": -2,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 93,
-      "j": -7,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 103,
-      "j": -194,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 102,
-      "j": -170,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 106,
-      "j": -180,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 114,
-      "j": -176,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 103,
-      "j": -171,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 110,
-      "j": -153,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 111,
-      "j": -146,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 114,
-      "j": -141,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 117,
-      "j": -130,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 117,
-      "j": -112,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 107,
-      "j": -85,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 118,
+      "i": 0,
       "j": -89,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 108,
+      "i": 7,
+      "j": -83,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 6,
+      "j": -83,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 13,
+      "j": -91,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 11,
+      "j": -88,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 2,
+      "j": -62,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 0,
+      "j": -79,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 0,
+      "j": -66,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 9,
+      "j": -51,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 11,
+      "j": -53,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 8,
+      "j": -35,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 10,
+      "j": -10,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 13,
+      "j": -16,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 11,
+      "j": -10,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 4,
+      "j": -8,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 13,
+      "j": -12,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 25,
+      "j": -200,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 36,
+      "j": -188,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 30,
+      "j": -193,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 25,
+      "j": -161,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 33,
+      "j": -168,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 25,
+      "j": -144,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 32,
+      "j": -157,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 29,
+      "j": -139,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 32,
+      "j": -127,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 26,
+      "j": -140,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 35,
+      "j": -135,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 26,
+      "j": -117,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 30,
+      "j": -93,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 25,
+      "j": -93,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 31,
+      "j": -99,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 28,
+      "j": -78,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 30,
+      "j": -58,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 21,
+      "j": -60,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 33,
+      "j": -57,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 37,
+      "j": -59,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 36,
+      "j": -45,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 28,
+      "j": -21,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 33,
+      "j": -21,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 30,
+      "j": -12,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 20,
+      "j": -10,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 52,
+      "j": -198,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 48,
+      "j": -176,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 53,
+      "j": -164,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 42,
+      "j": -161,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 41,
+      "j": -163,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 57,
+      "j": -180,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 49,
+      "j": -167,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 55,
+      "j": -149,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 53,
+      "j": -147,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 40,
+      "j": -125,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 46,
+      "j": -126,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 50,
+      "j": -126,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 54,
+      "j": -103,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 51,
+      "j": -104,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 58,
+      "j": -89,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 57,
+      "j": -90,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 52,
       "j": -84,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 107,
-      "j": -85,
+      "i": 45,
+      "j": -76,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 117,
-      "j": -82,
+      "i": 51,
+      "j": -76,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 58,
+      "j": -76,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 109,
-      "j": -79,
+      "i": 51,
+      "j": -80,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 51,
+      "j": -71,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 111,
+      "i": 43,
       "j": -65,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 112,
-      "j": -64,
+      "i": 48,
+      "j": -79,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 103,
-      "j": -71,
+      "i": 41,
+      "j": -51,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 100,
-      "j": -77,
+      "i": 58,
+      "j": -29,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 43,
+      "j": -23,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 49,
+      "j": -30,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 117,
-      "j": -48,
+      "i": 51,
+      "j": -12,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 102,
-      "j": -38,
+      "i": 47,
+      "j": -17,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 102,
-      "j": -22,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 119,
-      "j": -33,
+      "i": 54,
+      "j": -17,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 101,
+      "i": 73,
+      "j": -179,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 73,
+      "j": -164,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 72,
+      "j": -173,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 70,
+      "j": -148,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 71,
+      "j": -160,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 72,
+      "j": -146,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 67,
+      "j": -149,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 62,
+      "j": -136,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 71,
+      "j": -107,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 66,
+      "j": -109,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 71,
+      "j": -101,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 68,
+      "j": -118,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 76,
+      "j": -88,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 72,
+      "j": -89,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 71,
+      "j": -89,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 60,
+      "j": -66,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 65,
+      "j": -80,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 61,
+      "j": -66,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 60,
+      "j": -57,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 61,
+      "j": -40,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 66,
+      "j": -29,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 76,
       "j": -24,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 106,
-      "j": -26,
+      "i": 66,
+      "j": -40,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 66,
+      "j": -24,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 71,
+      "j": -4,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 79,
+      "j": -5,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 60,
+      "j": -8,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 71,
+      "j": -14,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 79,
+      "j": -20,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 92,
+      "j": -169,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 93,
+      "j": -165,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 81,
+      "j": -159,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 97,
+      "j": -160,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 92,
+      "j": -124,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 92,
+      "j": -106,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 81,
+      "j": -120,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 91,
+      "j": -71,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 98,
+      "j": -74,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 85,
+      "j": -79,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 80,
+      "j": -76,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 93,
+      "j": -71,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 94,
+      "j": -58,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 84,
+      "j": -60,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 97,
+      "j": -60,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 96,
+      "j": -43,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 84,
+      "j": -54,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 97,
+      "j": -32,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 90,
+      "j": -31,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 91,
+      "j": -38,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 86,
+      "j": -6,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 113,
+      "j": -194,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 100,
+      "j": -195,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 102,
+      "j": -184,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 105,
+      "j": -169,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 108,
+      "j": -176,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 112,
+      "j": -162,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 119,
+      "j": -176,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 101,
+      "j": -171,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 118,
+      "j": -169,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 104,
+      "j": -147,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 106,
-      "j": -32,
+      "j": -153,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 105,
+      "j": -149,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 115,
+      "j": -108,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 110,
+      "j": -111,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 103,
+      "j": -117,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 107,
+      "j": -106,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 109,
+      "j": -102,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 102,
+      "j": -102,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 106,
+      "j": -83,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 118,
+      "j": -91,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 104,
+      "j": -65,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 114,
+      "j": -41,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 107,
+      "j": -45,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 110,
+      "j": -44,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 105,
+      "j": -50,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 116,
+      "j": -52,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 104,
+      "j": -41,
       "type": "random",
       "src": "../char/joob/"
     },
@@ -1004,752 +986,674 @@
       "src": "../char/joob/"
     },
     {
+      "i": 108,
+      "j": -26,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 119,
+      "j": -36,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
       "i": 111,
       "j": -3,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 133,
-      "j": -196,
-      "type": "random",
-      "src": "../char/joob/"
+      "i": 107,
+      "j": -3,
+      "type": "random-walk",
+      "src": "../char/not-found/"
     },
     {
-      "i": 128,
+      "i": 123,
+      "j": -189,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 124,
       "j": -183,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 129,
-      "j": -180,
       "type": "random",
       "src": "../char/joob/"
-    },
-    {
-      "i": 132,
-      "j": -169,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 135,
-      "j": -161,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 126,
-      "j": -180,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 126,
-      "j": -159,
-      "type": "random-walk",
-      "src": "../char/not-found/"
     },
     {
       "i": 127,
-      "j": -155,
+      "j": -189,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 139,
+      "i": 125,
+      "j": -177,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 131,
+      "j": -178,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 137,
+      "j": -171,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 125,
       "j": -145,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 134,
-      "j": -148,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 136,
-      "j": -141,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 133,
-      "j": -123,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 132,
-      "j": -129,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 129,
-      "j": -116,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 134,
-      "j": -101,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 132,
-      "j": -114,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 139,
-      "j": -83,
+      "i": 128,
+      "j": -145,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
       "i": 137,
-      "j": -85,
+      "j": -147,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 121,
-      "j": -96,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 132,
-      "j": -63,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 129,
-      "j": -62,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 122,
-      "j": -65,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 139,
-      "j": -79,
+      "i": 120,
+      "j": -138,
       "type": "random",
       "src": "../char/joob/"
-    },
-    {
-      "i": 133,
-      "j": -60,
-      "type": "random-walk",
-      "src": "../char/not-found/"
     },
     {
       "i": 137,
-      "j": -54,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 138,
-      "j": -59,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 133,
-      "j": -28,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 126,
-      "j": -23,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 121,
-      "j": -33,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 130,
-      "j": -6,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 150,
-      "j": -182,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 156,
-      "j": -166,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 158,
-      "j": -166,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 144,
-      "j": -175,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 146,
-      "j": -180,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 149,
-      "j": -147,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 147,
-      "j": -143,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 154,
-      "j": -143,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 145,
-      "j": -147,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 152,
       "j": -125,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 153,
-      "j": -119,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 141,
-      "j": -109,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 141,
-      "j": -87,
+      "i": 136,
+      "j": -114,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 146,
-      "j": -89,
+      "i": 128,
+      "j": -104,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 145,
-      "j": -87,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 155,
-      "j": -68,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 149,
-      "j": -69,
+      "i": 129,
+      "j": -64,
       "type": "random",
       "src": "../char/joob/"
+    },
+    {
+      "i": 121,
+      "j": -37,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 128,
+      "j": -23,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 126,
+      "j": -12,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 132,
+      "j": -14,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 123,
+      "j": -6,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 121,
+      "j": -11,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 152,
+      "j": -184,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 154,
+      "j": -182,
+      "type": "random-walk",
+      "src": "../char/not-found/"
     },
     {
       "i": 144,
-      "j": -75,
+      "j": -180,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 148,
-      "j": -78,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 158,
-      "j": -76,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 148,
-      "j": -59,
+      "i": 140,
+      "j": -151,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
       "i": 157,
-      "j": -44,
+      "j": -153,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 143,
-      "j": -51,
+      "i": 147,
+      "j": -134,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 152,
-      "j": -57,
+      "i": 156,
+      "j": -140,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 147,
+      "j": -101,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 159,
-      "j": -43,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 154,
-      "j": -60,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 156,
-      "j": -32,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 154,
-      "j": -36,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 144,
-      "j": -20,
+      "j": -120,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 147,
-      "j": -11,
+      "i": 143,
+      "j": -117,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 142,
+      "j": -96,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 142,
+      "j": -84,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 158,
+      "j": -80,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 159,
+      "j": -62,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 150,
+      "j": -72,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 141,
+      "j": -73,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 158,
+      "j": -76,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 150,
+      "j": -77,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 140,
-      "j": -7,
+      "j": -61,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 169,
-      "j": -182,
+      "i": 159,
+      "j": -46,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 149,
+      "j": -46,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 167,
+      "i": 148,
+      "j": -25,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 154,
+      "j": -28,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 151,
+      "j": -39,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 143,
+      "j": -16,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 156,
+      "j": -12,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 166,
       "j": -193,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 176,
-      "j": -200,
+      "i": 165,
+      "j": -183,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 161,
+      "j": -193,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 171,
-      "j": -170,
+      "i": 177,
+      "j": -184,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 168,
+      "j": -173,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 163,
+      "j": -167,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
       "i": 174,
-      "j": -165,
+      "j": -148,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 167,
-      "j": -168,
+      "i": 175,
+      "j": -144,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 162,
-      "j": -162,
+      "i": 166,
+      "j": -145,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 165,
-      "j": -168,
+      "i": 173,
+      "j": -149,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 163,
-      "j": -156,
+      "i": 175,
+      "j": -151,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 160,
+      "j": -153,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
       "i": 172,
-      "j": -158,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 168,
-      "j": -146,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 164,
       "j": -151,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 168,
-      "j": -130,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 173,
-      "j": -136,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 178,
-      "j": -129,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 173,
-      "j": -108,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 175,
-      "j": -81,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 173,
-      "j": -99,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 177,
-      "j": -97,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 177,
-      "j": -72,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 170,
-      "j": -65,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 163,
-      "j": -71,
+      "j": -134,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 165,
-      "j": -45,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 172,
-      "j": -56,
+      "j": -139,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 177,
-      "j": -25,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 173,
-      "j": -14,
+      "j": -137,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 184,
-      "j": -191,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 189,
-      "j": -192,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 196,
-      "j": -195,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 197,
-      "j": -192,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 191,
-      "j": -200,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 195,
-      "j": -176,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 190,
-      "j": -177,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 182,
-      "j": -165,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 183,
-      "j": -174,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 181,
-      "j": -162,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 184,
-      "j": -163,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 187,
-      "j": -157,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 193,
-      "j": -141,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 199,
-      "j": -149,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 196,
+      "i": 176,
       "j": -139,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 180,
-      "j": -132,
+      "i": 171,
+      "j": -81,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 180,
-      "j": -130,
+      "i": 176,
+      "j": -84,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 186,
-      "j": -137,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 192,
-      "j": -110,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 183,
-      "j": -97,
+      "i": 179,
+      "j": -93,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 183,
-      "j": -72,
-      "type": "random-walk",
-      "src": "../char/not-found/"
+      "i": 164,
+      "j": -87,
+      "type": "random",
+      "src": "../char/joob/"
     },
     {
-      "i": 187,
+      "i": 171,
+      "j": -98,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 172,
+      "j": -85,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 173,
       "j": -65,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
-      "i": 192,
+      "i": 168,
+      "j": -80,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 173,
+      "j": -73,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 171,
+      "j": -43,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 170,
+      "j": -42,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 164,
+      "j": -6,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 174,
+      "j": -13,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 177,
+      "j": -13,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 170,
+      "j": -3,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 174,
+      "j": -8,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 188,
+      "j": -193,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 197,
+      "j": -188,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 182,
+      "j": -186,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 196,
+      "j": -171,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 195,
+      "j": -180,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 186,
+      "j": -161,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 198,
+      "j": -134,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 184,
+      "j": -135,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 187,
+      "j": -124,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 196,
+      "j": -118,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 183,
+      "j": -111,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 185,
+      "j": -105,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 183,
+      "j": -119,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 193,
+      "j": -113,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 194,
+      "j": -117,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 184,
+      "j": -84,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 185,
+      "j": -99,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 183,
+      "j": -83,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 193,
+      "j": -79,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 184,
       "j": -77,
       "type": "random",
       "src": "../char/joob/"
     },
     {
       "i": 199,
-      "j": -65,
-      "type": "random",
-      "src": "../char/joob/"
+      "j": -80,
+      "type": "random-walk",
+      "src": "../char/not-found/"
     },
     {
       "i": 184,
-      "j": -54,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 183,
-      "j": -49,
+      "j": -78,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
       "i": 196,
-      "j": -26,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 186,
-      "j": -30,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 187,
-      "j": -33,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 191,
-      "j": -30,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 185,
-      "j": -40,
-      "type": "random",
-      "src": "../char/joob/"
-    },
-    {
-      "i": 186,
-      "j": -34,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 196,
-      "j": -19,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 180,
-      "j": -10,
-      "type": "random-walk",
-      "src": "../char/not-found/"
-    },
-    {
-      "i": 199,
-      "j": -20,
+      "j": -45,
       "type": "random-walk",
       "src": "../char/not-found/"
     },
     {
       "i": 193,
-      "j": -19,
+      "j": -60,
       "type": "random",
       "src": "../char/joob/"
     },
     {
-      "i": 191,
-      "j": -15,
+      "i": 182,
+      "j": -56,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 195,
+      "j": -26,
+      "type": "random",
+      "src": "../char/joob/"
+    },
+    {
+      "i": 189,
+      "j": -29,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 181,
+      "j": -26,
+      "type": "random-walk",
+      "src": "../char/not-found/"
+    },
+    {
+      "i": 189,
+      "j": -14,
       "type": "random-walk",
       "src": "../char/not-found/"
     }
@@ -1757,3132 +1661,2946 @@
   "items": [
     {
       "i": 7,
-      "j": -192,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 5,
-      "j": -187,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 5,
-      "j": -185,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 18,
-      "j": -188,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 5,
-      "j": -171,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 9,
-      "j": -161,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 5,
-      "j": -171,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 15,
-      "j": -177,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 11,
-      "j": -173,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 12,
-      "j": -157,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 1,
-      "j": -145,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 8,
-      "j": -150,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 17,
-      "j": -142,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 1,
-      "j": -158,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 9,
-      "j": -152,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 10,
-      "j": -156,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 10,
-      "j": -134,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 9,
-      "j": -137,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 15,
-      "j": -122,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 1,
-      "j": -126,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 1,
-      "j": -136,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 16,
-      "j": -140,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 11,
-      "j": -114,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 13,
-      "j": -105,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 6,
-      "j": -104,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 16,
-      "j": -115,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 5,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 10,
-      "j": -101,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 14,
-      "j": -119,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 2,
-      "j": -117,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 7,
-      "j": -84,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 1,
-      "j": -100,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 12,
-      "j": -96,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 16,
-      "j": -100,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 3,
-      "j": -62,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 7,
-      "j": -68,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 3,
-      "j": -71,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 11,
-      "j": -75,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 3,
-      "j": -67,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 5,
-      "j": -80,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 19,
-      "j": -76,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 1,
-      "j": -60,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 12,
-      "j": -57,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 19,
-      "j": -46,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 4,
-      "j": -54,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 6,
-      "j": -29,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 7,
-      "j": -39,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 11,
-      "j": -25,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 13,
-      "j": -1,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 12,
-      "j": -11,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 11,
-      "j": -4,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 15,
-      "j": -18,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 36,
-      "j": -185,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 34,
-      "j": -184,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 33,
-      "j": -187,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 21,
-      "j": -196,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 25,
-      "j": -191,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 24,
-      "j": -184,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 28,
-      "j": -187,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 31,
-      "j": -175,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 31,
-      "j": -164,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 25,
-      "j": -161,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 32,
-      "j": -164,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 27,
-      "j": -167,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 30,
-      "j": -159,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 23,
-      "j": -159,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 20,
-      "j": -157,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 25,
-      "j": -155,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 21,
-      "j": -151,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 31,
-      "j": -142,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 36,
-      "j": -133,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 25,
-      "j": -129,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 27,
-      "j": -140,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 25,
-      "j": -127,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 21,
-      "j": -126,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 23,
-      "j": -105,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 35,
-      "j": -111,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 22,
-      "j": -110,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 36,
-      "j": -103,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 32,
-      "j": -102,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 21,
-      "j": -110,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 38,
-      "j": -119,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 21,
-      "j": -110,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 21,
-      "j": -92,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 39,
-      "j": -88,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 30,
-      "j": -90,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 29,
-      "j": -87,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 33,
-      "j": -94,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 23,
-      "j": -82,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 20,
-      "j": -89,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 31,
-      "j": -79,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 31,
-      "j": -66,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 22,
-      "j": -72,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 26,
-      "j": -62,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 25,
-      "j": -73,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 38,
-      "j": -71,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 24,
-      "j": -80,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 27,
-      "j": -72,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 26,
-      "j": -66,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 33,
-      "j": -77,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 27,
-      "j": -47,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 28,
-      "j": -57,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 28,
-      "j": -51,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 39,
-      "j": -45,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 37,
-      "j": -60,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 34,
-      "j": -60,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 21,
-      "j": -60,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 24,
-      "j": -60,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 26,
-      "j": -55,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 36,
-      "j": -23,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 37,
-      "j": -33,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 21,
-      "j": -39,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 32,
-      "j": -39,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 26,
-      "j": -29,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 36,
-      "j": -21,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 23,
-      "j": -17,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 24,
-      "j": -14,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 39,
-      "j": -13,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 27,
-      "j": -1,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 44,
       "j": -196,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 55,
-      "j": -191,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 57,
-      "j": -199,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 53,
-      "j": -194,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 42,
-      "j": -177,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 58,
-      "j": -161,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 55,
-      "j": -171,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 51,
-      "j": -179,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 56,
-      "j": -173,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 50,
-      "j": -167,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 43,
-      "j": -162,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 48,
-      "j": -149,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 57,
-      "j": -145,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 47,
-      "j": -155,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 55,
-      "j": -155,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 51,
-      "j": -155,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 58,
-      "j": -142,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 52,
-      "j": -136,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 49,
-      "j": -127,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 58,
-      "j": -130,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 40,
-      "j": -127,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 47,
-      "j": -138,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 49,
-      "j": -129,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 51,
-      "j": -126,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 56,
-      "j": -126,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 57,
-      "j": -139,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 48,
-      "j": -126,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 44,
-      "j": -107,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 51,
-      "j": -102,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 40,
-      "j": -105,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 44,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 50,
-      "j": -111,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 52,
-      "j": -112,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 45,
-      "j": -90,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 53,
-      "j": -92,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 42,
-      "j": -98,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 58,
-      "j": -94,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 50,
-      "j": -98,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 54,
-      "j": -95,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 41,
-      "j": -83,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 51,
-      "j": -89,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 55,
-      "j": -100,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 54,
-      "j": -77,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 45,
-      "j": -74,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 40,
-      "j": -54,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 56,
-      "j": -45,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 45,
-      "j": -47,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 47,
-      "j": -56,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 50,
-      "j": -47,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 41,
-      "j": -60,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 47,
-      "j": -33,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 51,
-      "j": -27,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 41,
-      "j": -28,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 41,
-      "j": -27,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 40,
-      "j": -32,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 40,
-      "j": -36,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 47,
-      "j": -2,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 47,
-      "j": -5,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 59,
-      "j": -20,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 49,
-      "j": -6,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 42,
-      "j": -10,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 43,
-      "j": -11,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 41,
-      "j": -6,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 52,
-      "j": -16,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 74,
-      "j": -186,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 72,
-      "j": -188,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 77,
-      "j": -182,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 79,
-      "j": -200,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 71,
-      "j": -194,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 64,
-      "j": -164,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 64,
-      "j": -165,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 62,
-      "j": -171,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 70,
-      "j": -165,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 75,
-      "j": -163,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 62,
-      "j": -179,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 72,
-      "j": -173,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 75,
-      "j": -175,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 75,
-      "j": -164,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 79,
-      "j": -150,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 62,
-      "j": -144,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 64,
-      "j": -157,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 73,
-      "j": -143,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 76,
-      "j": -141,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 63,
-      "j": -136,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 68,
-      "j": -138,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 72,
-      "j": -122,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 62,
-      "j": -122,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 60,
-      "j": -138,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 66,
-      "j": -132,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 72,
-      "j": -122,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 63,
-      "j": -117,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 67,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 64,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 79,
-      "j": -83,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 77,
-      "j": -93,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 66,
-      "j": -97,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 70,
-      "j": -82,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 64,
-      "j": -83,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 77,
-      "j": -100,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 72,
-      "j": -92,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 61,
-      "j": -80,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 63,
-      "j": -74,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 66,
-      "j": -69,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 79,
-      "j": -80,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 71,
-      "j": -69,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 77,
-      "j": -66,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 77,
-      "j": -50,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 77,
-      "j": -49,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 69,
-      "j": -44,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 63,
-      "j": -57,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 75,
-      "j": -54,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 65,
-      "j": -21,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 71,
-      "j": -40,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 73,
-      "j": -31,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 60,
-      "j": -21,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 74,
-      "j": -29,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 77,
-      "j": -28,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 70,
-      "j": -5,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 71,
-      "j": -12,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 67,
-      "j": -7,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 90,
-      "j": -195,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 90,
-      "j": -184,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 93,
-      "j": -190,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 97,
-      "j": -181,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 97,
-      "j": -199,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 95,
-      "j": -193,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 98,
-      "j": -187,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 82,
-      "j": -197,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 96,
-      "j": -188,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 99,
-      "j": -194,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 84,
-      "j": -199,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 86,
-      "j": -172,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 92,
-      "j": -170,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 85,
-      "j": -174,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -178,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 95,
-      "j": -156,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 90,
-      "j": -147,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 83,
-      "j": -154,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 94,
-      "j": -159,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 83,
-      "j": -124,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 90,
-      "j": -125,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 92,
-      "j": -127,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 84,
-      "j": -124,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 84,
-      "j": -129,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 87,
-      "j": -123,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 90,
-      "j": -103,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 87,
-      "j": -107,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -114,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 89,
-      "j": -112,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 90,
-      "j": -106,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 88,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -108,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 97,
-      "j": -111,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -101,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 97,
-      "j": -81,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 93,
-      "j": -81,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 94,
-      "j": -99,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 82,
-      "j": -100,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 83,
-      "j": -97,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 95,
-      "j": -86,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 97,
-      "j": -98,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 82,
-      "j": -95,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 91,
-      "j": -97,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -96,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 92,
-      "j": -97,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 94,
-      "j": -83,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 82,
-      "j": -80,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 92,
-      "j": -71,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 92,
-      "j": -71,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 98,
-      "j": -70,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 99,
-      "j": -77,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 99,
-      "j": -62,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -79,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 86,
-      "j": -80,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 91,
-      "j": -61,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 89,
-      "j": -78,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 81,
-      "j": -43,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 99,
-      "j": -44,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 80,
-      "j": -44,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 85,
-      "j": -41,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 82,
-      "j": -57,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 95,
-      "j": -33,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 96,
-      "j": -26,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 96,
-      "j": -30,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 81,
-      "j": -32,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 90,
-      "j": -35,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 97,
-      "j": -22,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 82,
-      "j": -39,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 89,
-      "j": -40,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 97,
-      "j": -40,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 86,
-      "j": -27,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 99,
-      "j": -24,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 82,
-      "j": -13,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 84,
-      "j": -13,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 86,
-      "j": -10,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 93,
-      "j": -7,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 86,
-      "j": -8,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 118,
-      "j": -198,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 103,
-      "j": -195,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 102,
-      "j": -198,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 113,
-      "j": -194,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 109,
-      "j": -191,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 111,
-      "j": -190,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 113,
-      "j": -200,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 112,
-      "j": -180,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 118,
-      "j": -177,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 119,
-      "j": -171,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 102,
-      "j": -176,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 100,
-      "j": -167,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 105,
-      "j": -168,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 118,
-      "j": -153,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 116,
-      "j": -156,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 114,
-      "j": -157,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 115,
-      "j": -160,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 101,
-      "j": -127,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 100,
-      "j": -125,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 117,
-      "j": -139,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 107,
-      "j": -128,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 109,
-      "j": -133,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 103,
-      "j": -139,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 107,
-      "j": -137,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 102,
-      "j": -139,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 109,
-      "j": -128,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 107,
-      "j": -137,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 103,
-      "j": -113,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 119,
-      "j": -106,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 100,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 104,
-      "j": -116,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 105,
-      "j": -101,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 116,
-      "j": -105,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 106,
-      "j": -106,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 117,
-      "j": -119,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 117,
-      "j": -91,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 111,
-      "j": -89,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 108,
-      "j": -100,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 102,
-      "j": -82,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 110,
-      "j": -82,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 101,
-      "j": -85,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 108,
-      "j": -85,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 115,
-      "j": -96,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 109,
-      "j": -99,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 117,
-      "j": -85,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 114,
-      "j": -89,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 119,
-      "j": -84,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 108,
-      "j": -62,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 119,
-      "j": -69,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 114,
-      "j": -76,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 105,
-      "j": -42,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 118,
-      "j": -41,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 101,
-      "j": -49,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 105,
-      "j": -49,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 111,
-      "j": -55,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 113,
-      "j": -57,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 109,
-      "j": -53,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 105,
-      "j": -54,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 104,
-      "j": -43,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 105,
-      "j": -50,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 103,
-      "j": -57,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 114,
-      "j": -45,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 119,
-      "j": -60,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 112,
-      "j": -25,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 112,
-      "j": -24,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 109,
-      "j": -22,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 116,
-      "j": -35,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 105,
-      "j": -24,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 103,
-      "j": -36,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 117,
-      "j": -28,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 110,
-      "j": -13,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 113,
-      "j": -8,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 116,
-      "j": -9,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 104,
-      "j": -11,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 128,
-      "j": -182,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 122,
-      "j": -193,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 134,
-      "j": -200,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 129,
-      "j": -187,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 132,
-      "j": -189,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 136,
-      "j": -187,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 135,
-      "j": -199,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 135,
-      "j": -165,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 120,
-      "j": -167,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 122,
-      "j": -149,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 122,
-      "j": -148,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 128,
-      "j": -157,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 128,
-      "j": -144,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 121,
-      "j": -134,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 137,
-      "j": -122,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 133,
-      "j": -123,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 137,
-      "j": -125,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 131,
-      "j": -131,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 132,
-      "j": -124,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 122,
-      "j": -122,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 131,
-      "j": -123,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 138,
-      "j": -131,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 133,
-      "j": -122,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 120,
-      "j": -128,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 133,
-      "j": -119,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 127,
-      "j": -117,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 132,
-      "j": -110,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 123,
-      "j": -120,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 120,
-      "j": -96,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 126,
-      "j": -94,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 132,
-      "j": -93,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 133,
-      "j": -99,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 127,
-      "j": -90,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 129,
-      "j": -85,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 137,
-      "j": -91,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 136,
-      "j": -97,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 136,
-      "j": -82,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 128,
-      "j": -93,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 134,
-      "j": -84,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 121,
-      "j": -85,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 120,
-      "j": -93,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 138,
-      "j": -73,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 122,
-      "j": -63,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 123,
-      "j": -65,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 135,
-      "j": -76,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 128,
-      "j": -64,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 124,
-      "j": -75,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 139,
-      "j": -63,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 129,
-      "j": -75,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 137,
-      "j": -64,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 131,
-      "j": -64,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 130,
-      "j": -78,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 138,
-      "j": -73,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 120,
-      "j": -61,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 126,
-      "j": -58,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 123,
-      "j": -54,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 133,
-      "j": -43,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 138,
-      "j": -47,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 122,
-      "j": -51,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 132,
-      "j": -46,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 133,
-      "j": -41,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 123,
-      "j": -33,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 132,
-      "j": -29,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 125,
-      "j": -29,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 124,
-      "j": -32,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 131,
-      "j": -32,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 127,
-      "j": -23,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 129,
-      "j": -10,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 125,
-      "j": -17,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 131,
-      "j": -19,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 131,
-      "j": -14,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 138,
-      "j": -11,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 155,
-      "j": -193,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 155,
+      "i": 10,
       "j": -183,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 141,
-      "j": -192,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 151,
-      "j": -199,
+      "i": 11,
+      "j": -191,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 148,
-      "j": -192,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 145,
-      "j": -187,
+      "i": 8,
+      "j": -190,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 141,
-      "j": -200,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 146,
-      "j": -176,
+      "i": 3,
+      "j": -197,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 148,
+      "i": 10,
+      "j": -180,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 13,
+      "j": -168,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 10,
+      "j": -179,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 12,
+      "j": -169,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 18,
       "j": -167,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 145,
-      "j": -178,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 147,
-      "j": -177,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 158,
-      "j": -162,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
-      "i": 156,
-      "j": -166,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 142,
-      "j": -163,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 157,
-      "j": -152,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 151,
-      "j": -148,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 157,
-      "j": -148,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 141,
-      "j": -144,
+      "i": 11,
+      "j": -141,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
-      "i": 156,
+      "i": 1,
+      "j": -155,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 10,
+      "j": -155,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 8,
       "j": -153,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 153,
-      "j": -125,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
+      "i": 10,
+      "j": -134,
+      "type": "apple",
+      "src": "../item/apple.png"
     },
     {
-      "i": 148,
+      "i": 3,
+      "j": -137,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 18,
       "j": -139,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 144,
-      "j": -132,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 156,
-      "j": -121,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 146,
-      "j": -135,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 158,
-      "j": -121,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 155,
-      "j": -136,
+      "i": 0,
+      "j": -129,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 141,
-      "j": -137,
+      "i": 10,
+      "j": -139,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 146,
+      "i": 13,
       "j": -133,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 149,
+      "i": 12,
+      "j": -127,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 11,
+      "j": -116,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 2,
+      "j": -111,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 1,
+      "j": -115,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 1,
+      "j": -118,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 19,
       "j": -112,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 153,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 140,
-      "j": -110,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 155,
-      "j": -105,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 147,
-      "j": -114,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 149,
-      "j": -109,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 157,
-      "j": -107,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 148,
-      "j": -87,
+      "i": 2,
+      "j": -113,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 147,
-      "j": -89,
+      "i": 7,
+      "j": -106,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 144,
-      "j": -94,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 156,
-      "j": -90,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 140,
-      "j": -89,
+      "i": 19,
+      "j": -115,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 144,
-      "j": -83,
+      "i": 9,
+      "j": -111,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 159,
-      "j": -99,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 159,
+      "i": 3,
       "j": -98,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 143,
+      "i": 9,
+      "j": -99,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 11,
+      "j": -96,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 6,
+      "j": -83,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 0,
+      "j": -84,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 11,
+      "j": -98,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 17,
+      "j": -86,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 16,
+      "j": -76,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 12,
       "j": -75,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 1,
+      "j": -76,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 143,
-      "j": -62,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 155,
+      "i": 13,
       "j": -63,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 142,
-      "j": -75,
+      "i": 10,
+      "j": -69,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 144,
-      "j": -79,
+      "i": 10,
+      "j": -76,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 159,
+      "i": 1,
       "j": -78,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 142,
-      "j": -68,
+      "i": 10,
+      "j": -49,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 146,
-      "j": -56,
+      "i": 6,
+      "j": -60,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 2,
+      "j": -45,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 19,
+      "j": -51,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 18,
+      "j": -59,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 10,
+      "j": -60,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
-      "i": 155,
-      "j": -47,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 152,
-      "j": -47,
+      "i": 0,
+      "j": -54,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 152,
-      "j": -44,
+      "i": 0,
+      "j": -29,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 5,
+      "j": -22,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 157,
-      "j": -42,
+      "i": 10,
+      "j": -25,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 6,
+      "j": -31,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 19,
+      "j": -26,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 145,
+      "i": 8,
+      "j": -39,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 19,
+      "j": -38,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 3,
+      "j": -11,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 17,
+      "j": -4,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 15,
+      "j": -13,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 15,
+      "j": -18,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 11,
+      "j": -10,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 19,
+      "j": -1,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 32,
+      "j": -189,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 22,
+      "j": -196,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 34,
+      "j": -199,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 32,
+      "j": -198,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 29,
+      "j": -186,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 37,
+      "j": -200,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 25,
+      "j": -186,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 39,
+      "j": -175,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 37,
+      "j": -171,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 37,
+      "j": -169,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 26,
+      "j": -177,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 34,
+      "j": -174,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 20,
+      "j": -171,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 27,
+      "j": -173,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 29,
+      "j": -164,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 22,
+      "j": -158,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 25,
+      "j": -151,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 36,
+      "j": -143,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 30,
+      "j": -141,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 27,
+      "j": -157,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 26,
+      "j": -141,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 35,
+      "j": -159,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 26,
+      "j": -157,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 39,
+      "j": -134,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 25,
+      "j": -121,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 28,
+      "j": -124,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 39,
+      "j": -126,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 20,
+      "j": -103,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 26,
+      "j": -103,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 38,
+      "j": -120,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 27,
+      "j": -107,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 32,
+      "j": -102,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 23,
+      "j": -111,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 38,
+      "j": -103,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 26,
+      "j": -119,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 30,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 28,
+      "j": -93,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 26,
+      "j": -82,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 36,
+      "j": -87,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 38,
+      "j": -98,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 38,
+      "j": -98,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 39,
+      "j": -84,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 38,
+      "j": -98,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 34,
+      "j": -97,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 37,
+      "j": -94,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 30,
+      "j": -69,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 32,
+      "j": -73,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 33,
+      "j": -80,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 34,
+      "j": -65,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 34,
+      "j": -75,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 20,
+      "j": -69,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 37,
+      "j": -80,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 29,
+      "j": -78,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 35,
       "j": -57,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 157,
+      "i": 30,
+      "j": -60,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 34,
+      "j": -53,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 37,
+      "j": -49,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 23,
+      "j": -54,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 33,
+      "j": -43,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 39,
+      "j": -21,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 39,
+      "j": -32,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 28,
+      "j": -7,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 38,
+      "j": -8,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 30,
+      "j": -10,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 36,
+      "j": -14,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -181,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 58,
+      "j": -196,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -187,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 43,
+      "j": -175,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 46,
+      "j": -171,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 45,
+      "j": -168,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 56,
+      "j": -180,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 46,
+      "j": -171,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 51,
+      "j": -178,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -169,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 48,
+      "j": -156,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 54,
+      "j": -152,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 50,
+      "j": -143,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 54,
+      "j": -143,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 48,
+      "j": -158,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 55,
+      "j": -146,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 43,
+      "j": -160,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 41,
+      "j": -142,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -145,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 59,
+      "j": -150,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 42,
+      "j": -124,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 46,
+      "j": -128,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 41,
+      "j": -137,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 51,
+      "j": -136,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 45,
+      "j": -137,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 52,
+      "j": -112,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 50,
+      "j": -116,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 42,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 56,
+      "j": -110,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 46,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 47,
+      "j": -118,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 44,
+      "j": -113,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 48,
+      "j": -115,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 56,
+      "j": -112,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -84,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 57,
+      "j": -84,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 44,
+      "j": -96,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 47,
+      "j": -88,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 48,
+      "j": -81,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 42,
+      "j": -87,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 44,
+      "j": -98,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 40,
+      "j": -82,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 43,
+      "j": -84,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 55,
+      "j": -77,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 46,
+      "j": -68,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 40,
+      "j": -79,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 48,
+      "j": -63,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 47,
+      "j": -76,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 43,
+      "j": -74,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 51,
+      "j": -67,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 44,
+      "j": -76,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 47,
+      "j": -77,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 45,
+      "j": -71,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 40,
+      "j": -53,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 43,
+      "j": -59,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 41,
+      "j": -45,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 47,
+      "j": -44,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 43,
+      "j": -48,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 43,
+      "j": -57,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -46,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 48,
+      "j": -36,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 51,
+      "j": -37,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 57,
+      "j": -31,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 53,
+      "j": -33,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 57,
+      "j": -34,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 48,
+      "j": -18,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 56,
+      "j": -5,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 42,
+      "j": -10,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 50,
+      "j": -2,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 56,
+      "j": -7,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 54,
+      "j": -2,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 66,
+      "j": -186,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 62,
+      "j": -186,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 60,
+      "j": -184,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 79,
+      "j": -188,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 60,
+      "j": -181,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 72,
+      "j": -194,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 74,
+      "j": -192,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 67,
+      "j": -190,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 61,
+      "j": -191,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 70,
+      "j": -192,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 65,
+      "j": -183,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 64,
+      "j": -186,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 70,
+      "j": -188,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 76,
+      "j": -161,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 66,
+      "j": -168,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 70,
+      "j": -174,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 75,
+      "j": -174,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 68,
+      "j": -166,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 79,
+      "j": -178,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 60,
+      "j": -143,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 61,
+      "j": -149,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 61,
+      "j": -160,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 71,
+      "j": -149,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 72,
+      "j": -147,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 73,
+      "j": -149,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 72,
+      "j": -155,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 61,
+      "j": -150,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 67,
+      "j": -132,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 64,
+      "j": -133,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 79,
+      "j": -127,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 63,
+      "j": -120,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 77,
+      "j": -107,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 61,
+      "j": -112,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 73,
+      "j": -112,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 61,
+      "j": -107,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 66,
+      "j": -101,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 72,
+      "j": -119,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 72,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 65,
+      "j": -101,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 64,
+      "j": -101,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 60,
+      "j": -83,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 67,
+      "j": -84,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 63,
+      "j": -90,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 67,
+      "j": -92,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 73,
+      "j": -66,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 79,
+      "j": -72,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 60,
+      "j": -63,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 62,
+      "j": -75,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 73,
+      "j": -47,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 67,
+      "j": -42,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 67,
+      "j": -52,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 70,
+      "j": -54,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 67,
+      "j": -58,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 73,
+      "j": -32,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 70,
+      "j": -28,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 65,
+      "j": -35,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 76,
+      "j": -25,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 74,
+      "j": -14,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 78,
+      "j": -9,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 73,
+      "j": -17,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 63,
+      "j": -10,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 60,
+      "j": -10,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 99,
+      "j": -190,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 80,
+      "j": -187,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 81,
+      "j": -196,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 85,
+      "j": -199,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 84,
+      "j": -199,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 87,
+      "j": -168,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 97,
+      "j": -180,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 91,
+      "j": -176,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 92,
+      "j": -170,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 88,
+      "j": -167,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 94,
+      "j": -173,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 80,
+      "j": -152,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 90,
+      "j": -145,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 88,
+      "j": -143,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 87,
+      "j": -144,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 87,
+      "j": -145,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 99,
+      "j": -151,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 97,
+      "j": -156,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 95,
+      "j": -138,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 90,
+      "j": -137,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 97,
+      "j": -128,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 89,
+      "j": -137,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 90,
+      "j": -140,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 80,
+      "j": -125,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 93,
+      "j": -123,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 86,
+      "j": -109,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 98,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 93,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 99,
+      "j": -118,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 86,
+      "j": -107,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 96,
+      "j": -120,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 96,
+      "j": -113,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 91,
+      "j": -92,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 89,
+      "j": -82,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 88,
+      "j": -84,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 88,
+      "j": -76,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 87,
+      "j": -80,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 86,
+      "j": -69,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 96,
+      "j": -70,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 82,
+      "j": -80,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 87,
+      "j": -64,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 88,
+      "j": -75,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 87,
+      "j": -70,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 92,
+      "j": -65,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 93,
       "j": -48,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
+      "i": 95,
+      "j": -54,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 93,
+      "j": -51,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 95,
+      "j": -52,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 98,
+      "j": -41,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 90,
+      "j": -45,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 82,
+      "j": -25,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 92,
+      "j": -29,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 86,
+      "j": -22,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 94,
+      "j": -34,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 83,
+      "j": -17,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 85,
+      "j": -20,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 92,
+      "j": -3,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 90,
+      "j": -20,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 97,
+      "j": -17,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 86,
+      "j": -12,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 82,
+      "j": -14,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 87,
+      "j": -17,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 104,
+      "j": -200,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 108,
+      "j": -190,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 105,
+      "j": -197,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 104,
+      "j": -187,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 113,
+      "j": -186,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 111,
+      "j": -190,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 114,
+      "j": -197,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 102,
+      "j": -200,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 113,
+      "j": -162,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 112,
+      "j": -173,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 100,
+      "j": -180,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 115,
+      "j": -180,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 107,
+      "j": -165,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 115,
+      "j": -180,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 111,
+      "j": -176,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 110,
+      "j": -162,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 100,
+      "j": -151,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 105,
+      "j": -152,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 118,
+      "j": -149,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 110,
+      "j": -147,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 109,
+      "j": -145,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 115,
+      "j": -149,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 107,
+      "j": -160,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 117,
+      "j": -137,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 106,
+      "j": -122,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 113,
+      "j": -140,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 119,
+      "j": -140,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 111,
+      "j": -110,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 111,
+      "j": -119,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 100,
+      "j": -110,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 119,
+      "j": -120,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 103,
+      "j": -120,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 115,
+      "j": -117,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 108,
+      "j": -106,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 118,
+      "j": -117,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 113,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 107,
+      "j": -83,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 119,
+      "j": -97,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 101,
+      "j": -88,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 114,
+      "j": -96,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 103,
+      "j": -100,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 106,
+      "j": -89,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 104,
+      "j": -95,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 119,
+      "j": -67,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 108,
+      "j": -65,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 103,
+      "j": -77,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 115,
+      "j": -54,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 116,
+      "j": -58,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 119,
+      "j": -45,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 118,
+      "j": -60,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 101,
+      "j": -47,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 109,
+      "j": -50,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 101,
+      "j": -33,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 103,
+      "j": -28,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 111,
+      "j": -38,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 112,
+      "j": -29,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 107,
+      "j": -27,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 100,
+      "j": -38,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 119,
+      "j": -6,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 104,
+      "j": -20,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 115,
+      "j": -20,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 116,
+      "j": -16,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 106,
+      "j": -10,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 109,
+      "j": -11,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 101,
+      "j": -1,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 109,
+      "j": -12,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 112,
+      "j": -12,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 121,
+      "j": -184,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 120,
+      "j": -184,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 124,
+      "j": -183,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 122,
+      "j": -200,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 132,
+      "j": -184,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 125,
+      "j": -192,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 128,
+      "j": -188,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 134,
+      "j": -189,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 128,
+      "j": -191,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 123,
+      "j": -200,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 129,
+      "j": -200,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 125,
+      "j": -184,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 121,
+      "j": -172,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 135,
+      "j": -176,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 121,
+      "j": -179,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 139,
+      "j": -180,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 124,
+      "j": -177,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 136,
+      "j": -177,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 136,
+      "j": -166,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 138,
+      "j": -175,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 137,
+      "j": -178,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 137,
+      "j": -173,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 137,
+      "j": -159,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 137,
+      "j": -152,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 130,
+      "j": -150,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 134,
+      "j": -139,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 139,
+      "j": -136,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 124,
+      "j": -136,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 121,
+      "j": -124,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 120,
+      "j": -131,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 125,
+      "j": -134,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 127,
+      "j": -104,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 132,
+      "j": -114,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 127,
+      "j": -105,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 138,
+      "j": -105,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 124,
+      "j": -85,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 126,
+      "j": -93,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 139,
+      "j": -96,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 139,
+      "j": -96,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 125,
+      "j": -89,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 126,
+      "j": -71,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 120,
+      "j": -62,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 120,
+      "j": -79,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 134,
+      "j": -74,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 133,
+      "j": -68,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 139,
+      "j": -60,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 138,
+      "j": -51,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 125,
+      "j": -47,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 135,
+      "j": -44,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 120,
+      "j": -37,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 137,
+      "j": -31,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 131,
+      "j": -27,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 136,
+      "j": -30,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 122,
+      "j": -23,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 129,
+      "j": -31,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 124,
+      "j": -37,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 133,
+      "j": -7,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 137,
+      "j": -19,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 131,
+      "j": -12,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 128,
+      "j": -16,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 127,
+      "j": -12,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 139,
+      "j": -10,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 151,
+      "j": -185,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 156,
+      "j": -190,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 151,
+      "j": -181,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
       "i": 150,
-      "j": -55,
+      "j": -193,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 158,
+      "j": -176,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 154,
+      "j": -164,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 152,
+      "j": -170,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 154,
+      "j": -176,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 148,
+      "j": -173,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 147,
+      "j": -168,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 152,
+      "j": -148,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 149,
+      "j": -145,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 141,
+      "j": -155,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 154,
+      "j": -148,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 150,
+      "j": -159,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 158,
+      "j": -148,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 146,
+      "j": -131,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 144,
+      "j": -140,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 155,
+      "j": -116,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 151,
+      "j": -107,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 155,
+      "j": -117,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 153,
+      "j": -117,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 142,
+      "j": -111,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 140,
+      "j": -117,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 143,
+      "j": -114,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 152,
+      "j": -82,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 141,
+      "j": -86,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 146,
+      "j": -91,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
       "i": 148,
-      "j": -43,
+      "j": -100,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 159,
+      "j": -85,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 147,
+      "j": -93,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 142,
+      "i": 151,
+      "j": -90,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 143,
+      "j": -76,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 147,
+      "j": -67,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 145,
+      "j": -72,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 155,
+      "j": -69,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 152,
+      "j": -41,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 158,
       "j": -46,
       "type": "apple",
       "src": "../item/apple.png"
@@ -4890,240 +4608,300 @@
     {
       "i": 148,
       "j": -55,
-      "type": "apple",
-      "src": "../item/apple.png"
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
     },
     {
-      "i": 143,
-      "j": -25,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 158,
-      "j": -30,
+      "i": 155,
+      "j": -44,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 148,
+      "i": 143,
+      "j": -47,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 152,
+      "j": -24,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 144,
+      "j": -34,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 153,
+      "j": -27,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 155,
       "j": -22,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 149,
-      "j": -28,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 150,
-      "j": -23,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
+      "i": 146,
+      "j": -22,
+      "type": "apple",
+      "src": "../item/apple.png"
     },
     {
       "i": 157,
-      "j": -31,
+      "j": -32,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 140,
-      "j": -36,
+      "j": -29,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 147,
+      "j": -26,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 153,
+      "j": -28,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 145,
+      "j": -32,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 148,
+      "j": -26,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 148,
+      "j": -4,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 159,
+      "j": -18,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 140,
       "j": -5,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
+      "type": "apple",
+      "src": "../item/apple.png"
     },
     {
-      "i": 144,
-      "j": -9,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
+      "i": 153,
+      "j": -3,
+      "type": "apple",
+      "src": "../item/apple.png"
     },
     {
-      "i": 165,
+      "i": 148,
+      "j": -3,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 143,
+      "j": -19,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 143,
+      "j": -19,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 175,
       "j": -187,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 161,
-      "j": -181,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 163,
-      "j": -162,
+      "i": 171,
+      "j": -193,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 161,
-      "j": -171,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
+      "i": 164,
+      "j": -197,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 169,
+      "j": -196,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 162,
+      "j": -197,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 164,
+      "j": -200,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 167,
+      "j": -184,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 178,
+      "j": -166,
+      "type": "apple",
+      "src": "../item/apple.png"
     },
     {
       "i": 170,
-      "j": -173,
+      "j": -180,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
       "i": 179,
       "j": -176,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 171,
-      "j": -169,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 177,
-      "j": -163,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 169,
-      "j": -176,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 176,
-      "j": -178,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 170,
-      "j": -155,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 170,
-      "j": -150,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 166,
-      "j": -143,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 163,
-      "j": -153,
-      "type": "apple",
-      "src": "../item/apple.png"
+      "i": 160,
+      "j": -180,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
     },
     {
       "i": 171,
+      "j": -164,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 175,
+      "j": -149,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 170,
+      "j": -151,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 178,
       "j": -146,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 173,
-      "j": -141,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 169,
-      "j": -142,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 165,
-      "j": -150,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 164,
+      "i": 174,
       "j": -155,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 173,
-      "j": -133,
-      "type": "apple",
-      "src": "../item/apple.png"
+      "i": 176,
+      "j": -156,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
     },
     {
-      "i": 172,
-      "j": -126,
+      "i": 178,
+      "j": -145,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 164,
-      "j": -135,
+      "j": -128,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 165,
-      "j": -138,
+      "j": -139,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 167,
+      "j": -129,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 165,
+      "j": -132,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 165,
+      "j": -132,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 179,
+      "j": -137,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 178,
+      "j": -133,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 168,
+      "j": -120,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 167,
+      "j": -119,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 175,
       "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 176,
-      "j": -109,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 172,
-      "j": -107,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
       "i": 177,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 178,
-      "j": -104,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 172,
-      "j": -104,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 169,
-      "j": -118,
+      "j": -120,
       "type": "apple",
       "src": "../item/apple.png"
     },
@@ -5134,538 +4912,676 @@
       "src": "../item/apple.png"
     },
     {
-      "i": 173,
-      "j": -83,
+      "i": 161,
+      "j": -101,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 169,
+      "j": -112,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 174,
-      "j": -82,
+      "i": 176,
+      "j": -120,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 172,
+      "j": -106,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 164,
-      "j": -95,
+      "j": -115,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 168,
-      "j": -64,
+      "i": 178,
+      "j": -117,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 165,
-      "j": -72,
+      "j": -86,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 172,
+      "j": -86,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 171,
+      "j": -82,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 171,
+      "j": -83,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 161,
+      "j": -82,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 173,
-      "j": -63,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 170,
-      "j": -77,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 177,
-      "j": -43,
+      "j": -92,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 160,
+      "j": -86,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 167,
+      "j": -86,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 174,
+      "j": -85,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 162,
+      "j": -86,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 171,
+      "j": -84,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 166,
+      "j": -67,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 162,
+      "j": -66,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 171,
+      "j": -73,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 176,
+      "j": -51,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 170,
+      "j": -51,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 176,
+      "j": -54,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 166,
       "j": -48,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 164,
-      "j": -45,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 167,
-      "j": -46,
-      "type": "apple",
-      "src": "../item/apple.png"
+      "j": -33,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
     },
     {
       "i": 173,
-      "j": -45,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 160,
-      "j": -44,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 179,
-      "j": -60,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 178,
-      "j": -49,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 162,
       "j": -34,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
-      "i": 169,
+      "i": 167,
+      "j": -37,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 165,
+      "j": -21,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 171,
       "j": -26,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 179,
-      "j": -21,
+      "i": 161,
+      "j": -25,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 164,
+      "j": -30,
       "type": "mushroom",
       "src": "../item/mushroom.png"
-    },
-    {
-      "i": 166,
-      "j": -27,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 179,
-      "j": -30,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 173,
-      "j": -3,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 161,
-      "j": -15,
-      "type": "apple",
-      "src": "../item/apple.png"
     },
     {
       "i": 174,
-      "j": -17,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 163,
-      "j": -19,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 161,
-      "j": -20,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 177,
-      "j": -13,
-      "type": "apple",
-      "src": "../item/apple.png"
+      "j": -28,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
     },
     {
       "i": 170,
-      "j": -3,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
+      "j": -14,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
     },
     {
       "i": 168,
+      "j": -4,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 169,
       "j": -16,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 175,
-      "j": -20,
+      "i": 166,
+      "j": -4,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 163,
+      "i": 178,
+      "j": -16,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 173,
+      "j": -7,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 164,
+      "j": -13,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 179,
+      "j": -5,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 161,
+      "j": -18,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 160,
+      "j": -7,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 177,
       "j": -2,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 187,
-      "j": -197,
+      "j": -184,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
       "i": 194,
-      "j": -185,
+      "j": -196,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 185,
-      "j": -195,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 185,
-      "j": -185,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 198,
-      "j": -197,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 195,
-      "j": -195,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 191,
-      "j": -192,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 184,
+      "i": 183,
       "j": -199,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 186,
-      "j": -167,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 190,
-      "j": -170,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
-    },
-    {
-      "i": 194,
+      "i": 196,
       "j": -164,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 184,
-      "j": -166,
+      "i": 181,
+      "j": -179,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 196,
-      "j": -175,
+      "j": -165,
       "type": "mushroom",
       "src": "../item/mushroom.png"
     },
     {
-      "i": 198,
-      "j": -173,
+      "i": 199,
+      "j": -161,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 184,
-      "j": -162,
+      "i": 188,
+      "j": -171,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 192,
-      "j": -170,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
+      "i": 197,
+      "j": -165,
+      "type": "apple",
+      "src": "../item/apple.png"
     },
     {
-      "i": 184,
-      "j": -162,
+      "i": 194,
+      "j": -174,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 194,
+      "j": -177,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 196,
+      "j": -174,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 181,
-      "j": -144,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 182,
-      "j": -142,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 190,
       "j": -143,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 196,
-      "j": -147,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 190,
-      "j": -128,
+      "i": 199,
+      "j": -157,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 181,
-      "j": -126,
-      "type": "apple",
-      "src": "../item/apple.png"
+      "j": -146,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
     },
     {
-      "i": 195,
-      "j": -128,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 187,
-      "j": -106,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 196,
-      "j": -102,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 194,
-      "j": -107,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 188,
-      "j": -100,
+      "i": 182,
+      "j": -154,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 197,
-      "j": -85,
+      "j": -149,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 195,
-      "j": -96,
+      "i": 197,
+      "j": -149,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 188,
+      "j": -153,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 187,
-      "j": -87,
+      "i": 191,
+      "j": -121,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 195,
-      "j": -68,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 196,
-      "j": -71,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 199,
-      "j": -69,
+      "i": 189,
+      "j": -138,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 184,
-      "j": -68,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 188,
-      "j": -71,
+      "j": -131,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 194,
-      "j": -55,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 189,
-      "j": -41,
+      "j": -121,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 188,
-      "j": -44,
+      "i": 184,
+      "j": -134,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 195,
+      "j": -139,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 197,
+      "j": -127,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 189,
+      "j": -111,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 198,
+      "j": -102,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 186,
+      "j": -106,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 182,
+      "j": -90,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 181,
+      "j": -90,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 185,
+      "j": -94,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 181,
+      "j": -89,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 197,
+      "j": -84,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 181,
+      "j": -91,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 192,
+      "j": -100,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 185,
+      "j": -99,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 197,
+      "j": -90,
+      "type": "mushroom",
+      "src": "../item/mushroom.png"
+    },
+    {
+      "i": 183,
+      "j": -91,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 196,
+      "j": -72,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
       "i": 199,
-      "j": -49,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 185,
-      "j": -60,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 188,
-      "j": -50,
+      "j": -80,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 189,
-      "j": -58,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 182,
-      "j": -38,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 197,
-      "j": -31,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 188,
-      "j": -21,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 188,
-      "j": -25,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
-      "i": 191,
-      "j": -34,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 180,
-      "j": -23,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 197,
-      "j": -24,
-      "type": "apple",
-      "src": "../item/apple.png"
-    },
-    {
-      "i": 193,
-      "j": -25,
+      "i": 194,
+      "j": -68,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 190,
-      "j": -13,
-      "type": "mushroom",
-      "src": "../item/mushroom.png"
+      "j": -79,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
     },
     {
-      "i": 195,
-      "j": -1,
+      "i": 192,
+      "j": -67,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 187,
-      "j": -6,
-      "type": "green-apple",
-      "src": "../item/green-apple.png"
-    },
-    {
       "i": 185,
-      "j": -3,
+      "j": -61,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 194,
-      "j": -18,
+      "i": 196,
+      "j": -61,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 192,
+      "j": -69,
       "type": "green-apple",
       "src": "../item/green-apple.png"
     },
     {
-      "i": 182,
-      "j": -5,
+      "i": 184,
+      "j": -80,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 190,
+      "j": -79,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 190,
+      "j": -73,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
       "i": 198,
+      "j": -50,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 196,
+      "j": -54,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 186,
+      "j": -60,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 193,
+      "j": -44,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 189,
+      "j": -56,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 196,
+      "j": -50,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 199,
+      "j": -60,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 196,
+      "j": -29,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 187,
+      "j": -26,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 180,
+      "j": -32,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 189,
+      "j": -27,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 188,
+      "j": -23,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 186,
+      "j": -30,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
+    },
+    {
+      "i": 188,
+      "j": -38,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 184,
+      "j": -32,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 199,
+      "j": -2,
+      "type": "apple",
+      "src": "../item/apple.png"
+    },
+    {
+      "i": 193,
       "j": -15,
       "type": "apple",
       "src": "../item/apple.png"
     },
     {
-      "i": 194,
-      "j": -20,
+      "i": 182,
+      "j": -10,
       "type": "apple",
       "src": "../item/apple.png"
+    },
+    {
+      "i": 188,
+      "j": -14,
+      "type": "green-apple",
+      "src": "../item/green-apple.png"
     }
   ],
   "field": [

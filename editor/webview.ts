@@ -16,6 +16,7 @@ import type * as type from "./types.ts"
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
 const fieldBlock = new Signal<FieldBlock | null>(null)
 let prevFieldBlock: FieldBlock | null = null
+const mode = new Signal<"dot" | "stroke">("dot")
 const selectedCell = new Signal<number | null>(null)
 
 blockMapSource.subscribe(({ uri, text }) => {
@@ -57,9 +58,9 @@ function MainContainer({ subscribe, el, query }: Context) {
         const k = i + dx * 200
         const l = j + dy * 200
         const href =
-          `vscode://file/Users/kt3k/oss/bw/static/map/block_${k}.${l}.json`
+          new URL(`block_${k}.${l}.json`, blockMapSource.get().uri).href
         const a = document.createElement("a")
-        a.href = href
+        a.href = href.replace(/^file:\/\//, "vscode://file")
         a.textContent = `block_${k}.${l}.json`
         a.style.width = "20px"
         a.style.height = "20px"
@@ -166,10 +167,22 @@ function CellSwitch({ on, el, subscribe }: Context) {
   })
 }
 
+function ModeSwitch({ on, subscribe, el }: Context<HTMLElement>) {
+  subscribe(mode, (mode) => el.textContent = mode)
+
+  on("click", () => {
+    if (mode.get() === "dot") {
+      mode.update("stroke")
+    } else {
+      mode.update("dot")
+    }
+  })
+}
+
 function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 
-  on("click", (e) => {
+  const paint = (e: MouseEvent) => {
     const { left, top } = el.getBoundingClientRect()
     const x = floorN(e.clientX - left, 16)
     const y = floorN(e.clientY - top, 16)
@@ -178,7 +191,11 @@ function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     const block = fieldBlock.get()
     if (block === null) return
     const cell = block.cells[selectedCell.get()!]
-    const b = fieldBlock.get()!.clone()
+    const currentCell = block.getCell(i, j)
+    if (!currentCell) return
+    // The cell kind is already the same as selected cell
+    if (currentCell.name === cell.name) return
+    const b = block.clone()
     b.update(i, j, cell.name)
     fieldBlock.update(b)
     const map = b.toMap()
@@ -186,6 +203,14 @@ function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
       type: "update",
       map: map.toObject(),
     })
+  }
+
+  on("click", (e) => {
+    if (mode.get() === "dot") paint(e)
+  })
+
+  on("mousemove", (e) => {
+    if (mode.get() === "stroke") paint(e)
   })
 
   on("diff", async (e: CustomEvent<[i: number, j: number, name: string][]>) => {
@@ -208,12 +233,20 @@ function KeyHandler({ on }: Context) {
       if (currentCell === null) return
       if (block === null) return
       selectedCell.update(modulo(currentCell + 1, block.cells.length))
+      mode.update("dot")
     } else if (e.key === "j") {
       const currentCell = selectedCell.get()
       const block = fieldBlock.get()
       if (currentCell === null) return
       if (block === null) return
       selectedCell.update(modulo(currentCell - 1, block.cells.length))
+      mode.update("dot")
+    } else if (e.key === "s" && !e.altKey && !e.metaKey) {
+      if (mode.get() === "dot") {
+        mode.update("stroke")
+      } else {
+        mode.update("dot")
+      }
     }
   })
 }
@@ -251,10 +284,13 @@ globalThis.addEventListener(
   "message",
   (event: MessageEvent<type.Extension.Message>) => {
     const { data } = event
-    if (data.type === "update") {
-      onUpdate(data)
-    } else if (data.type === "loadImageResponse") {
-      onLoadImageResponse(data)
+    switch (data.type) {
+      case "update":
+        onUpdate(data)
+        break
+      case "loadImageResponse":
+        onLoadImageResponse(data)
+        break
     }
   },
 )
@@ -267,4 +303,5 @@ if (state) {
 register(MainContainer, "main-container")
 register(FieldBlockCanvas, "field-block-canvas")
 register(CellSwitch, "cell-switch")
+register(ModeSwitch, "mode-switch")
 register(KeyHandler, "key-handler")

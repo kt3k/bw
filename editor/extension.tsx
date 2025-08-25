@@ -9,18 +9,17 @@ import { encodeBase64 } from "@std/encoding/base64"
 import type * as type from "./types.ts"
 
 const { workspace, window, Uri } = vscode
+let uri: vscode.Uri
+const viewType = "kt3k.bwBlock"
 
-export function activate(context: vscode.ExtensionContext) {
-  const provider: vscode.CustomTextEditorProvider = {
-    resolveCustomTextEditor: (doc, panel) =>
-      editor(context.extensionUri, doc, panel),
-  }
-  const sub = window.registerCustomEditorProvider("kt3k.bwBlock", provider)
-  context.subscriptions.push(sub)
+export function activate(ctx: vscode.ExtensionContext) {
+  uri = ctx.extensionUri
+  ctx.subscriptions.push(
+    window.registerCustomEditorProvider(viewType, { resolveCustomTextEditor }),
+  )
 }
 
-function editor(
-  uri: vscode.Uri,
+function resolveCustomTextEditor(
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
 ) {
@@ -37,7 +36,12 @@ function editor(
       <body class="key-handler">
         <div class="spacer h-10"></div>
         <div class="main-container relative mt-5 w-[3230px]"></div>
-        <div class="cell-switch fixed left-0 top-0 px-1 bg-neutral-900 shadow shadow-neutral-600">
+        <div class="toolbox fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-full">
+          <div class="cell-switch flex items-center relative">
+          </div>
+          <div class="mode-switch" title="Press 's' to toggle">
+            dot
+          </div>
         </div>
         <script src={u("out/webview.js")} type="module"></script>
       </body>
