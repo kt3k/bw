@@ -449,7 +449,7 @@ class Field implements IFieldTester {
           spawn.type,
           spawn.i,
           spawn.j,
-          spawn.src,
+          new URL(spawn.src, spawn.srcBase).href,
           {
             dir: spawn.dir,
             speed: spawn.speed,
@@ -470,7 +470,7 @@ class Field implements IFieldTester {
             spawn.i,
             spawn.j,
             spawn.type,
-            spawn.src,
+            new URL(spawn.src, spawn.srcBase).href,
           ),
         )
       }
@@ -519,7 +519,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(2, 2, "char/kimi/", "kimi", "down", 1)
+  const me = new MainCharacter(22, 22, "char/kimi/", "kimi", "down", 1)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(screenSize, screenSize)

@@ -33,16 +33,24 @@ export class ItemSpawnInfo implements IBox {
   readonly j: number
   readonly type: ItemType
   readonly src: string
+  readonly srcBase: string
   readonly x: number
   readonly y: number
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
-  constructor(i: number, j: number, type: ItemType, src: string) {
+  constructor(
+    i: number,
+    j: number,
+    type: ItemType,
+    src: string,
+    srcBase: string,
+  ) {
     this.id = `${i}.${j}.${type}` // Unique ID for the spawn
     this.i = i
     this.j = j
     this.type = type
     this.src = src
+    this.srcBase = srcBase
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
   }
@@ -65,6 +73,7 @@ export class CharacterSpawnInfo implements IBox {
   readonly j: number
   readonly type: NPCType
   readonly src: string
+  readonly srcBase: string
   readonly dir?: Dir
   readonly speed?: CharacterSpeed
   readonly x: number
@@ -76,6 +85,7 @@ export class CharacterSpawnInfo implements IBox {
     j: number,
     type: NPCType,
     src: string,
+    srcBase: string,
     { dir, speed }: {
       dir?: Dir
       speed?: CharacterSpeed
@@ -88,6 +98,7 @@ export class CharacterSpawnInfo implements IBox {
     this.speed = speed
     this.type = type
     this.src = src
+    this.srcBase = srcBase
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
   }
@@ -185,7 +196,8 @@ export class BlockMap {
         spawn.i,
         spawn.j,
         spawn.type,
-        new URL(spawn.src, this.url).href,
+        spawn.src,
+        this.url,
         {
           dir: spawn.dir,
           speed: spawn.speed,
@@ -199,7 +211,8 @@ export class BlockMap {
         item.i,
         item.j,
         item.type,
-        new URL(item.src, this.url).href,
+        item.src,
+        this.url,
       )
     )
     this.field = obj.field

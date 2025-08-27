@@ -167,16 +167,8 @@ function CellSwitch({ on, el, subscribe }: Context) {
   })
 }
 
-function ModeSwitch({ on, subscribe, el }: Context<HTMLElement>) {
+function ModeSwitch({ subscribe, el }: Context<HTMLElement>) {
   subscribe(mode, (mode) => el.textContent = mode)
-
-  on("click", () => {
-    if (mode.get() === "dot") {
-      mode.update("stroke")
-    } else {
-      mode.update("dot")
-    }
-  })
 }
 
 function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
@@ -206,7 +198,7 @@ function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
   }
 
   on("click", (e) => {
-    if (mode.get() === "dot") paint(e)
+    paint(e)
   })
 
   on("mousemove", (e) => {
@@ -247,6 +239,8 @@ function KeyHandler({ on }: Context) {
       } else {
         mode.update("dot")
       }
+    } else if (e.key === "Escape") {
+      mode.update("dot")
     }
   })
 }

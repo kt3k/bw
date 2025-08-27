@@ -39,8 +39,17 @@ function resolveCustomTextEditor(
         <div class="toolbox fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-full">
           <div class="cell-switch flex items-center relative">
           </div>
-          <div class="mode-switch" title="Press 's' to toggle">
-            dot
+          <div class="group relative">
+            <span class="mode-switch">dot</span>
+            <span class="
+              absolute top-full left-1/2 -translate-x-1/2 mt-2
+              hidden group-hover:block
+            bg-neutral-800 text-white text-sm px-2 py-1 rounded-lg
+              border border-neutral-600
+              whitespace-nowrap pointer-events-none
+            ">
+              Press "s" to toggle
+            </span>
           </div>
         </div>
         <script src={u("out/webview.js")} type="module"></script>
