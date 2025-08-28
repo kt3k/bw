@@ -277,11 +277,23 @@ export abstract class Character implements IChar {
         this.onMoveEndWrap(fieldTester, itemContainer, moveType)
       }
     } else if (this.#moveType === "jump") {
-      this.#movePhase += this.#speed * 2
-      if (this.#movePhase < 8) {
-        this.#d += this.#speed * 2
+      this.#movePhase += 2
+      if (this.#movePhase === 2) {
+        this.#d += 4
+      } else if (this.#movePhase === 4) {
+        this.#d += 3
+      } else if (this.#movePhase === 6) {
+        this.#d += 1
+      } else if (this.#movePhase === 8) {
+        this.#d += 0
+      } else if (this.#movePhase === 10) {
+        this.#d -= 0
+      } else if (this.#movePhase === 12) {
+        this.#d -= 1
+      } else if (this.#movePhase === 14) {
+        this.#d -= 3
       } else {
-        this.#d -= this.#speed * 2
+        this.#d -= 4
       }
       if (this.#movePhase == 16) {
         this.#movePhase = 0
@@ -343,6 +355,11 @@ export abstract class Character implements IChar {
 
   /** Gets the center x of the world coordinates. This is used for setting the center of ViewScope. */
   get centerX(): number {
+    if (this.#moveType === "jump" || this.#moveType === "bounce") {
+      // We don't use #d in jump and bounce state to prevent screen shake
+      return this.#i * CELL_SIZE + CELL_SIZE / 2
+    }
+
     return this.x + CELL_SIZE / 2
   }
 
@@ -376,8 +393,8 @@ export abstract class Character implements IChar {
 
   /** Gets the center y of the world coordinates. This is used for setting the center of ViewScope. */
   get centerY(): number {
-    if (this.#moveType === "jump") {
-      // We don't use #d in jump state. Otherwise the screen shakes for each jump.
+    if (this.#moveType === "jump" || this.#moveType === "bounce") {
+      // We don't use #d in jump and bounce state to prevent screen shake
       return this.#j * CELL_SIZE + CELL_SIZE / 2
     }
 

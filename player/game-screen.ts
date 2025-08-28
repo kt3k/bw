@@ -437,7 +437,6 @@ class Field implements IFieldTester {
 
     const newItemSpawns = chunks.flatMap((c) => c.getItemSpawnInfo())
       .filter((spawn) => !items.isCollected(spawn.id)) // isn't collected yet
-      .filter((spawn) => !items.get(spawn.i, spawn.j)) // the place isn't occupied by other item
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
@@ -464,6 +463,10 @@ class Field implements IFieldTester {
     if (newItemSpawns.length > 0) {
       console.log(`Spawning ${newItemSpawns.length} items`)
       for (const spawn of newItemSpawns) {
+        if (items.get(spawn.i, spawn.j)) {
+          // The space is already occupied by some other item
+          continue
+        }
         items.add(
           new Item(
             spawn.id,
