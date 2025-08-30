@@ -324,30 +324,6 @@ export class FieldBlock {
     return this.#assetsReady
   }
 
-  createImageDataForRange(
-    i: number,
-    j: number,
-    gridWidth: number,
-    gridHeight: number,
-  ): ImageData {
-    const canvas = new OffscreenCanvas(
-      CELL_SIZE * BLOCK_SIZE,
-      CELL_SIZE * BLOCK_SIZE,
-    )
-    const layer = new CanvasWrapper(canvas)
-    for (let jj = 0; jj < gridHeight; jj++) {
-      for (let ii = 0; ii < gridWidth; ii++) {
-        this.drawCell(layer, i + ii, j + jj)
-      }
-    }
-    return canvas.getContext("2d")!.getImageData(
-      CELL_SIZE * i,
-      CELL_SIZE * j,
-      CELL_SIZE * gridWidth,
-      CELL_SIZE * gridHeight,
-    )
-  }
-
   #createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement("canvas")
     canvas.style.position = "absolute"
@@ -412,13 +388,43 @@ export class FieldBlock {
     )
   }
 
-  renderAll() {
-    const wrapper = new CanvasWrapper(this.canvas)
-    for (let i = 0; i < BLOCK_SIZE; i++) {
-      for (let j = 0; j < BLOCK_SIZE; j++) {
-        this.drawCell(wrapper, i, j)
+  #renderRange(
+    wrapper: CanvasWrapper,
+    i: number,
+    j: number,
+    width: number,
+    height: number,
+  ) {
+    for (let ii = 0; ii < width; ii++) {
+      for (let jj = 0; jj < height; jj++) {
+        this.drawCell(wrapper, i + ii, j + jj)
       }
     }
+  }
+
+  renderAll() {
+    const wrapper = new CanvasWrapper(this.canvas)
+    this.#renderRange(wrapper, 0, 0, BLOCK_SIZE, BLOCK_SIZE)
+  }
+
+  createImageDataForRange(
+    i: number,
+    j: number,
+    gridWidth: number,
+    gridHeight: number,
+  ): ImageData {
+    const canvas = new OffscreenCanvas(
+      CELL_SIZE * BLOCK_SIZE,
+      CELL_SIZE * BLOCK_SIZE,
+    )
+    const layer = new CanvasWrapper(canvas)
+    this.#renderRange(layer, i, j, gridWidth, gridHeight)
+    return canvas.getContext("2d")!.getImageData(
+      CELL_SIZE * i,
+      CELL_SIZE * j,
+      CELL_SIZE * gridWidth,
+      CELL_SIZE * gridHeight,
+    )
   }
 
   getChunk(i: number, j: number): FieldBlockChunk {

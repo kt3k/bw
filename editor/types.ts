@@ -12,7 +12,19 @@ export namespace Extension {
     id: string
     text: string
   }
-  export type Message = MessageUpdate | MessageLoadImageResponse
+  export type MessageLoadTextResponse = {
+    type: "loadTextResponse"
+    id: string
+    text: string
+  } | {
+    type: "loadTextResponse"
+    id: string
+    error: string
+  }
+  export type Message =
+    | MessageUpdate
+    | MessageLoadImageResponse
+    | MessageLoadTextResponse
 }
 
 // deno-lint-ignore no-namespace
@@ -22,10 +34,15 @@ export namespace Webview {
     id: string
     uri: string
   }
+  export type MessageLoadText = {
+    type: "loadText"
+    id: string
+    uri: string
+  }
   export type MessageUpdate = {
     type: "update"
     // deno-lint-ignore no-explicit-any
     map: any
   }
-  export type Message = MessageLoadImage | MessageUpdate
+  export type Message = MessageLoadImage | MessageLoadText | MessageUpdate
 }

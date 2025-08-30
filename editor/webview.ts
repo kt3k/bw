@@ -12,6 +12,7 @@ import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
+import { BLOCK_SIZE } from "../util/constants.ts"
 
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
 const fieldBlock = new Signal<FieldBlock | null>(null)
@@ -29,6 +30,12 @@ blockMapSource.subscribe(({ uri, text }) => {
   )
 })
 
+function getGridFromUri(uri: string) {
+  const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
+  if (!m) return { i: NaN, j: NaN }
+  return { i: parseInt(m[1]), j: parseInt(m[2]) }
+}
+
 function MainContainer({ subscribe, el, query }: Context) {
   subscribe(fieldBlock, async (fieldBlock) => {
     const prev = prevFieldBlock
@@ -36,18 +43,21 @@ function MainContainer({ subscribe, el, query }: Context) {
     if (fieldBlock === null) return
 
     if (prev === null) {
+      const FULL_SIZE = 3200
+      const SIDE_CANVAS_SIZE = 80
+
       await fieldBlock.loadAssets()
       const canvas = fieldBlock.canvas
-      canvas.style.left = ""
-      canvas.style.top = ""
-      canvas.style.position = ""
+      canvas.style.left = SIDE_CANVAS_SIZE + "px"
+      canvas.style.top = SIDE_CANVAS_SIZE + "px"
+      canvas.style.position = "absolute"
       canvas.classList.add("field-block-canvas")
       el.innerHTML = ""
       el.appendChild(canvas)
       fieldBlock.renderAll()
       mount("field-block-canvas", el)
 
-      const { i, j } = fieldBlock
+      const { i, j } = getGridFromUri(fieldBlock.toMap().url)
       const x = [
         [-1, 0],
         [0, -1],
@@ -59,36 +69,99 @@ function MainContainer({ subscribe, el, query }: Context) {
         const l = j + dy * 200
         const href =
           new URL(`block_${k}.${l}.json`, blockMapSource.get().uri).href
+        let text
+        try {
+          text = await loadText(href)
+        } catch {
+          text = await loadText(
+            new URL("block_not_found.json", blockMapSource.get().uri).href,
+          )
+        }
+        const blockMap = new BlockMap(href, JSON.parse(text))
+        const fieldBlock = new FieldBlock(blockMap, loadImage)
+        await fieldBlock.loadAssets()
         const a = document.createElement("a")
         a.href = href.replace(/^file:\/\//, "vscode://file")
         a.textContent = `block_${k}.${l}.json`
-        a.style.width = "20px"
-        a.style.height = "20px"
         a.classList.add(
           "absolute",
+          "opacity-50",
           "hover:bg-neutral-700",
           "bg-neutral-800",
           "break-all",
         )
-        const FULL_SIZE = "3200px"
         if (dx === -1) {
+          const imageData = fieldBlock.createImageDataForRange(
+            BLOCK_SIZE - 5,
+            0,
+            5,
+            BLOCK_SIZE,
+          )
+          const canvas = document.createElement("canvas")
+          canvas.width = imageData.width
+          canvas.height = imageData.height
+          canvas.classList.add("absolute", "top-0", "left-0")
+          const ctx = canvas.getContext("2d")!
+          ctx.putImageData(imageData, 0, 0)
+          a.appendChild(canvas)
           a.style.left = "0"
-          a.style.top = "0"
-          a.style.height = FULL_SIZE
-          a.style.marginLeft = "-20px"
+          a.style.top = SIDE_CANVAS_SIZE + "px"
+          a.style.height = FULL_SIZE + "px"
+          a.style.width = SIDE_CANVAS_SIZE + "px"
         } else if (dx === 1) {
-          a.style.left = FULL_SIZE
-          a.style.top = "0"
-          a.style.height = FULL_SIZE
+          const imageData = fieldBlock.createImageDataForRange(
+            0,
+            0,
+            5,
+            BLOCK_SIZE,
+          )
+          const canvas = document.createElement("canvas")
+          canvas.width = imageData.width
+          canvas.height = imageData.height
+          canvas.classList.add("absolute", "top-0", "left-0")
+          const ctx = canvas.getContext("2d")!
+          ctx.putImageData(imageData, 0, 0)
+          a.appendChild(canvas)
+          a.style.left = (FULL_SIZE + SIDE_CANVAS_SIZE) + "px"
+          a.style.top = SIDE_CANVAS_SIZE + "px"
+          a.style.height = FULL_SIZE + "px"
+          a.style.width = SIDE_CANVAS_SIZE + "px"
         } else if (dy === -1) {
+          const imageData = fieldBlock.createImageDataForRange(
+            0,
+            BLOCK_SIZE - 5,
+            BLOCK_SIZE,
+            5,
+          )
+          const canvas = document.createElement("canvas")
+          canvas.width = imageData.width
+          canvas.height = imageData.height
+          canvas.classList.add("absolute", "top-0", "left-0")
+          const ctx = canvas.getContext("2d")!
+          ctx.putImageData(imageData, 0, 0)
+          a.appendChild(canvas)
           a.style.top = "0"
-          a.style.left = "0"
-          a.style.width = FULL_SIZE
-          a.style.marginTop = "-20px"
+          a.style.left = SIDE_CANVAS_SIZE + "px"
+          a.style.width = FULL_SIZE + "px"
+          a.style.height = SIDE_CANVAS_SIZE + "px"
         } else if (dy === 1) {
-          a.style.top = FULL_SIZE
-          a.style.left = "0"
-          a.style.width = FULL_SIZE
+          const imageData = fieldBlock.createImageDataForRange(
+            0,
+            0,
+            BLOCK_SIZE,
+            5,
+          )
+          const canvas = document.createElement("canvas")
+          canvas.width = imageData.width
+          canvas.height = imageData.height
+          canvas.classList.add("absolute", "top-0", "left-0")
+          const ctx = canvas.getContext("2d")!
+          ctx.putImageData(imageData, 0, 0)
+          a.appendChild(canvas)
+          a.style.top = (FULL_SIZE + SIDE_CANVAS_SIZE) + "px"
+          a.style.left = SIDE_CANVAS_SIZE + "px"
+          a.style.width = FULL_SIZE + "px"
+          a.style.height = SIDE_CANVAS_SIZE + "px"
         }
         el.appendChild(a)
       }
@@ -245,6 +318,8 @@ function KeyHandler({ on }: Context) {
   })
 }
 
+type ResolveImage = (image: ImageBitmap) => void
+const loadImageMap: Record<string, { resolve: ResolveImage }> = {}
 const loadImage = memoizedLoading((uri: string) => {
   const { resolve, promise } = Promise.withResolvers<ImageBitmap>()
   const id = Math.random().toString()
@@ -252,16 +327,6 @@ const loadImage = memoizedLoading((uri: string) => {
   vscode.postMessage({ type: "loadImage", uri, id })
   return promise
 })
-
-type ResolveImage = (image: ImageBitmap) => void
-const loadImageMap: Record<string, { resolve: ResolveImage }> = {}
-
-function onUpdate(message: type.Extension.MessageUpdate) {
-  const { uri, text } = message
-  blockMapSource.update({ uri, text })
-  vscode.setState({ uri, text })
-}
-
 function onLoadImageResponse(message: type.Extension.MessageLoadImageResponse) {
   const image = new Image()
   image.src = message.text
@@ -274,6 +339,36 @@ function onLoadImageResponse(message: type.Extension.MessageLoadImageResponse) {
   }
 }
 
+type ResolveText = (text: string) => void
+type RejectText = (error: Error) => void
+const loadTextMap: Record<
+  string,
+  { resolve: ResolveText; reject: RejectText }
+> = {}
+const loadText = (uri: string) => {
+  const { resolve, reject, promise } = Promise.withResolvers<string>()
+  const id = Math.random().toString()
+  loadTextMap[id] = { resolve, reject }
+  vscode.postMessage({ type: "loadText", uri, id })
+  return promise
+}
+function onLoadTextResponse(message: type.Extension.MessageLoadTextResponse) {
+  if ("text" in message) {
+    const text = message.text
+    loadTextMap[message.id].resolve(text)
+  } else {
+    const error = message.error
+    loadTextMap[message.id].reject(new Error(error))
+  }
+  delete loadTextMap[message.id]
+}
+
+function onUpdate(message: type.Extension.MessageUpdate) {
+  const { uri, text } = message
+  blockMapSource.update({ uri, text })
+  vscode.setState({ uri, text })
+}
+
 globalThis.addEventListener(
   "message",
   (event: MessageEvent<type.Extension.Message>) => {
@@ -284,6 +379,9 @@ globalThis.addEventListener(
         break
       case "loadImageResponse":
         onLoadImageResponse(data)
+        break
+      case "loadTextResponse":
+        onLoadTextResponse(data)
         break
     }
   },

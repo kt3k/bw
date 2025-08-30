@@ -35,7 +35,7 @@ function resolveCustomTextEditor(
       </head>
       <body class="key-handler">
         <div class="spacer h-10"></div>
-        <div class="main-container relative mt-5 w-[3230px]"></div>
+        <div class="main-container relative mt-5 w-[3360px]"></div>
         <div class="toolbox fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-full">
           <div class="cell-switch flex items-center relative">
           </div>
@@ -80,8 +80,17 @@ function resolveCustomTextEditor(
   }
 
   function onMessage(e: type.Webview.Message) {
-    if (e.type === "loadImage") loadImage(e)
-    else if (e.type === "update") update(e)
+    switch (e.type) {
+      case "update":
+        update(e)
+        break
+      case "loadImage":
+        loadImage(e)
+        break
+      case "loadText":
+        loadText(e)
+        break
+    }
   }
 
   function update(e: type.Webview.MessageUpdate) {
@@ -95,8 +104,28 @@ function resolveCustomTextEditor(
   }
 
   async function loadImage({ uri, id }: type.Webview.MessageLoadImage) {
-    const data = await workspace.fs.readFile(Uri.parse(uri))
-    const text = "data:image/png;base64," + encodeBase64(data)
-    postMessage({ type: "loadImageResponse", text, id })
+    postMessage({
+      type: "loadImageResponse",
+      text: "data:image/png;base64," +
+        encodeBase64(await workspace.fs.readFile(Uri.parse(uri))),
+      id,
+    })
+  }
+
+  async function loadText({ uri, id }: type.Webview.MessageLoadText) {
+    try {
+      const text = (await workspace.fs.readFile(Uri.parse(uri))).toString()
+      postMessage({
+        type: "loadTextResponse",
+        text,
+        id,
+      })
+    } catch (error) {
+      postMessage({
+        type: "loadTextResponse",
+        error: (error as Error).message,
+        id,
+      })
+    }
   }
 }
