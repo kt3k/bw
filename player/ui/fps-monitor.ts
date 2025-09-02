@@ -4,13 +4,13 @@ import * as signal from "../../util/signal.ts"
 /** Monitors the current fps number */
 export function FpsMonitor({ el }: Context) {
   signal.fps.subscribe((fps) => {
-    el.textContent = fps.toFixed(2)
+    el.textContent = fps.toFixed(0)
   })
 }
 
 /** Monitors the current v value */
 export function VMonitor({ el }: Context) {
   signal.v.subscribe((v) => {
-    el.textContent = v.toFixed(2)
+    el.textContent = v.toFixed(0)
   })
 }

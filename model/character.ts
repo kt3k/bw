@@ -278,22 +278,22 @@ export abstract class Character implements IChar {
       }
     } else if (this.#moveType === "jump") {
       this.#movePhase += 2
-      if (this.#movePhase === 2) {
+      if (this.#movePhase <= 2) {
+        this.#d += 6
+      } else if (this.#movePhase <= 4) {
         this.#d += 4
-      } else if (this.#movePhase === 4) {
-        this.#d += 3
-      } else if (this.#movePhase === 6) {
+      } else if (this.#movePhase <= 6) {
+        this.#d += 2
+      } else if (this.#movePhase <= 8) {
         this.#d += 1
-      } else if (this.#movePhase === 8) {
-        this.#d += 0
-      } else if (this.#movePhase === 10) {
-        this.#d -= 0
-      } else if (this.#movePhase === 12) {
+      } else if (this.#movePhase <= 10) {
         this.#d -= 1
-      } else if (this.#movePhase === 14) {
-        this.#d -= 3
-      } else {
+      } else if (this.#movePhase <= 12) {
+        this.#d -= 2
+      } else if (this.#movePhase <= 14) {
         this.#d -= 4
+      } else {
+        this.#d -= 6
       }
       if (this.#movePhase == 16) {
         this.#movePhase = 0
@@ -531,7 +531,9 @@ export class RandomWalkNPC extends Character {
     if (dirs.length === 0) {
       return undefined
     }
-    const { choice } = seed(this.age.toString())
+    const { choice } = seed(
+      this.age.toString() + this.i.toString() + this.j.toString(),
+    )
     return choice(dirs)
   }
 }

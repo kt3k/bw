@@ -40,11 +40,11 @@
       <div
         class="ui-panel js-apple-counter absolute px-0.5 text-sm text-gray-400 font-8bit bg-black right-[8px] top-[8px] h-[64px] w-[64px]"
       >
-        <p class="mt-0.5 flex items-start gap-0.5">
+        <p class="mt-0.5 flex items-start gap-1">
           <img class="inline" src="./item/apple.png" />
           <span class="count-label">0</span>
         </p>
-        <p class="mt-0.5 flex items-start gap-0.5">
+        <p class="mt-0.5 flex items-start gap-1">
           <img class="inline" src="./item/green-apple.png" />
           <span class="green-apple-count-label">0</span>
         </p>
@@ -60,16 +60,13 @@
       class="text-neutral-500 relative text-xs flex items-center justify-between w-full max-w-[450px] font-8bit"
     >
       <div>
-        <span class="px-0.5"
-        >FPS <span class="js-fps-monitor">-</span>(<span class="js-v-monitor"
-          >-</span>)</span>
-        <span class="px-0.5">ACTORS
-          <span class="js-actors-counter">-</span>
+        <span>FPS <span class="js-fps-monitor"></span>/<span
+            class="js-v-monitor"
+          ></span>
         </span>
-        <span class="px-0.5">ITEMS
-          <span class="js-items-counter">-</span>
-        </span>
-        <span>BUILD DATE BUILD_DATE</span>
+        <span>ACTORS <span class="js-actors-counter"></span></span>
+        <span>ITEMS <span class="js-items-counter"></span></span>
+        <span>VERSION BUILD_DATE</span>
       </div>
       <span class="js-loading-indicator hidden">
         <svg
@@ -86,14 +83,14 @@
       </span>
     </div>
     <div
-      class="w-full text-center font-8bit text-neutral-500 text-sm fixed bottom-5 sm:hidden"
+      class="w-full text-center font-8bit text-neutral-500 text-xs fixed bottom-5 sm:hidden"
     >
-      swipe and hold to move
+      SWIPE AND HOLD TO MOVE
     </div>
     <div
-      class="pl-1 font-8bit text-neutral-500 text-sm hidden sm:block"
+      class="font-8bit text-neutral-500 text-xs hidden sm:block"
     >
-      use arrow keys to move
+      USE ARROW KEYS TO MOVE
     </div>
   </body>
   <script type="module" src="./main.js"></script>
