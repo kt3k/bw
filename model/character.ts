@@ -32,11 +32,18 @@ export type IObj = IBox & ILoader & {
   image(): ImageBitmap
 }
 
-export type ItemType = "apple" | "green-apple" | "mushroom"
+export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
 
 export type IItem = IObj & {
   id: string | null
   type: ItemType
+}
+
+export type PropType = "chair" | "table"
+
+export type IProp = IObj & {
+  id: string | null
+  type: PropType
 }
 
 export type IFieldTester = {

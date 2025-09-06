@@ -5,6 +5,7 @@ import {
   FieldBlock,
   ItemSpawnInfo,
 } from "../model/field-block.ts"
+import type { ItemType } from "../model/character.ts"
 
 const randomInt = (n: number) => Math.floor(Math.random() * n)
 
@@ -47,13 +48,14 @@ async function addCharactersRandomly(mapFile: string) {
           j + bm.j,
           isRandom ? "random" : "random-walk",
           isRandom ? "../char/joob/" : "../char/not-found/",
+          mapJson.href,
         ),
       )
     }
   }
   if (mapFile === "block_0.0") {
     fb.addItemSpawnInfo(
-      new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png"),
+      new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png", mapJson.href),
     )
   }
 
@@ -75,7 +77,7 @@ async function addCharactersRandomly(mapFile: string) {
       [-6, 8, "apple", "../item/apple.png"],
     ] as const
     for (const [i, j, type, src] of items) {
-      fb.addItemSpawnInfo(new ItemSpawnInfo(i, j, type, src))
+      fb.addItemSpawnInfo(new ItemSpawnInfo(i, j, type, src, mapJson.href))
     }
   }
 
@@ -87,17 +89,21 @@ async function addCharactersRandomly(mapFile: string) {
     if (cell.canEnter) {
       itemCount++
       const random = Math.random()
-      const type = random > 0.9
-        ? "mushroom"
-        : random > 0.7
-        ? "green-apple"
-        : "apple"
+      let type: ItemType = "apple"
+      if (random > 0.93) {
+        type = "purple-mushroom"
+      } else if (random > 0.8) {
+        type = "mushroom"
+      } else if (random > 0.65) {
+        type = "green-apple"
+      }
       fb.addItemSpawnInfo(
         new ItemSpawnInfo(
           i + fb.i,
           j + fb.j,
           type,
           "../item/" + type + ".png",
+          mapJson.href,
         ),
       )
     }

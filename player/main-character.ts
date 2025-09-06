@@ -10,10 +10,12 @@ import {
 } from "../model/character.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
+import { seed } from "../util/random.ts"
 
 export class MainCharacter extends Character {
   #lastMoveTypes: MoveType[] = []
-  #nextActionQueue: (NextAction | "speed-up" | "speed-reset")[] = []
+  #nextActionQueue: (NextAction | "speed-2x" | "speed-4x" | "speed-reset")[] =
+    []
   #speedUpTimer: number | undefined = undefined
   override getNextAction(
     fieldTester: IFieldTester,
@@ -21,8 +23,14 @@ export class MainCharacter extends Character {
   ): NextAction {
     if (this.#nextActionQueue.length > 0) {
       const nextAction = this.#nextActionQueue.shift()!
-      if (nextAction === "speed-up") {
+      if (nextAction === "speed-2x") {
         this.speed = 2
+        this.#speedUpTimer = setTimeout(() => {
+          this.#nextActionQueue.push("speed-reset", "jump")
+        }, 15000)
+        return this.getNextAction(fieldTester, collisionChecker)
+      } else if (nextAction === "speed-4x") {
+        this.speed = 4
         this.#speedUpTimer = setTimeout(() => {
           this.#nextActionQueue.push("speed-reset", "jump")
         }, 15000)
@@ -84,7 +92,19 @@ export class MainCharacter extends Character {
         }
         case "mushroom": {
           itemContainer.collect(this.i, this.j)
-          this.#nextActionQueue.push("speed-reset", "jump", "jump", "speed-up")
+          this.#nextActionQueue = []
+          this.#nextActionQueue.push("speed-reset", "jump", "speed-2x")
+          break
+        }
+        case "purple-mushroom": {
+          itemContainer.collect(this.i, this.j)
+          const { choice } = seed(`${this.i},${this.j}`)
+          this.#nextActionQueue = []
+          this.#nextActionQueue.push("speed-reset", "jump", "jump", "speed-4x")
+          for (const _ of Array(30)) {
+            this.#nextActionQueue.push(choice([UP, DOWN, LEFT, RIGHT]))
+          }
+          this.#nextActionQueue.push("speed-reset", "jump")
           break
         }
       }
