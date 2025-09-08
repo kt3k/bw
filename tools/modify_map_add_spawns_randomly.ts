@@ -4,8 +4,9 @@ import {
   CharacterSpawnInfo,
   FieldBlock,
   ItemSpawnInfo,
+  ObjectSpawnInfo,
 } from "../model/field-block.ts"
-import type { ItemType } from "../model/character.ts"
+import type { ItemType } from "../model/item.ts"
 
 const randomInt = (n: number) => Math.floor(Math.random() * n)
 
@@ -78,6 +79,24 @@ async function addCharactersRandomly(mapFile: string) {
     ] as const
     for (const [i, j, type, src] of items) {
       fb.addItemSpawnInfo(new ItemSpawnInfo(i, j, type, src, mapJson.href))
+    }
+  }
+
+  if (mapFile === "block_0.0") {
+    const objects = [
+      [27, 18, "chair", "../obj/stool.png"],
+      [28, 18, "chair", "../obj/stool.png"],
+      [29, 18, "chair", "../obj/stool.png"],
+      [30, 18, "chair", "../obj/stool.png"],
+      [31, 18, "chair", "../obj/stool.png"],
+      [27, 19, "chair", "../obj/stool.png"],
+      [28, 19, "chair", "../obj/stool.png"],
+      [29, 19, "chair", "../obj/stool.png"],
+      [30, 19, "chair", "../obj/stool.png"],
+      [31, 19, "chair", "../obj/stool.png"],
+    ] as const
+    for (const [i, j, type, src] of objects) {
+      fb.addObjectSpawnInfo(new ObjectSpawnInfo(i, j, type, src, mapJson.href))
     }
   }
 

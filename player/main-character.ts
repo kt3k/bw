@@ -110,13 +110,6 @@ export class MainCharacter extends Character {
       }
     }
 
-    if (moveType === "linear") {
-      const cell = fieldTester.get(this.i, this.j)
-      if (cell.name === "d") {
-        this.#nextActionQueue.push("jump")
-      }
-    }
-
     this.#lastMoveTypes.push(moveType)
     if (this.#lastMoveTypes.length > 3) {
       this.#lastMoveTypes.shift()

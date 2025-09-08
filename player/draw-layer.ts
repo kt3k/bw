@@ -1,6 +1,6 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { type RectScope } from "../util/rect-scope.ts"
-import type { IObj } from "../model/character.ts"
+import type { IDrawable } from "../model/character.ts"
 import { randomInt } from "../util/random.ts"
 
 export class DrawLayer {
@@ -19,7 +19,7 @@ export class DrawLayer {
     this.#enableNoise = options.enableNoise ?? false
   }
 
-  draw(obj: IObj): void {
+  draw(obj: IDrawable): void {
     this.#canvasWrapper.drawImage(
       obj.image(),
       obj.x - this.#viewScope.left,
@@ -27,7 +27,7 @@ export class DrawLayer {
     )
   }
 
-  drawIterable(iterable: Iterable<IObj>): void {
+  drawIterable(iterable: Iterable<IDrawable>): void {
     this.#canvasWrapper.clear()
     for (const obj of iterable) {
       if (this.#viewScope.overlaps(obj)) {

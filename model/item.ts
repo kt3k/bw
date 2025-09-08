@@ -1,6 +1,13 @@
 import { loadImage } from "../util/load.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IItem, ItemType } from "./character.ts"
+import type { IDrawable } from "./drawable.ts"
+
+export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
+
+export type IItem = IDrawable & {
+  id: string | null
+  type: ItemType
+}
 
 const fallbackImage = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",

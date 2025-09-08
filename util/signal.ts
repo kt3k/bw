@@ -9,6 +9,8 @@ export const v = new Signal(0)
 export const actorsCount = new Signal(0)
 // The current number of active items
 export const itemsCount = new Signal(0)
+// The current number of active objects
+export const objectsCount = new Signal(0)
 // The current count of apples
 export const appleCount = new Signal(0)
 // The current count of green apples

@@ -3,16 +3,17 @@ import { Gameloop } from "@kt3k/gameloop"
 import * as signal from "../util/signal.ts"
 import { ceilN, floorN, modulo } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
+import type { ILoader } from "../model/drawable.ts"
 import {
   type CollisionChecker,
-  type IChar,
+  type IActor,
   type IFieldTester,
-  type IItem,
-  type ILoader,
   type IStepper,
   type ItemContainer,
   spawnCharacter,
 } from "../model/character.ts"
+import { type IItem, Item } from "../model/item.ts"
+import { type IObject, Object } from "../model/object.ts"
 import { MainCharacter } from "./main-character.ts"
 import {
   BlockMap,
@@ -20,7 +21,6 @@ import {
   type FieldBlockChunk,
   type FieldCell,
 } from "../model/field-block.ts"
-import { Item } from "../model/item.ts"
 import { loadImage } from "../util/load.ts"
 import { DrawLayer } from "./draw-layer.ts"
 import { RectScope } from "../util/rect-scope.ts"
@@ -107,10 +107,74 @@ class FieldItems implements ILoader, ItemContainer {
     return [...this.#items].every((x) => x.assetsReady)
   }
 
-  [Symbol.iterator]() {
+  iter() {
     return this.#items[Symbol.iterator]()
   }
 }
+
+class FieldObjects implements ILoader {
+  #objects: Set<IObject> = new Set()
+  #coordMap = {} as Record<string, IObject>
+  #activateScope: RectScope
+
+  constructor(scope: RectScope) {
+    this.#activateScope = scope
+  }
+
+  checkDeactivate(i: number, j: number) {
+    this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
+    this.#objects.values()
+      .filter((obj) => !this.#activateScope.overlaps(obj))
+      .forEach((obj) => {
+        console.log("deactivating object", obj.id)
+        this.#deactivate(obj.i, obj.j)
+      })
+    signal.objectsCount.update(this.#objects.size)
+  }
+
+  add(obj: IObject) {
+    this.#objects.add(obj)
+    this.#coordMap[`${obj.i}.${obj.j}`] = obj
+    signal.objectsCount.update(this.#objects.size)
+  }
+
+  get(i: number, j: number): IObject | undefined {
+    return this.#coordMap[`${i}.${j}`]
+  }
+
+  #deactivate(i: number, j: number): IObject | undefined {
+    const key = `${i}.${j}`
+    const obj = this.#coordMap[key]
+    if (!obj) {
+      return
+    }
+    this.#objects.delete(obj)
+    delete this.#coordMap[key]
+    signal.objectsCount.update(this.#objects.size)
+    return obj
+  }
+
+  async loadAssets(): Promise<void> {
+    await Promise.all(
+      [...this.#objects]
+        .filter((obj) => !obj.assetsReady)
+        .map((obj) => obj.loadAssets()),
+    )
+  }
+
+  get assetsReady(): boolean {
+    return [...this.#objects].every((x) => x.assetsReady)
+  }
+
+  step() {
+    // Implement this when there are moving objects
+  }
+
+  iter() {
+    return this.#objects[Symbol.iterator]()
+  }
+}
+
 /** A map that counts characters at each coordinate
  * TODO(kt3k): move to util and write tests for this class
  */
@@ -142,8 +206,8 @@ class CoordCountMap {
 /**
  * The characters who step (evaluates) in each frame
  */
-class Actors implements IStepper, ILoader {
-  #actors: IChar[] = []
+class FieldActors implements IStepper, ILoader {
+  #actors: IActor[] = []
   #coordCountMap = new CoordCountMap()
   #activateScope: RectScope
   #idSet: Set<string> = new Set()
@@ -152,14 +216,14 @@ class Actors implements IStepper, ILoader {
     return this.#coordCountMap.get(`${i}.${j}`) > 0
   }
 
-  constructor(chars: IChar[] = [], activateScope: RectScope) {
+  constructor(chars: IActor[] = [], activateScope: RectScope) {
     this.#activateScope = activateScope
     for (const actor of chars) {
       this.add(actor)
     }
   }
 
-  add(actor: IChar) {
+  add(actor: IActor) {
     this.#actors.push(actor)
     this.#idSet.add(actor.id)
     this.#coordCountMap.increment(actor.physicalGridKey)
@@ -192,7 +256,7 @@ class Actors implements IStepper, ILoader {
 
   checkDeactivate(i: number, j: number) {
     this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
-    const actors = [] as IChar[]
+    const actors = [] as IActor[]
     for (const actor of this.#actors) {
       if (this.#activateScope.overlaps(actor)) {
         actors.push(actor)
@@ -206,7 +270,7 @@ class Actors implements IStepper, ILoader {
     signal.actorsCount.update(this.#actors.length)
   }
 
-  [Symbol.iterator]() {
+  iter() {
     return this.#actors[Symbol.iterator]()
   }
 
@@ -280,7 +344,7 @@ class BlockMapLoader {
       const obj = await resp.json()
       // Fix the map grid coordinates
       const [i, j] = mapId.split(".").map(Number) // mapId is in the form "i.j"
-      return new BlockMap(fallbackUrl, Object.assign(obj, { i, j }))
+      return new BlockMap(fallbackUrl, globalThis.Object.assign(obj, { i, j }))
     } finally {
       // ensure the loading is removed even if an error occurs
       this.#loading.delete(url)
@@ -368,8 +432,9 @@ class Field implements IFieldTester {
     i: number,
     j: number,
     viewScope: ViewScope,
-    actors: Actors,
+    actors: FieldActors,
     items: FieldItems,
+    objects: FieldObjects,
   ) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
@@ -391,6 +456,7 @@ class Field implements IFieldTester {
           viewScope,
           actors,
           items,
+          objects,
           initialLoad: true,
         },
       ).then(() => {
@@ -402,7 +468,7 @@ class Field implements IFieldTester {
 
   checkBlockUnload(i: number, j: number) {
     this.#unloadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    for (const block of Object.values(this.#blocks)) {
+    for (const block of globalThis.Object.values(this.#blocks)) {
       if (!this.#unloadScope.overlaps(block)) {
         console.log("unloading block", block.id)
         this.#removeBlock(block)
@@ -413,17 +479,22 @@ class Field implements IFieldTester {
   async checkActivate(
     i: number,
     j: number,
-    { viewScope, actors, items, initialLoad = false }: {
+    { viewScope, actors, items, objects, initialLoad = false }: {
       viewScope: RectScope
       actors: {
         has(id: string): boolean
-        add(char: IChar): void
+        add(char: IActor): void
         loadAssets(): Promise<void>
       }
       items: {
         isCollected(id: string): boolean
         get(i: number, j: number): IItem | undefined
         add(item: IItem): void
+        loadAssets(): Promise<void>
+      }
+      objects: {
+        get(i: number, j: number): IObject | undefined
+        add(obj: IObject): void
         loadAssets(): Promise<void>
       }
       initialLoad?: boolean
@@ -437,6 +508,10 @@ class Field implements IFieldTester {
 
     const newItemSpawns = chunks.flatMap((c) => c.getItemSpawnInfo())
       .filter((spawn) => !items.isCollected(spawn.id)) // isn't collected yet
+      .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
+      .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
+
+    const newObjectSpawns = chunks.flatMap((c) => c.getObjectSpawnInfo())
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
@@ -481,6 +556,28 @@ class Field implements IFieldTester {
     } else if (initialLoad) {
       await items.loadAssets()
     }
+
+    if (newObjectSpawns.length > 0) {
+      console.log(`Spawning ${newObjectSpawns.length} objects`)
+      for (const spawn of newObjectSpawns) {
+        if (objects.get(spawn.i, spawn.j)) {
+          // The space is already occupied by some other object
+          continue
+        }
+        objects.add(
+          new Object(
+            spawn.id,
+            spawn.i,
+            spawn.j,
+            spawn.type,
+            new URL(spawn.src, spawn.srcBase).href,
+          ),
+        )
+      }
+      await objects.loadAssets()
+    } else if (initialLoad) {
+      await objects.loadAssets()
+    }
   }
 
   *#getChunks(i: number, j: number): Generator<FieldBlockChunk> {
@@ -512,6 +609,7 @@ class Field implements IFieldTester {
 export function GameScreen({ el, query }: Context) {
   const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
   const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
+  const objectCanvas = query<HTMLCanvasElement>(".canvas-objects")!
 
   const screenSize = Math.min(globalThis.screen.width, 450)
 
@@ -519,6 +617,8 @@ export function GameScreen({ el, query }: Context) {
   charCanvas.height = screenSize
   itemCanvas.width = screenSize
   itemCanvas.height = screenSize
+  objectCanvas.width = screenSize
+  objectCanvas.height = screenSize
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
@@ -527,17 +627,19 @@ export function GameScreen({ el, query }: Context) {
 
   const viewScope = new ViewScope(screenSize, screenSize)
 
+  const objectLayer = new DrawLayer(objectCanvas, viewScope)
   const itemLayer = new DrawLayer(itemCanvas, viewScope)
   const charLayer = new DrawLayer(charCanvas, viewScope, { enableNoise: true })
 
   const activateScope = new ActivateScope(screenSize)
 
-  const actors = new Actors([me], activateScope)
+  const actors = new FieldActors([me], activateScope)
   const items = new FieldItems(activateScope)
+  const objects = new FieldObjects(activateScope)
   const field = new Field(query(".field")!, activateScope)
 
   signal.centerGrid10.subscribe(({ i, j }) => {
-    field.checkBlockLoad(i, j, viewScope, actors, items)
+    field.checkBlockLoad(i, j, viewScope, actors, items, objects)
     field.checkBlockUnload(i, j)
   })
 
@@ -545,8 +647,6 @@ export function GameScreen({ el, query }: Context) {
     viewScope.setCenter(x, y)
     field.translateElement(-viewScope.left, -viewScope.top)
   })
-
-  items.loadAssets()
 
   signal.isGameLoading.subscribe((v) => {
     if (!v) {
@@ -568,10 +668,12 @@ export function GameScreen({ el, query }: Context) {
 
     actors.step(field, collisionChecker, items)
     items.step() // currently, this is a no-op
+    objects.step() // currently, this is a no-op
     signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
-    itemLayer.drawIterable(items)
-    charLayer.drawIterable(actors)
+    itemLayer.drawIterable(items.iter())
+    charLayer.drawIterable(actors.iter())
+    objectLayer.drawIterable(objects.iter())
 
     if (i % 300 === 299) {
       actors.checkDeactivate(me.i, me.j)
@@ -580,7 +682,7 @@ export function GameScreen({ el, query }: Context) {
       items.checkDeactivate(me.i, me.j)
     }
     if (i % 60 === 59) {
-      field.checkActivate(me.i, me.j, { viewScope, actors, items })
+      field.checkActivate(me.i, me.j, { viewScope, actors, items, objects })
     }
   })
   loop.onStep((fps, v) => {

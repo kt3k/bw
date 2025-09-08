@@ -2,6 +2,8 @@ import { loadImage } from "../util/load.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
+import type { IItem } from "./item.ts"
+import type { IDrawable } from "./drawable.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -11,45 +13,9 @@ const fallbackImagePhase1 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD5JREFUOE9jZGBg+M+AChjR+HjlQYqHgQFoXibNS+gBBjKMpDAZHAaQ5GQGBgYUV4+mA7QAgaYokgJ14NMBAK1TIAlUJpxYAAAAAElFTkSuQmCC",
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
 
-export type ILoader = {
-  loadAssets(): Promise<void>
-  get assetsReady(): boolean
-}
-
-export type CellName = "0" | "1" | "2" | "d"
-
-/** The interface represents a box */
-export type IBox = {
-  get x(): number
-  get y(): number
-  get w(): number
-  get h(): number
-}
-
-export type IObj = IBox & ILoader & {
-  i: number
-  j: number
-  image(): ImageBitmap
-}
-
-export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
-
-export type IItem = IObj & {
-  id: string | null
-  type: ItemType
-}
-
-export type PropType = "chair" | "table"
-
-export type IProp = IObj & {
-  id: string | null
-  type: PropType
-}
-
 export type IFieldTester = {
   get(i: number, j: number): {
     canEnter: boolean
-    get name(): CellName
   }
 }
 
@@ -63,8 +29,8 @@ export type IStepper = {
 }
 
 /** The interface represents a character */
-export type IChar =
-  & IObj
+export type IActor =
+  & IDrawable
   & IStepper
   & {
     get id(): string
@@ -100,7 +66,7 @@ export function spawnCharacter(
   j: number,
   src: string,
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
-): IChar {
+): IActor {
   if (type === "random") {
     return new RandomlyTurnNPC(i, j, src, id, dir, speed)
   } else if (type === "random-walk") {
@@ -118,7 +84,7 @@ export type NextAction = Dir | "jump" | undefined
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
  */
-export abstract class Character implements IChar {
+export abstract class Character implements IActor {
   /** The current direction of the character */
   #dir: Dir = "down"
   /** The column of the world coordinates */

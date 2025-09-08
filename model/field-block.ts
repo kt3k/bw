@@ -3,18 +3,21 @@ import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
 import type { Dir } from "../util/dir.ts"
 import { floorN, modulo } from "../util/math.ts"
-import type { CellName, IBox, ItemType, NPCType } from "./character.ts"
+import type { IBox } from "./drawable.ts"
+import type { NPCType } from "./character.ts"
+import type { ObjectType } from "./object.ts"
+import type { ItemType } from "./item.ts"
 
 /**
  * {@linkcode FieldCell} represents the cell in the field block
  */
 export class FieldCell {
-  readonly name: CellName
+  readonly name: string
   readonly canEnter: boolean
   readonly color?: string
   readonly src?: string[]
   constructor(
-    name: CellName,
+    name: string,
     canEnter: boolean,
     color?: string,
     src?: string[],
@@ -42,6 +45,45 @@ export class ItemSpawnInfo implements IBox {
     i: number,
     j: number,
     type: ItemType,
+    src: string,
+    srcBase: string,
+  ) {
+    this.id = `${i}.${j}.${type}` // Unique ID for the spawn
+    this.i = i
+    this.j = j
+    this.type = type
+    this.src = src
+    this.srcBase = srcBase
+    this.x = i * CELL_SIZE
+    this.y = j * CELL_SIZE
+  }
+
+  toJSON() {
+    return {
+      i: this.i,
+      j: this.j,
+      type: this.type,
+      src: this.src,
+    }
+  }
+}
+
+/** {@linkcode ObjectSpawnInfo} represents the spawn info for the objects in {@linkcode FieldBlock} */
+export class ObjectSpawnInfo implements IBox {
+  readonly id: string
+  readonly i: number
+  readonly j: number
+  readonly type: ObjectType
+  readonly src: string
+  readonly srcBase: string
+  readonly x: number
+  readonly y: number
+  readonly w = CELL_SIZE
+  readonly h = CELL_SIZE
+  constructor(
+    i: number,
+    j: number,
+    type: ObjectType,
     src: string,
     srcBase: string,
   ) {
@@ -166,13 +208,14 @@ export class BlockMap {
   // The row of the world coordinates
   readonly j: number
   readonly cells: {
-    name: CellName
+    name: string
     canEnter: boolean
     color?: string
     src?: string | string[]
   }[]
   readonly characters: CharacterSpawnInfo[]
   readonly items: ItemSpawnInfo[]
+  readonly objects: ObjectSpawnInfo[] = []
   readonly field: string[]
   // deno-lint-ignore no-explicit-any
   #obj: any
@@ -215,6 +258,17 @@ export class BlockMap {
         this.url,
       )
     )
+    this.objects = (obj.objects ?? []).map((
+      obj: { i: number; j: number; type: ObjectType; src: string },
+    ) =>
+      new ObjectSpawnInfo(
+        obj.i,
+        obj.j,
+        obj.type,
+        obj.src,
+        this.url,
+      )
+    )
     this.field = obj.field
     this.#obj = obj
   }
@@ -242,6 +296,7 @@ export class FieldBlock {
   #imgMap: Record<string, ImageBitmap> = {}
   #characterSpawnInfoByChunk: ByChunk<CharacterSpawnInfo>
   #itemSpawnInfoByChunk: ByChunk<ItemSpawnInfo>
+  #objectSpawnInfoByChunk: ByChunk<ObjectSpawnInfo>
   #field: string[]
   #loadImage: (url: string) => Promise<ImageBitmap>
   #map: BlockMap
@@ -272,6 +327,7 @@ export class FieldBlock {
     this.#map = map
     this.#characterSpawnInfoByChunk = new ByChunk(map.characters)
     this.#itemSpawnInfoByChunk = new ByChunk(map.items)
+    this.#objectSpawnInfoByChunk = new ByChunk(map.objects)
   }
 
   loadCellImage(href: string): Promise<ImageBitmap> {
@@ -529,6 +585,8 @@ export class FieldBlock {
         .getAll().map((spawn) => spawn.toJSON()),
       items: this.#itemSpawnInfoByChunk
         .getAll().map((spawn) => spawn.toJSON()),
+      objects: this.#objectSpawnInfoByChunk
+        .getAll().map((spawn) => spawn.toJSON()),
       field: this.#field,
     })
   }
@@ -583,10 +641,20 @@ export class FieldBlock {
     this.#itemSpawnInfoByChunk.add(spawn)
   }
 
+  getObjectSpawnInfoForChunk(i: number, j: number): ObjectSpawnInfo[] {
+    const [k, l] = this.#gridToChunkIndex(i, j)
+    return this.#objectSpawnInfoByChunk.get(k, l)
+  }
+
+  addObjectSpawnInfo(spawn: ObjectSpawnInfo): void {
+    this.#objectSpawnInfoByChunk.add(spawn)
+  }
+
   /** Clears the spawn info */
   clearSpawnInfo(): void {
     this.#characterSpawnInfoByChunk = new ByChunk([])
     this.#itemSpawnInfoByChunk = new ByChunk([])
+    this.#objectSpawnInfoByChunk = new ByChunk([])
   }
 }
 
@@ -606,6 +674,10 @@ export class FieldBlockChunk {
 
   getCharacterSpawnInfo(): CharacterSpawnInfo[] {
     return this.#fieldBlock.getCharacterSpawnInfoForChunk(this.#i, this.#j)
+  }
+
+  getObjectSpawnInfo(): ObjectSpawnInfo[] {
+    return this.#fieldBlock.getObjectSpawnInfoForChunk(this.#i, this.#j)
   }
 
   render(initialLoad: boolean) {
