@@ -1,11 +1,11 @@
 import * as signal from "../util/signal.ts"
-import { ceilN, floorN, modulo } from "../util/math.ts"
+import { ceilN, floorN } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import type { ILoader } from "../model/drawable.ts"
 import {
   type CollisionChecker,
   type IActor,
-  type IFieldTester,
+  type IField,
   type IStepper,
   type ItemContainer,
   spawnCharacter,
@@ -220,13 +220,13 @@ export class FieldActors implements IStepper, ILoader {
   }
 
   step(
-    fieldTester: IFieldTester,
+    field: IField,
     collisionChecker: CollisionChecker,
     items: ItemContainer,
   ) {
     for (const actor of this.#actors) {
       this.#coordCountMap.decrement(actor.physicalGridKey)
-      actor.step(fieldTester, collisionChecker, items)
+      actor.step(field, collisionChecker, items)
       this.#coordCountMap.increment(actor.physicalGridKey)
     }
   }
@@ -265,17 +265,6 @@ export class FieldActors implements IStepper, ILoader {
 
   has(id: string) {
     return this.#idSet.has(id)
-  }
-}
-
-/**
- * When the chunk of {@linkcode FieldBlock} overlaps with this scope,
- * the {@linkcode Character}s in that chunk start walking.
- */
-class ActivateScope extends RectScope {
-  static MARGIN = 20 * CELL_SIZE
-  constructor(screenSize: number) {
-    super(screenSize + ActivateScope.MARGIN, screenSize + ActivateScope.MARGIN)
   }
 }
 
@@ -356,7 +345,7 @@ class BlockUnloadScope extends RectScope {
   }
 }
 
-export class Field implements IFieldTester {
+export class Field implements IField {
   #el: HTMLElement
   #blocks: Record<string, FieldBlock> = {}
   #blockElements: Record<string, HTMLCanvasElement> = {}
@@ -403,10 +392,7 @@ export class Field implements IFieldTester {
    * Mainly used by characters to get the cell they are trying to enter
    */
   get(i: number, j: number): FieldCell {
-    return this.#getBlock(i, j).getCell(
-      modulo(i, BLOCK_SIZE),
-      modulo(j, BLOCK_SIZE),
-    )
+    return this.#getBlock(i, j).getCell(i, j)
   }
 
   #hasBlock(blockId: string) {

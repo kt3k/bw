@@ -13,7 +13,7 @@ const fallbackImagePhase1 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD5JREFUOE9jZGBg+M+AChjR+HjlQYqHgQFoXibNS+gBBjKMpDAZHAaQ5GQGBgYUV4+mA7QAgaYokgJ14NMBAK1TIAlUJpxYAAAAAElFTkSuQmCC",
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
 
-export type IFieldTester = {
+export type IField = {
   get(i: number, j: number): {
     canEnter: boolean
   }
@@ -22,7 +22,7 @@ export type IFieldTester = {
 /** The implementor of 'step' function */
 export type IStepper = {
   step(
-    fieldTester: IFieldTester,
+    field: IField,
     collisionChecker: CollisionChecker,
     items: ItemContainer,
   ): void
@@ -154,7 +154,7 @@ export abstract class Character implements IActor {
   /** Returns true if the character can go to the given direction */
   canEnter(
     dir: Dir,
-    fieldTester: IFieldTester,
+    fieldTester: IField,
     collisionChecker: CollisionChecker,
   ): boolean {
     const [i, j] = this.nextGrid(dir)
@@ -169,20 +169,20 @@ export abstract class Character implements IActor {
    * Returning undefined causes the character to stay in the current state.
    */
   getNextAction(
-    _fieldTester: IFieldTester,
+    _fieldTester: IField,
     _collisionChecker: CollisionChecker,
   ): NextAction {
     return undefined
   }
 
   onMoveEnd(
-    _fieldTester: IFieldTester,
+    _fieldTester: IField,
     _itemContainer: ItemContainer,
     _moveType: MoveType,
   ): void {}
 
   onMoveEndWrap(
-    fieldTester: IFieldTester,
+    fieldTester: IField,
     itemContainer: ItemContainer,
     moveType: MoveType,
   ) {
@@ -191,7 +191,7 @@ export abstract class Character implements IActor {
   }
 
   step(
-    fieldTester: IFieldTester,
+    fieldTester: IField,
     collisionChecker: CollisionChecker,
     itemContainer: ItemContainer,
   ) {
@@ -466,7 +466,7 @@ export class RandomlyTurnNPC extends Character {
   #counter = 32
 
   override getNextAction(
-    fieldTester: IFieldTester,
+    fieldTester: IField,
     collisionChecker: CollisionChecker,
   ): NextAction {
     this.#counter -= 1
@@ -495,7 +495,7 @@ export class RandomlyTurnNPC extends Character {
 
 export class RandomWalkNPC extends Character {
   override getNextAction(
-    fieldTester: IFieldTester,
+    fieldTester: IField,
     collisionChecker: CollisionChecker,
   ): NextAction {
     const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {

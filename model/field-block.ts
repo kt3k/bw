@@ -180,6 +180,10 @@ export class ByChunk<T extends { i: number; j: number }> {
     this.#spawnInfo[k][l].push(spawn)
   }
 
+  /**
+   * @param k local chunk index
+   * @param l local chunk index
+   */
   get(k: number, l: number): T[] {
     return this.#spawnInfo[k][l]
   }
@@ -498,7 +502,7 @@ export class FieldBlock {
     j: number,
     { initialLoad = false } = {},
   ): Promise<void> {
-    const [k, l] = this.#gridToChunkIndex(i, j)
+    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
     const layer = new CanvasWrapper(this.canvas)
 
     const chunkKey = `${k}.${l}`
@@ -540,8 +544,14 @@ export class FieldBlock {
     return
   }
 
+  /**
+   * @param i world grid index
+   * @param j world grid index
+   * @returns the cell at the given world grid coordinates
+   */
   getCell(i: number, j: number): FieldCell {
-    return this.#cellMap[this.#field[j][i]]
+    return this
+      .#cellMap[this.#field[modulo(j, BLOCK_SIZE)][modulo(i, BLOCK_SIZE)]]
   }
   /** Updates a cell at the given coordinates with the given cell name.
    * This is for editor use.
@@ -608,7 +618,7 @@ export class FieldBlock {
     return diff
   }
 
-  #gridToChunkIndex(i: number, j: number): [number, number] {
+  #worldGridToLocalChunkIndex(i: number, j: number): [number, number] {
     const relI = modulo(i, BLOCK_SIZE)
     const relJ = modulo(j, BLOCK_SIZE)
     const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
@@ -619,11 +629,11 @@ export class FieldBlock {
   /** Gets the character spawn info for the given chunk. The chunk should be given by the i, j coordinates of the
    * left and top of the chunk.
    *
-   * @param i world grid coordinate
-   * @param j world grid coordinate
+   * @param i world grid index
+   * @param j world grid index
    */
   getCharacterSpawnInfoForChunk(i: number, j: number): CharacterSpawnInfo[] {
-    const [k, l] = this.#gridToChunkIndex(i, j)
+    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
     return this.#characterSpawnInfoByChunk.get(k, l)
   }
 
@@ -633,7 +643,7 @@ export class FieldBlock {
   }
 
   getItemSpawnInfoForChunk(i: number, j: number): ItemSpawnInfo[] {
-    const [k, l] = this.#gridToChunkIndex(i, j)
+    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
     return this.#itemSpawnInfoByChunk.get(k, l)
   }
 
@@ -642,7 +652,7 @@ export class FieldBlock {
   }
 
   getObjectSpawnInfoForChunk(i: number, j: number): ObjectSpawnInfo[] {
-    const [k, l] = this.#gridToChunkIndex(i, j)
+    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
     return this.#objectSpawnInfoByChunk.get(k, l)
   }
 

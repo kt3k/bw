@@ -3,7 +3,7 @@ import { Input, inputQueue } from "./ui/input.ts"
 import {
   Character,
   CollisionChecker,
-  IFieldTester,
+  IField,
   ItemContainer,
   type MoveType,
   NextAction,
@@ -18,7 +18,7 @@ export class MainCharacter extends Character {
     []
   #speedUpTimer: number | undefined = undefined
   override getNextAction(
-    fieldTester: IFieldTester,
+    field: IField,
     collisionChecker: CollisionChecker,
   ): NextAction {
     if (this.#nextActionQueue.length > 0) {
@@ -28,20 +28,20 @@ export class MainCharacter extends Character {
         this.#speedUpTimer = setTimeout(() => {
           this.#nextActionQueue.push("speed-reset", "jump")
         }, 15000)
-        return this.getNextAction(fieldTester, collisionChecker)
+        return this.getNextAction(field, collisionChecker)
       } else if (nextAction === "speed-4x") {
         this.speed = 4
         this.#speedUpTimer = setTimeout(() => {
           this.#nextActionQueue.push("speed-reset", "jump")
         }, 15000)
-        return this.getNextAction(fieldTester, collisionChecker)
+        return this.getNextAction(field, collisionChecker)
       } else if (nextAction === "speed-reset") {
         if (this.#speedUpTimer) {
           clearTimeout(this.#speedUpTimer)
           this.#speedUpTimer = undefined
         }
         this.speed = 1
-        return this.getNextAction(fieldTester, collisionChecker)
+        return this.getNextAction(field, collisionChecker)
       }
       return nextAction
     }
@@ -69,7 +69,7 @@ export class MainCharacter extends Character {
   }
 
   override onMoveEnd(
-    fieldTester: IFieldTester,
+    _field: IField,
     itemContainer: ItemContainer,
     moveType: MoveType,
   ): void {
