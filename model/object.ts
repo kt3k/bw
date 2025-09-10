@@ -1,13 +1,6 @@
 import { loadImage } from "../util/load.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IDrawable } from "./drawable.ts"
-
-export type ObjectType = "chair" | "table"
-
-export type IObject = IDrawable & {
-  id: string | null
-  type: ObjectType
-}
+import type { IObject, ObjectType } from "./types.ts"
 
 const fallbackImage = await fetch(
   // TODO(kt3k): Update

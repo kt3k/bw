@@ -1,4 +1,4 @@
-import seedrandom from "npm:seedrandom"
+import seedrandom from "seedrandom"
 
 const { randomInt, choice } = seed("Hello.")
 

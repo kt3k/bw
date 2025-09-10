@@ -2,8 +2,7 @@ import { loadImage } from "../util/load.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
-import type { IItem } from "./item.ts"
-import type { IDrawable } from "./drawable.ts"
+import type { IActor, IField } from "./types.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -12,30 +11,6 @@ const fallbackImagePhase0 = await fetch(
 const fallbackImagePhase1 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD5JREFUOE9jZGBg+M+AChjR+HjlQYqHgQFoXibNS+gBBjKMpDAZHAaQ5GQGBgYUV4+mA7QAgaYokgJ14NMBAK1TIAlUJpxYAAAAAElFTkSuQmCC",
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
-
-export type IField = {
-  get(i: number, j: number): {
-    canEnter: boolean
-  }
-}
-
-/** The implementor of 'step' function */
-export type IStepper = {
-  step(
-    field: IField,
-    collisionChecker: CollisionChecker,
-    items: ItemContainer,
-  ): void
-}
-
-/** The interface represents a character */
-export type IActor =
-  & IDrawable
-  & IStepper
-  & {
-    get id(): string
-    get physicalGridKey(): string
-  }
 
 type CharacterAppearance =
   | "up0"
@@ -49,12 +24,6 @@ type CharacterAppearance =
 
 type CharacterAssets = {
   [K in CharacterAppearance]: ImageBitmap
-}
-
-export type CollisionChecker = (i: number, j: number) => boolean
-export type ItemContainer = {
-  get(i: number, j: number): IItem | undefined
-  collect(i: number, j: number): void
 }
 
 export type NPCType = "random" | "random-walk" | "static"
@@ -154,12 +123,10 @@ export abstract class Character implements IActor {
   /** Returns true if the character can go to the given direction */
   canEnter(
     dir: Dir,
-    fieldTester: IField,
-    collisionChecker: CollisionChecker,
+    field: IField,
   ): boolean {
     const [i, j] = this.nextGrid(dir)
-    const cell = fieldTester.get(i, j)
-    return cell.canEnter && !collisionChecker(i, j)
+    return field.canEnter(i, j)
   }
 
   /** Returns the next state of the character.
@@ -169,34 +136,27 @@ export abstract class Character implements IActor {
    * Returning undefined causes the character to stay in the current state.
    */
   getNextAction(
-    _fieldTester: IField,
-    _collisionChecker: CollisionChecker,
+    _field: IField,
   ): NextAction {
     return undefined
   }
 
   onMoveEnd(
-    _fieldTester: IField,
-    _itemContainer: ItemContainer,
+    _field: IField,
     _moveType: MoveType,
   ): void {}
 
   onMoveEndWrap(
-    fieldTester: IField,
-    itemContainer: ItemContainer,
+    field: IField,
     moveType: MoveType,
   ) {
     this.#age++
-    this.onMoveEnd(fieldTester, itemContainer, moveType)
+    this.onMoveEnd(field, moveType)
   }
 
-  step(
-    fieldTester: IField,
-    collisionChecker: CollisionChecker,
-    itemContainer: ItemContainer,
-  ) {
+  step(field: IField) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextAction(fieldTester, collisionChecker)
+      const nextState = this.getNextAction(field)
       if (
         nextState === "up" || nextState === "down" ||
         nextState === "left" || nextState === "right"
@@ -204,7 +164,7 @@ export abstract class Character implements IActor {
         this.setDir(nextState)
         this.#idleCounter = 0
 
-        if (this.canEnter(nextState, fieldTester, collisionChecker)) {
+        if (this.canEnter(nextState, field)) {
           this.#moveType = "linear"
         } else {
           this.#moveType = "bounce"
@@ -233,7 +193,7 @@ export abstract class Character implements IActor {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEndWrap(fieldTester, itemContainer, moveType)
+        this.onMoveEndWrap(field, moveType)
       }
     } else if (this.#moveType === "bounce") {
       this.#movePhase += this.#speed
@@ -247,7 +207,7 @@ export abstract class Character implements IActor {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEndWrap(fieldTester, itemContainer, moveType)
+        this.onMoveEndWrap(field, moveType)
       }
     } else if (this.#moveType === "jump") {
       this.#movePhase += 2
@@ -273,7 +233,7 @@ export abstract class Character implements IActor {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEndWrap(fieldTester, itemContainer, moveType)
+        this.onMoveEndWrap(field, moveType)
       }
     } else {
       this.#idleCounter += 1
@@ -465,10 +425,7 @@ export abstract class Character implements IActor {
 export class RandomlyTurnNPC extends Character {
   #counter = 32
 
-  override getNextAction(
-    fieldTester: IField,
-    collisionChecker: CollisionChecker,
-  ): NextAction {
+  override getNextAction(field: IField): NextAction {
     this.#counter -= 1
     if (this.#counter <= 0) {
       const { randomInt, choice } = seed(this.age.toString())
@@ -476,7 +433,7 @@ export class RandomlyTurnNPC extends Character {
       // If the character can keep going in the current direction,
       // it will keep going with 96% probability.
       if (
-        this.canEnter(this.dir, fieldTester, collisionChecker) &&
+        this.canEnter(this.dir, field) &&
         Math.random() < 0.96
       ) {
         return this.dir
@@ -486,7 +443,7 @@ export class RandomlyTurnNPC extends Character {
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
       return choice(nextCandidate.filter((d) => {
-        return this.canEnter(d, fieldTester, collisionChecker)
+        return this.canEnter(d, field)
       }))
     }
     return undefined
@@ -495,11 +452,10 @@ export class RandomlyTurnNPC extends Character {
 
 export class RandomWalkNPC extends Character {
   override getNextAction(
-    fieldTester: IField,
-    collisionChecker: CollisionChecker,
+    field: IField,
   ): NextAction {
     const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {
-      return this.canEnter(d, fieldTester, collisionChecker)
+      return this.canEnter(d, field)
     })
     if (dirs.length === 0) {
       return undefined

@@ -1,13 +1,7 @@
 import { DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import {
-  Character,
-  CollisionChecker,
-  IField,
-  ItemContainer,
-  type MoveType,
-  NextAction,
-} from "../model/character.ts"
+import { Character, type MoveType, NextAction } from "../model/character.ts"
+import type { IField } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import { seed } from "../util/random.ts"
@@ -17,10 +11,7 @@ export class MainCharacter extends Character {
   #nextActionQueue: (NextAction | "speed-2x" | "speed-4x" | "speed-reset")[] =
     []
   #speedUpTimer: number | undefined = undefined
-  override getNextAction(
-    field: IField,
-    collisionChecker: CollisionChecker,
-  ): NextAction {
+  override getNextAction(field: IField): NextAction {
     if (this.#nextActionQueue.length > 0) {
       const nextAction = this.#nextActionQueue.shift()!
       if (nextAction === "speed-2x") {
@@ -28,20 +19,20 @@ export class MainCharacter extends Character {
         this.#speedUpTimer = setTimeout(() => {
           this.#nextActionQueue.push("speed-reset", "jump")
         }, 15000)
-        return this.getNextAction(field, collisionChecker)
+        return this.getNextAction(field)
       } else if (nextAction === "speed-4x") {
         this.speed = 4
         this.#speedUpTimer = setTimeout(() => {
           this.#nextActionQueue.push("speed-reset", "jump")
         }, 15000)
-        return this.getNextAction(field, collisionChecker)
+        return this.getNextAction(field)
       } else if (nextAction === "speed-reset") {
         if (this.#speedUpTimer) {
           clearTimeout(this.#speedUpTimer)
           this.#speedUpTimer = undefined
         }
         this.speed = 1
-        return this.getNextAction(field, collisionChecker)
+        return this.getNextAction(field)
       }
       return nextAction
     }
@@ -68,36 +59,32 @@ export class MainCharacter extends Character {
     return undefined
   }
 
-  override onMoveEnd(
-    _field: IField,
-    itemContainer: ItemContainer,
-    moveType: MoveType,
-  ): void {
-    const item = itemContainer.get(this.i, this.j)
+  override onMoveEnd(field: IField, moveType: MoveType): void {
+    const item = field.peekItem(this.i, this.j)
     if (item) {
       switch (item.type) {
         case "apple": {
-          itemContainer.collect(this.i, this.j)
+          field.collectItem(this.i, this.j)
 
           const count = signal.appleCount.get()
           signal.appleCount.update(count + 1)
           break
         }
         case "green-apple": {
-          itemContainer.collect(this.i, this.j)
+          field.collectItem(this.i, this.j)
 
           const count = signal.greenAppleCount.get()
           signal.greenAppleCount.update(count + 1)
           break
         }
         case "mushroom": {
-          itemContainer.collect(this.i, this.j)
+          field.collectItem(this.i, this.j)
           this.#nextActionQueue = []
           this.#nextActionQueue.push("speed-reset", "jump", "speed-2x")
           break
         }
         case "purple-mushroom": {
-          itemContainer.collect(this.i, this.j)
+          field.collectItem(this.i, this.j)
           const { choice } = seed(`${this.i},${this.j}`)
           this.#nextActionQueue = []
           this.#nextActionQueue.push("speed-reset", "jump", "jump", "speed-4x")

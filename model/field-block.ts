@@ -3,10 +3,9 @@ import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
 import type { Dir } from "../util/dir.ts"
 import { floorN, modulo } from "../util/math.ts"
-import type { IBox } from "./drawable.ts"
+import type { IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
-import type { ObjectType } from "./object.ts"
-import type { ItemType } from "./item.ts"
+import type { ItemType, ObjectType } from "./types.ts"
 
 /**
  * {@linkcode FieldCell} represents the cell in the field block

@@ -6,7 +6,7 @@ import { MainCharacter } from "./main-character.ts"
 import { DrawLayer } from "./draw-layer.ts"
 import { RectScope } from "../util/rect-scope.ts"
 
-import { Field, FieldActors, FieldItems, FieldObjects } from "./field.ts"
+import { Field } from "./field.ts"
 
 /**
  * The area which is visible to the user
@@ -53,19 +53,17 @@ export function GameScreen({ el, query }: Context) {
 
   const activateScope = new ActivateScope(screenSize)
 
-  const actors = new FieldActors([me], activateScope)
-  const items = new FieldItems(activateScope)
-  const objects = new FieldObjects(activateScope)
   const field = new Field(query(".field")!, activateScope)
+  field.actors.add(me)
 
   signal.centerGrid10.subscribe(({ i, j }) => {
-    field.checkBlockLoad(i, j, viewScope, actors, items, objects)
+    field.checkBlockLoad(i, j, viewScope)
     field.checkBlockUnload(i, j)
   })
 
   signal.centerPixel.subscribe(({ x, y }) => {
     viewScope.setCenter(x, y)
-    field.translateElement(-viewScope.left, -viewScope.top)
+    field.translateBackground(-viewScope.left, -viewScope.top)
   })
 
   signal.isGameLoading.subscribe((v) => {
@@ -73,8 +71,6 @@ export function GameScreen({ el, query }: Context) {
       query(".curtain")!.style.opacity = "0"
     }
   })
-
-  const collisionChecker = (i: number, j: number) => actors.checkCollision(i, j)
 
   let i = 0
 
@@ -86,26 +82,24 @@ export function GameScreen({ el, query }: Context) {
     }
     signal.isGameLoading.update(false)
 
-    actors.step(field, collisionChecker, items)
-    items.step() // currently, this is a no-op
-    objects.step() // currently, this is a no-op
+    field.step()
     signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
-    itemLayer.drawIterable(items.iter())
-    charLayer.drawIterable(actors.iter())
-    objectLayer.drawIterable(objects.iter())
+    itemLayer.drawIterable(field.items.iter())
+    charLayer.drawIterable(field.actors.iter())
+    objectLayer.drawIterable(field.objects.iter())
 
     if (i % 300 === 299) {
-      actors.checkDeactivate(me.i, me.j)
+      field.actors.checkDeactivate(me.i, me.j)
     }
     if (i % 300 === 199) {
-      items.checkDeactivate(me.i, me.j)
+      field.items.checkDeactivate(me.i, me.j)
     }
     if (i % 300 === 99) {
-      objects.checkDeactivate(me.i, me.j)
+      field.objects.checkDeactivate(me.i, me.j)
     }
     if (i % 60 === 59) {
-      field.checkActivate(me.i, me.j, { viewScope, actors, items, objects })
+      field.checkActivate(me.i, me.j, { viewScope })
     }
   })
   loop.onStep((fps, v) => {

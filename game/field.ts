@@ -1,17 +1,17 @@
 import * as signal from "../util/signal.ts"
 import { ceilN, floorN } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import type { ILoader } from "../model/drawable.ts"
-import {
-  type CollisionChecker,
-  type IActor,
-  type IField,
-  type IStepper,
-  type ItemContainer,
-  spawnCharacter,
-} from "../model/character.ts"
-import { type IItem, Item } from "../model/item.ts"
-import { type IObject, Object } from "../model/object.ts"
+import type {
+  IActor,
+  IField,
+  IItem,
+  ILoader,
+  IObject,
+  IStepper,
+} from "../model/types.ts"
+import { spawnCharacter } from "../model/character.ts"
+import { Item } from "../model/item.ts"
+import { Object } from "../model/object.ts"
 import {
   BlockMap,
   FieldBlock,
@@ -22,7 +22,7 @@ import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
 
 /** The items on the field */
-export class FieldItems implements ILoader, ItemContainer {
+export class FieldItems implements IStepper, ILoader {
   #items: Set<IItem> = new Set()
   #coordMap = {} as Record<string, IItem>
   #activateScope: RectScope
@@ -80,7 +80,7 @@ export class FieldItems implements ILoader, ItemContainer {
     return item
   }
 
-  step() {
+  step(_field: IField) {
     // some items might need updates in the future
   }
 
@@ -101,7 +101,7 @@ export class FieldItems implements ILoader, ItemContainer {
   }
 }
 
-export class FieldObjects implements ILoader {
+export class FieldObjects implements IStepper, ILoader {
   #objects: Set<IObject> = new Set()
   #coordMap = {} as Record<string, IObject>
   #activateScope: RectScope
@@ -155,7 +155,7 @@ export class FieldObjects implements ILoader {
     return [...this.#objects].every((x) => x.assetsReady)
   }
 
-  step() {
+  step(_field: IField) {
     // Implement this when there are moving objects
   }
 
@@ -201,6 +201,11 @@ export class FieldActors implements IStepper, ILoader {
   #activateScope: RectScope
   #idSet: Set<string> = new Set()
 
+  /**
+   * @param i world grid index
+   * @param j world grid index
+   * @return true if there is a character at the given grid coordinate
+   */
   checkCollision(i: number, j: number) {
     return this.#coordCountMap.get(`${i}.${j}`) > 0
   }
@@ -219,14 +224,10 @@ export class FieldActors implements IStepper, ILoader {
     signal.actorsCount.update(this.#actors.length)
   }
 
-  step(
-    field: IField,
-    collisionChecker: CollisionChecker,
-    items: ItemContainer,
-  ) {
+  step(field: IField) {
     for (const actor of this.#actors) {
       this.#coordCountMap.decrement(actor.physicalGridKey)
-      actor.step(field, collisionChecker, items)
+      actor.step(field)
       this.#coordCountMap.increment(actor.physicalGridKey)
     }
   }
@@ -356,9 +357,28 @@ export class Field implements IField {
   #initialBlocksLoaded = false
   #initialActivateReady = false
 
+  #actors: FieldActors
+  #items: FieldItems
+  #objects: FieldObjects
+
   constructor(el: HTMLElement, activateScope: RectScope) {
     this.#el = el
     this.#activateScope = activateScope
+    this.#actors = new FieldActors([], activateScope)
+    this.#items = new FieldItems(activateScope)
+    this.#objects = new FieldObjects(activateScope)
+  }
+
+  get actors() {
+    return this.#actors
+  }
+
+  get items() {
+    return this.#items
+  }
+
+  get objects() {
+    return this.#objects
   }
 
   async #addBlock(block: FieldBlock) {
@@ -391,15 +411,29 @@ export class Field implements IField {
    * Gets the cell for the given grid coordinate
    * Mainly used by characters to get the cell they are trying to enter
    */
-  get(i: number, j: number): FieldCell {
+  #getCell(i: number, j: number): FieldCell {
     return this.#getBlock(i, j).getCell(i, j)
+  }
+  step(): void {
+    this.#actors.step(this)
+    this.#items.step(this)
+    this.#objects.step(this)
+  }
+  canEnter(i: number, j: number): boolean {
+    return this.#getCell(i, j).canEnter && !this.#actors.checkCollision(i, j)
+  }
+  peekItem(i: number, j: number): IItem | undefined {
+    return this.#items.get(i, j)
+  }
+  collectItem(i: number, j: number): void {
+    this.#items.collect(i, j)
   }
 
   #hasBlock(blockId: string) {
     return !!this.#blocks[blockId]
   }
 
-  translateElement(x: number, y: number) {
+  translateBackground(x: number, y: number) {
     this.#el.style.transform = `translateX(${x}px) translateY(${y}px)`
   }
 
@@ -407,9 +441,6 @@ export class Field implements IField {
     i: number,
     j: number,
     viewScope: RectScope,
-    actors: FieldActors,
-    items: FieldItems,
-    objects: FieldObjects,
   ) {
     this.#loadScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
     const blockIdsToLoad = this.#loadScope.blockIds().filter((id) =>
@@ -427,13 +458,7 @@ export class Field implements IField {
       this.checkActivate(
         i,
         j,
-        {
-          viewScope,
-          actors,
-          items,
-          objects,
-          initialLoad: true,
-        },
+        { viewScope, initialLoad: true },
       ).then(() => {
         console.log("initial actors ready")
         this.#initialActivateReady = true
@@ -454,35 +479,19 @@ export class Field implements IField {
   async checkActivate(
     i: number,
     j: number,
-    { viewScope, actors, items, objects, initialLoad = false }: {
+    { viewScope, initialLoad = false }: {
       viewScope: RectScope
-      actors: {
-        has(id: string): boolean
-        add(char: IActor): void
-        loadAssets(): Promise<void>
-      }
-      items: {
-        isCollected(id: string): boolean
-        get(i: number, j: number): IItem | undefined
-        add(item: IItem): void
-        loadAssets(): Promise<void>
-      }
-      objects: {
-        get(i: number, j: number): IObject | undefined
-        add(obj: IObject): void
-        loadAssets(): Promise<void>
-      }
       initialLoad?: boolean
     },
   ) {
     const chunks = [...this.#getChunks(i, j)]
     const newCharSpawns = chunks.flatMap((c) => c.getCharacterSpawnInfo())
-      .filter((spawn) => !actors.has(spawn.id)) // isn't spawned yet
+      .filter((spawn) => !this.#actors.has(spawn.id)) // isn't spawned yet
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
     const newItemSpawns = chunks.flatMap((c) => c.getItemSpawnInfo())
-      .filter((spawn) => !items.isCollected(spawn.id)) // isn't collected yet
+      .filter((spawn) => !this.#items.isCollected(spawn.id)) // isn't collected yet
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
@@ -493,7 +502,7 @@ export class Field implements IField {
     if (newCharSpawns.length > 0) {
       console.log(`Spawning ${newCharSpawns.length} characters`)
       for (const spawn of newCharSpawns) {
-        actors.add(spawnCharacter(
+        this.#actors.add(spawnCharacter(
           spawn.id,
           spawn.type,
           spawn.i,
@@ -505,19 +514,19 @@ export class Field implements IField {
           },
         ))
       }
-      await actors.loadAssets()
+      await this.#actors.loadAssets()
     } else if (initialLoad) {
-      await actors.loadAssets()
+      await this.#actors.loadAssets()
     }
 
     if (newItemSpawns.length > 0) {
       console.log(`Spawning ${newItemSpawns.length} items`)
       for (const spawn of newItemSpawns) {
-        if (items.get(spawn.i, spawn.j)) {
+        if (this.#items.get(spawn.i, spawn.j)) {
           // The space is already occupied by some other item
           continue
         }
-        items.add(
+        this.#items.add(
           new Item(
             spawn.id,
             spawn.i,
@@ -527,19 +536,19 @@ export class Field implements IField {
           ),
         )
       }
-      await items.loadAssets()
+      await this.#items.loadAssets()
     } else if (initialLoad) {
-      await items.loadAssets()
+      await this.#items.loadAssets()
     }
 
     if (newObjectSpawns.length > 0) {
       console.log(`Spawning ${newObjectSpawns.length} objects`)
       for (const spawn of newObjectSpawns) {
-        if (objects.get(spawn.i, spawn.j)) {
+        if (this.#objects.get(spawn.i, spawn.j)) {
           // The space is already occupied by some other object
           continue
         }
-        objects.add(
+        this.#objects.add(
           new Object(
             spawn.id,
             spawn.i,
@@ -549,9 +558,9 @@ export class Field implements IField {
           ),
         )
       }
-      await objects.loadAssets()
+      await this.#objects.loadAssets()
     } else if (initialLoad) {
-      await objects.loadAssets()
+      await this.#objects.loadAssets()
     }
   }
 
