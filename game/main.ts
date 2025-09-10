@@ -2,7 +2,11 @@ import { register } from "@kt3k/cell"
 import { clearInput } from "./ui/input.ts"
 import { KeyMonitor } from "./ui/key-monitor.ts"
 import { FpsMonitor, VMonitor } from "./ui/fps-monitor.ts"
-import { ActorsCounter, ItemsCounter } from "./ui/actors-counter.ts"
+import {
+  ActorsCounter,
+  ItemsCounter,
+  ObjectsCounter,
+} from "./ui/spawns-counter.ts"
 import { SwipeHandler } from "./ui/swipe-handler.ts"
 import { ItemGetEffector } from "./ui/item-get-effector.ts"
 import { LoadingIndicator } from "./ui/loading-indicator.ts"
@@ -21,3 +25,4 @@ register(AppleCounter, "js-apple-counter")
 register(ItemGetEffector, "js-item-get-effector")
 register(ActorsCounter, "js-actors-counter")
 register(ItemsCounter, "js-items-counter")
+register(ObjectsCounter, "js-objects-counter")

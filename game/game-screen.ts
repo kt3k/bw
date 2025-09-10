@@ -101,6 +101,9 @@ export function GameScreen({ el, query }: Context) {
     if (i % 300 === 199) {
       items.checkDeactivate(me.i, me.j)
     }
+    if (i % 300 === 99) {
+      objects.checkDeactivate(me.i, me.j)
+    }
     if (i % 60 === 59) {
       field.checkActivate(me.i, me.j, { viewScope, actors, items, objects })
     }

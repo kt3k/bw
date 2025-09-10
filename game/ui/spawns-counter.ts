@@ -14,3 +14,10 @@ export function ItemsCounter({ el, subscribe }: Context) {
     el.textContent = count.toString()
   })
 }
+
+/** The ui which shows the current active objects count */
+export function ObjectsCounter({ el, subscribe }: Context) {
+  subscribe(signal.objectsCount, (count) => {
+    el.textContent = count.toString()
+  })
+}
