@@ -1,6 +1,5 @@
-import { loadImage } from "../util/load.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IItem, ItemType } from "./types.ts"
+import type { IItem, ItemType, LoadOptions } from "./types.ts"
 
 const fallbackImage = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",
@@ -47,7 +46,11 @@ export class Item implements IItem {
     this.src = src
   }
 
-  async loadAssets() {
+  async loadAssets(options: LoadOptions) {
+    const loadImage = options.loadImage
+    if (!loadImage) {
+      throw new Error("Cannot load assets as loadImage not specified")
+    }
     this.#image = await loadImage(this.src)
   }
 

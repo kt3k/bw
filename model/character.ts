@@ -1,8 +1,7 @@
-import { loadImage } from "../util/load.ts"
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
-import type { IActor, IField } from "./types.ts"
+import type { IActor, IField, LoadOptions } from "./types.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -335,7 +334,11 @@ export abstract class Character implements IActor {
   }
 
   /** Loads the assets and store ImageBitmaps in #assets. */
-  async loadAssets() {
+  async loadAssets(options: LoadOptions) {
+    const loadImage = options.loadImage
+    if (!loadImage) {
+      throw new Error("Cannot load assets as loadImage not specified")
+    }
     const [up0, up1, down0, down1, left0, left1, right0, right1] = await Promise
       .all([
         `${this.#src}up0.png`,

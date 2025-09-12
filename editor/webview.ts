@@ -6,19 +6,88 @@
 
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
-import { BlockMap, FieldBlock } from "../model/field-block.ts"
+import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
+import { Object } from "../model/object.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
-import { BLOCK_SIZE } from "../util/constants.ts"
+import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
+const CANVAS_SIZE = BLOCK_SIZE * CELL_SIZE
+const SIDE_CANVAS_SIZE = CELL_SIZE * 5
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
 const fieldBlock = new Signal<FieldBlock | null>(null)
-let prevFieldBlock: FieldBlock | null = null
 const mode = new Signal<"dot" | "stroke">("dot")
-const selectedCell = new Signal<number | null>(null)
+
+type CellTool = { name: string }
+type ObjectTool = { type: string; src: string } | "remove"
+
+const selectedTool = new Signal<string | null>(null)
+const cellTools = [] as CellTool[]
+const objTools = [] as ObjectTool[]
+
+function parseToolIndex(
+  tool: string | null,
+): ["cell" | "object" | null, number] {
+  if (tool === null) return [null, -1]
+  if (tool.startsWith("cell-")) return ["cell", +tool.replace("cell-", "")]
+  if (tool.startsWith("object-")) {
+    return ["object", +tool.replace("object-", "")]
+  }
+  return [null, -1]
+}
+
+function toolIndex(kind: "cell" | "object", index: number): string {
+  return kind + "-" + index
+}
+
+function nextTool(current: string | null): string {
+  if (current === null) return toolIndex("cell", 0)
+  const [kind, index] = parseToolIndex(current)
+  if (kind === "cell") {
+    const nextIndex = index + 1
+    if (nextIndex >= cellTools.length) {
+      if (objTools.length === 0) return toolIndex("cell", 0)
+      return toolIndex("object", 0)
+    }
+    return toolIndex("cell", nextIndex)
+  } else if (kind === "object") {
+    const nextIndex = index + 1
+    if (nextIndex >= objTools.length) {
+      if (cellTools.length === 0) return toolIndex("object", 0)
+      return toolIndex("cell", 0)
+    }
+    return toolIndex("object", nextIndex)
+  } else {
+    return toolIndex("cell", 0)
+  }
+}
+
+function prevTool(current: string | null): string {
+  if (current === null) return toolIndex("object", objTools.length - 1)
+  const [kind, index] = parseToolIndex(current)
+  if (kind === "cell") {
+    const prevIndex = index - 1
+    if (prevIndex < 0) {
+      if (objTools.length === 0) return toolIndex("cell", cellTools.length - 1)
+      return toolIndex("object", objTools.length - 1)
+    }
+    return toolIndex("cell", prevIndex)
+  } else if (kind === "object") {
+    const prevIndex = index - 1
+    if (prevIndex < 0) {
+      if (cellTools.length === 0) {
+        return toolIndex("object", objTools.length - 1)
+      }
+      return toolIndex("cell", cellTools.length - 1)
+    }
+    return toolIndex("object", prevIndex)
+  } else {
+    return toolIndex("object", objTools.length - 1)
+  }
+}
 
 blockMapSource.subscribe(({ uri, text }) => {
   if (uri === "" || text === "") {
@@ -26,162 +95,23 @@ blockMapSource.subscribe(({ uri, text }) => {
     return
   }
   fieldBlock.update(
-    new FieldBlock(new BlockMap(uri, JSON.parse(text)), loadImage),
+    new FieldBlock(new BlockMap(uri, JSON.parse(text))),
   )
 })
 
-function getGridFromUri(uri: string) {
-  const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
-  if (!m) return { i: NaN, j: NaN }
-  return { i: parseInt(m[1]), j: parseInt(m[2]) }
-}
-
-function MainContainer({ subscribe, el, query }: Context) {
-  subscribe(fieldBlock, async (fieldBlock) => {
-    const prev = prevFieldBlock
-    prevFieldBlock = fieldBlock
-    if (fieldBlock === null) return
-
-    if (prev === null) {
-      const FULL_SIZE = 3200
-      const SIDE_CANVAS_SIZE = 80
-
-      await fieldBlock.loadAssets()
-      const canvas = fieldBlock.canvas
-      canvas.style.left = SIDE_CANVAS_SIZE + "px"
-      canvas.style.top = SIDE_CANVAS_SIZE + "px"
-      canvas.style.position = "absolute"
-      canvas.classList.add("field-block-canvas")
-      el.innerHTML = ""
-      el.appendChild(canvas)
-      fieldBlock.renderAll()
-      mount("field-block-canvas", el)
-
-      const { i, j } = getGridFromUri(fieldBlock.toMap().url)
-      const x = [
-        [-1, 0],
-        [0, -1],
-        [0, 1],
-        [1, 0],
-      ]
-      for (const [dx, dy] of x) {
-        const k = i + dx * 200
-        const l = j + dy * 200
-        const href =
-          new URL(`block_${k}.${l}.json`, blockMapSource.get().uri).href
-        let text
-        try {
-          text = await loadText(href)
-        } catch {
-          text = await loadText(
-            new URL("block_not_found.json", blockMapSource.get().uri).href,
-          )
-        }
-        const blockMap = new BlockMap(href, JSON.parse(text))
-        const fieldBlock = new FieldBlock(blockMap, loadImage)
-        await fieldBlock.loadAssets()
-        const a = document.createElement("a")
-        a.href = href.replace(/^file:\/\//, "vscode://file")
-        a.textContent = `block_${k}.${l}.json`
-        a.classList.add(
-          "absolute",
-          "opacity-50",
-          "hover:bg-neutral-700",
-          "bg-neutral-800",
-          "break-all",
-        )
-        if (dx === -1) {
-          const imageData = fieldBlock.createImageDataForRange(
-            BLOCK_SIZE - 5,
-            0,
-            5,
-            BLOCK_SIZE,
-          )
-          const canvas = document.createElement("canvas")
-          canvas.width = imageData.width
-          canvas.height = imageData.height
-          canvas.classList.add("absolute", "top-0", "left-0")
-          const ctx = canvas.getContext("2d")!
-          ctx.putImageData(imageData, 0, 0)
-          a.appendChild(canvas)
-          a.style.left = "0"
-          a.style.top = SIDE_CANVAS_SIZE + "px"
-          a.style.height = FULL_SIZE + "px"
-          a.style.width = SIDE_CANVAS_SIZE + "px"
-        } else if (dx === 1) {
-          const imageData = fieldBlock.createImageDataForRange(
-            0,
-            0,
-            5,
-            BLOCK_SIZE,
-          )
-          const canvas = document.createElement("canvas")
-          canvas.width = imageData.width
-          canvas.height = imageData.height
-          canvas.classList.add("absolute", "top-0", "left-0")
-          const ctx = canvas.getContext("2d")!
-          ctx.putImageData(imageData, 0, 0)
-          a.appendChild(canvas)
-          a.style.left = (FULL_SIZE + SIDE_CANVAS_SIZE) + "px"
-          a.style.top = SIDE_CANVAS_SIZE + "px"
-          a.style.height = FULL_SIZE + "px"
-          a.style.width = SIDE_CANVAS_SIZE + "px"
-        } else if (dy === -1) {
-          const imageData = fieldBlock.createImageDataForRange(
-            0,
-            BLOCK_SIZE - 5,
-            BLOCK_SIZE,
-            5,
-          )
-          const canvas = document.createElement("canvas")
-          canvas.width = imageData.width
-          canvas.height = imageData.height
-          canvas.classList.add("absolute", "top-0", "left-0")
-          const ctx = canvas.getContext("2d")!
-          ctx.putImageData(imageData, 0, 0)
-          a.appendChild(canvas)
-          a.style.top = "0"
-          a.style.left = SIDE_CANVAS_SIZE + "px"
-          a.style.width = FULL_SIZE + "px"
-          a.style.height = SIDE_CANVAS_SIZE + "px"
-        } else if (dy === 1) {
-          const imageData = fieldBlock.createImageDataForRange(
-            0,
-            0,
-            BLOCK_SIZE,
-            5,
-          )
-          const canvas = document.createElement("canvas")
-          canvas.width = imageData.width
-          canvas.height = imageData.height
-          canvas.classList.add("absolute", "top-0", "left-0")
-          const ctx = canvas.getContext("2d")!
-          ctx.putImageData(imageData, 0, 0)
-          a.appendChild(canvas)
-          a.style.top = (FULL_SIZE + SIDE_CANVAS_SIZE) + "px"
-          a.style.left = SIDE_CANVAS_SIZE + "px"
-          a.style.width = FULL_SIZE + "px"
-          a.style.height = SIDE_CANVAS_SIZE + "px"
-        }
-        el.appendChild(a)
-      }
-      return
-    }
-
-    const diff = prev.diff(fieldBlock)
-    if (diff.length === 0) {
-      return
-    }
-    query(".field-block-canvas")?.dispatchEvent(
-      new CustomEvent("diff", { detail: diff }),
-    )
-  })
-}
+const CELL_SWITCH_ACTIVE_CLASSES = ["bg-cyan-400"]
+const OBJECT_SWITCH_ACTIVE_CLASSES = ["bg-red-400"]
+const SWITCH_ACTIVE_CANVAS_CLASSES = ["opacity-70"]
 
 function CellSwitch({ on, el, subscribe }: Context) {
+  let initialized = false
   subscribe(fieldBlock, async (fieldBlock) => {
     if (fieldBlock === null) return
+    if (initialized) return
+    initialized = true
+
     const cells = await Promise.all(fieldBlock.cells.map(async (cell) => {
+      cellTools.push({ name: cell.name })
       let div = el.querySelector<HTMLDivElement>(
         '[name="' + cell.name + '"]',
       )
@@ -189,7 +119,13 @@ function CellSwitch({ on, el, subscribe }: Context) {
         return div
       }
       div = document.createElement("div")
-      div.classList.add("inline-block", "p-1", "m-1", "rounded")
+      div.classList.add(
+        "inline-block",
+        "p-1",
+        "m-1",
+        "rounded",
+        "cursor-pointer",
+      )
       div.setAttribute("name", cell.name)
       const canvas = document.createElement("canvas")
       canvas.width = 16
@@ -200,7 +136,7 @@ function CellSwitch({ on, el, subscribe }: Context) {
       }
       if (cell.src) {
         for (const src of cell.src) {
-          const img = await fieldBlock.loadCellImage(src)
+          const img = await fieldBlock.loadCellImage(src, { loadImage })
           const ctx = canvas.getContext("2d")!
           ctx.drawImage(img, 0, 0, 16, 16)
         }
@@ -213,38 +149,266 @@ function CellSwitch({ on, el, subscribe }: Context) {
         el.appendChild(cell)
       }
     })
-    if (cells.length > 0 && selectedCell.get() === null) {
-      selectedCell.update(0)
+    if (cells.length > 0 && selectedTool.get() === null) {
+      selectedTool.update(toolIndex("cell", 0))
     }
   })
-  subscribe(selectedCell, (index) => {
+  subscribe(selectedTool, (selected) => {
+    const [kind, index] = parseToolIndex(selected)
     const children = Array.from(el.children)
-    const ACTIVE_CLASSES = ["bg-orange-400"]
-    const ACTIVE_CANVAS_CLASSES = ["opacity-70"]
     children.forEach((child, i) => {
       const firstChild = child.firstChild as HTMLElement
-      if (i === index) {
-        child.classList.add(...ACTIVE_CLASSES)
-        firstChild.classList.add(...ACTIVE_CANVAS_CLASSES)
+      if (kind === "cell" && i === index) {
+        child.classList.add(...CELL_SWITCH_ACTIVE_CLASSES)
+        firstChild.classList.add(...SWITCH_ACTIVE_CANVAS_CLASSES)
       } else {
-        child.classList.remove(...ACTIVE_CLASSES)
-        firstChild.classList.remove(...ACTIVE_CANVAS_CLASSES)
+        child.classList.remove(...CELL_SWITCH_ACTIVE_CLASSES)
+        firstChild.classList.remove(...SWITCH_ACTIVE_CANVAS_CLASSES)
       }
     })
   })
   on("click", (e) => {
     const index = Array.from(el.children).indexOf(e.target as HTMLElement)
     if (index >= 0) {
-      selectedCell.update(index)
+      selectedTool.update(toolIndex("cell", index))
     }
   })
 }
 
-function ModeSwitch({ subscribe, el }: Context<HTMLElement>) {
+function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
   subscribe(mode, (mode) => el.textContent = mode)
 }
 
-function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
+function ObjectSwitch({ subscribe, el, on }: Context) {
+  let initialized = false
+  subscribe(fieldBlock, async (fieldBlock) => {
+    if (fieldBlock === null) return
+    if (initialized) return
+    initialized = true
+    const objKinds = new Set<string>()
+    for (const object of fieldBlock.objectSpawns.getAll()) {
+      objKinds.add(object.type + "|" + object.src)
+    }
+    if (objKinds.size === 0) return
+    objTools.unshift("remove")
+    const div = document.createElement("div")
+    div.classList.add("inline-block", "p-1", "m-1", "rounded", "cursor-pointer")
+    const span = document.createElement("span")
+    span.classList.add(
+      "w-4",
+      "h-4",
+      "block",
+      "text-xs",
+      "text-center",
+      "text-white",
+      "pointer-events-none",
+    )
+    span.textContent = "φ"
+    div.appendChild(span)
+    el.appendChild(div)
+
+    for (const spawn of objKinds) {
+      const [type, src] = spawn.split("|")
+      objTools.push({ type, src })
+      const obj = new Object(
+        null,
+        0,
+        0,
+        type as any,
+        new URL(src, fieldBlock.url).href,
+      )
+      await obj.loadAssets({ loadImage })
+      const div = document.createElement("div")
+      div.classList.add(
+        "inline-block",
+        "p-1",
+        "m-1",
+        "rounded",
+        "cursor-pointer",
+      )
+      const canvas = document.createElement("canvas")
+      canvas.width = 16
+      canvas.height = 16
+      canvas.classList.add("pointer-events-none")
+      const ctx = canvas.getContext("2d")!
+      ctx.drawImage(obj.image(), 0, 0, 16, 16)
+      div.appendChild(canvas)
+      el.appendChild(div)
+    }
+  })
+  subscribe(selectedTool, (selected) => {
+    const [kind, index] = parseToolIndex(selected)
+    const children = Array.from(el.children)
+    children.forEach((child, i) => {
+      const firstChild = child.firstChild as HTMLElement
+      if (kind === "object" && i === index) {
+        child.classList.add(...OBJECT_SWITCH_ACTIVE_CLASSES)
+        firstChild.classList.add(...SWITCH_ACTIVE_CANVAS_CLASSES)
+      } else {
+        child.classList.remove(...OBJECT_SWITCH_ACTIVE_CLASSES)
+        firstChild.classList.remove(...SWITCH_ACTIVE_CANVAS_CLASSES)
+      }
+    })
+  })
+  on("click", (e) => {
+    const index = Array.from(el.children).indexOf(e.target as HTMLElement)
+    if (index >= 0) {
+      selectedTool.update(toolIndex("object", index))
+    }
+  })
+}
+
+function MainContainer({ subscribe, el }: Context) {
+  function createCanvasFromImageData(imageData: ImageData) {
+    const canvas = document.createElement("canvas")
+    canvas.width = imageData.width
+    canvas.height = imageData.height
+    canvas.classList.add("absolute", "top-0", "left-0")
+    const ctx = canvas.getContext("2d")!
+    ctx.putImageData(imageData, 0, 0)
+    return canvas
+  }
+
+  let initialized = false
+  subscribe(fieldBlock, async (fieldBlock) => {
+    if (fieldBlock === null) return
+    if (initialized) return
+    initialized = true
+
+    await fieldBlock.loadAssets({ loadImage })
+    const canvas = fieldBlock.canvas
+    canvas.style.left = SIDE_CANVAS_SIZE + "px"
+    canvas.style.top = SIDE_CANVAS_SIZE + "px"
+    canvas.style.position = "absolute"
+    canvas.classList.add("field-block-canvas")
+    el.innerHTML = ""
+    el.appendChild(canvas)
+    fieldBlock.renderAll()
+    mount("field-block-canvas", el)
+
+    {
+      const objectsCanvas = document.createElement("canvas")
+      objectsCanvas.width = CANVAS_SIZE
+      objectsCanvas.height = CANVAS_SIZE
+      objectsCanvas.style.left = SIDE_CANVAS_SIZE + "px"
+      objectsCanvas.style.top = SIDE_CANVAS_SIZE + "px"
+      objectsCanvas.style.position = "absolute"
+      objectsCanvas.classList.add(
+        "field-object-spawns-canvas",
+        "pointer-events-none",
+      )
+      el.appendChild(objectsCanvas)
+      mount("field-object-spawns-canvas", el)
+
+      const wrapper = new CanvasWrapper(objectsCanvas)
+      for (const object of fieldBlock.objectSpawns.getAll()) {
+        const obj = new Object(
+          null,
+          object.i,
+          object.j,
+          object.type,
+          new URL(object.src, fieldBlock.url).href,
+        )
+        await obj.loadAssets({ loadImage })
+        wrapper.drawImage(obj.image(), obj.x, obj.y)
+      }
+      el.appendChild(objectsCanvas)
+    }
+
+    const { i, j } = getGridFromUri(fieldBlock.url)
+    const x = [
+      [-1, 0],
+      [0, -1],
+      [0, 1],
+      [1, 0],
+    ]
+    for (const [dx, dy] of x) {
+      const k = i + dx * 200
+      const l = j + dy * 200
+      const href =
+        new URL(`block_${k}.${l}.json`, blockMapSource.get().uri).href
+      let text
+      try {
+        text = await loadText(href)
+      } catch {
+        text = await loadText(
+          new URL("block_not_found.json", blockMapSource.get().uri).href,
+        )
+      }
+      const blockMap = new BlockMap(href, JSON.parse(text))
+      const fieldBlock = new FieldBlock(blockMap)
+      await fieldBlock.loadAssets({ loadImage })
+      const a = document.createElement("a")
+      a.href = href.replace(/^file:\/\//, "vscode://file")
+      a.textContent = `block_${k}.${l}.json`
+      a.classList.add(
+        "absolute",
+        "opacity-50",
+        "hover:bg-neutral-700",
+        "bg-neutral-800",
+        "break-all",
+      )
+      if (dx === -1) {
+        const imageData = fieldBlock.createImageDataForRange(
+          BLOCK_SIZE - 5,
+          0,
+          5,
+          BLOCK_SIZE,
+        )
+        a.appendChild(createCanvasFromImageData(imageData))
+        a.style.left = "0"
+        a.style.top = SIDE_CANVAS_SIZE + "px"
+        a.style.height = CANVAS_SIZE + "px"
+        a.style.width = SIDE_CANVAS_SIZE + "px"
+      } else if (dx === 1) {
+        const imageData = fieldBlock.createImageDataForRange(
+          0,
+          0,
+          5,
+          BLOCK_SIZE,
+        )
+        a.appendChild(createCanvasFromImageData(imageData))
+        a.style.left = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
+        a.style.top = SIDE_CANVAS_SIZE + "px"
+        a.style.height = CANVAS_SIZE + "px"
+        a.style.width = SIDE_CANVAS_SIZE + "px"
+      } else if (dy === -1) {
+        const imageData = fieldBlock.createImageDataForRange(
+          0,
+          BLOCK_SIZE - 5,
+          BLOCK_SIZE,
+          5,
+        )
+        a.appendChild(createCanvasFromImageData(imageData))
+        a.style.top = "0"
+        a.style.left = SIDE_CANVAS_SIZE + "px"
+        a.style.width = CANVAS_SIZE + "px"
+        a.style.height = SIDE_CANVAS_SIZE + "px"
+      } else if (dy === 1) {
+        const imageData = fieldBlock.createImageDataForRange(
+          0,
+          0,
+          BLOCK_SIZE,
+          5,
+        )
+        a.appendChild(createCanvasFromImageData(imageData))
+        a.style.top = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
+        a.style.left = SIDE_CANVAS_SIZE + "px"
+        a.style.width = CANVAS_SIZE + "px"
+        a.style.height = SIDE_CANVAS_SIZE + "px"
+      }
+      el.appendChild(a)
+    }
+  })
+
+  function getGridFromUri(uri: string) {
+    const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
+    if (!m) return { i: NaN, j: NaN }
+    return { i: parseInt(m[1]), j: parseInt(m[2]) }
+  }
+}
+
+function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 
   const paint = (e: MouseEvent) => {
@@ -255,18 +419,19 @@ function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     const j = y / 16
     const block = fieldBlock.get()
     if (block === null) return
-    const cell = block.cells[selectedCell.get()!]
+    const [kind, index] = parseToolIndex(selectedTool.get())
+    if (kind !== "cell") return
+    const { name } = cellTools[index]
     const currentCell = block.getCell(i, j)
     if (!currentCell) return
     // The cell kind is already the same as selected cell
-    if (currentCell.name === cell.name) return
+    if (currentCell.name === name) return
     const b = block.clone()
-    b.update(i, j, cell.name)
+    b.updateCell(i, j, name)
     fieldBlock.update(b)
-    const map = b.toMap()
     vscode.postMessage({
       type: "update",
-      map: map.toObject(),
+      map: b.toMap().toObject(),
     })
   }
 
@@ -278,33 +443,116 @@ function FieldBlockCanvas({ on, el }: Context<HTMLCanvasElement>) {
     if (mode.get() === "stroke") paint(e)
   })
 
-  on("diff", async (e: CustomEvent<[i: number, j: number, name: string][]>) => {
-    const diff = e.detail
-    const block = fieldBlock.get()
+  let prev = fieldBlock.get()!
+  subscribe(fieldBlock, async (block) => {
     if (block === null) return
-    // TODO(kt3k): this shouldn't be necessary
-    await block.loadAssets()
-    for (const [i, j] of diff) {
+    await block.loadAssets({ loadImage })
+    for (const [i, j] of prev.diffCells(block)) {
       block.drawCell(canvasWrapper, i, j)
     }
+    prev = block
+  })
+
+  subscribe(selectedTool, (selected) => {
+    const [kind] = parseToolIndex(selected)
+    el.classList.toggle("pointer-events-none", kind !== "cell")
+  })
+}
+
+function FieldObjectSpawnsCanvas(
+  { el, on, subscribe }: Context<HTMLCanvasElement>,
+) {
+  const canvasWrapper = new CanvasWrapper(el)
+
+  const paint = (e: MouseEvent) => {
+    const block = fieldBlock.get()
+    if (block === null) return
+    const [kind, index] = parseToolIndex(selectedTool.get())
+    if (kind !== "object") return
+    const { left, top } = el.getBoundingClientRect()
+    const x = floorN(e.clientX - left, 16)
+    const y = floorN(e.clientY - top, 16)
+    const i = x / 16 + block.i
+    const j = y / 16 + block.j
+    const tool = objTools[index]
+    const b = block.clone()
+    if (tool === "remove") {
+      if (block.objectSpawns.has(i, j)) {
+        b.objectSpawns.remove(i, j)
+        doUpdate(b)
+      }
+    } else {
+      const { type, src } = tool
+      if (b.objectSpawns.has(i, j)) {
+        b.objectSpawns.remove(i, j)
+      }
+      const spawn = new ObjectSpawnInfo(
+        i,
+        j,
+        type as any,
+        src,
+        block.url,
+      )
+      b.objectSpawns.add(spawn)
+      doUpdate(b)
+    }
+
+    function doUpdate(b: FieldBlock) {
+      fieldBlock.update(b)
+      vscode.postMessage({
+        type: "update",
+        map: b.toMap().toObject(),
+      })
+    }
+  }
+
+  on("click", (e) => {
+    paint(e)
+  })
+
+  subscribe(selectedTool, (tool) => {
+    const [kind] = parseToolIndex(tool)
+    el.classList.toggle("pointer-events-none", kind !== "object")
+  })
+
+  let prev: FieldBlock = fieldBlock.get()!
+  subscribe(fieldBlock, async (block) => {
+    if (block === null) return
+    for (const [action, spawn] of prev.objectSpawns.diff(block.objectSpawns)) {
+      const object = new Object(
+        null,
+        spawn.i,
+        spawn.j,
+        spawn.type,
+        new URL(spawn.src, block.url).href,
+      )
+      await object.loadAssets({ loadImage })
+      if (action === "add") {
+        canvasWrapper.drawImage(
+          object.image(),
+          modulo(object.x, CANVAS_SIZE),
+          modulo(object.y, CANVAS_SIZE),
+        )
+      } else {
+        canvasWrapper.ctx.clearRect(
+          modulo(object.x, CANVAS_SIZE),
+          modulo(object.y, CANVAS_SIZE),
+          CELL_SIZE,
+          CELL_SIZE,
+        )
+      }
+    }
+    prev = block
   })
 }
 
 function KeyHandler({ on }: Context) {
   on("keydown", (e) => {
     if (e.key === "k") {
-      const currentCell = selectedCell.get()
-      const block = fieldBlock.get()
-      if (currentCell === null) return
-      if (block === null) return
-      selectedCell.update(modulo(currentCell + 1, block.cells.length))
+      selectedTool.update(nextTool(selectedTool.get()))
       mode.update("dot")
     } else if (e.key === "j") {
-      const currentCell = selectedCell.get()
-      const block = fieldBlock.get()
-      if (currentCell === null) return
-      if (block === null) return
-      selectedCell.update(modulo(currentCell - 1, block.cells.length))
+      selectedTool.update(prevTool(selectedTool.get()))
       mode.update("dot")
     } else if (e.key === "s" && !e.altKey && !e.metaKey) {
       if (mode.get() === "dot") {
@@ -390,10 +638,14 @@ globalThis.addEventListener(
 const state = vscode.getState()
 if (state) {
   blockMapSource.update(state)
+} else {
+  vscode.postMessage({ type: "ready" })
 }
 
-register(MainContainer, "main-container")
-register(FieldBlockCanvas, "field-block-canvas")
-register(CellSwitch, "cell-switch")
-register(ModeSwitch, "mode-switch")
 register(KeyHandler, "key-handler")
+register(CellSwitch, "cell-switch")
+register(ObjectSwitch, "object-switch")
+register(ModeIndicator, "mode-indicator")
+register(MainContainer, "main-container")
+register(FieldCellsCanvas, "field-block-canvas")
+register(FieldObjectSpawnsCanvas, "field-object-spawns-canvas")

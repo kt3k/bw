@@ -1,6 +1,5 @@
-import { loadImage } from "../util/load.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IObject, ObjectType } from "./types.ts"
+import type { IObject, LoadOptions, ObjectType } from "./types.ts"
 
 const fallbackImage = await fetch(
   // TODO(kt3k): Update
@@ -38,7 +37,11 @@ export class Object implements IObject {
     this.src = src
   }
 
-  async loadAssets() {
+  async loadAssets(options: LoadOptions) {
+    const loadImage = options.loadImage
+    if (!loadImage) {
+      throw new Error("Cannot load assets as loadImage not specified")
+    }
     this.#image = await loadImage(this.src)
   }
 
@@ -55,5 +58,12 @@ export class Object implements IObject {
   }
   get y(): number {
     return this.j * CELL_SIZE
+  }
+
+  get canEnter(): boolean {
+    if (this.type === "table") {
+      return false
+    }
+    return true
   }
 }

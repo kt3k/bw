@@ -5,8 +5,8 @@ addEventListener("message", async (event) => {
   const start = performance.now()
   const { url, obj, i, j, gridWidth, gridHeight } = event.data
   const blockMap = new BlockMap(url, obj)
-  const fieldBlock = new FieldBlock(blockMap, loadImage)
-  await fieldBlock.loadCellImages()
+  const fieldBlock = new FieldBlock(blockMap)
+  await fieldBlock.loadCellImages({ loadImage })
   const imageData = fieldBlock.createImageDataForRange(
     i,
     j,

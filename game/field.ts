@@ -8,6 +8,7 @@ import type {
   ILoader,
   IObject,
   IStepper,
+  LoadOptions,
 } from "../model/types.ts"
 import { spawnCharacter } from "../model/character.ts"
 import { Item } from "../model/item.ts"
@@ -84,11 +85,11 @@ export class FieldItems implements IStepper, ILoader {
     // some items might need updates in the future
   }
 
-  async loadAssets(): Promise<void> {
+  async loadAssets(options: LoadOptions): Promise<void> {
     await Promise.all(
       [...this.#items]
         .filter((item) => !item.assetsReady)
-        .map((item) => item.loadAssets()),
+        .map((item) => item.loadAssets(options)),
     )
   }
 
@@ -131,6 +132,11 @@ export class FieldObjects implements IStepper, ILoader {
     return this.#coordMap[`${i}.${j}`]
   }
 
+  canEnter(i: number, j: number): boolean {
+    const obj = this.get(i, j)
+    return obj === undefined || obj.canEnter
+  }
+
   #deactivate(i: number, j: number): IObject | undefined {
     const key = `${i}.${j}`
     const obj = this.#coordMap[key]
@@ -143,11 +149,11 @@ export class FieldObjects implements IStepper, ILoader {
     return obj
   }
 
-  async loadAssets(): Promise<void> {
+  async loadAssets(options: LoadOptions): Promise<void> {
     await Promise.all(
       [...this.#objects]
         .filter((obj) => !obj.assetsReady)
-        .map((obj) => obj.loadAssets()),
+        .map((obj) => obj.loadAssets(options)),
     )
   }
 
@@ -232,11 +238,11 @@ export class FieldActors implements IStepper, ILoader {
     }
   }
 
-  async loadAssets(): Promise<void> {
+  async loadAssets(options: LoadOptions): Promise<void> {
     await Promise.all(
       this.#actors
         .filter((w) => !w.assetsReady)
-        .map((w) => w.loadAssets()),
+        .map((w) => w.loadAssets(options)),
     )
   }
 
@@ -387,7 +393,7 @@ export class Field implements IField {
     const canvas = block.canvas
     this.#blockElements[block.id] = canvas
     this.#el.appendChild(canvas)
-    await block.loadAssets()
+    await block.loadAssets({ loadImage })
   }
 
   #removeBlock(block: FieldBlock) {
@@ -420,7 +426,8 @@ export class Field implements IField {
     this.#objects.step(this)
   }
   canEnter(i: number, j: number): boolean {
-    return this.#getCell(i, j).canEnter && !this.#actors.checkCollision(i, j)
+    return this.#getCell(i, j).canEnter && !this.#actors.checkCollision(i, j) &&
+      this.#objects.canEnter(i, j)
   }
   peekItem(i: number, j: number): IItem | undefined {
     return this.#items.get(i, j)
@@ -447,7 +454,7 @@ export class Field implements IField {
       !this.#hasBlock(id)
     )
     for (const map of await this.#mapLoader.loadMaps(blockIdsToLoad)) {
-      this.#addBlock(new FieldBlock(map, loadImage))
+      this.#addBlock(new FieldBlock(map))
     }
     const initialLoad = !this.#initialBlocksLoaded
     await Promise.all(
@@ -485,17 +492,17 @@ export class Field implements IField {
     },
   ) {
     const chunks = [...this.#getChunks(i, j)]
-    const newCharSpawns = chunks.flatMap((c) => c.getCharacterSpawnInfo())
+    const newCharSpawns = chunks.flatMap((c) => c.getCharacterSpawns())
       .filter((spawn) => !this.#actors.has(spawn.id)) // isn't spawned yet
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
-    const newItemSpawns = chunks.flatMap((c) => c.getItemSpawnInfo())
+    const newItemSpawns = chunks.flatMap((c) => c.getItemSpawns())
       .filter((spawn) => !this.#items.isCollected(spawn.id)) // isn't collected yet
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
-    const newObjectSpawns = chunks.flatMap((c) => c.getObjectSpawnInfo())
+    const newObjectSpawns = chunks.flatMap((c) => c.getObjectSpawns())
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
@@ -514,9 +521,9 @@ export class Field implements IField {
           },
         ))
       }
-      await this.#actors.loadAssets()
+      await this.#actors.loadAssets({ loadImage })
     } else if (initialLoad) {
-      await this.#actors.loadAssets()
+      await this.#actors.loadAssets({ loadImage })
     }
 
     if (newItemSpawns.length > 0) {
@@ -536,9 +543,9 @@ export class Field implements IField {
           ),
         )
       }
-      await this.#items.loadAssets()
+      await this.#items.loadAssets({ loadImage })
     } else if (initialLoad) {
-      await this.#items.loadAssets()
+      await this.#items.loadAssets({ loadImage })
     }
 
     if (newObjectSpawns.length > 0) {
@@ -558,9 +565,9 @@ export class Field implements IField {
           ),
         )
       }
-      await this.#objects.loadAssets()
+      await this.#objects.loadAssets({ loadImage })
     } else if (initialLoad) {
-      await this.#objects.loadAssets()
+      await this.#objects.loadAssets({ loadImage })
     }
   }
 

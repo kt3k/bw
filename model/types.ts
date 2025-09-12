@@ -1,5 +1,12 @@
+export type LoadOptions = {
+  loadImage?: (url: string) => Promise<ImageBitmap>
+  loadJson?: (url: string) => unknown
+}
+
 export type ILoader = {
-  loadAssets(): Promise<void>
+  loadAssets(
+    opts?: LoadOptions,
+  ): Promise<void>
   get assetsReady(): boolean
 }
 
@@ -24,11 +31,12 @@ export type IItem = IDrawable & {
   type: ItemType
 }
 
-export type ObjectType = "chair" | "table"
+export type ObjectType = "stool" | "table"
 
 export type IObject = IDrawable & {
   id: string | null
   type: ObjectType
+  canEnter: boolean
 }
 
 export type IField = {

@@ -11,7 +11,8 @@
     "clear-spawns": "deno -A tools/modify_map_clear_spawns.ts block_0.0 block_-200.0 block_0.-200 block_-200.-200 block_-200.200 block_0.200 block_not_found",
     "add-spawns": "deno -A tools/modify_map_add_spawns_randomly.ts block_0.0 block_-200.0 block_0.-200 block_-200.-200 block_-200.200 block_0.200 block_not_found",
     "dist": "deno run -A npm:cpx2 'out/**' dist",
-    "serve": "deno run -A jsr:@std/http/file-server out -p 8000"
+    "serve": "deno run -A jsr:@std/http/file-server out -p 8000",
+    "update-editor": "deno task --cwd editor update-package"
   },
   "compilerOptions": {
     "lib": ["deno.ns", "esnext", "dom", "dom.iterable"]

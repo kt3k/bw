@@ -29,6 +29,9 @@ export namespace Extension {
 
 // deno-lint-ignore no-namespace
 export namespace Webview {
+  export type MessageReady = {
+    type: "ready"
+  }
   export type MessageLoadImage = {
     type: "loadImage"
     id: string
@@ -44,5 +47,9 @@ export namespace Webview {
     // deno-lint-ignore no-explicit-any
     map: any
   }
-  export type Message = MessageLoadImage | MessageLoadText | MessageUpdate
+  export type Message =
+    | MessageLoadImage
+    | MessageLoadText
+    | MessageUpdate
+    | MessageReady
 }

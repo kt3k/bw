@@ -20,12 +20,10 @@ async function clear(mapFile: string) {
   )
 
   const bm = new BlockMap(mapJson.href, map)
-  const fb = new FieldBlock(bm, async (url: string) => {
-    const res = await fetch(url)
-    return res.blob().then((blob) => createImageBitmap(blob))
-  })
+  const fb = new FieldBlock(bm)
 
-  fb.clearSpawnInfo()
+  fb.characterSpawns.clear()
+  fb.itemSpawns.clear()
 
   console.log(`Cleared all characters and items from the map ${mapFile}`)
   await Deno.writeTextFile(

@@ -8,6 +8,9 @@ import { RectScope } from "../util/rect-scope.ts"
 
 import { Field } from "./field.ts"
 
+const I = 20
+const J = 32
+
 /**
  * The area which is visible to the user
  * The center of this area is the center of the screen
@@ -42,7 +45,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(22, 22, "char/kimi/", "kimi", "down", 1)
+  const me = new MainCharacter(I, J, "char/kimi/", "kimi", "down", 1)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(screenSize, screenSize)

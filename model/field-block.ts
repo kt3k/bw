@@ -5,7 +5,16 @@ import type { Dir } from "../util/dir.ts"
 import { floorN, modulo } from "../util/math.ts"
 import type { IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
-import type { ItemType, ObjectType } from "./types.ts"
+import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
+
+/** Converts the world grid coordinates to local chunk coordinates */
+function g2c(i: number, j: number): [number, number] {
+  const relI = modulo(i, BLOCK_SIZE)
+  const relJ = modulo(j, BLOCK_SIZE)
+  const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+  const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+  return [k, l]
+}
 
 /**
  * {@linkcode FieldCell} represents the cell in the field block
@@ -57,6 +66,12 @@ export class ItemSpawnInfo implements IBox {
     this.y = j * CELL_SIZE
   }
 
+  equals(other: ItemSpawnInfo): boolean {
+    return this.i === other.i && this.j === other.j &&
+      this.type === other.type &&
+      this.src === other.src
+  }
+
   toJSON() {
     return {
       i: this.i,
@@ -94,6 +109,12 @@ export class ObjectSpawnInfo implements IBox {
     this.srcBase = srcBase
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
+  }
+
+  equals(other: ObjectSpawnInfo): boolean {
+    return this.i === other.i && this.j === other.j &&
+      this.type === other.type &&
+      this.src === other.src
   }
 
   toJSON() {
@@ -144,6 +165,14 @@ export class CharacterSpawnInfo implements IBox {
     this.y = j * CELL_SIZE
   }
 
+  equals(other: CharacterSpawnInfo): boolean {
+    return this.i === other.i && this.j === other.j &&
+      this.type === other.type &&
+      this.src === other.src &&
+      this.dir === other.dir &&
+      this.speed === other.speed
+  }
+
   toJSON() {
     return {
       i: this.i,
@@ -159,11 +188,19 @@ export class CharacterSpawnInfo implements IBox {
 const CHUNK_COUNT_X = BLOCK_SIZE / BLOCK_CHUNK_SIZE
 const CHUNK_COUNT_Y = BLOCK_SIZE / BLOCK_CHUNK_SIZE
 
-export class ByChunk<T extends { i: number; j: number }> {
-  #spawnInfo: T[][][] = Array.from(
+export class SpawnMap<
+  T extends {
+    i: number
+    j: number
+    equals(other: T): boolean
+    toJSON(): unknown
+  },
+> {
+  #chunks: T[][][] = Array.from(
     { length: CHUNK_COUNT_X },
     () => Array.from({ length: CHUNK_COUNT_Y }, () => []),
   )
+  #map = {} as Record<string, T>
 
   constructor(spawnInfo: T[]) {
     for (const spawn of spawnInfo) {
@@ -171,24 +208,74 @@ export class ByChunk<T extends { i: number; j: number }> {
     }
   }
 
+  clear(): void {
+    this.#chunks = Array.from(
+      { length: CHUNK_COUNT_X },
+      () => Array.from({ length: CHUNK_COUNT_Y }, () => []),
+    )
+    this.#map = {}
+  }
+
+  #key(i: number, j: number): string {
+    return i + "." + j
+  }
+
   add(spawn: T): void {
-    const relI = modulo(spawn.i, BLOCK_SIZE)
-    const relJ = modulo(spawn.j, BLOCK_SIZE)
-    const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-    const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-    this.#spawnInfo[k][l].push(spawn)
+    this.#map[this.#key(spawn.i, spawn.j)] = spawn
+    const [k, l] = g2c(spawn.i, spawn.j)
+    this.#chunks[k][l].push(spawn)
+  }
+
+  get(i: number, j: number): T | undefined {
+    return this.#map[this.#key(i, j)]
+  }
+
+  has(i: number, j: number): boolean {
+    return !!this.#map[this.#key(i, j)]
+  }
+
+  remove(i: number, j: number): void {
+    const spawn = this.#map[this.#key(i, j)]
+    if (!spawn) return
+    delete this.#map[this.#key(i, j)]
+    const [k, l] = g2c(i, j)
+    this.#chunks[k][l] = this.#chunks[k][l].filter((s) => s !== spawn)
   }
 
   /**
-   * @param k local chunk index
-   * @param l local chunk index
+   * @param i world grid index
+   * @param j world grid index
    */
-  get(k: number, l: number): T[] {
-    return this.#spawnInfo[k][l]
+  getChunk(i: number, j: number): T[] {
+    const [k, l] = g2c(i, j)
+    return this.#chunks[k][l]
   }
 
   getAll(): T[] {
-    return this.#spawnInfo.flat(2)
+    return Object.values(this.#map)
+  }
+
+  diff(other: SpawnMap<T>): (["add", T] | ["remove", T])[] {
+    const diff: (["add", T] | ["remove", T])[] = []
+    for (const spawn of other.getAll()) {
+      const existing = this.get(spawn.i, spawn.j)
+      if (!existing) {
+        diff.push(["add", spawn])
+      } else if (!existing.equals(spawn)) {
+        diff.push(["remove", existing])
+        diff.push(["add", spawn])
+      }
+    }
+    for (const spawn of this.getAll()) {
+      if (!other.get(spawn.i, spawn.j)) {
+        diff.push(["remove", spawn])
+      }
+    }
+    return diff
+  }
+
+  toJSON(): unknown[] {
+    return this.getAll().map((s) => s.toJSON())
   }
 }
 
@@ -297,20 +384,16 @@ export class FieldBlock {
   #j: number
   #cellMap: Record<string, FieldCell> = {}
   #imgMap: Record<string, ImageBitmap> = {}
-  #characterSpawnInfoByChunk: ByChunk<CharacterSpawnInfo>
-  #itemSpawnInfoByChunk: ByChunk<ItemSpawnInfo>
-  #objectSpawnInfoByChunk: ByChunk<ObjectSpawnInfo>
+  characterSpawns: SpawnMap<CharacterSpawnInfo>
+  itemSpawns: SpawnMap<ItemSpawnInfo>
+  objectSpawns: SpawnMap<ObjectSpawnInfo>
   #field: string[]
-  #loadImage: (url: string) => Promise<ImageBitmap>
   #map: BlockMap
   #canvas: HTMLCanvasElement | undefined
   #assetsReady = false
   #chunks: Record<string, boolean | "loading"> = {}
 
-  constructor(
-    map: BlockMap,
-    loadImage: (url: string) => Promise<ImageBitmap>,
-  ) {
+  constructor(map: BlockMap) {
     this.#i = map.i
     this.#j = map.j
     this.#x = this.#i * CELL_SIZE
@@ -326,25 +409,26 @@ export class FieldBlock {
       )
     }
     this.#field = map.field
-    this.#loadImage = loadImage
     this.#map = map
-    this.#characterSpawnInfoByChunk = new ByChunk(map.characters)
-    this.#itemSpawnInfoByChunk = new ByChunk(map.items)
-    this.#objectSpawnInfoByChunk = new ByChunk(map.objects)
+    this.characterSpawns = new SpawnMap(map.characters)
+    this.itemSpawns = new SpawnMap(map.items)
+    this.objectSpawns = new SpawnMap(map.objects)
   }
 
-  loadCellImage(href: string): Promise<ImageBitmap> {
-    return this.#loadImage(
-      new URL(href, this.#map.url).href,
-    )
+  loadCellImage(href: string, options: LoadOptions): Promise<ImageBitmap> {
+    return options.loadImage
+      ? options.loadImage(
+        new URL(href, this.#map.url).href,
+      )
+      : Promise.reject(new Error("no loadImage specified"))
   }
 
-  async loadCellImages() {
+  async loadCellImages(options: LoadOptions) {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
         if (cell.src) {
           for (const src of cell.src) {
-            this.#imgMap[src] = await this.loadCellImage(src)
+            this.#imgMap[src] = await this.loadCellImage(src, options)
           }
         }
       }),
@@ -352,11 +436,15 @@ export class FieldBlock {
   }
 
   clone(): FieldBlock {
-    return new FieldBlock(this.#map.clone(), this.#loadImage)
+    return new FieldBlock(this.#map.clone())
   }
 
   get id(): string {
     return `${this.#i}.${this.#j}`
+  }
+
+  get url(): string {
+    return this.#map.url
   }
 
   get cells(): FieldCell[] {
@@ -374,8 +462,8 @@ export class FieldBlock {
     return this.#canvas
   }
 
-  async loadAssets() {
-    await this.loadCellImages()
+  async loadAssets(options: LoadOptions) {
+    await this.loadCellImages(options)
     this.#assetsReady = true
   }
 
@@ -501,7 +589,7 @@ export class FieldBlock {
     j: number,
     { initialLoad = false } = {},
   ): Promise<void> {
-    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
+    const [k, l] = g2c(i, j)
     const layer = new CanvasWrapper(this.canvas)
 
     const chunkKey = `${k}.${l}`
@@ -555,7 +643,7 @@ export class FieldBlock {
   /** Updates a cell at the given coordinates with the given cell name.
    * This is for editor use.
    */
-  update(i: number, j: number, cell: string): void {
+  updateCell(i: number, j: number, cell: string): void {
     this.#field[j] = this.#field[j].substring(0, i) + cell +
       this.#field[j].substring(i + 1)
   }
@@ -590,12 +678,9 @@ export class FieldBlock {
           ? cell.src.length === 1 ? cell.src[0] : cell.src
           : undefined,
       })),
-      characters: this.#characterSpawnInfoByChunk
-        .getAll().map((spawn) => spawn.toJSON()),
-      items: this.#itemSpawnInfoByChunk
-        .getAll().map((spawn) => spawn.toJSON()),
-      objects: this.#objectSpawnInfoByChunk
-        .getAll().map((spawn) => spawn.toJSON()),
+      characters: this.characterSpawns.toJSON(),
+      items: this.itemSpawns.toJSON(),
+      objects: this.objectSpawns.toJSON(),
       field: this.#field,
     })
   }
@@ -604,7 +689,7 @@ export class FieldBlock {
    * Returns the difference between this block and the other block.
    * This is for editor use.
    */
-  diff(other: FieldBlock): [i: number, j: number, cell: string][] {
+  diffCells(other: FieldBlock): [i: number, j: number, cell: string][] {
     const diff: [i: number, j: number, cell: string][] = []
     for (let j = 0; j < BLOCK_SIZE; j++) {
       for (let i = 0; i < BLOCK_SIZE; i++) {
@@ -615,55 +700,6 @@ export class FieldBlock {
       }
     }
     return diff
-  }
-
-  #worldGridToLocalChunkIndex(i: number, j: number): [number, number] {
-    const relI = modulo(i, BLOCK_SIZE)
-    const relJ = modulo(j, BLOCK_SIZE)
-    const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-    const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-    return [k, l]
-  }
-
-  /** Gets the character spawn info for the given chunk. The chunk should be given by the i, j coordinates of the
-   * left and top of the chunk.
-   *
-   * @param i world grid index
-   * @param j world grid index
-   */
-  getCharacterSpawnInfoForChunk(i: number, j: number): CharacterSpawnInfo[] {
-    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
-    return this.#characterSpawnInfoByChunk.get(k, l)
-  }
-
-  /** Adds the spawn info */
-  addCharacterSpawnInfo(spawn: CharacterSpawnInfo): void {
-    this.#characterSpawnInfoByChunk.add(spawn)
-  }
-
-  getItemSpawnInfoForChunk(i: number, j: number): ItemSpawnInfo[] {
-    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
-    return this.#itemSpawnInfoByChunk.get(k, l)
-  }
-
-  addItemSpawnInfo(spawn: ItemSpawnInfo): void {
-    this.#itemSpawnInfoByChunk.add(spawn)
-  }
-
-  getObjectSpawnInfoForChunk(i: number, j: number): ObjectSpawnInfo[] {
-    const [k, l] = this.#worldGridToLocalChunkIndex(i, j)
-    return this.#objectSpawnInfoByChunk.get(k, l)
-  }
-
-  addObjectSpawnInfo(spawn: ObjectSpawnInfo): void {
-    this.#objectSpawnInfoByChunk.add(spawn)
-  }
-
-  /** Clears the spawn info */
-  clearSpawnInfo(): void {
-    this.#characterSpawnInfoByChunk = new ByChunk([])
-    this.#itemSpawnInfoByChunk = new ByChunk([])
-    this.#objectSpawnInfoByChunk = new ByChunk([])
   }
 }
 
@@ -677,16 +713,16 @@ export class FieldBlockChunk {
     this.#fieldBlock = block
   }
 
-  getItemSpawnInfo(): ItemSpawnInfo[] {
-    return this.#fieldBlock.getItemSpawnInfoForChunk(this.#i, this.#j)
+  getItemSpawns(): ItemSpawnInfo[] {
+    return this.#fieldBlock.itemSpawns.getChunk(this.#i, this.#j)
   }
 
-  getCharacterSpawnInfo(): CharacterSpawnInfo[] {
-    return this.#fieldBlock.getCharacterSpawnInfoForChunk(this.#i, this.#j)
+  getCharacterSpawns(): CharacterSpawnInfo[] {
+    return this.#fieldBlock.characterSpawns.getChunk(this.#i, this.#j)
   }
 
-  getObjectSpawnInfo(): ObjectSpawnInfo[] {
-    return this.#fieldBlock.getObjectSpawnInfoForChunk(this.#i, this.#j)
+  getObjectSpawns(): ObjectSpawnInfo[] {
+    return this.#fieldBlock.objectSpawns.getChunk(this.#i, this.#j)
   }
 
   render(initialLoad: boolean) {

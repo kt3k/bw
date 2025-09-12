@@ -39,8 +39,11 @@ function resolveCustomTextEditor(
         <div class="toolbox fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-full">
           <div class="cell-switch flex items-center relative">
           </div>
+          <div class="h-full w-0 border-l border-neutral-500">&nbsp;</div>
+          <div class="object-switch flex items-center relative">
+          </div>
           <div class="group relative">
-            <span class="mode-switch">dot</span>
+            <span class="mode-indicator">dot</span>
             <span class="
               absolute top-full left-1/2 -translate-x-1/2 mt-2
               hidden group-hover:block
@@ -60,7 +63,6 @@ function resolveCustomTextEditor(
   const sub = workspace.onDidChangeTextDocument(onDocChange)
   panel.onDidDispose(() => sub.dispose())
   webview.onDidReceiveMessage(onMessage)
-  updateWebview()
 
   function postMessage(message: type.Extension.Message) {
     webview.postMessage(message)
@@ -81,6 +83,9 @@ function resolveCustomTextEditor(
 
   function onMessage(e: type.Webview.Message) {
     switch (e.type) {
+      case "ready":
+        updateWebview()
+        break
       case "update":
         update(e)
         break

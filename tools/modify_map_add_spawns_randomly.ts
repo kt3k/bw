@@ -4,9 +4,8 @@ import {
   CharacterSpawnInfo,
   FieldBlock,
   ItemSpawnInfo,
-  ObjectSpawnInfo,
 } from "../model/field-block.ts"
-import type { ItemType } from "../model/item.ts"
+import type { ItemType } from "../model/types.ts"
 
 const randomInt = (n: number) => Math.floor(Math.random() * n)
 
@@ -14,7 +13,7 @@ const args = parseArgs(Deno.args)
 
 if (args._.length === 0) {
   console.error(
-    "Usage: deno -A tools/modify_map_add_chars_randomly.ts <map_files...>",
+    "Usage: deno -A tools/modify_map_add_spawns_randomly.ts <map_files...>",
   )
   Deno.exit(1)
 }
@@ -31,10 +30,7 @@ async function addCharactersRandomly(mapFile: string) {
   )
 
   const bm = new BlockMap(mapJson.href, map)
-  const fb = new FieldBlock(bm, async (url: string) => {
-    const res = await fetch(url)
-    return res.blob().then((blob) => createImageBitmap(blob))
-  })
+  const fb = new FieldBlock(bm)
   let c = 0
   for (const _ of Array(400)) {
     const i = randomInt(200)
@@ -43,7 +39,7 @@ async function addCharactersRandomly(mapFile: string) {
     if (cell.canEnter) {
       c++
       const isRandom = Math.random() > 0.5
-      fb.addCharacterSpawnInfo(
+      fb.characterSpawns.add(
         new CharacterSpawnInfo(
           i + bm.i,
           j + bm.j,
@@ -55,7 +51,7 @@ async function addCharactersRandomly(mapFile: string) {
     }
   }
   if (mapFile === "block_0.0") {
-    fb.addItemSpawnInfo(
+    fb.itemSpawns.add(
       new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png", mapJson.href),
     )
   }
@@ -78,25 +74,7 @@ async function addCharactersRandomly(mapFile: string) {
       [-6, 8, "apple", "../item/apple.png"],
     ] as const
     for (const [i, j, type, src] of items) {
-      fb.addItemSpawnInfo(new ItemSpawnInfo(i, j, type, src, mapJson.href))
-    }
-  }
-
-  if (mapFile === "block_0.0") {
-    const objects = [
-      [27, 18, "chair", "../obj/stool.png"],
-      [28, 18, "chair", "../obj/stool.png"],
-      [29, 18, "chair", "../obj/stool.png"],
-      [30, 18, "chair", "../obj/stool.png"],
-      [31, 18, "chair", "../obj/stool.png"],
-      [27, 19, "chair", "../obj/stool.png"],
-      [28, 19, "chair", "../obj/stool.png"],
-      [29, 19, "chair", "../obj/stool.png"],
-      [30, 19, "chair", "../obj/stool.png"],
-      [31, 19, "chair", "../obj/stool.png"],
-    ] as const
-    for (const [i, j, type, src] of objects) {
-      fb.addObjectSpawnInfo(new ObjectSpawnInfo(i, j, type, src, mapJson.href))
+      fb.itemSpawns.add(new ItemSpawnInfo(i, j, type, src, mapJson.href))
     }
   }
 
@@ -105,7 +83,7 @@ async function addCharactersRandomly(mapFile: string) {
     const i = randomInt(200)
     const j = randomInt(200)
     const cell = fb.getCell(i, j)
-    if (cell.canEnter) {
+    if (cell.canEnter && !fb.objectSpawns.has(i + fb.i, j + fb.j)) {
       itemCount++
       const random = Math.random()
       let type: ItemType = "apple"
@@ -116,7 +94,7 @@ async function addCharactersRandomly(mapFile: string) {
       } else if (random > 0.65) {
         type = "green-apple"
       }
-      fb.addItemSpawnInfo(
+      fb.itemSpawns.add(
         new ItemSpawnInfo(
           i + fb.i,
           j + fb.j,
