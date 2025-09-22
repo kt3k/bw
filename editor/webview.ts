@@ -310,7 +310,11 @@ function MainContainer({ subscribe, el }: Context) {
           new URL(object.src, fieldBlock.url).href,
         )
         await obj.loadAssets({ loadImage })
-        wrapper.drawImage(obj.image(), obj.x, obj.y)
+        wrapper.drawImage(
+          obj.image(),
+          obj.x - fieldBlock.x,
+          obj.y - fieldBlock.y,
+        )
       }
       el.appendChild(objectsCanvas)
     }
@@ -508,6 +512,9 @@ function FieldObjectSpawnsCanvas(
 
   on("click", (e) => {
     paint(e)
+  })
+  on("mousemove", (e) => {
+    if (mode.get() === "stroke") paint(e)
   })
 
   subscribe(selectedTool, (tool) => {
