@@ -37,11 +37,9 @@ function resolveCustomTextEditor(
         <div class="spacer h-10"></div>
         <div class="main-container relative mt-5 w-[3360px]"></div>
         <div class="toolbox fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-full">
-          <div class="cell-switch flex items-center relative">
-          </div>
+          <div class="cell-switch flex items-center relative"></div>
           <div class="h-full w-0 border-l border-neutral-500">&nbsp;</div>
-          <div class="object-switch flex items-center relative">
-          </div>
+          <div class="object-switch flex items-center relative"></div>
           <div class="group relative">
             <span class="mode-indicator">dot</span>
             <span class="
@@ -54,6 +52,9 @@ function resolveCustomTextEditor(
               Press "s" to toggle
             </span>
           </div>
+        </div>
+        <div class="js-canvas-tooltip opacity-80 px-2 py-1 rounded fixed z-50 bg-white text-black border border-neutral-500 font-mono pointer-events-none">
+          heya
         </div>
         <script src={u("out/webview.js")} type="module"></script>
       </body>

@@ -20,6 +20,8 @@ const SIDE_CANVAS_SIZE = CELL_SIZE * 5
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
 const fieldBlock = new Signal<FieldBlock | null>(null)
 const mode = new Signal<"dot" | "stroke">("dot")
+const tooltipContents = new Signal<string | null>(null)
+const tooltipPosition = new Signal<{ x: number; y: number } | null>(null)
 
 type CellTool = { name: string }
 type ObjectTool = { type: string; src: string } | "remove"
@@ -416,15 +418,11 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 
   const paint = (e: MouseEvent) => {
-    const { left, top } = el.getBoundingClientRect()
-    const x = floorN(e.clientX - left, 16)
-    const y = floorN(e.clientY - top, 16)
-    const i = x / 16
-    const j = y / 16
     const block = fieldBlock.get()
     if (block === null) return
     const [kind, index] = parseToolIndex(selectedTool.get())
     if (kind !== "cell") return
+    const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
     const { name } = cellTools[index]
     const currentCell = block.getCell(i, j)
     if (!currentCell) return
@@ -463,6 +461,21 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   })
 }
 
+function getCoordinatesFromMouseEvent(
+  e: MouseEvent,
+  el: HTMLElement,
+  block: FieldBlock,
+) {
+  const { left, top } = el.getBoundingClientRect()
+  const x = floorN(e.clientX - left, 16)
+  const y = floorN(e.clientY - top, 16)
+  const i = x / 16 + block.i
+  const j = y / 16 + block.j
+  return { i, j }
+}
+
+const html = String.raw
+
 function FieldObjectSpawnsCanvas(
   { el, on, subscribe }: Context<HTMLCanvasElement>,
 ) {
@@ -473,11 +486,7 @@ function FieldObjectSpawnsCanvas(
     if (block === null) return
     const [kind, index] = parseToolIndex(selectedTool.get())
     if (kind !== "object") return
-    const { left, top } = el.getBoundingClientRect()
-    const x = floorN(e.clientX - left, 16)
-    const y = floorN(e.clientY - top, 16)
-    const i = x / 16 + block.i
-    const j = y / 16 + block.j
+    const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
     const tool = objTools[index]
     const b = block.clone()
     if (tool === "remove") {
@@ -514,7 +523,36 @@ function FieldObjectSpawnsCanvas(
     paint(e)
   })
   on("mousemove", (e) => {
-    if (mode.get() === "stroke") paint(e)
+    if (mode.get() === "stroke") {
+      paint(e)
+      return
+    }
+    const block = fieldBlock.get()
+    if (block === null) return
+    const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
+    const spawn = block.objectSpawns.get(i, j)
+    if (spawn) {
+      tooltipContents.update(html`
+        <div class="grid grid-cols-[auto_auto] gap-x-1 gap-y-1">
+          <span class="text-right">(i, j):</span>
+          <span class="font-semibold text-blue-500">
+            (${spawn.i}, ${spawn.j})
+          </span>
+          <span class="text-right">type:</span>
+          <span class="font-semibold text-blue-500">
+            ${spawn.type}
+          </span>
+          <span class="text-right">src:</span>
+          <span class="font-semibold text-blue-500">
+            ${spawn.src}
+          </span>
+        </div>
+      `)
+      tooltipPosition.update({ x: e.clientX, y: e.clientY })
+    } else {
+      tooltipContents.update(null)
+      tooltipPosition.update(null)
+    }
   })
 
   subscribe(selectedTool, (tool) => {
@@ -525,7 +563,9 @@ function FieldObjectSpawnsCanvas(
   let prev: FieldBlock = fieldBlock.get()!
   subscribe(fieldBlock, async (block) => {
     if (block === null) return
-    for (const [action, spawn] of prev.objectSpawns.diff(block.objectSpawns)) {
+    for (
+      const [action, spawn] of prev.objectSpawns.diff(block.objectSpawns)
+    ) {
       const object = new Object(
         null,
         spawn.i,
@@ -573,6 +613,19 @@ function KeyHandler({ on }: Context) {
   })
 }
 
+function CanvasTooltip({ subscribe, el }: Context<HTMLElement>) {
+  subscribe(tooltipPosition, (pos) => {
+    el.classList.toggle("hidden", pos === null)
+    if (pos) {
+      el.style.left = pos.x + 30 + "px"
+      el.style.top = pos.y - 10 + "px"
+    }
+  })
+  subscribe(tooltipContents, (content) => {
+    el.innerHTML = content ?? ""
+  })
+}
+
 type ResolveImage = (image: ImageBitmap) => void
 const loadImageMap: Record<string, { resolve: ResolveImage }> = {}
 const loadImage = memoizedLoading((uri: string) => {
@@ -582,7 +635,9 @@ const loadImage = memoizedLoading((uri: string) => {
   vscode.postMessage({ type: "loadImage", uri, id })
   return promise
 })
-function onLoadImageResponse(message: type.Extension.MessageLoadImageResponse) {
+function onLoadImageResponse(
+  message: type.Extension.MessageLoadImageResponse,
+) {
   const image = new Image()
   image.src = message.text
   image.onload = () => {
@@ -656,3 +711,4 @@ register(ModeIndicator, "mode-indicator")
 register(MainContainer, "main-container")
 register(FieldCellsCanvas, "field-block-canvas")
 register(FieldObjectSpawnsCanvas, "field-object-spawns-canvas")
+register(CanvasTooltip, "js-canvas-tooltip")
