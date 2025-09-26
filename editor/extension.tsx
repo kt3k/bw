@@ -33,12 +33,11 @@ function resolveCustomTextEditor(
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link href={u("out/style.css")} rel="stylesheet" />
       </head>
-      <body class="key-handler">
-        <div class="spacer h-10"></div>
-        <div class="main-container relative mt-5 w-[3360px]"></div>
-        <div class="toolbox fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-full">
+      <body class="key-handler p-0">
+        <div class="main-container relative mt-10 w-[calc(3360px+196px)]"></div>
+        <div class="top-toolbox h-10 px-2 fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-[calc(100%-12rem)]">
           <div class="cell-switch flex items-center relative"></div>
-          <div class="h-full w-0 border-l border-neutral-500">&nbsp;</div>
+          <div class="h-full w-0 border-l border-neutral-500/50">&nbsp;</div>
           <div class="object-switch flex items-center relative"></div>
           <div class="group relative">
             <span class="mode-indicator">dot</span>
@@ -53,8 +52,9 @@ function resolveCustomTextEditor(
             </span>
           </div>
         </div>
-        <div class="js-canvas-tooltip opacity-80 px-2 py-1 rounded fixed z-50 bg-white text-black border border-neutral-500 font-mono pointer-events-none">
-          heya
+        <div class="js-info-panel fixed right-0 top-0 h-full w-48 bg-neutral-900/90 flex flex-col pointer-events-none">
+          <div class="info-content flex-1 overflow-auto p-1 text-sm font-mono">
+          </div>
         </div>
         <script src={u("out/webview.js")} type="module"></script>
       </body>

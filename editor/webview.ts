@@ -20,8 +20,10 @@ const SIDE_CANVAS_SIZE = CELL_SIZE * 5
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
 const fieldBlock = new Signal<FieldBlock | null>(null)
 const mode = new Signal<"dot" | "stroke">("dot")
-const tooltipContents = new Signal<string | null>(null)
-const tooltipPosition = new Signal<{ x: number; y: number } | null>(null)
+const gridIndex = new GroupSignal<{ i: number | null; j: number | null }>({
+  i: null,
+  j: null,
+})
 
 type CellTool = { name: string }
 type ObjectTool = { type: string; src: string } | "remove"
@@ -442,7 +444,14 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   })
 
   on("mousemove", (e) => {
-    if (mode.get() === "stroke") paint(e)
+    if (mode.get() === "stroke") {
+      paint(e)
+      return
+    }
+    const block = fieldBlock.get()
+    if (block === null) return
+    const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
+    gridIndex.update({ i, j })
   })
 
   let prev = fieldBlock.get()!
@@ -530,29 +539,7 @@ function FieldObjectSpawnsCanvas(
     const block = fieldBlock.get()
     if (block === null) return
     const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
-    const spawn = block.objectSpawns.get(i, j)
-    if (spawn) {
-      tooltipContents.update(html`
-        <div class="grid grid-cols-[auto_auto] gap-x-1 gap-y-1">
-          <span class="text-right">(i, j):</span>
-          <span class="font-semibold text-blue-500">
-            (${spawn.i}, ${spawn.j})
-          </span>
-          <span class="text-right">type:</span>
-          <span class="font-semibold text-blue-500">
-            ${spawn.type}
-          </span>
-          <span class="text-right">src:</span>
-          <span class="font-semibold text-blue-500">
-            ${spawn.src}
-          </span>
-        </div>
-      `)
-      tooltipPosition.update({ x: e.clientX, y: e.clientY })
-    } else {
-      tooltipContents.update(null)
-      tooltipPosition.update(null)
-    }
+    gridIndex.update({ i, j })
   })
 
   subscribe(selectedTool, (tool) => {
@@ -613,16 +600,42 @@ function KeyHandler({ on }: Context) {
   })
 }
 
-function CanvasTooltip({ subscribe, el }: Context<HTMLElement>) {
-  subscribe(tooltipPosition, (pos) => {
-    el.classList.toggle("hidden", pos === null)
-    if (pos) {
-      el.style.left = pos.x + 30 + "px"
-      el.style.top = pos.y - 10 + "px"
-    }
-  })
-  subscribe(tooltipContents, (content) => {
-    el.innerHTML = content ?? ""
+function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
+  subscribe(gridIndex, ({ i, j }) => {
+    const infoContent = query(".info-content")
+    const fb = fieldBlock.get()
+    if (!infoContent || !fb) return
+    const cell = (i !== null && j !== null) ? fb.getCell(i, j) : null
+    const cellInfo = cell ? fb.cellMap[cell.name] : null
+    const spawn = (i !== null && j !== null) ? fb.objectSpawns.get(i, j) : null
+    infoContent.innerHTML = html`
+      <div class="grid grid-cols-[auto_1fr] gap-x-1 gap-y-1">
+        <span class="text-right">(i, j):</span>
+        <span class="font-semibold text-blue-500">
+          ${i !== null && j !== null ? `(${i}, ${j})` : "-"}
+        </span>
+        <span class="text-right">cell:</span>
+        <span class="font-semibold text-blue-500">
+          ${cell ? cell.name : "-"}
+        </span>
+        <span class="text-right">src:</span>
+        <span class="font-semibold text-blue-500 break-all">
+          ${cellInfo && cellInfo.src ? cellInfo.src.join(", ") : "-"}
+        </span>
+        <span class="text-right">canEnter:</span>
+        <span class="font-semibold text-blue-500">
+          ${cellInfo ? String(cellInfo.canEnter) : "-"}
+        </span>
+        <span class="text-right">object:</span>
+        <span class="font-semibold text-blue-500">
+          ${spawn ? spawn.type : "-"}
+        </span>
+        <span class="text-right">src:</span>
+        <span class="font-semibold text-blue-500 break-all">
+          ${spawn ? spawn.src : "-"}
+        </span>
+      </div>
+    `
   })
 }
 
@@ -711,4 +724,4 @@ register(ModeIndicator, "mode-indicator")
 register(MainContainer, "main-container")
 register(FieldCellsCanvas, "field-block-canvas")
 register(FieldObjectSpawnsCanvas, "field-object-spawns-canvas")
-register(CanvasTooltip, "js-canvas-tooltip")
+register(InfoPanel, "js-info-panel")
