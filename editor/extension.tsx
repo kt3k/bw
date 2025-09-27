@@ -52,8 +52,26 @@ function resolveCustomTextEditor(
             </span>
           </div>
         </div>
-        <div class="js-info-panel fixed right-0 top-0 h-full w-48 bg-neutral-900/90 flex flex-col pointer-events-none">
-          <div class="info-content flex-1 overflow-auto p-1 text-sm font-mono">
+        <div class="js-info-panel fixed right-0 top-0 h-full w-48 bg-neutral-900/90 pointer-events-none">
+          <div class="info-content text-xs font-mono">
+            <div class="py-1 px-2 bg-white/50 text-black">Grid</div>
+            <div class="px-2 py-1">
+              (i, j): <span class="grid-index text-blue-500"></span>
+            </div>
+            <div class="py-1 px-2 bg-white/50 text-black">Cell</div>
+            <div class="px-2 py-1">
+              name: <span class="cell-name text-blue-500"></span>
+              <br />
+              src: <span class="cell-src text-blue-500"></span>
+              <br />
+              canEnter: <span class="cell-can-enter text-blue-500"></span>
+            </div>
+            <div class="py-1 px-2 bg-white/50 text-black">Object</div>
+            <div class="px-2 py-1">
+              type: <span class="object-type text-blue-500"></span>
+              <br />
+              src: <span class="object-src text-blue-500"></span>
+            </div>
           </div>
         </div>
         <script src={u("out/webview.js")} type="module"></script>

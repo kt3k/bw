@@ -608,34 +608,18 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
     const cell = (i !== null && j !== null) ? fb.getCell(i, j) : null
     const cellInfo = cell ? fb.cellMap[cell.name] : null
     const spawn = (i !== null && j !== null) ? fb.objectSpawns.get(i, j) : null
-    infoContent.innerHTML = html`
-      <div class="grid grid-cols-[auto_1fr] gap-x-1 gap-y-1">
-        <span class="text-right">(i, j):</span>
-        <span class="font-semibold text-blue-500">
-          ${i !== null && j !== null ? `(${i}, ${j})` : "-"}
-        </span>
-        <span class="text-right">cell:</span>
-        <span class="font-semibold text-blue-500">
-          ${cell ? cell.name : "-"}
-        </span>
-        <span class="text-right">src:</span>
-        <span class="font-semibold text-blue-500 break-all">
-          ${cellInfo && cellInfo.src ? cellInfo.src.join(", ") : "-"}
-        </span>
-        <span class="text-right">canEnter:</span>
-        <span class="font-semibold text-blue-500">
-          ${cellInfo ? String(cellInfo.canEnter) : "-"}
-        </span>
-        <span class="text-right">object:</span>
-        <span class="font-semibold text-blue-500">
-          ${spawn ? spawn.type : "-"}
-        </span>
-        <span class="text-right">src:</span>
-        <span class="font-semibold text-blue-500 break-all">
-          ${spawn ? spawn.src : "-"}
-        </span>
-      </div>
-    `
+    query(".grid-index")!.textContent = i !== null && j !== null
+      ? `(${i}, ${j})`
+      : "-"
+    query(".cell-name")!.textContent = cell ? cell.name : "-"
+    query(".cell-src")!.textContent = cellInfo && cellInfo.src
+      ? cellInfo.src.join(", ")
+      : "-"
+    query(".cell-can-enter")!.textContent = cellInfo
+      ? String(cellInfo.canEnter)
+      : "-"
+    query(".object-type")!.textContent = spawn ? spawn.type : "-"
+    query(".object-src")!.textContent = spawn ? spawn.src : "-"
   })
 }
 
