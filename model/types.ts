@@ -43,6 +43,9 @@ export type IField = {
   canEnter(i: number, j: number): boolean
   peekItem(i: number, j: number): IItem | undefined
   collectItem(i: number, j: number): void
+  actors: {
+    iter(): Iterable<IActor>
+  }
 }
 
 /** The implementor of 'step' function */
@@ -55,4 +58,5 @@ export type IActor =
   & {
     get id(): string
     get physicalGridKey(): string
+    onEvent(event: { type: string }): void
   }

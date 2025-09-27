@@ -1,6 +1,6 @@
 import { DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import { Character, type MoveType, NextAction } from "../model/character.ts"
+import { Action, Character, type MoveType } from "../model/character.ts"
 import type { IField } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
@@ -8,35 +8,7 @@ import { seed } from "../util/random.ts"
 
 export class MainCharacter extends Character {
   #lastMoveTypes: MoveType[] = []
-  #nextActionQueue: (NextAction | "speed-2x" | "speed-4x" | "speed-reset")[] =
-    []
-  #speedUpTimer: number | undefined = undefined
-  override getNextAction(field: IField): NextAction {
-    if (this.#nextActionQueue.length > 0) {
-      const nextAction = this.#nextActionQueue.shift()!
-      if (nextAction === "speed-2x") {
-        this.speed = 2
-        this.#speedUpTimer = setTimeout(() => {
-          this.#nextActionQueue.push("speed-reset", "jump")
-        }, 15000)
-        return this.getNextAction(field)
-      } else if (nextAction === "speed-4x") {
-        this.speed = 4
-        this.#speedUpTimer = setTimeout(() => {
-          this.#nextActionQueue.push("speed-reset", "jump")
-        }, 15000)
-        return this.getNextAction(field)
-      } else if (nextAction === "speed-reset") {
-        if (this.#speedUpTimer) {
-          clearTimeout(this.#speedUpTimer)
-          this.#speedUpTimer = undefined
-        }
-        this.speed = 1
-        return this.getNextAction(field)
-      }
-      return nextAction
-    }
-
+  override getNextAction(_field: IField): Action {
     if (Input.up) {
       return UP
     } else if (Input.down) {
@@ -75,23 +47,27 @@ export class MainCharacter extends Character {
 
           const count = signal.greenAppleCount.get()
           signal.greenAppleCount.update(count + 1)
+          for (const actor of field.actors.iter()) {
+            if (actor === this) continue
+            actor.onEvent({ type: "green-apple-collected" })
+          }
           break
         }
         case "mushroom": {
           field.collectItem(this.i, this.j)
-          this.#nextActionQueue = []
-          this.#nextActionQueue.push("speed-reset", "jump", "speed-2x")
+          this.clearActionQueue()
+          this.enqueueAction("speed-reset", "jump", "speed-2x")
           break
         }
         case "purple-mushroom": {
           field.collectItem(this.i, this.j)
           const { choice } = seed(`${this.i},${this.j}`)
-          this.#nextActionQueue = []
-          this.#nextActionQueue.push("speed-reset", "jump", "jump", "speed-4x")
+          this.clearActionQueue
+          this.enqueueAction("speed-reset", "jump", "jump", "speed-4x")
           for (const _ of Array(30)) {
-            this.#nextActionQueue.push(choice([UP, DOWN, LEFT, RIGHT]))
+            this.enqueueAction(choice([this.dir]))
           }
-          this.#nextActionQueue.push("speed-reset", "jump")
+          this.enqueueAction("speed-reset", "jump")
           break
         }
       }

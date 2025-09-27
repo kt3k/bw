@@ -47,7 +47,12 @@ export function spawnCharacter(
 
 export type MoveType = "linear" | "bounce" | "jump"
 
-export type NextAction = Dir | "jump" | undefined
+export type Action =
+  | Dir
+  | "jump"
+  | undefined
+
+export type QueueAction = Action | "speed-2x" | "speed-4x" | "speed-reset"
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -79,6 +84,10 @@ export abstract class Character implements IActor {
   #src: string
   /** The images necessary to render this character */
   #assets?: CharacterAssets
+  /** The queue of actions to be performed */
+  #actionQueue: QueueAction[] = []
+  /** The timer for speed up actions */
+  #speedUpTimer: ReturnType<typeof setTimeout> | undefined
 
   constructor(
     i: number,
@@ -120,7 +129,7 @@ export abstract class Character implements IActor {
   }
 
   /** Returns true if the character can go to the given direction */
-  canEnter(
+  canGo(
     dir: Dir,
     field: IField,
   ): boolean {
@@ -136,7 +145,7 @@ export abstract class Character implements IActor {
    */
   getNextAction(
     _field: IField,
-  ): NextAction {
+  ): Action {
     return undefined
   }
 
@@ -153,22 +162,55 @@ export abstract class Character implements IActor {
     this.onMoveEnd(field, moveType)
   }
 
+  enqueueAction(...actions: QueueAction[]) {
+    this.#actionQueue.push(...actions)
+  }
+
+  clearActionQueue() {
+    this.#actionQueue = []
+  }
+
+  #getNextActionWrap(field: IField): Action {
+    if (this.#actionQueue.length > 0) {
+      const nextAction = this.#actionQueue.shift()
+      if (nextAction === "speed-2x") {
+        this.speed = 2
+        this.#speedUpTimer = setTimeout(() => {
+          this.#actionQueue.push("speed-reset", "jump")
+        }, 15000)
+        return this.#getNextActionWrap(field)
+      } else if (nextAction === "speed-4x") {
+        this.speed = 4
+        this.#speedUpTimer = setTimeout(() => {
+          this.#actionQueue.push("speed-reset", "jump")
+        }, 15000)
+        return this.#getNextActionWrap(field)
+      } else if (nextAction === "speed-reset") {
+        clearTimeout(this.#speedUpTimer)
+        this.speed = 1
+        return this.#getNextActionWrap(field)
+      }
+      return nextAction
+    }
+    return this.getNextAction(field)
+  }
+
   step(field: IField) {
     if (this.#movePhase === 0) {
-      const nextState = this.getNextAction(field)
+      const nextAction = this.#getNextActionWrap(field)
       if (
-        nextState === "up" || nextState === "down" ||
-        nextState === "left" || nextState === "right"
+        nextAction === "up" || nextAction === "down" ||
+        nextAction === "left" || nextAction === "right"
       ) {
-        this.setDir(nextState)
+        this.setDir(nextAction)
         this.#idleCounter = 0
 
-        if (this.canEnter(nextState, field)) {
+        if (this.canGo(nextAction, field)) {
           this.#moveType = "linear"
         } else {
           this.#moveType = "bounce"
         }
-      } else if (nextState === "jump") {
+      } else if (nextAction === "jump") {
         this.#idleCounter = 0
         this.#moveType = "jump"
         // Jumping is always allowed.
@@ -423,12 +465,21 @@ export abstract class Character implements IActor {
     }
     return this.#j
   }
+
+  onEvent(event: { type: string }): void {
+    switch (event.type) {
+      case "green-apple-collected": {
+        this.enqueueAction("speed-reset", "jump", "speed-2x")
+        break
+      }
+    }
+  }
 }
 
 export class RandomlyTurnNPC extends Character {
   #counter = 32
 
-  override getNextAction(field: IField): NextAction {
+  override getNextAction(field: IField): Action {
     this.#counter -= 1
     if (this.#counter <= 0) {
       const { randomInt, choice } = seed(this.age.toString())
@@ -436,7 +487,7 @@ export class RandomlyTurnNPC extends Character {
       // If the character can keep going in the current direction,
       // it will keep going with 96% probability.
       if (
-        this.canEnter(this.dir, field) &&
+        this.canGo(this.dir, field) &&
         Math.random() < 0.96
       ) {
         return this.dir
@@ -446,7 +497,7 @@ export class RandomlyTurnNPC extends Character {
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
       return choice(nextCandidate.filter((d) => {
-        return this.canEnter(d, field)
+        return this.canGo(d, field)
       }))
     }
     return undefined
@@ -456,9 +507,9 @@ export class RandomlyTurnNPC extends Character {
 export class RandomWalkNPC extends Character {
   override getNextAction(
     field: IField,
-  ): NextAction {
+  ): Action {
     const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {
-      return this.canEnter(d, field)
+      return this.canGo(d, field)
     })
     if (dirs.length === 0) {
       return undefined
