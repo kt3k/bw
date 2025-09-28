@@ -8,8 +8,8 @@ import { RectScope } from "../util/rect-scope.ts"
 
 import { Field } from "./field.ts"
 
-const I = 177
-const J = -185
+const I = 72
+const J = 18
 
 /**
  * The area which is visible to the user

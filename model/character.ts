@@ -52,7 +52,15 @@ export type Action =
   | "jump"
   | undefined
 
-export type QueueAction = Action | "speed-2x" | "speed-4x" | "speed-reset"
+export type QueueAction =
+  | Action
+  | "turn-down"
+  | "turn-up"
+  | "turn-left"
+  | "turn-right"
+  | "speed-2x"
+  | "speed-4x"
+  | "speed-reset"
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -189,6 +197,18 @@ export abstract class Character implements IActor {
         clearTimeout(this.#speedUpTimer)
         this.speed = 1
         return this.#getNextActionWrap(field)
+      } else if (nextAction === "turn-down") {
+        this.setDir("down")
+        return this.#getNextActionWrap(field)
+      } else if (nextAction === "turn-up") {
+        this.setDir("up")
+        return this.#getNextActionWrap(field)
+      } else if (nextAction === "turn-left") {
+        this.setDir("left")
+        return this.#getNextActionWrap(field)
+      } else if (nextAction === "turn-right") {
+        this.setDir("right")
+        return this.#getNextActionWrap(field)
       }
       return nextAction
     }
@@ -251,7 +271,7 @@ export abstract class Character implements IActor {
         this.onMoveEndWrap(field, moveType)
       }
     } else if (this.#moveType === "jump") {
-      this.#movePhase += 2
+      this.#movePhase += 1
       if (this.#movePhase <= 2) {
         this.#d += 6
       } else if (this.#movePhase <= 4) {
@@ -469,7 +489,16 @@ export abstract class Character implements IActor {
   onEvent(event: { type: string }): void {
     switch (event.type) {
       case "green-apple-collected": {
-        this.enqueueAction("speed-reset", "jump", "speed-2x")
+        this.enqueueAction(
+          "turn-left",
+          "jump",
+          "turn-right",
+          "jump",
+          "turn-left",
+          "jump",
+          "turn-right",
+          "jump",
+        )
         break
       }
     }
