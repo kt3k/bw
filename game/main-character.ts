@@ -1,14 +1,13 @@
 import { DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import { Action, Character, type MoveType } from "../model/character.ts"
+import { Character, Move, type MoveType } from "../model/character.ts"
 import type { IField } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
-import { seed } from "../util/random.ts"
 
 export class MainCharacter extends Character {
   #lastMoveTypes: MoveType[] = []
-  override getNextAction(_field: IField): Action {
+  override getNextAction(_field: IField): Move {
     if (Input.up) {
       return UP
     } else if (Input.down) {
@@ -56,18 +55,21 @@ export class MainCharacter extends Character {
         case "mushroom": {
           field.collectItem(this.i, this.j)
           this.clearActionQueue()
-          this.enqueueAction("speed-reset", "jump", "speed-2x")
+          this.enqueueAction({ type: "speed-reset" }, { type: "jump" }, {
+            type: "speed-2x",
+          })
           break
         }
         case "purple-mushroom": {
           field.collectItem(this.i, this.j)
-          const { choice } = seed(`${this.i},${this.j}`)
-          this.clearActionQueue
-          this.enqueueAction("speed-reset", "jump", "jump", "speed-4x")
+          this.clearActionQueue()
+          this.enqueueAction({ type: "speed-reset" }, { type: "jump" }, {
+            type: "jump",
+          }, { type: "speed-4x" })
           for (const _ of Array(30)) {
-            this.enqueueAction(choice([this.dir]))
+            this.enqueueAction({ type: this.dir })
           }
-          this.enqueueAction("speed-reset", "jump")
+          this.enqueueAction({ type: "speed-reset" }, { type: "jump" })
           break
         }
       }
