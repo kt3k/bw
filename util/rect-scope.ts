@@ -1,5 +1,5 @@
 import { floorN } from "./math.ts"
-import { type IBox } from "../model/character.ts"
+import { type IBox } from "../model/types.ts"
 
 /**
  * Abstract rectangular area, which implements properties of the rectangle.

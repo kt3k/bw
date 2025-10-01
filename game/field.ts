@@ -367,6 +367,8 @@ export class Field implements IField {
   #items: FieldItems
   #objects: FieldObjects
 
+  #time = 0
+
   constructor(el: HTMLElement, activateScope: RectScope) {
     this.#el = el
     this.#activateScope = activateScope
@@ -385,6 +387,11 @@ export class Field implements IField {
 
   get objects() {
     return this.#objects
+  }
+
+  /** The current time in the field */
+  get time() {
+    return this.#time
   }
 
   async #addBlock(block: FieldBlock) {
@@ -421,6 +428,7 @@ export class Field implements IField {
     return this.#getBlock(i, j).getCell(i, j)
   }
   step(): void {
+    this.#time++
     this.#actors.step(this)
     this.#items.step(this)
     this.#objects.step(this)

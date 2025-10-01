@@ -46,6 +46,7 @@ export type IField = {
   actors: {
     iter(): Iterable<IActor>
   }
+  get time(): number
 }
 
 /** The implementor of 'step' function */
@@ -58,5 +59,5 @@ export type IActor =
   & {
     get id(): string
     get physicalGridKey(): string
-    onEvent(event: { type: string }): void
+    onEvent(event: { type: string }, field: IField): void
   }

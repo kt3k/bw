@@ -1,6 +1,6 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { type RectScope } from "../util/rect-scope.ts"
-import type { IDrawable } from "../model/character.ts"
+import type { IDrawable } from "../model/types.ts"
 import { randomInt } from "../util/random.ts"
 
 export class DrawLayer {

@@ -62,7 +62,7 @@ export type Action = {
     | "speed-2x"
     | "speed-4x"
     | "speed-reset"
-}
+} | { type: "wait"; until: number }
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -86,6 +86,8 @@ export abstract class Character implements IActor {
   #movePhase: number = 0
   /** The counter of the idle state */
   #idleCounter: number = 0
+  /** The time until the next action */
+  #waitUntil: number | null = null
   /** Type of the move */
   #moveType: MoveType | undefined = undefined
   /** The key of the physical grid, which is used for collision detection */
@@ -153,7 +155,7 @@ export abstract class Character implements IActor {
    * Returning the direction causes the character to move in that direction.
    * Returning undefined causes the character to stay in the current state.
    */
-  getNextAction(
+  getNextMove(
     _field: IField,
   ): Move {
     return undefined
@@ -182,43 +184,50 @@ export abstract class Character implements IActor {
 
   #getNextMoveWrap(field: IField): Move {
     if (this.#actionQueue.length > 0) {
-      const nextAction = this.#actionQueue.shift()?.type
-      if (nextAction === "speed-2x") {
+      const nextAction = this.#actionQueue.shift()!
+      if (nextAction.type === "speed-2x") {
         this.speed = 2
         this.#speedUpTimer = setTimeout(() => {
           this.#actionQueue.push({ type: "speed-reset" }, { type: "jump" })
         }, 15000)
         return this.#getNextMoveWrap(field)
-      } else if (nextAction === "speed-4x") {
+      } else if (nextAction.type === "speed-4x") {
         this.speed = 4
         this.#speedUpTimer = setTimeout(() => {
           this.#actionQueue.push({ type: "speed-reset" }, { type: "jump" })
         }, 15000)
         return this.#getNextMoveWrap(field)
-      } else if (nextAction === "speed-reset") {
+      } else if (nextAction.type === "speed-reset") {
         clearTimeout(this.#speedUpTimer)
         this.speed = 1
         return this.#getNextMoveWrap(field)
-      } else if (nextAction === "turn-down") {
+      } else if (nextAction.type === "turn-down") {
         this.setDir("down")
         return this.#getNextMoveWrap(field)
-      } else if (nextAction === "turn-up") {
+      } else if (nextAction.type === "turn-up") {
         this.setDir("up")
         return this.#getNextMoveWrap(field)
-      } else if (nextAction === "turn-left") {
+      } else if (nextAction.type === "turn-left") {
         this.setDir("left")
         return this.#getNextMoveWrap(field)
-      } else if (nextAction === "turn-right") {
+      } else if (nextAction.type === "turn-right") {
         this.setDir("right")
         return this.#getNextMoveWrap(field)
+      } else if (nextAction.type === "wait") {
+        if (field.time < nextAction.until) {
+          this.#waitUntil = nextAction.until
+          return undefined
+        } else {
+          return this.#getNextMoveWrap(field)
+        }
       }
-      return nextAction
+      return nextAction.type
     }
-    return this.getNextAction(field)
+    return this.getNextMove(field)
   }
 
   step(field: IField) {
-    if (this.#movePhase === 0) {
+    if (this.#waitUntil === null && this.#movePhase === 0) {
       const nextMove = this.#getNextMoveWrap(field)
       if (
         nextMove === "up" || nextMove === "down" ||
@@ -237,6 +246,10 @@ export abstract class Character implements IActor {
         this.#moveType = "jump"
         // Jumping is always allowed.
       }
+    }
+
+    if (this.#waitUntil !== null && field.time >= this.#waitUntil) {
+      this.#waitUntil = null
     }
 
     if (this.#moveType === "linear") {
@@ -488,10 +501,26 @@ export abstract class Character implements IActor {
     return this.#j
   }
 
-  onEvent(event: { type: string }): void {
+  onEvent(event: { type: string }, field: IField): void {
     switch (event.type) {
       case "green-apple-collected": {
         this.enqueueAction(
+          { type: "turn-left" },
+          { type: "wait", until: field.time + 4 },
+          { type: "turn-down" },
+          { type: "wait", until: field.time + 8 },
+          { type: "turn-right" },
+          { type: "wait", until: field.time + 12 },
+          { type: "turn-up" },
+          { type: "wait", until: field.time + 16 },
+          { type: "turn-left" },
+          { type: "wait", until: field.time + 20 },
+          { type: "turn-down" },
+          { type: "wait", until: field.time + 24 },
+          { type: "turn-right" },
+          { type: "wait", until: field.time + 28 },
+          { type: "turn-up" },
+          { type: "wait", until: field.time + 32 },
           { type: "turn-left" },
           { type: "jump" },
           { type: "turn-right" },
@@ -510,7 +539,7 @@ export abstract class Character implements IActor {
 export class RandomlyTurnNPC extends Character {
   #counter = 32
 
-  override getNextAction(field: IField): Move {
+  override getNextMove(field: IField): Move {
     this.#counter -= 1
     if (this.#counter <= 0) {
       const { randomInt, choice } = seed(this.age.toString())
@@ -536,7 +565,7 @@ export class RandomlyTurnNPC extends Character {
 }
 
 export class RandomWalkNPC extends Character {
-  override getNextAction(
+  override getNextMove(
     field: IField,
   ): Move {
     const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {

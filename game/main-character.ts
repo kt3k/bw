@@ -7,7 +7,7 @@ import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 
 export class MainCharacter extends Character {
   #lastMoveTypes: MoveType[] = []
-  override getNextAction(_field: IField): Move {
+  override getNextMove(_field: IField): Move {
     if (Input.up) {
       return UP
     } else if (Input.down) {
@@ -48,7 +48,7 @@ export class MainCharacter extends Character {
           signal.greenAppleCount.update(count + 1)
           for (const actor of field.actors.iter()) {
             if (actor === this) continue
-            actor.onEvent({ type: "green-apple-collected" })
+            actor.onEvent({ type: "green-apple-collected" }, field)
           }
           break
         }
