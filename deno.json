@@ -2,6 +2,7 @@
   "lock": false,
   "tasks": {
     "test": "deno test",
+    "check": "deno check game model util",
     "dev": "deno run -A npm:concurrently 'deno task build:main --watch' 'deno task build:worker --watch' 'deno task build:style --watch' 'deno task build:static --watch' 'deno task serve'",
     "build": "deno task build:main && deno task build:worker && deno task build:style && deno task build:static && deno -A npm:replace BUILD_DATE `deno -A npm:date-now-cli --format=yyyy.MM.dd` out/index.html",
     "build:main": "deno bundle --platform browser -o out/main.js game/main.ts",

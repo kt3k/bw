@@ -55,21 +55,26 @@ export class MainCharacter extends Character {
         case "mushroom": {
           field.collectItem(this.i, this.j)
           this.clearActionQueue()
-          this.enqueueAction({ type: "speed-reset" }, { type: "jump" }, {
-            type: "speed-2x",
-          })
+          this.enqueueAction(
+            { type: "jump" },
+            { type: "speed", change: "2x" },
+          )
           break
         }
         case "purple-mushroom": {
           field.collectItem(this.i, this.j)
           this.clearActionQueue()
-          this.enqueueAction({ type: "speed-reset" }, { type: "jump" }, {
-            type: "jump",
-          }, { type: "speed-4x" })
+          this.enqueueAction(
+            { type: "jump" },
+            { type: "speed", change: "4x" },
+          )
           for (const _ of Array(30)) {
             this.enqueueAction({ type: this.dir })
           }
-          this.enqueueAction({ type: "speed-reset" }, { type: "jump" })
+          this.enqueueAction(
+            { type: "speed", change: "reset" },
+            { type: "jump" },
+          )
           break
         }
       }

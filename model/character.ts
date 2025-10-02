@@ -45,24 +45,18 @@ export function spawnCharacter(
   throw new Error(`Unknown character type: ${type}`)
 }
 
-export type MoveType = "linear" | "bounce" | "jump"
+export type MoveType = "go" | "bounce" | "jump"
 
 export type Move =
   | Dir
   | "jump"
   | undefined
 
-export type Action = {
-  type:
-    | Move
-    | "turn-down"
-    | "turn-up"
-    | "turn-left"
-    | "turn-right"
-    | "speed-2x"
-    | "speed-4x"
-    | "speed-reset"
-} | { type: "wait"; until: number }
+export type Action =
+  | { type: Move }
+  | { type: "speed"; change: "2x" | "4x" | "reset" }
+  | { type: "turn"; dir: "north" | "south" | "west" | "east" }
+  | { type: "wait"; until: number }
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -185,33 +179,43 @@ export abstract class Character implements IActor {
   #getNextMoveWrap(field: IField): Move {
     if (this.#actionQueue.length > 0) {
       const nextAction = this.#actionQueue.shift()!
-      if (nextAction.type === "speed-2x") {
-        this.speed = 2
-        this.#speedUpTimer = setTimeout(() => {
-          this.#actionQueue.push({ type: "speed-reset" }, { type: "jump" })
-        }, 15000)
-        return this.#getNextMoveWrap(field)
-      } else if (nextAction.type === "speed-4x") {
-        this.speed = 4
-        this.#speedUpTimer = setTimeout(() => {
-          this.#actionQueue.push({ type: "speed-reset" }, { type: "jump" })
-        }, 15000)
-        return this.#getNextMoveWrap(field)
-      } else if (nextAction.type === "speed-reset") {
+      if (nextAction.type === "speed") {
         clearTimeout(this.#speedUpTimer)
-        this.speed = 1
+        switch (nextAction.change) {
+          case "2x":
+            this.speed = 2
+            break
+          case "4x":
+            this.speed = 4
+            break
+          case "reset":
+            this.speed = 1
+            break
+        }
+        if (nextAction.change !== "reset") {
+          this.#speedUpTimer = setTimeout(() => {
+            this.#actionQueue.push(
+              { type: "speed", change: "reset" },
+              { type: "jump" },
+            )
+          }, 15000)
+        }
         return this.#getNextMoveWrap(field)
-      } else if (nextAction.type === "turn-down") {
-        this.setDir("down")
-        return this.#getNextMoveWrap(field)
-      } else if (nextAction.type === "turn-up") {
-        this.setDir("up")
-        return this.#getNextMoveWrap(field)
-      } else if (nextAction.type === "turn-left") {
-        this.setDir("left")
-        return this.#getNextMoveWrap(field)
-      } else if (nextAction.type === "turn-right") {
-        this.setDir("right")
+      } else if (nextAction.type === "turn") {
+        switch (nextAction.dir) {
+          case "north":
+            this.setDir("up")
+            break
+          case "south":
+            this.setDir("down")
+            break
+          case "west":
+            this.setDir("left")
+            break
+          case "east":
+            this.setDir("right")
+            break
+        }
         return this.#getNextMoveWrap(field)
       } else if (nextAction.type === "wait") {
         if (field.time < nextAction.until) {
@@ -237,7 +241,7 @@ export abstract class Character implements IActor {
         this.#idleCounter = 0
 
         if (this.canGo(nextMove, field)) {
-          this.#moveType = "linear"
+          this.#moveType = "go"
         } else {
           this.#moveType = "bounce"
         }
@@ -252,7 +256,7 @@ export abstract class Character implements IActor {
       this.#waitUntil = null
     }
 
-    if (this.#moveType === "linear") {
+    if (this.#moveType === "go") {
       this.#movePhase += this.#speed
       this.#d += this.#speed
       if (this.#movePhase == 16) {
@@ -480,7 +484,7 @@ export abstract class Character implements IActor {
    * when the character is moving.
    */
   get #physicalI(): number {
-    if (this.#moveType === "linear") {
+    if (this.#moveType === "go") {
       if (this.#dir === LEFT) {
         return this.#i - 1
       } else if (this.#dir === RIGHT) {
@@ -491,7 +495,7 @@ export abstract class Character implements IActor {
   }
 
   get #physicalJ(): number {
-    if (this.#moveType === "linear") {
+    if (this.#moveType === "go") {
       if (this.#dir === UP) {
         return this.#j - 1
       } else if (this.#dir === DOWN) {
@@ -505,29 +509,29 @@ export abstract class Character implements IActor {
     switch (event.type) {
       case "green-apple-collected": {
         this.enqueueAction(
-          { type: "turn-left" },
+          { type: "turn", dir: "west" },
           { type: "wait", until: field.time + 4 },
-          { type: "turn-down" },
+          { type: "turn", dir: "south" },
           { type: "wait", until: field.time + 8 },
-          { type: "turn-right" },
+          { type: "turn", dir: "east" },
           { type: "wait", until: field.time + 12 },
-          { type: "turn-up" },
+          { type: "turn", dir: "north" },
           { type: "wait", until: field.time + 16 },
-          { type: "turn-left" },
+          { type: "turn", dir: "west" },
           { type: "wait", until: field.time + 20 },
-          { type: "turn-down" },
+          { type: "turn", dir: "south" },
           { type: "wait", until: field.time + 24 },
-          { type: "turn-right" },
+          { type: "turn", dir: "east" },
           { type: "wait", until: field.time + 28 },
-          { type: "turn-up" },
+          { type: "turn", dir: "north" },
           { type: "wait", until: field.time + 32 },
-          { type: "turn-left" },
+          { type: "turn", dir: "west" },
           { type: "jump" },
-          { type: "turn-right" },
+          { type: "turn", dir: "east" },
           { type: "jump" },
-          { type: "turn-left" },
+          { type: "turn", dir: "west" },
           { type: "jump" },
-          { type: "turn-right" },
+          { type: "turn", dir: "east" },
           { type: "jump" },
         )
         break
