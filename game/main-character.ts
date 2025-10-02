@@ -9,13 +9,13 @@ export class MainCharacter extends Character {
   #lastMoveTypes: MoveType[] = []
   override getNextMove(_field: IField): Move {
     if (Input.up) {
-      return UP
+      return { type: "go", dir: UP }
     } else if (Input.down) {
-      return DOWN
+      return { type: "go", dir: DOWN }
     } else if (Input.left) {
-      return LEFT
+      return { type: "go", dir: LEFT }
     } else if (Input.right) {
-      return RIGHT
+      return { type: "go", dir: RIGHT }
     }
 
     const queueHead = inputQueue[0]
@@ -25,7 +25,7 @@ export class MainCharacter extends Character {
       queueHead === "touchendempty"
     ) {
       inputQueue.shift()
-      return "jump"
+      return { type: "jump" }
     }
     return undefined
   }
@@ -69,7 +69,7 @@ export class MainCharacter extends Character {
             { type: "speed", change: "4x" },
           )
           for (const _ of Array(30)) {
-            this.enqueueAction({ type: this.dir })
+            this.enqueueAction({ type: "go", dir: this.dir })
           }
           this.enqueueAction(
             { type: "speed", change: "reset" },

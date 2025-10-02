@@ -48,12 +48,13 @@ export function spawnCharacter(
 export type MoveType = "go" | "bounce" | "jump"
 
 export type Move =
-  | Dir
-  | "jump"
+  | { type: "go"; dir: Dir }
+  | { type: "slide"; dir: Dir }
+  | { type: "jump" }
   | undefined
 
 export type Action =
-  | { type: Move }
+  | Move
   | { type: "speed"; change: "2x" | "4x" | "reset" }
   | { type: "turn"; dir: "north" | "south" | "west" | "east" }
   | { type: "wait"; until: number }
@@ -84,6 +85,8 @@ export abstract class Character implements IActor {
   #waitUntil: number | null = null
   /** Type of the move */
   #moveType: MoveType | undefined = undefined
+  /** The direction of the move */
+  #moveDir: Dir | undefined = undefined
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
@@ -225,7 +228,7 @@ export abstract class Character implements IActor {
           return this.#getNextMoveWrap(field)
         }
       }
-      return nextAction.type
+      return nextAction
     }
     return this.getNextMove(field)
   }
@@ -233,19 +236,26 @@ export abstract class Character implements IActor {
   step(field: IField) {
     if (this.#waitUntil === null && this.#movePhase === 0) {
       const nextMove = this.#getNextMoveWrap(field)
-      if (
-        nextMove === "up" || nextMove === "down" ||
-        nextMove === "left" || nextMove === "right"
-      ) {
-        this.setDir(nextMove)
+      if (nextMove?.type === "go") {
+        this.setDir(nextMove.dir)
+        this.#moveDir = nextMove.dir
         this.#idleCounter = 0
 
-        if (this.canGo(nextMove, field)) {
+        if (this.canGo(nextMove.dir, field)) {
           this.#moveType = "go"
         } else {
           this.#moveType = "bounce"
         }
-      } else if (nextMove === "jump") {
+      } else if (nextMove?.type === "slide") {
+        this.#moveDir = nextMove.dir
+        this.#idleCounter = 0
+
+        if (this.canGo(nextMove.dir, field)) {
+          this.#moveType = "go"
+        } else {
+          this.#moveType = "bounce"
+        }
+      } else if (nextMove?.type === "jump") {
         this.#idleCounter = 0
         this.#moveType = "jump"
         // Jumping is always allowed.
@@ -260,13 +270,13 @@ export abstract class Character implements IActor {
       this.#movePhase += this.#speed
       this.#d += this.#speed
       if (this.#movePhase == 16) {
-        if (this.#dir === UP) {
+        if (this.#moveDir === UP) {
           this.#j -= 1
-        } else if (this.#dir === DOWN) {
+        } else if (this.#moveDir === DOWN) {
           this.#j += 1
-        } else if (this.#dir === LEFT) {
+        } else if (this.#moveDir === LEFT) {
           this.#i -= 1
-        } else if (this.#dir === RIGHT) {
+        } else if (this.#moveDir === RIGHT) {
           this.#i += 1
         }
         this.#movePhase = 0
@@ -357,9 +367,9 @@ export abstract class Character implements IActor {
       return this.#i * CELL_SIZE
     }
 
-    if (this.#dir === LEFT) {
+    if (this.#moveDir === LEFT) {
       return this.#i * CELL_SIZE - this.#d
-    } else if (this.#dir === RIGHT) {
+    } else if (this.#moveDir === RIGHT) {
       return this.#i * CELL_SIZE + this.#d
     } else {
       return this.#i * CELL_SIZE
@@ -383,9 +393,9 @@ export abstract class Character implements IActor {
       return this.#j * CELL_SIZE - this.#d
     }
 
-    if (this.#dir === UP) {
+    if (this.#moveDir === UP) {
       return this.#j * CELL_SIZE - this.#d
-    } else if (this.#dir === DOWN) {
+    } else if (this.#moveDir === DOWN) {
       return this.#j * CELL_SIZE + this.#d
     } else {
       return this.#j * CELL_SIZE
@@ -485,9 +495,9 @@ export abstract class Character implements IActor {
    */
   get #physicalI(): number {
     if (this.#moveType === "go") {
-      if (this.#dir === LEFT) {
+      if (this.#moveDir === LEFT) {
         return this.#i - 1
-      } else if (this.#dir === RIGHT) {
+      } else if (this.#moveDir === RIGHT) {
         return this.#i + 1
       }
     }
@@ -496,9 +506,9 @@ export abstract class Character implements IActor {
 
   get #physicalJ(): number {
     if (this.#moveType === "go") {
-      if (this.#dir === UP) {
+      if (this.#moveDir === UP) {
         return this.#j - 1
-      } else if (this.#dir === DOWN) {
+      } else if (this.#moveDir === DOWN) {
         return this.#j + 1
       }
     }
@@ -525,6 +535,17 @@ export abstract class Character implements IActor {
           { type: "wait", until: field.time + 28 },
           { type: "turn", dir: "north" },
           { type: "wait", until: field.time + 32 },
+          { type: "turn", dir: "east" },
+          { type: "slide", dir: "left" },
+          { type: "turn", dir: "north" },
+          { type: "slide", dir: "down" },
+          { type: "turn", dir: "west" },
+          { type: "slide", dir: "right" },
+          { type: "turn", dir: "south" },
+          { type: "slide", dir: "up" },
+          { type: "turn", dir: "east" },
+          { type: "slide", dir: "left" },
+          { type: "turn", dir: "east" },
           { type: "turn", dir: "west" },
           { type: "jump" },
           { type: "turn", dir: "east" },
@@ -554,15 +575,18 @@ export class RandomlyTurnNPC extends Character {
         this.canGo(this.dir, field) &&
         Math.random() < 0.96
       ) {
-        return this.dir
+        return { type: "go", dir: this.dir }
       }
       if (randomInt(2) === 0) {
-        return "jump"
+        return { type: "jump" }
       }
       const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
-      return choice(nextCandidate.filter((d) => {
-        return this.canGo(d, field)
-      }))
+      return {
+        type: "go",
+        dir: choice(nextCandidate.filter((d) => {
+          return this.canGo(d, field)
+        })),
+      }
     }
     return undefined
   }
@@ -581,7 +605,7 @@ export class RandomWalkNPC extends Character {
     const { choice } = seed(
       this.age.toString() + this.i.toString() + this.j.toString(),
     )
-    return choice(dirs)
+    return { type: "go", dir: choice(dirs) }
   }
 }
 
