@@ -35,12 +35,13 @@ export function spawnCharacter(
   src: string,
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
 ): IActor {
-  if (type === "random") {
-    return new RandomlyTurnNPC(i, j, src, id, dir, speed)
-  } else if (type === "random-walk") {
-    return new RandomWalkNPC(i, j, src, id, dir, speed)
-  } else if (type === "static") {
-    return new StaticNPC(i, j, src, id, dir, speed)
+  switch (type) {
+    case "random":
+      return new RandomlyTurnNPC(i, j, src, id, dir, speed)
+    case "random-walk":
+      return new RandomWalkNPC(i, j, src, id, dir, speed)
+    case "static":
+      return new StaticNPC(i, j, src, id, dir, speed)
   }
   throw new Error(`Unknown character type: ${type}`)
 }
@@ -126,14 +127,15 @@ export abstract class Character implements IActor {
 
   /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
   nextGrid(dir: Dir): [i: number, j: number] {
-    if (dir === UP) {
-      return [this.#i, this.#j - 1]
-    } else if (dir === DOWN) {
-      return [this.#i, this.#j + 1]
-    } else if (dir === LEFT) {
-      return [this.#i - 1, this.#j]
-    } else {
-      return [this.#i + 1, this.#j]
+    switch (dir) {
+      case UP:
+        return [this.#i, this.#j - 1]
+      case DOWN:
+        return [this.#i, this.#j + 1]
+      case LEFT:
+        return [this.#i - 1, this.#j]
+      case RIGHT:
+        return [this.#i + 1, this.#j]
     }
   }
 
@@ -236,29 +238,18 @@ export abstract class Character implements IActor {
   step(field: IField) {
     if (this.#waitUntil === null && this.#movePhase === 0) {
       const nextMove = this.#getNextMoveWrap(field)
-      if (nextMove?.type === "go") {
-        this.setDir(nextMove.dir)
-        this.#moveDir = nextMove.dir
-        this.#idleCounter = 0
-
-        if (this.canGo(nextMove.dir, field)) {
-          this.#moveType = "go"
-        } else {
-          this.#moveType = "bounce"
-        }
-      } else if (nextMove?.type === "slide") {
-        this.#moveDir = nextMove.dir
-        this.#idleCounter = 0
-
-        if (this.canGo(nextMove.dir, field)) {
-          this.#moveType = "go"
-        } else {
-          this.#moveType = "bounce"
-        }
-      } else if (nextMove?.type === "jump") {
-        this.#idleCounter = 0
-        this.#moveType = "jump"
-        // Jumping is always allowed.
+      switch (nextMove?.type) {
+        case "go":
+        case "slide":
+          if (nextMove?.type === "go") this.setDir(nextMove.dir)
+          this.#moveDir = nextMove.dir
+          this.#idleCounter = 0
+          this.#moveType = this.canGo(nextMove.dir, field) ? "go" : "bounce"
+          break
+        case "jump":
+          this.#idleCounter = 0
+          this.#moveType = "jump"
+          break
       }
     }
 
@@ -270,14 +261,19 @@ export abstract class Character implements IActor {
       this.#movePhase += this.#speed
       this.#d += this.#speed
       if (this.#movePhase == 16) {
-        if (this.#moveDir === UP) {
-          this.#j -= 1
-        } else if (this.#moveDir === DOWN) {
-          this.#j += 1
-        } else if (this.#moveDir === LEFT) {
-          this.#i -= 1
-        } else if (this.#moveDir === RIGHT) {
-          this.#i += 1
+        switch (this.#moveDir) {
+          case UP:
+            this.#j -= 1
+            break
+          case DOWN:
+            this.#j += 1
+            break
+          case LEFT:
+            this.#i -= 1
+            break
+          case RIGHT:
+            this.#i += 1
+            break
         }
         this.#movePhase = 0
         const moveType = this.#moveType
