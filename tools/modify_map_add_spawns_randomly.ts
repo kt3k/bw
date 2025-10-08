@@ -54,6 +54,18 @@ async function addCharactersRandomly(mapFile: string) {
     fb.itemSpawns.add(
       new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png", mapJson.href),
     )
+
+    for (const i of [64, 65, 66, 67, 68, 69, 70, 71]) {
+      fb.characterSpawns.add(
+        new CharacterSpawnInfo(
+          i,
+          16,
+          "static",
+          "../char/juni/",
+          mapJson.href,
+        ),
+      )
+    }
   }
 
   if (mapFile === "block_-200.0") {

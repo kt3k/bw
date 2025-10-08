@@ -1,7 +1,7 @@
 import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
-import type { IActor, IField, LoadOptions } from "./types.ts"
+import type { ActorEvent, IActor, IField, LoadOptions } from "./types.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -170,6 +170,7 @@ export abstract class Character implements IActor {
     moveType: MoveType,
   ) {
     this.#age++
+    //this.#onMoveEndCommon(field, moveType)
     this.onMoveEnd(field, moveType)
   }
 
@@ -284,11 +285,16 @@ export abstract class Character implements IActor {
     } else if (this.#moveType === "bounce") {
       this.#movePhase += this.#speed
       if (this.#movePhase < 8) {
-        this.#d += this.#speed / 2
+        this.#d += this.#speed
       } else {
-        this.#d -= this.#speed / 2
+        this.#d -= this.#speed
       }
-      if (this.#movePhase == 16) {
+      if (this.#movePhase === 8) {
+        const [i, j] = this.nextGrid(this.#moveDir!)
+        field.actors.get(i, j)?.forEach((actor) => {
+          actor.onEvent({ type: "bounced", dir: this.#moveDir! }, field)
+        })
+      } else if (this.#movePhase === 16) {
         this.#movePhase = 0
         const moveType = this.#moveType
         this.#moveType = undefined
@@ -511,7 +517,7 @@ export abstract class Character implements IActor {
     return this.#j
   }
 
-  onEvent(event: { type: string }, field: IField): void {
+  onEvent(event: ActorEvent, field: IField): void {
     switch (event.type) {
       case "green-apple-collected": {
         this.enqueueAction(
@@ -550,6 +556,12 @@ export abstract class Character implements IActor {
           { type: "jump" },
           { type: "turn", dir: "east" },
           { type: "jump" },
+        )
+        break
+      }
+      case "bounced": {
+        this.enqueueAction(
+          { type: "slide", dir: event.dir },
         )
         break
       }

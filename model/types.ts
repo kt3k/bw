@@ -45,12 +45,19 @@ export type IField = {
   collectItem(i: number, j: number): void
   actors: {
     iter(): Iterable<IActor>
+    /** This method is slow */
+    get(i: number, j: number): IActor[] | undefined
   }
   get time(): number
 }
 
 /** The implementor of 'step' function */
 export type IStepper = { step(field: IField): void }
+
+export type ActorEvent = { type: "green-apple-collected" } | {
+  type: "bounced"
+  dir: "up" | "down" | "left" | "right"
+}
 
 /** The interface represents a character */
 export type IActor =
@@ -59,5 +66,5 @@ export type IActor =
   & {
     get id(): string
     get physicalGridKey(): string
-    onEvent(event: { type: string }, field: IField): void
+    onEvent(event: ActorEvent, field: IField): void
   }
