@@ -60,7 +60,7 @@ async function addCharactersRandomly(mapFile: string) {
         new CharacterSpawnInfo(
           i,
           16,
-          "static",
+          "random-rotate",
           "../char/juni/",
           mapJson.href,
         ),

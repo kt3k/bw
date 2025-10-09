@@ -1,4 +1,12 @@
-import { type Dir, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
+import {
+  type Dir,
+  DOWN,
+  LEFT,
+  RIGHT,
+  turnLeft,
+  turnRight,
+  UP,
+} from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
 import type { ActorEvent, IActor, IField, LoadOptions } from "./types.ts"
@@ -25,7 +33,11 @@ type CharacterAssets = {
   [K in CharacterAppearance]: ImageBitmap
 }
 
-export type NPCType = "random" | "random-walk" | "static"
+export type NPCType =
+  | typeof RandomlyTurnNPC.type
+  | typeof RandomWalkNPC.type
+  | typeof StaticNPC.type
+  | typeof RandomRotateNPC.type
 
 export function spawnCharacter(
   id: string,
@@ -36,12 +48,14 @@ export function spawnCharacter(
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
 ): IActor {
   switch (type) {
-    case "random":
+    case RandomlyTurnNPC.type:
       return new RandomlyTurnNPC(i, j, src, id, dir, speed)
-    case "random-walk":
+    case RandomWalkNPC.type:
       return new RandomWalkNPC(i, j, src, id, dir, speed)
-    case "static":
+    case StaticNPC.type:
       return new StaticNPC(i, j, src, id, dir, speed)
+    case RandomRotateNPC.type:
+      return new RandomRotateNPC(i, j, src, id, dir, speed)
   }
   throw new Error(`Unknown character type: ${type}`)
 }
@@ -170,7 +184,6 @@ export abstract class Character implements IActor {
     moveType: MoveType,
   ) {
     this.#age++
-    //this.#onMoveEndCommon(field, moveType)
     this.onMoveEnd(field, moveType)
   }
 
@@ -362,7 +375,11 @@ export abstract class Character implements IActor {
     return this.#dir
   }
 
-  /** Gets the x of the world coordinates */
+  /**
+   * Gets the x of the world coordinates.
+   *
+   * This defines where the character is drawn.
+   */
   get x(): number {
     if (this.#moveType === "jump") {
       // When jumping, the character always moves vertically
@@ -378,7 +395,12 @@ export abstract class Character implements IActor {
     }
   }
 
-  /** Gets the center x of the world coordinates. This is used for setting the center of ViewScope. */
+  /**
+   * Gets the center x of the world coordinates.
+   *
+   * This is used for setting the center of ViewScope.
+   * We ignore the effect of jump and bounce to prevent screen shake.
+   */
   get centerX(): number {
     if (this.#moveType === "jump" || this.#moveType === "bounce") {
       // We don't use #d in jump and bounce state to prevent screen shake
@@ -388,7 +410,11 @@ export abstract class Character implements IActor {
     return this.x + CELL_SIZE / 2
   }
 
-  /** Gets the y of the world coordinates */
+  /**
+   * Gets the y of the world coordinates
+   *
+   * This defines where the character is drawn.
+   */
   get y(): number {
     if (this.#moveType === "jump") {
       // When jumping, the character always moves vertically
@@ -416,7 +442,12 @@ export abstract class Character implements IActor {
     this.#speed = value
   }
 
-  /** Gets the center y of the world coordinates. This is used for setting the center of ViewScope. */
+  /**
+   * Gets the center y of the world coordinates.
+   *
+   * This is used for setting the center of ViewScope.
+   * We ignore the effect of jump and bounce to prevent screen shake.
+   */
   get centerY(): number {
     if (this.#moveType === "jump" || this.#moveType === "bounce") {
       // We don't use #d in jump and bounce state to prevent screen shake
@@ -570,8 +601,9 @@ export abstract class Character implements IActor {
 }
 
 export class RandomlyTurnNPC extends Character {
-  #counter = 32
+  static type = "random" as const
 
+  #counter = 32
   override getNextMove(field: IField): Move {
     this.#counter -= 1
     if (this.#counter <= 0) {
@@ -600,10 +632,47 @@ export class RandomlyTurnNPC extends Character {
   }
 }
 
+export class RandomRotateNPC extends Character {
+  static type = "random-rotate" as const
+
+  #delay = 0
+  #counter = 0
+  #turnRight = true
+
+  constructor(
+    i: number,
+    j: number,
+    src: string,
+    id: string,
+    dir: Dir = DOWN,
+    speed: 1 | 2 | 4 | 8 | 16 = 1,
+  ) {
+    super(i, j, src, id, dir, speed)
+    const { randomInt } = seed(id)
+    this.#delay = 43 + randomInt(8)
+    this.#counter = this.#delay
+    this.#turnRight = randomInt(2) === 0
+  }
+
+  override getNextMove(_field: IField): Move {
+    this.#counter -= 1
+    if (this.#counter > 0) {
+      return
+    }
+
+    this.#counter = this.#delay
+    if (this.#turnRight) {
+      this.setDir(turnRight(this.dir))
+    } else {
+      this.setDir(turnLeft(this.dir))
+    }
+  }
+}
+
 export class RandomWalkNPC extends Character {
-  override getNextMove(
-    field: IField,
-  ): Move {
+  static type = "random-walk" as const
+
+  override getNextMove(field: IField): Move {
     const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {
       return this.canGo(d, field)
     })
@@ -618,4 +687,5 @@ export class RandomWalkNPC extends Character {
 }
 
 export class StaticNPC extends Character {
+  static type = "static" as const
 }
