@@ -2,6 +2,7 @@ import {
   type Dir,
   DOWN,
   LEFT,
+  opposite,
   RIGHT,
   turnLeft,
   turnRight,
@@ -37,6 +38,7 @@ export type NPCType =
   | typeof RandomlyTurnNPC.type
   | typeof RandomWalkNPC.type
   | typeof StaticNPC.type
+  | typeof InertialNPC.type
   | typeof RandomRotateNPC.type
 
 export function spawnCharacter(
@@ -56,7 +58,11 @@ export function spawnCharacter(
       return new StaticNPC(i, j, src, id, dir, speed)
     case RandomRotateNPC.type:
       return new RandomRotateNPC(i, j, src, id, dir, speed)
+    case InertialNPC.type:
+      return new InertialNPC(i, j, src, id, dir, speed)
   }
+
+  const _exhaustiveCheck: never = type
   throw new Error(`Unknown character type: ${type}`)
 }
 
@@ -375,6 +381,10 @@ export abstract class Character implements IActor {
     return this.#dir
   }
 
+  get moveDir(): Dir | undefined {
+    return this.#moveDir
+  }
+
   /**
    * Gets the x of the world coordinates.
    *
@@ -683,6 +693,25 @@ export class RandomWalkNPC extends Character {
       this.age.toString() + this.i.toString() + this.j.toString(),
     )
     return { type: "go", dir: choice(dirs) }
+  }
+}
+
+export class InertialNPC extends Character {
+  static type = "inertial" as const
+
+  override onMoveEnd(field: IField, moveType: MoveType): void {
+    const moveDir = this.moveDir ?? this.dir
+    if (moveType === "go") {
+      this.clearActionQueue()
+      this.enqueueAction({ type: "go", dir: moveDir })
+    } else if (moveType === "bounce") {
+      const someoneInFront =
+        field.actors.get(...this.nextGrid(moveDir)).length > 0
+      if (!someoneInFront) {
+        this.clearActionQueue()
+        this.enqueueAction({ type: "go", dir: opposite(moveDir) })
+      }
+    }
   }
 }
 

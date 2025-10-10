@@ -55,17 +55,45 @@ async function addCharactersRandomly(mapFile: string) {
       new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png", mapJson.href),
     )
 
-    for (const i of [64, 65, 66, 67, 68, 69, 70, 71]) {
+    for (const i of [...Array(8).keys()]) {
       fb.characterSpawns.add(
         new CharacterSpawnInfo(
-          i,
-          16,
+          69,
+          8 + i,
           "random-rotate",
           "../char/juni/",
           mapJson.href,
         ),
       )
     }
+
+    for (const i of [...Array(7).keys()]) {
+      fb.characterSpawns.add(
+        new CharacterSpawnInfo(
+          72,
+          9 + i,
+          "random-rotate",
+          "../char/juni/",
+          mapJson.href,
+        ),
+      )
+    }
+
+    for (const i of [...Array(8).keys()]) {
+      fb.characterSpawns.add(
+        new CharacterSpawnInfo(
+          75,
+          8 + i,
+          "inertial",
+          "../char/lena/",
+          mapJson.href,
+        ),
+      )
+    }
+
+    fb.characterSpawns.add(
+      new CharacterSpawnInfo(72, 8, "inertial", "../char/lena/", mapJson.href),
+    )
   }
 
   if (mapFile === "block_-200.0") {

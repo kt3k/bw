@@ -274,7 +274,7 @@ export class FieldActors implements IStepper, ILoader {
     return this.#idSet.has(id)
   }
 
-  get(i: number, j: number): IActor[] | undefined {
+  get(i: number, j: number): IActor[] {
     return this.#actors.filter((actor) => {
       return actor.i === i && actor.j === j
     })

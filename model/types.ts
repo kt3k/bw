@@ -46,7 +46,7 @@ export type IField = {
   actors: {
     iter(): Iterable<IActor>
     /** This method is slow */
-    get(i: number, j: number): IActor[] | undefined
+    get(i: number, j: number): IActor[]
   }
   get time(): number
 }
