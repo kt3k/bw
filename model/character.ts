@@ -1,5 +1,4 @@
 import {
-  type Dir,
   DOWN,
   LEFT,
   opposite,
@@ -10,7 +9,7 @@ import {
 } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
-import type { ActorEvent, IActor, IField, LoadOptions } from "./types.ts"
+import type { ActorEvent, Dir, IActor, IField, LoadOptions } from "./types.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",

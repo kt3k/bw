@@ -1,7 +1,9 @@
-export const UP = "up"
-export const DOWN = "down"
-export const LEFT = "left"
-export const RIGHT = "right"
+import { Dir } from "../model/types.ts"
+
+export const UP = "up" as const
+export const DOWN = "down" as const
+export const LEFT = "left" as const
+export const RIGHT = "right" as const
 export const DIRS = [
   UP,
   DOWN,
@@ -44,4 +46,3 @@ export function opposite(dir: Dir): Dir {
       return LEFT
   }
 }
-export type Dir = typeof DIRS[number]

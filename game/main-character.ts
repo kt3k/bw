@@ -1,6 +1,11 @@
-import { DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
+import { DIRS, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import { Character, Move, type MoveType } from "../model/character.ts"
+import {
+  Character,
+  Move,
+  type MoveType,
+  spawnCharacter,
+} from "../model/character.ts"
 import type { IField } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
@@ -36,6 +41,21 @@ export class MainCharacter extends Character {
       switch (item.type) {
         case "apple": {
           field.collectItem(this.i, this.j)
+          for (const dir of DIRS) {
+            if (dir === this.dir) continue
+            if (!this.canGo(dir, field)) continue
+            const actor = spawnCharacter(
+              crypto.randomUUID(),
+              "inertial",
+              this.i,
+              this.j,
+              "char/lena/",
+              { dir },
+            )
+            actor.loadAssets()
+            actor.enqueueAction({ type: "go", dir })
+            field.actors.add(actor)
+          }
 
           const count = signal.appleCount.get()
           signal.appleCount.update(count + 1)

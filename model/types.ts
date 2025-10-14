@@ -1,3 +1,4 @@
+export type Dir = "up" | "down" | "left" | "right"
 export type LoadOptions = {
   loadImage?: (url: string) => Promise<ImageBitmap>
   loadJson?: (url: string) => unknown
@@ -47,6 +48,7 @@ export type IField = {
     iter(): Iterable<IActor>
     /** This method is slow */
     get(i: number, j: number): IActor[]
+    add(actor: IActor): void
   }
   get time(): number
 }
@@ -67,4 +69,19 @@ export type IActor =
     get id(): string
     get physicalGridKey(): string
     onEvent(event: ActorEvent, field: IField): void
+    enqueueAction(...actions: Action[]): void
   }
+
+export type MoveType = "go" | "bounce" | "jump"
+
+export type Move =
+  | { type: "go"; dir: Dir }
+  | { type: "slide"; dir: Dir }
+  | { type: "jump" }
+  | undefined
+
+export type Action =
+  | Move
+  | { type: "speed"; change: "2x" | "4x" | "reset" }
+  | { type: "turn"; dir: "north" | "south" | "west" | "east" }
+  | { type: "wait"; until: number }
