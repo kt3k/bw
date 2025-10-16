@@ -521,8 +521,9 @@ export class Field implements IField {
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
     if (newCharSpawns.length > 0) {
-      console.log(`Spawning ${newCharSpawns.length} characters`)
+      let i = 0
       for (const spawn of newCharSpawns) {
+        i++
         this.#actors.add(spawnCharacter(
           spawn.id,
           spawn.type,
@@ -535,18 +536,22 @@ export class Field implements IField {
           },
         ))
       }
-      await this.#actors.loadAssets({ loadImage })
+      if (i > 0) {
+        console.log(`Spawning ${i} actors`)
+        await this.#actors.loadAssets({ loadImage })
+      }
     } else if (initialLoad) {
       await this.#actors.loadAssets({ loadImage })
     }
 
     if (newItemSpawns.length > 0) {
-      console.log(`Spawning ${newItemSpawns.length} items`)
+      let i = 0
       for (const spawn of newItemSpawns) {
         if (this.#items.get(spawn.i, spawn.j)) {
           // The space is already occupied by some other item
           continue
         }
+        i++
         this.#items.add(
           new Item(
             spawn.id,
@@ -557,18 +562,22 @@ export class Field implements IField {
           ),
         )
       }
-      await this.#items.loadAssets({ loadImage })
+      if (i > 0) {
+        console.log(`Spawning ${i} items`)
+        await this.#items.loadAssets({ loadImage })
+      }
     } else if (initialLoad) {
       await this.#items.loadAssets({ loadImage })
     }
 
     if (newObjectSpawns.length > 0) {
-      console.log(`Spawning ${newObjectSpawns.length} objects`)
+      let i = 0
       for (const spawn of newObjectSpawns) {
         if (this.#objects.get(spawn.i, spawn.j)) {
           // The space is already occupied by some other object
           continue
         }
+        i++
         this.#objects.add(
           new Object(
             spawn.id,
@@ -579,7 +588,10 @@ export class Field implements IField {
           ),
         )
       }
-      await this.#objects.loadAssets({ loadImage })
+      if (i > 0) {
+        console.log(`Spawning ${i} objects`)
+        await this.#objects.loadAssets({ loadImage })
+      }
     } else if (initialLoad) {
       await this.#objects.loadAssets({ loadImage })
     }
