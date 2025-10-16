@@ -275,9 +275,8 @@ export class FieldActors implements IStepper, ILoader {
   }
 
   get(i: number, j: number): IActor[] {
-    return this.#actors.filter((actor) => {
-      return actor.i === i && actor.j === j
-    })
+    const key = `${i}.${j}`
+    return this.#actors.filter((actor) => actor.physicalGridKey === key)
   }
 }
 

@@ -65,6 +65,8 @@ export function spawnCharacter(
   throw new Error(`Unknown character type: ${type}`)
 }
 
+// TODO: Move(move,bounce) / MovePlan(go,slide) / Action(MovePlan/effects)
+
 export type MoveType = "go" | "bounce" | "jump"
 
 export type Move =
@@ -107,6 +109,8 @@ export abstract class Character implements IActor {
   #moveType: MoveType | undefined = undefined
   /** The direction of the move */
   #moveDir: Dir | undefined = undefined
+  /** The characters currently this character is pushing */
+  #pushing: IActor[] = []
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
@@ -160,10 +164,10 @@ export abstract class Character implements IActor {
 
   /** Returns true if the character can go to the given direction */
   canGo(
-    dir: Dir,
+    dir: Dir | undefined,
     field: IField,
   ): boolean {
-    const [i, j] = this.nextGrid(dir)
+    const [i, j] = this.nextGrid(dir ?? this.dir)
     return field.canEnter(i, j)
   }
 
@@ -182,14 +186,16 @@ export abstract class Character implements IActor {
   onMoveEnd(
     _field: IField,
     _moveType: MoveType,
+    _pushed: boolean,
   ): void {}
 
   onMoveEndWrap(
     field: IField,
     moveType: MoveType,
+    pushed: boolean,
   ) {
     this.#age++
-    this.onMoveEnd(field, moveType)
+    this.onMoveEnd(field, moveType, pushed)
   }
 
   enqueueAction(...actions: Action[]) {
@@ -278,6 +284,12 @@ export abstract class Character implements IActor {
           this.#moveType = "jump"
           break
       }
+      if (this.#moveType === "bounce") {
+        const [i, j] = this.nextGrid(this.moveDir!)
+        this.#pushing = field.actors.get(i, j)
+      } else {
+        this.#pushing.length = 0
+      }
     }
 
     if (this.#waitUntil !== null && field.time >= this.#waitUntil) {
@@ -306,7 +318,7 @@ export abstract class Character implements IActor {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEndWrap(field, moveType)
+        this.onMoveEndWrap(field, moveType, this.#pushing.length > 0)
       }
     } else if (this.#moveType === "bounce") {
       this.#movePhase += this.#speed
@@ -316,8 +328,7 @@ export abstract class Character implements IActor {
         this.#d -= this.#speed
       }
       if (this.#movePhase === 8) {
-        const [i, j] = this.nextGrid(this.#moveDir!)
-        field.actors.get(i, j)?.forEach((actor) => {
+        this.#pushing.forEach((actor) => {
           actor.onEvent({ type: "bounced", dir: this.#moveDir! }, field)
         })
       } else if (this.#movePhase === 16) {
@@ -325,7 +336,7 @@ export abstract class Character implements IActor {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEndWrap(field, moveType)
+        this.onMoveEndWrap(field, moveType, this.#pushing.length > 0)
       }
     } else if (this.#moveType === "jump") {
       this.#movePhase += 1
@@ -351,7 +362,7 @@ export abstract class Character implements IActor {
         const moveType = this.#moveType
         this.#moveType = undefined
         this.#d = 0
-        this.onMoveEndWrap(field, moveType)
+        this.onMoveEndWrap(field, moveType, this.#pushing.length > 0)
       }
     } else {
       this.#idleCounter += 1
@@ -706,7 +717,7 @@ export class RandomWalkNPC extends Character {
 export class InertialNPC extends Character {
   static type = "inertial" as const
 
-  override onMoveEnd(field: IField, moveType: MoveType): void {
+  override onMoveEnd(field: IField, moveType: MoveType, pushed: boolean): void {
     const moveDir = this.moveDir ?? this.dir
     if (this.actionQueue.length > 0) {
       return
@@ -718,9 +729,7 @@ export class InertialNPC extends Character {
         break
       }
       case "bounce": {
-        const someoneInFront =
-          field.actors.get(...this.nextGrid(moveDir)).length > 0
-        if (!someoneInFront) {
+        if (!pushed) {
           this.enqueueAction({ type: "go", dir: opposite(moveDir) })
         }
       }
