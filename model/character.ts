@@ -196,8 +196,16 @@ export abstract class Character implements IActor {
     this.#actionQueue.push(...actions)
   }
 
+  unshiftAction(...actions: Action[]) {
+    this.#actionQueue.unshift(...actions)
+  }
+
   clearActionQueue() {
     this.#actionQueue = []
+  }
+
+  get actionQueue(): readonly Action[] {
+    return this.#actionQueue
   }
 
   #getNextMoveWrap(field: IField): Move {
@@ -600,7 +608,7 @@ export abstract class Character implements IActor {
         break
       }
       case "bounced": {
-        this.enqueueAction(
+        this.unshiftAction(
           { type: "slide", dir: event.dir },
         )
         break
@@ -700,15 +708,21 @@ export class InertialNPC extends Character {
 
   override onMoveEnd(field: IField, moveType: MoveType): void {
     const moveDir = this.moveDir ?? this.dir
-    if (moveType === "go") {
-      this.clearActionQueue()
-      this.enqueueAction({ type: "go", dir: moveDir })
-    } else if (moveType === "bounce") {
-      const someoneInFront =
-        field.actors.get(...this.nextGrid(moveDir)).length > 0
-      if (!someoneInFront) {
-        this.clearActionQueue()
-        this.enqueueAction({ type: "go", dir: opposite(moveDir) })
+    if (this.actionQueue.length > 0) {
+      return
+    }
+
+    switch (moveType) {
+      case "go": {
+        this.enqueueAction({ type: "go", dir: moveDir })
+        break
+      }
+      case "bounce": {
+        const someoneInFront =
+          field.actors.get(...this.nextGrid(moveDir)).length > 0
+        if (!someoneInFront) {
+          this.enqueueAction({ type: "go", dir: opposite(moveDir) })
+        }
       }
     }
   }

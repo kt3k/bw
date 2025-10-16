@@ -1,4 +1,5 @@
 import { DIRS, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
+import { loadImage } from "../util/load.ts"
 import { Input, inputQueue } from "./ui/input.ts"
 import {
   Character,
@@ -52,7 +53,7 @@ export class MainCharacter extends Character {
               "char/lena/",
               { dir },
             )
-            actor.loadAssets()
+            actor.loadAssets({ loadImage })
             actor.enqueueAction({ type: "go", dir })
             field.actors.add(actor)
           }
