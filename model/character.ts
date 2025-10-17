@@ -65,21 +65,28 @@ export function spawnCharacter(
   throw new Error(`Unknown character type: ${type}`)
 }
 
-// TODO: Move(move,bounce) / MovePlan(go,slide) / Action(MovePlan/effects)
-
-export type MoveType = "go" | "bounce" | "jump"
-
 export type Move =
-  | { type: "go"; dir: Dir }
-  | { type: "slide"; dir: Dir }
-  | { type: "jump" }
+  | { readonly type: "move"; readonly dir: Dir; phase: number; d: number }
+  | {
+    readonly type: "bounce"
+    readonly dir: Dir
+    readonly pushing: IActor[]
+    phase: number
+    d: number
+  }
+  | { readonly type: "jump"; phase: number; d: number }
+
+export type MovePlan =
+  | { readonly type: "go"; readonly dir: Dir }
+  | { readonly type: "slide"; readonly dir: Dir }
+  | { readonly type: "jump" }
   | undefined
 
 export type Action =
-  | Move
-  | { type: "speed"; change: "2x" | "4x" | "reset" }
-  | { type: "turn"; dir: "north" | "south" | "west" | "east" }
-  | { type: "wait"; until: number }
+  | MovePlan
+  | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
+  | { readonly type: "turn"; readonly dir: "north" | "south" | "west" | "east" }
+  | { readonly type: "wait"; readonly until: number }
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -93,24 +100,14 @@ export abstract class Character implements IActor {
   #j: number
   /** The id of the character */
   #id: string
-  /** The distance of the current movement */
-  #d: number = 0
   /** The speed of the move */
   #speed: 1 | 2 | 4 | 8 | 16 = 1
   /** The age after spawned in the field. Used for seeding RNG */
   #age = 0
-  /** The phase of the move */
-  #movePhase: number = 0
   /** The counter of the idle state */
   #idleCounter: number = 0
   /** The time until the next action */
   #waitUntil: number | null = null
-  /** Type of the move */
-  #moveType: MoveType | undefined = undefined
-  /** The direction of the move */
-  #moveDir: Dir | undefined = undefined
-  /** The characters currently this character is pushing */
-  #pushing: IActor[] = []
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
@@ -121,6 +118,8 @@ export abstract class Character implements IActor {
   #actionQueue: Action[] = []
   /** The timer for speed up actions */
   #speedUpTimer: ReturnType<typeof setTimeout> | undefined
+  /** The move of the character */
+  #move: Move | null = null
 
   constructor(
     i: number,
@@ -177,25 +176,23 @@ export abstract class Character implements IActor {
    * Returning the direction causes the character to move in that direction.
    * Returning undefined causes the character to stay in the current state.
    */
-  getNextMove(
+  getNextMovePlan(
     _field: IField,
-  ): Move {
+  ): MovePlan {
     return undefined
   }
 
   onMoveEnd(
     _field: IField,
-    _moveType: MoveType,
-    _pushed: boolean,
+    _move: Move,
   ): void {}
 
   onMoveEndWrap(
     field: IField,
-    moveType: MoveType,
-    pushed: boolean,
+    move: Move,
   ) {
     this.#age++
-    this.onMoveEnd(field, moveType, pushed)
+    this.onMoveEnd(field, move)
   }
 
   enqueueAction(...actions: Action[]) {
@@ -214,7 +211,7 @@ export abstract class Character implements IActor {
     return this.#actionQueue
   }
 
-  #getNextMoveWrap(field: IField): Move {
+  #getNextMovePlanWrap(field: IField): MovePlan {
     if (this.#actionQueue.length > 0) {
       const nextAction = this.#actionQueue.shift()!
       if (nextAction.type === "speed") {
@@ -238,7 +235,7 @@ export abstract class Character implements IActor {
             )
           }, 15000)
         }
-        return this.#getNextMoveWrap(field)
+        return this.#getNextMovePlanWrap(field)
       } else if (nextAction.type === "turn") {
         switch (nextAction.dir) {
           case "north":
@@ -254,115 +251,122 @@ export abstract class Character implements IActor {
             this.setDir("right")
             break
         }
-        return this.#getNextMoveWrap(field)
+        return this.#getNextMovePlanWrap(field)
       } else if (nextAction.type === "wait") {
         if (field.time < nextAction.until) {
           this.#waitUntil = nextAction.until
           return undefined
         } else {
-          return this.#getNextMoveWrap(field)
+          return this.#getNextMovePlanWrap(field)
         }
       }
       return nextAction
     }
-    return this.getNextMove(field)
+    return this.getNextMovePlan(field)
   }
 
   step(field: IField) {
-    if (this.#waitUntil === null && this.#movePhase === 0) {
-      const nextMove = this.#getNextMoveWrap(field)
-      switch (nextMove?.type) {
-        case "go":
-        case "slide":
-          if (nextMove?.type === "go") this.setDir(nextMove.dir)
-          this.#moveDir = nextMove.dir
-          this.#idleCounter = 0
-          this.#moveType = this.canGo(nextMove.dir, field) ? "go" : "bounce"
-          break
-        case "jump":
-          this.#idleCounter = 0
-          this.#moveType = "jump"
-          break
-      }
-      if (this.#moveType === "bounce") {
-        const [i, j] = this.nextGrid(this.moveDir!)
-        this.#pushing = field.actors.get(i, j)
-      } else {
-        this.#pushing.length = 0
+    if (this.#waitUntil === null && this.#move === null) {
+      const nextPlan = this.#getNextMovePlanWrap(field)
+      if (nextPlan) {
+        this.#idleCounter = 0
+
+        switch (nextPlan.type) {
+          case "go":
+          case "slide": {
+            const dir = nextPlan.dir
+            if (nextPlan?.type === "go") this.setDir(dir)
+            if (this.canGo(dir, field)) {
+              this.#move = { type: "move", dir, phase: 0, d: 0 }
+            } else {
+              const [i, j] = this.nextGrid(dir)
+              const pushing = field.actors.get(i, j)
+              this.#move = { type: "bounce", dir, pushing, phase: 0, d: 0 }
+            }
+            break
+          }
+          case "jump":
+            this.#move = { type: "jump", phase: 0, d: 0 }
+            break
+        }
       }
     }
 
+    // check waitUntil against the field time
     if (this.#waitUntil !== null && field.time >= this.#waitUntil) {
       this.#waitUntil = null
     }
 
-    if (this.#moveType === "go") {
-      this.#movePhase += this.#speed
-      this.#d += this.#speed
-      if (this.#movePhase == 16) {
-        switch (this.#moveDir) {
-          case UP:
-            this.#j -= 1
-            break
-          case DOWN:
-            this.#j += 1
-            break
-          case LEFT:
-            this.#i -= 1
-            break
-          case RIGHT:
-            this.#i += 1
-            break
+    if (this.#move) {
+      switch (this.#move.type) {
+        case "move":
+          this.#move.phase += this.#speed
+          this.#move.d += this.#speed
+          if (this.#move.phase == 16) {
+            switch (this.#move.dir) {
+              case UP:
+                this.#j -= 1
+                break
+              case DOWN:
+                this.#j += 1
+                break
+              case LEFT:
+                this.#i -= 1
+                break
+              case RIGHT:
+                this.#i += 1
+                break
+            }
+            const move = this.#move
+            this.#move = null
+            this.onMoveEndWrap(field, move)
+          }
+          break
+        case "bounce": {
+          this.#move.phase += this.#speed
+          if (this.#move.phase < 8) {
+            this.#move.d += this.#speed
+          } else {
+            this.#move.d -= this.#speed
+          }
+          if (this.#move.phase === 8) {
+            const dir = this.#move.dir
+            this.#move.pushing.forEach((actor) => {
+              actor.onEvent({ type: "bounced", dir }, field)
+            })
+          } else if (this.#move.phase === 16) {
+            const move = this.#move
+            this.#move = null
+            this.onMoveEndWrap(field, move)
+          }
+          break
         }
-        this.#movePhase = 0
-        const moveType = this.#moveType
-        this.#moveType = undefined
-        this.#d = 0
-        this.onMoveEndWrap(field, moveType, this.#pushing.length > 0)
-      }
-    } else if (this.#moveType === "bounce") {
-      this.#movePhase += this.#speed
-      if (this.#movePhase < 8) {
-        this.#d += this.#speed
-      } else {
-        this.#d -= this.#speed
-      }
-      if (this.#movePhase === 8) {
-        this.#pushing.forEach((actor) => {
-          actor.onEvent({ type: "bounced", dir: this.#moveDir! }, field)
-        })
-      } else if (this.#movePhase === 16) {
-        this.#movePhase = 0
-        const moveType = this.#moveType
-        this.#moveType = undefined
-        this.#d = 0
-        this.onMoveEndWrap(field, moveType, this.#pushing.length > 0)
-      }
-    } else if (this.#moveType === "jump") {
-      this.#movePhase += 1
-      if (this.#movePhase <= 2) {
-        this.#d += 6
-      } else if (this.#movePhase <= 4) {
-        this.#d += 4
-      } else if (this.#movePhase <= 6) {
-        this.#d += 2
-      } else if (this.#movePhase <= 8) {
-        this.#d += 1
-      } else if (this.#movePhase <= 10) {
-        this.#d -= 1
-      } else if (this.#movePhase <= 12) {
-        this.#d -= 2
-      } else if (this.#movePhase <= 14) {
-        this.#d -= 4
-      } else {
-        this.#d -= 6
-      }
-      if (this.#movePhase == 16) {
-        this.#movePhase = 0
-        const moveType = this.#moveType
-        this.#moveType = undefined
-        this.#d = 0
-        this.onMoveEndWrap(field, moveType, this.#pushing.length > 0)
+        case "jump": {
+          this.#move.phase += 1
+          if (this.#move.phase <= 2) {
+            this.#move.d += 6
+          } else if (this.#move.phase <= 4) {
+            this.#move.d += 4
+          } else if (this.#move.phase <= 6) {
+            this.#move.d += 2
+          } else if (this.#move.phase <= 8) {
+            this.#move.d += 1
+          } else if (this.#move.phase <= 10) {
+            this.#move.d -= 1
+          } else if (this.#move.phase <= 12) {
+            this.#move.d -= 2
+          } else if (this.#move.phase <= 14) {
+            this.#move.d -= 4
+          } else {
+            this.#move.d -= 6
+          }
+          if (this.#move.phase == 16) {
+            const move = this.#move
+            this.#move = null
+            this.onMoveEndWrap(field, move)
+          }
+          break
+        }
       }
     } else {
       this.#idleCounter += 1
@@ -372,8 +376,8 @@ export abstract class Character implements IActor {
   }
 
   image(): ImageBitmap {
-    if (this.#moveType !== undefined) {
-      if (this.#movePhase < 8) {
+    if (this.#move) {
+      if (this.#move.phase < 8) {
         return this.getImage(this.#dir, 0)
       } else {
         // active state
@@ -399,25 +403,21 @@ export abstract class Character implements IActor {
     return this.#dir
   }
 
-  get moveDir(): Dir | undefined {
-    return this.#moveDir
-  }
-
   /**
    * Gets the x of the world coordinates.
    *
    * This defines where the character is drawn.
    */
   get x(): number {
-    if (this.#moveType === "jump") {
+    if (this.#move === null) {
+      return this.#i * CELL_SIZE
+    } else if (this.#move.type === "jump") {
       // When jumping, the character always moves vertically
       return this.#i * CELL_SIZE
-    }
-
-    if (this.#moveDir === LEFT) {
-      return this.#i * CELL_SIZE - this.#d
-    } else if (this.#moveDir === RIGHT) {
-      return this.#i * CELL_SIZE + this.#d
+    } else if (this.#move.dir === LEFT) {
+      return this.#i * CELL_SIZE - this.#move.d
+    } else if (this.#move.dir === RIGHT) {
+      return this.#i * CELL_SIZE + this.#move.d
     } else {
       return this.#i * CELL_SIZE
     }
@@ -430,7 +430,9 @@ export abstract class Character implements IActor {
    * We ignore the effect of jump and bounce to prevent screen shake.
    */
   get centerX(): number {
-    if (this.#moveType === "jump" || this.#moveType === "bounce") {
+    if (
+      this.#move && (this.#move.type === "jump" || this.#move.type === "bounce")
+    ) {
       // We don't use #d in jump and bounce state to prevent screen shake
       return this.#i * CELL_SIZE + CELL_SIZE / 2
     }
@@ -444,18 +446,35 @@ export abstract class Character implements IActor {
    * This defines where the character is drawn.
    */
   get y(): number {
-    if (this.#moveType === "jump") {
+    if (this.#move === null) {
+      return this.#j * CELL_SIZE
+    } else if (this.#move.type === "jump") {
       // When jumping, the character always moves vertically
-      return this.#j * CELL_SIZE - this.#d
-    }
-
-    if (this.#moveDir === UP) {
-      return this.#j * CELL_SIZE - this.#d
-    } else if (this.#moveDir === DOWN) {
-      return this.#j * CELL_SIZE + this.#d
+      return this.#j * CELL_SIZE - this.#move.d
+    } else if (this.#move.dir === UP) {
+      return this.#j * CELL_SIZE - this.#move.d
+    } else if (this.#move.dir === DOWN) {
+      return this.#j * CELL_SIZE + this.#move.d
     } else {
       return this.#j * CELL_SIZE
     }
+  }
+
+  /**
+   * Gets the center y of the world coordinates.
+   *
+   * This is used for setting the center of ViewScope.
+   * We ignore the effect of jump and bounce to prevent screen shake.
+   */
+  get centerY(): number {
+    if (
+      this.#move && (this.#move.type === "jump" || this.#move.type === "bounce")
+    ) {
+      // We don't use #d in jump and bounce state to prevent screen shake
+      return this.#j * CELL_SIZE + CELL_SIZE / 2
+    }
+
+    return this.y + CELL_SIZE / 2
   }
 
   get h(): number {
@@ -468,21 +487,6 @@ export abstract class Character implements IActor {
 
   set speed(value: 1 | 2 | 4 | 8 | 16) {
     this.#speed = value
-  }
-
-  /**
-   * Gets the center y of the world coordinates.
-   *
-   * This is used for setting the center of ViewScope.
-   * We ignore the effect of jump and bounce to prevent screen shake.
-   */
-  get centerY(): number {
-    if (this.#moveType === "jump" || this.#moveType === "bounce") {
-      // We don't use #d in jump and bounce state to prevent screen shake
-      return this.#j * CELL_SIZE + CELL_SIZE / 2
-    }
-
-    return this.y + CELL_SIZE / 2
   }
 
   /** Loads the assets and store ImageBitmaps in #assets. */
@@ -555,10 +559,10 @@ export abstract class Character implements IActor {
    * when the character is moving.
    */
   get #physicalI(): number {
-    if (this.#moveType === "go") {
-      if (this.#moveDir === LEFT) {
+    if (this.#move && this.#move.type === "move") {
+      if (this.#move.dir === LEFT) {
         return this.#i - 1
-      } else if (this.#moveDir === RIGHT) {
+      } else if (this.#move.dir === RIGHT) {
         return this.#i + 1
       }
     }
@@ -566,10 +570,10 @@ export abstract class Character implements IActor {
   }
 
   get #physicalJ(): number {
-    if (this.#moveType === "go") {
-      if (this.#moveDir === UP) {
+    if (this.#move && this.#move.type === "move") {
+      if (this.#move.dir === UP) {
         return this.#j - 1
-      } else if (this.#moveDir === DOWN) {
+      } else if (this.#move.dir === DOWN) {
         return this.#j + 1
       }
     }
@@ -632,7 +636,7 @@ export class RandomlyTurnNPC extends Character {
   static type = "random" as const
 
   #counter = 32
-  override getNextMove(field: IField): Move {
+  override getNextMovePlan(field: IField): MovePlan {
     this.#counter -= 1
     if (this.#counter <= 0) {
       const { randomInt, choice } = seed(this.age.toString())
@@ -682,7 +686,7 @@ export class RandomRotateNPC extends Character {
     this.#turnRight = randomInt(2) === 0
   }
 
-  override getNextMove(_field: IField): Move {
+  override getNextMovePlan(_field: IField): MovePlan {
     this.#counter -= 1
     if (this.#counter > 0) {
       return
@@ -700,7 +704,7 @@ export class RandomRotateNPC extends Character {
 export class RandomWalkNPC extends Character {
   static type = "random-walk" as const
 
-  override getNextMove(field: IField): Move {
+  override getNextMovePlan(field: IField): MovePlan {
     const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {
       return this.canGo(d, field)
     })
@@ -717,20 +721,21 @@ export class RandomWalkNPC extends Character {
 export class InertialNPC extends Character {
   static type = "inertial" as const
 
-  override onMoveEnd(field: IField, moveType: MoveType, pushed: boolean): void {
-    const moveDir = this.moveDir ?? this.dir
+  override onMoveEnd(_field: IField, move: Move): void {
     if (this.actionQueue.length > 0) {
       return
     }
 
-    switch (moveType) {
-      case "go": {
-        this.enqueueAction({ type: "go", dir: moveDir })
+    switch (move.type) {
+      case "move": {
+        this.enqueueAction({ type: "go", dir: move.dir })
         break
       }
       case "bounce": {
-        if (!pushed) {
-          this.enqueueAction({ type: "go", dir: opposite(moveDir) })
+        // The character was bounced to the wall.
+        // In that case, the character go back to the opposite direction
+        if (move.pushing.length === 0) {
+          this.enqueueAction({ type: "go", dir: opposite(move.dir) })
         }
       }
     }

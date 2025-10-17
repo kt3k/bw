@@ -3,8 +3,8 @@ import { loadImage } from "../util/load.ts"
 import { Input, inputQueue } from "./ui/input.ts"
 import {
   Character,
-  Move,
-  type MoveType,
+  type Move,
+  MovePlan,
   spawnCharacter,
 } from "../model/character.ts"
 import type { IField } from "../model/types.ts"
@@ -12,8 +12,8 @@ import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 
 export class MainCharacter extends Character {
-  #lastMoveTypes: MoveType[] = []
-  override getNextMove(_field: IField): Move {
+  #lastMoveTypes: string[] = []
+  override getNextMovePlan(_field: IField): MovePlan {
     if (Input.up) {
       return { type: "go", dir: UP }
     } else if (Input.down) {
@@ -36,7 +36,7 @@ export class MainCharacter extends Character {
     return undefined
   }
 
-  override onMoveEnd(field: IField, moveType: MoveType): void {
+  override onMoveEnd(field: IField, move: Move): void {
     const item = field.peekItem(this.i, this.j)
     if (item) {
       switch (item.type) {
@@ -101,7 +101,7 @@ export class MainCharacter extends Character {
       }
     }
 
-    this.#lastMoveTypes.push(moveType)
+    this.#lastMoveTypes.push(move.type)
     if (this.#lastMoveTypes.length > 3) {
       this.#lastMoveTypes.shift()
     }

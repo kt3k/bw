@@ -1,9 +1,8 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
-import type { Dir } from "../util/dir.ts"
 import { floorN, modulo } from "../util/math.ts"
-import type { IBox } from "./types.ts"
+import type { Dir, IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
 import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
 
