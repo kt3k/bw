@@ -59,6 +59,7 @@ export type IStepper = { step(field: IField): void }
 export type ActorEvent = { type: "green-apple-collected" } | {
   type: "bounced"
   dir: "up" | "down" | "left" | "right"
+  peakAt: number
 }
 
 /** The interface represents a character */

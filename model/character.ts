@@ -71,6 +71,7 @@ export type Move =
     readonly type: "bounce"
     readonly dir: Dir
     readonly pushing: IActor[]
+    readonly peakAt: number
     phase: number
     d: number
   }
@@ -281,7 +282,14 @@ export abstract class Character implements IActor {
             } else {
               const [i, j] = this.nextGrid(dir)
               const pushing = field.actors.get(i, j)
-              this.#move = { type: "bounce", dir, pushing, phase: 0, d: 0 }
+              this.#move = {
+                type: "bounce",
+                dir,
+                pushing,
+                peakAt: 7,
+                phase: 0,
+                d: 0,
+              }
             }
             break
           }
@@ -329,10 +337,14 @@ export abstract class Character implements IActor {
           } else {
             this.#move.d -= this.#speed
           }
-          if (this.#move.phase === 8) {
+          if (this.#move.phase === 1) {
             const dir = this.#move.dir
+            const peakAt = this.#move.peakAt
             this.#move.pushing.forEach((actor) => {
-              actor.onEvent({ type: "bounced", dir }, field)
+              actor.onEvent(
+                { type: "bounced", dir, peakAt },
+                field,
+              )
             })
           } else if (this.#move.phase === 16) {
             const move = this.#move
@@ -623,9 +635,12 @@ export abstract class Character implements IActor {
         break
       }
       case "bounced": {
-        this.unshiftAction(
-          { type: "slide", dir: event.dir },
-        )
+        if (this.#move) {
+          this.unshiftAction({ type: "slide", dir: event.dir })
+        } else {
+          this.enqueueAction({ type: "wait", until: field.time + event.peakAt })
+          this.enqueueAction({ type: "slide", dir: event.dir })
+        }
         break
       }
     }
