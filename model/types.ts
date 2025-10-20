@@ -51,6 +51,7 @@ export type IField = {
     add(actor: IActor): void
   }
   get time(): number
+  colorCell(i: number, j: number, color: string): void
 }
 
 /** The implementor of 'step' function */

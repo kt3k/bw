@@ -747,9 +747,9 @@ export class InertialNPC extends Character {
         break
       }
       case "bounce": {
-        // The character was bounced to the wall.
-        // In that case, the character go back to the opposite direction
         if (move.pushing.length === 0) {
+          // The character was bounced to the wall.
+          // In that case, the character go back to the opposite direction
           this.enqueueAction({ type: "go", dir: opposite(move.dir) })
         }
       }

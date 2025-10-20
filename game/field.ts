@@ -399,6 +399,10 @@ export class Field implements IField {
     return this.#time
   }
 
+  colorCell(i: number, j: number, color: string): void {
+    this.#getBlock(i, j).drawCellColor(i, j, color)
+  }
+
   async #addBlock(block: FieldBlock) {
     console.log("adding district i", block.i, "j", block.j, "id", block.id)
     this.#blocks[block.id] = block

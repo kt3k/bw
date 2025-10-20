@@ -389,6 +389,7 @@ export class FieldBlock {
   #field: string[]
   #map: BlockMap
   #canvas: HTMLCanvasElement | undefined
+  #canvasWrapper: CanvasWrapper | undefined
   #assetsReady = false
   #chunks: Record<string, boolean | "loading"> = {}
 
@@ -461,6 +462,13 @@ export class FieldBlock {
     return this.#canvas
   }
 
+  get canvasWrapper(): CanvasWrapper {
+    if (!this.#canvasWrapper) {
+      this.#canvasWrapper = new CanvasWrapper(this.canvas)
+    }
+    return this.#canvasWrapper
+  }
+
   async loadAssets(options: LoadOptions) {
     await this.loadCellImages(options)
     this.#assetsReady = true
@@ -501,14 +509,24 @@ export class FieldBlock {
     }
   }
 
-  drawCell(layer: CanvasWrapper, i: number, j: number) {
+  drawCellColor(i: number, j: number, color: string) {
+    this.canvasWrapper.drawRect(
+      i * CELL_SIZE,
+      j * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE,
+      color,
+    )
+  }
+
+  drawCell(wrapper: CanvasWrapper, i: number, j: number) {
     const cell = this.getCell(i, j)
     if (cell.src) {
       for (const src of cell.src) {
-        layer.drawImage(this.#imgMap[src], i * CELL_SIZE, j * CELL_SIZE)
+        wrapper.drawImage(this.#imgMap[src], i * CELL_SIZE, j * CELL_SIZE)
       }
     } else {
-      layer.drawRect(
+      wrapper.drawRect(
         i * CELL_SIZE,
         j * CELL_SIZE,
         CELL_SIZE,
@@ -525,7 +543,7 @@ export class FieldBlock {
     } else {
       color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
     }
-    layer.drawRect(
+    wrapper.drawRect(
       i * CELL_SIZE,
       j * CELL_SIZE,
       CELL_SIZE,
@@ -563,8 +581,8 @@ export class FieldBlock {
       CELL_SIZE * BLOCK_SIZE,
       CELL_SIZE * BLOCK_SIZE,
     )
-    const layer = new CanvasWrapper(canvas)
-    this.#renderRange(layer, i, j, gridWidth, gridHeight)
+    const wrapper = new CanvasWrapper(canvas)
+    this.#renderRange(wrapper, i, j, gridWidth, gridHeight)
     return canvas.getContext("2d")!.getImageData(
       CELL_SIZE * i,
       CELL_SIZE * j,

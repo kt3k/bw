@@ -10,6 +10,7 @@ import {
 import type { IField } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
+import { seed } from "../util/random.ts"
 
 export class MainCharacter extends Character {
   #lastMoveTypes: string[] = []
@@ -56,6 +57,14 @@ export class MainCharacter extends Character {
             actor.loadAssets({ loadImage })
             actor.enqueueAction({ type: "go", dir })
             field.actors.add(actor)
+          }
+
+          for (const dir of DIRS) {
+            const [i, j] = this.nextGrid(dir)
+            if (!field.canEnter(i, j)) continue
+            const { rng } = seed(i + " " + j)
+            console.log(rng())
+            field.colorCell(i, j, `rgba(255, 0, 0, ${rng() * 0.04 + 0.08})`)
           }
 
           const count = signal.appleCount.get()
