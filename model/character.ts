@@ -149,16 +149,16 @@ export abstract class Character implements IActor {
   }
 
   /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
-  nextGrid(dir: Dir): [i: number, j: number] {
+  nextGrid(dir: Dir, distance = 1): [i: number, j: number] {
     switch (dir) {
       case UP:
-        return [this.#i, this.#j - 1]
+        return [this.#i, this.#j - distance]
       case DOWN:
-        return [this.#i, this.#j + 1]
+        return [this.#i, this.#j + distance]
       case LEFT:
-        return [this.#i - 1, this.#j]
+        return [this.#i - distance, this.#j]
       case RIGHT:
-        return [this.#i + 1, this.#j]
+        return [this.#i + distance, this.#j]
     }
   }
 
@@ -331,13 +331,7 @@ export abstract class Character implements IActor {
           }
           break
         case "bounce": {
-          this.#move.phase += this.#speed
-          if (this.#move.phase < 8) {
-            this.#move.d += this.#speed
-          } else {
-            this.#move.d -= this.#speed
-          }
-          if (this.#move.phase === 1) {
+          if (this.#move.phase === 0) {
             const dir = this.#move.dir
             const peakAt = this.#move.peakAt
             this.#move.pushing.forEach((actor) => {
@@ -346,7 +340,15 @@ export abstract class Character implements IActor {
                 field,
               )
             })
-          } else if (this.#move.phase === 16) {
+          }
+
+          this.#move.phase += this.#speed
+          if (this.#move.phase < 8) {
+            this.#move.d += this.#speed
+          } else {
+            this.#move.d -= this.#speed
+          }
+          if (this.#move.phase === 16) {
             const move = this.#move
             this.#move = null
             this.onMoveEndWrap(field, move)

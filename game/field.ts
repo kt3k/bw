@@ -446,6 +446,9 @@ export class Field implements IField {
     return this.#getCell(i, j).canEnter && !this.#actors.checkCollision(i, j) &&
       this.#objects.canEnter(i, j)
   }
+  canEnterStatic(i: number, j: number): boolean {
+    return this.#getCell(i, j).canEnter && this.#objects.canEnter(i, j)
+  }
   peekItem(i: number, j: number): IItem | undefined {
     return this.#items.get(i, j)
   }

@@ -12,6 +12,23 @@ import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import { seed } from "../util/random.ts"
 
+function colorCell(
+  i: number,
+  j: number,
+  hue: number,
+  sat: number,
+  light: number,
+  alpha: number,
+  field: IField,
+  rng: () => number,
+): void {
+  field.colorCell(
+    i,
+    j,
+    `hsla(${hue}, ${sat}%, ${light}%, ${alpha + rng() * 0.1})`,
+  )
+}
+
 export class MainCharacter extends Character {
   #lastMoveTypes: string[] = []
   override getNextMovePlan(_field: IField): MovePlan {
@@ -59,12 +76,22 @@ export class MainCharacter extends Character {
             field.actors.add(actor)
           }
 
+          const { rng } = seed(this.i + " " + this.j)
+
+          const hue = 333.3
+          const sat = 59.4
+          const light = 38.6
+
+          colorCell(this.i, this.j, hue, sat, light, 0.40, field, rng)
+
           for (const dir of DIRS) {
-            const [i, j] = this.nextGrid(dir)
-            if (!field.canEnter(i, j)) continue
-            const { rng } = seed(i + " " + j)
-            console.log(rng())
-            field.colorCell(i, j, `rgba(255, 0, 0, ${rng() * 0.04 + 0.08})`)
+            for (let dist = 1; dist <= 3; dist++) {
+              const [i, j] = this.nextGrid(dir, dist)
+              if (!field.canEnterStatic(i, j)) break
+              setTimeout(() => {
+                colorCell(i, j, hue, sat, light, 0.24 - dist * 0.06, field, rng)
+              }, dist * 32)
+            }
           }
 
           const count = signal.appleCount.get()

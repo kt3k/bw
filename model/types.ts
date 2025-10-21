@@ -41,7 +41,10 @@ export type IObject = IDrawable & {
 }
 
 export type IField = {
+  /** can enter the cell considering dynamic objects */
   canEnter(i: number, j: number): boolean
+  /** can enter the cell without considering dynamic objects */
+  canEnterStatic(i: number, j: number): boolean
   peekItem(i: number, j: number): IItem | undefined
   collectItem(i: number, j: number): void
   actors: {
