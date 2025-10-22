@@ -160,14 +160,15 @@ export abstract class Character implements IActor {
       case RIGHT:
         return [this.#i + distance, this.#j]
     }
+    throw new Error(`Unknown direction: ${dir}`)
   }
 
   /** Returns true if the character can go to the given direction */
   canGo(
-    dir: Dir | undefined,
+    dir: Dir,
     field: IField,
   ): boolean {
-    const [i, j] = this.nextGrid(dir ?? this.dir)
+    const [i, j] = this.nextGrid(dir)
     return field.canEnter(i, j)
   }
 

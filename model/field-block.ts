@@ -8,11 +8,16 @@ import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
 
 /** Converts the world grid coordinates to local chunk coordinates */
 function g2c(i: number, j: number): [number, number] {
-  const relI = modulo(i, BLOCK_SIZE)
-  const relJ = modulo(j, BLOCK_SIZE)
-  const k = floorN(relI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
-  const l = floorN(relJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+  const [localI, localJ] = g2l(i, j)
+  const k = floorN(localI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
+  const l = floorN(localJ, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
   return [k, l]
+}
+
+function g2l(i: number, j: number): [number, number] {
+  const localI = modulo(i, BLOCK_SIZE)
+  const localJ = modulo(j, BLOCK_SIZE)
+  return [localI, localJ]
 }
 
 /**
@@ -510,9 +515,10 @@ export class FieldBlock {
   }
 
   drawCellColor(i: number, j: number, color: string) {
+    const [localI, localJ] = g2l(i, j)
     this.canvasWrapper.drawRect(
-      i * CELL_SIZE,
-      j * CELL_SIZE,
+      localI * CELL_SIZE,
+      localJ * CELL_SIZE,
       CELL_SIZE,
       CELL_SIZE,
       color,
@@ -520,23 +526,26 @@ export class FieldBlock {
   }
 
   drawCell(wrapper: CanvasWrapper, i: number, j: number) {
+    const [localI, localJ] = g2l(i, j)
     const cell = this.getCell(i, j)
     if (cell.src) {
       for (const src of cell.src) {
-        wrapper.drawImage(this.#imgMap[src], i * CELL_SIZE, j * CELL_SIZE)
+        wrapper.drawImage(
+          this.#imgMap[src],
+          localI * CELL_SIZE,
+          localJ * CELL_SIZE,
+        )
       }
     } else {
       wrapper.drawRect(
-        i * CELL_SIZE,
-        j * CELL_SIZE,
+        localI * CELL_SIZE,
+        localJ * CELL_SIZE,
         CELL_SIZE,
         CELL_SIZE,
         cell.color || "black",
       )
     }
-    const worldI = this.#i + i
-    const worldJ = this.#j + j
-    const { rng } = seed(`${worldI}.${worldJ}`)
+    const { rng } = seed(`${i}.${j}`)
     let color: string
     if (cell.canEnter) {
       color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
@@ -544,8 +553,8 @@ export class FieldBlock {
       color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
     }
     wrapper.drawRect(
-      i * CELL_SIZE,
-      j * CELL_SIZE,
+      localI * CELL_SIZE,
+      localJ * CELL_SIZE,
       CELL_SIZE,
       CELL_SIZE,
       color,
@@ -654,8 +663,8 @@ export class FieldBlock {
    * @returns the cell at the given world grid coordinates
    */
   getCell(i: number, j: number): FieldCell {
-    return this
-      .#cellMap[this.#field[modulo(j, BLOCK_SIZE)][modulo(i, BLOCK_SIZE)]]
+    const [localI, localJ] = g2l(i, j)
+    return this.#cellMap[this.#field[localJ][localI]]
   }
   /** Updates a cell at the given coordinates with the given cell name.
    * This is for editor use.
