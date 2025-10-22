@@ -231,10 +231,20 @@ export class FieldActors implements IStepper, ILoader {
   }
 
   step(field: IField) {
+    let needsSort = false
     for (const actor of this.#actors) {
       this.#coordCountMap.decrement(actor.physicalGridKey)
+      const j = actor.j
       actor.step(field)
       this.#coordCountMap.increment(actor.physicalGridKey)
+      if (actor.j !== j) {
+        needsSort = true
+      }
+    }
+    // Sort actors by j-coordinate to ensure correct rendering order
+    // FIXME(kt3k): This is a naive implementation. Optimize this later.
+    if (needsSort) {
+      this.#actors.sort((a, b) => a.j - b.j)
     }
   }
 
