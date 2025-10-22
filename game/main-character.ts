@@ -64,7 +64,7 @@ export class MainCharacter extends Character {
             if (dir === this.dir) continue
             if (!this.canGo(dir, field)) continue
             const actor = spawnCharacter(
-              crypto.randomUUID(),
+              `${this.i}.${this.j}.inertial.${crypto.randomUUID()}`,
               "inertial",
               this.i,
               this.j,

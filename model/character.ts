@@ -1,4 +1,5 @@
 import {
+  DIRS,
   DOWN,
   LEFT,
   opposite,
@@ -723,8 +724,9 @@ export class RandomWalkNPC extends Character {
   static type = "random-walk" as const
 
   override getNextMovePlan(field: IField): MovePlan {
-    const dirs = ([UP, DOWN, LEFT, RIGHT] as const).filter((d) => {
-      return this.canGo(d, field)
+    const dirs = DIRS.filter((d) => {
+      const [i, j] = this.nextGrid(d)
+      return field.canEnterStatic(i, j)
     })
     if (dirs.length === 0) {
       return undefined
