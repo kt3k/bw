@@ -1,13 +1,8 @@
 import { DIRS, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { loadImage } from "../util/load.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import {
-  Character,
-  type Move,
-  MovePlan,
-  spawnCharacter,
-} from "../model/character.ts"
-import type { IField } from "../model/types.ts"
+import { Character, spawnCharacter } from "../model/character.ts"
+import type { IField, Move, MovePlan } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import { seed } from "../util/random.ts"

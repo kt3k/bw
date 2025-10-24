@@ -19,7 +19,7 @@ export type IBox = {
   get h(): number
 }
 
-export type IDrawable = IBox & ILoader & {
+export type IEntity = IBox & ILoader & {
   i: number
   j: number
   image(): ImageBitmap
@@ -27,14 +27,14 @@ export type IDrawable = IBox & ILoader & {
 
 export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
 
-export type IItem = IDrawable & {
+export type IItem = IEntity & {
   id: string | null
   type: ItemType
 }
 
 export type ObjectType = "stool" | "table"
 
-export type IObject = IDrawable & {
+export type IObject = IEntity & {
   id: string | null
   type: ObjectType
   canEnter: boolean
@@ -60,33 +60,47 @@ export type IField = {
 /** The implementor of 'step' function */
 export type IStepper = { step(field: IField): void }
 
-export type ActorEvent = { type: "green-apple-collected" } | {
+export type FieldEvent = { type: "green-apple-collected" } | {
   type: "bounced"
   dir: "up" | "down" | "left" | "right"
   peakAt: number
 }
 
+export type FieldEventTarget = {
+  onEvent(event: FieldEvent, field: IField): void
+}
+
 /** The interface represents a character */
 export type IActor =
-  & IDrawable
+  & IEntity
   & IStepper
+  & FieldEventTarget
   & {
     get id(): string
     get physicalGridKey(): string
-    onEvent(event: ActorEvent, field: IField): void
     enqueueAction(...actions: Action[]): void
   }
 
-export type MoveType = "go" | "bounce" | "jump"
-
 export type Move =
-  | { type: "go"; dir: Dir }
-  | { type: "slide"; dir: Dir }
-  | { type: "jump" }
+  | { readonly type: "move"; readonly dir: Dir; phase: number; d: number }
+  | {
+    readonly type: "bounce"
+    readonly dir: Dir
+    readonly pushing: FieldEventTarget[]
+    readonly peakAt: number
+    phase: number
+    d: number
+  }
+  | { readonly type: "jump"; phase: number; d: number }
+
+export type MovePlan =
+  | { readonly type: "go"; readonly dir: Dir }
+  | { readonly type: "slide"; readonly dir: Dir }
+  | { readonly type: "jump" }
   | undefined
 
 export type Action =
-  | Move
-  | { type: "speed"; change: "2x" | "4x" | "reset" }
-  | { type: "turn"; dir: "north" | "south" | "west" | "east" }
-  | { type: "wait"; until: number }
+  | MovePlan
+  | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
+  | { readonly type: "turn"; readonly dir: "north" | "south" | "west" | "east" }
+  | { readonly type: "wait"; readonly until: number }

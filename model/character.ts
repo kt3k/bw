@@ -10,7 +10,16 @@ import {
 } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
-import type { ActorEvent, Dir, IActor, IField, LoadOptions } from "./types.ts"
+import type {
+  Action,
+  Dir,
+  FieldEvent,
+  IActor,
+  IField,
+  LoadOptions,
+  Move,
+  MovePlan,
+} from "./types.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -65,30 +74,6 @@ export function spawnCharacter(
   const _exhaustiveCheck: never = type
   throw new Error(`Unknown character type: ${type}`)
 }
-
-export type Move =
-  | { readonly type: "move"; readonly dir: Dir; phase: number; d: number }
-  | {
-    readonly type: "bounce"
-    readonly dir: Dir
-    readonly pushing: IActor[]
-    readonly peakAt: number
-    phase: number
-    d: number
-  }
-  | { readonly type: "jump"; phase: number; d: number }
-
-export type MovePlan =
-  | { readonly type: "go"; readonly dir: Dir }
-  | { readonly type: "slide"; readonly dir: Dir }
-  | { readonly type: "jump" }
-  | undefined
-
-export type Action =
-  | MovePlan
-  | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
-  | { readonly type: "turn"; readonly dir: "north" | "south" | "west" | "east" }
-  | { readonly type: "wait"; readonly until: number }
 
 /** The abstract character class
  * The parent class of MainCharacter and NPC.
@@ -596,7 +581,7 @@ export abstract class Character implements IActor {
     return this.#j
   }
 
-  onEvent(event: ActorEvent, field: IField): void {
+  onEvent(event: FieldEvent, field: IField): void {
     switch (event.type) {
       case "green-apple-collected": {
         this.enqueueAction(
