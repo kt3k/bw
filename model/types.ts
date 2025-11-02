@@ -81,18 +81,6 @@ export type IActor =
     enqueueAction(...actions: Action[]): void
   }
 
-export type Move =
-  | { readonly type: "move"; readonly dir: Dir; phase: number; d: number }
-  | {
-    readonly type: "bounce"
-    readonly dir: Dir
-    readonly pushing: FieldEventTarget[]
-    readonly peakAt: number
-    phase: number
-    d: number
-  }
-  | { readonly type: "jump"; phase: number; d: number }
-
 export type MovePlan =
   | { readonly type: "go"; readonly dir: Dir }
   | { readonly type: "slide"; readonly dir: Dir }

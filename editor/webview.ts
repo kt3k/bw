@@ -483,8 +483,6 @@ function getCoordinatesFromMouseEvent(
   return { i, j }
 }
 
-const html = String.raw
-
 function FieldObjectSpawnsCanvas(
   { el, on, subscribe }: Context<HTMLCanvasElement>,
 ) {
