@@ -206,21 +206,21 @@ class CharacterJumpMove implements MoveBase {
   step() {
     this.#phase += 1
     if (this.#phase <= 2) {
-      this.#y += 6
-    } else if (this.#phase <= 4) {
-      this.#y += 4
-    } else if (this.#phase <= 6) {
-      this.#y += 2
-    } else if (this.#phase <= 8) {
-      this.#y += 1
-    } else if (this.#phase <= 10) {
-      this.#y -= 1
-    } else if (this.#phase <= 12) {
-      this.#y -= 2
-    } else if (this.#phase <= 14) {
-      this.#y -= 4
-    } else {
       this.#y -= 6
+    } else if (this.#phase <= 4) {
+      this.#y -= 4
+    } else if (this.#phase <= 6) {
+      this.#y -= 2
+    } else if (this.#phase <= 8) {
+      this.#y -= 1
+    } else if (this.#phase <= 10) {
+      this.#y += 1
+    } else if (this.#phase <= 12) {
+      this.#y += 2
+    } else if (this.#phase <= 14) {
+      this.#y += 4
+    } else {
+      this.#y += 6
     }
   }
 
