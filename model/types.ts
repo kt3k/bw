@@ -90,5 +90,15 @@ export type MovePlan =
 export type Action =
   | MovePlan
   | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
-  | { readonly type: "turn"; readonly dir: "north" | "south" | "west" | "east" }
+  | {
+    readonly type: "turn"
+    readonly dir:
+      | "north"
+      | "south"
+      | "west"
+      | "east"
+      | "left"
+      | "right"
+      | "back"
+  }
   | { readonly type: "wait"; readonly until: number }

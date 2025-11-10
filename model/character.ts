@@ -383,7 +383,8 @@ export abstract class Character implements IActor {
         }
         return this.#getNextMovePlanWrap(field)
       } else if (nextAction.type === "turn") {
-        switch (nextAction.dir) {
+        const dir = nextAction.dir
+        switch (dir) {
           case "north":
             this.setDir("up")
             break
@@ -396,6 +397,17 @@ export abstract class Character implements IActor {
           case "east":
             this.setDir("right")
             break
+          case "left":
+            this.setDir(turnLeft(this.dir))
+            break
+          case "right":
+            this.setDir(turnRight(this.dir))
+            break
+          case "back":
+            this.setDir(opposite(this.dir))
+            break
+          default:
+            dir satisfies never
         }
         return this.#getNextMovePlanWrap(field)
       } else if (nextAction.type === "wait") {
@@ -705,7 +717,7 @@ export class RandomlyTurnNPC extends Character {
   override getNextMovePlan(field: IField): MovePlan {
     this.#counter -= 1
     if (this.#counter <= 0) {
-      const { randomInt, choice } = seed(this.age.toString())
+      const { randomInt, choice } = seed(field.time.toString())
       this.#counter = randomInt(8) + 4
       // If the character can keep going in the current direction,
       // it will keep going with 96% probability.
@@ -718,12 +730,17 @@ export class RandomlyTurnNPC extends Character {
       if (randomInt(2) === 0) {
         return { type: "jump" }
       }
-      const nextCandidate = [UP, DOWN, LEFT, RIGHT] as Dir[]
+      const nextCandidate = DIRS.filter((d) => this.canGo(d, field))
+      if (nextCandidate.length === 0) {
+        this.enqueueAction({
+          type: "turn",
+          dir: choice(["left", "right"]),
+        })
+        return undefined
+      }
       return {
         type: "go",
-        dir: choice(nextCandidate.filter((d) => {
-          return this.canGo(d, field)
-        })),
+        dir: choice(nextCandidate),
       }
     }
     return undefined

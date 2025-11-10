@@ -11,6 +11,9 @@ export function seed(seed: string) {
   }
 
   const choice = <T>(arr: T[]) => {
+    if (arr.length === 0) {
+      throw new Error("Cannot choose from an empty array")
+    }
     return arr[randomInt(arr.length)]
   }
 
