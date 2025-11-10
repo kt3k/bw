@@ -102,3 +102,11 @@ export type Action =
       | "back"
   }
   | { readonly type: "wait"; readonly until: number }
+  | {
+    readonly type: "splash"
+    readonly hue: number
+    readonly sat: number
+    readonly light: number
+    readonly alpha: number
+    readonly radius: number
+  }

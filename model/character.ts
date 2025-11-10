@@ -2,12 +2,14 @@ import {
   DIRS,
   DOWN,
   LEFT,
+  nextGrid,
   opposite,
   RIGHT,
   turnLeft,
   turnRight,
   UP,
 } from "../util/dir.ts"
+import { splashColor } from "../game/field.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
 import type {
@@ -294,17 +296,7 @@ export abstract class Character implements IActor {
 
   /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
   nextGrid(dir: Dir, distance = 1): [i: number, j: number] {
-    switch (dir) {
-      case UP:
-        return [this.#i, this.#j - distance]
-      case DOWN:
-        return [this.#i, this.#j + distance]
-      case LEFT:
-        return [this.#i - distance, this.#j]
-      case RIGHT:
-        return [this.#i + distance, this.#j]
-    }
-    throw new Error(`Unknown direction: ${dir}`)
+    return nextGrid(this.#i, this.#j, dir, distance)
   }
 
   /** Returns true if the character can go to the given direction */
@@ -417,6 +409,21 @@ export abstract class Character implements IActor {
         } else {
           return this.#getNextMovePlanWrap(field)
         }
+      } else if (nextAction.type === "splash") {
+        const { i, j } = this
+        const { rng } = seed(`${i}${j}`)
+        splashColor(
+          field,
+          i,
+          j,
+          nextAction.hue,
+          nextAction.sat,
+          nextAction.light,
+          nextAction.alpha,
+          nextAction.radius,
+          rng,
+        )
+        return this.#getNextMovePlanWrap(field)
       }
       return nextAction
     }

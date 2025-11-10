@@ -8,8 +8,10 @@ import { RectScope } from "../util/rect-scope.ts"
 
 import { Field } from "./field.ts"
 
-const I = 72
-const J = 18
+/** The starting X coordinate */
+const I = 114
+/** The starting Y coordinate */
+const J = 164
 
 /**
  * The area which is visible to the user

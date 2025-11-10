@@ -2,6 +2,7 @@ import { DIRS, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { loadImage } from "../util/load.ts"
 import { Input, inputQueue } from "./ui/input.ts"
 import { Character, Move, spawnCharacter } from "../model/character.ts"
+import { splashColor } from "./field.ts"
 import type { IField, MovePlan } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
@@ -20,7 +21,7 @@ function colorCell(
   field.colorCell(
     i,
     j,
-    `hsla(${hue}, ${sat}%, ${light}%, ${alpha + rng() * 0.1})`,
+    `hsla(${hue}, ${sat}%, ${light}%, ${alpha + rng() * 0.15 - 0.05})`,
   )
 }
 
@@ -72,23 +73,21 @@ export class MainCharacter extends Character {
           }
 
           const { rng } = seed(this.i + " " + this.j)
-
           const hue = 333.3
           const sat = 59.4
-          const light = 38.6
-
-          colorCell(this.i, this.j, hue, sat, light, 0.40, field, rng)
-
-          for (const dir of DIRS) {
-            for (let dist = 1; dist <= 3; dist++) {
-              const [i, j] = this.nextGrid(dir, dist)
-              if (!field.canEnterStatic(i, j)) break
-              setTimeout(() => {
-                colorCell(i, j, hue, sat, light, 0.24 - dist * 0.06, field, rng)
-              }, dist * 32)
-            }
-          }
-
+          const light = 32
+          const alpha = 0.40
+          splashColor(
+            field,
+            this.i,
+            this.j,
+            hue,
+            sat,
+            light,
+            alpha,
+            4,
+            rng,
+          )
           const count = signal.appleCount.get()
           signal.appleCount.update(count + 1)
           break
@@ -121,6 +120,14 @@ export class MainCharacter extends Character {
             { type: "speed", change: "4x" },
           )
           for (const _ of Array(30)) {
+            this.enqueueAction({
+              type: "splash",
+              hue: 280,
+              sat: 40,
+              light: 30,
+              alpha: 0.2,
+              radius: 3,
+            })
             this.enqueueAction({ type: "go", dir: this.dir })
           }
           this.enqueueAction(

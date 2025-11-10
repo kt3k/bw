@@ -21,6 +21,7 @@ import {
 } from "../model/field-block.ts"
 import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
+import { DIRS, nextGrid } from "../util/dir.ts"
 
 /** The items on the field */
 export class FieldItems implements IStepper, ILoader {
@@ -637,4 +638,59 @@ export class Field implements IField {
   get assetsReady() {
     return this.#initialActivateReady
   }
+}
+
+export function splashColor(
+  field: IField,
+  i: number,
+  j: number,
+  hue: number,
+  sat: number,
+  light: number,
+  alpha: number = 0.40,
+  radius: number = 2,
+  rng: () => number = Math.random,
+): void {
+  if (radius < 1) {
+    return
+  }
+  colorCell(i, j, hue, sat, light, alpha, field, rng)
+  if (radius < 2) {
+    return
+  }
+  for (const dir of DIRS) {
+    for (let dist = 2; dist <= radius; dist++) {
+      const [i_, j_] = nextGrid(i, j, dir, dist - 1)
+      if (!field.canEnterStatic(i_, j_)) break
+      setTimeout(() => {
+        colorCell(
+          i_,
+          j_,
+          hue,
+          sat,
+          light,
+          alpha * 0.6 ** dist,
+          field,
+          rng,
+        )
+      }, dist * 32)
+    }
+  }
+}
+
+function colorCell(
+  i: number,
+  j: number,
+  hue: number,
+  sat: number,
+  light: number,
+  alpha: number,
+  field: IField,
+  rng: () => number,
+): void {
+  field.colorCell(
+    i,
+    j,
+    `hsla(${hue}, ${sat}%, ${light}%, ${alpha + rng() * 0.15 - 0.05})`,
+  )
 }
