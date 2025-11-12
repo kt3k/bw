@@ -105,18 +105,18 @@ class CharacterGoMove implements MoveBase {
 
   get x(): number {
     if (this.#dir === LEFT) {
-      return -this.#phase
+      return 16 - this.#phase
     } else if (this.#dir === RIGHT) {
-      return this.#phase
+      return this.#phase - 16
     }
     return 0
   }
 
   get y(): number {
     if (this.#dir === UP) {
-      return -this.#phase
+      return 16 - this.#phase
     } else if (this.#dir === DOWN) {
-      return this.#phase
+      return this.#phase - 16
     }
     return 0
   }
@@ -437,6 +437,9 @@ export abstract class Character implements IActor {
             if (nextPlan?.type === "go") this.setDir(dir)
             if (this.canGo(dir, field)) {
               this.#move = new CharacterGoMove(this.#speed, dir)
+              const [nextI, nextJ] = this.nextGrid(dir)
+              this.#i = nextI
+              this.#j = nextJ
             } else {
               const [i, j] = this.nextGrid(dir)
               const pushing = field.actors.get(i, j)
@@ -469,12 +472,6 @@ export abstract class Character implements IActor {
     if (this.#move) {
       this.#move.step()
       if (this.#move.finished) {
-        if (this.#move.type === "move") {
-          const dir = this.#move.dir
-          const [nextI, nextJ] = this.nextGrid(dir)
-          this.#i = nextI
-          this.#j = nextJ
-        }
         this.onMoveEnd(field, this.#move)
         this.#move = null
         this.#age++
@@ -615,7 +612,7 @@ export abstract class Character implements IActor {
   }
 
   #calcPhysicalGridKey(): string {
-    return `${this.#physicalI}.${this.#physicalJ}`
+    return `${this.#i}.${this.#j}`
   }
 
   get physicalGridKey(): string {
@@ -631,34 +628,6 @@ export abstract class Character implements IActor {
 
   get age(): number {
     return this.#age
-  }
-
-  /** Physical coordinate is the grid coordinate
-   * where the character is currently located.
-   * This is used to for collision detection with other characters.
-   * Physical coordinate is different from display coordinate #i and #j
-   * when the character is moving.
-   */
-  get #physicalI(): number {
-    if (this.#move && this.#move.type === "move") {
-      if (this.#move.dir === LEFT) {
-        return this.#i - 1
-      } else if (this.#move.dir === RIGHT) {
-        return this.#i + 1
-      }
-    }
-    return this.#i
-  }
-
-  get #physicalJ(): number {
-    if (this.#move && this.#move.type === "move") {
-      if (this.#move.dir === UP) {
-        return this.#j - 1
-      } else if (this.#move.dir === DOWN) {
-        return this.#j + 1
-      }
-    }
-    return this.#j
   }
 
   onEvent(event: FieldEvent, field: IField): void {
