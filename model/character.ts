@@ -53,13 +53,13 @@ export type NPCType =
 
 export function spawnCharacter(
   id: string,
-  type: NPCType,
+  typ: NPCType,
   i: number,
   j: number,
   src: string,
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
 ): IActor {
-  switch (type) {
+  switch (typ) {
     case RandomlyTurnNPC.type:
       return new RandomlyTurnNPC(i, j, src, id, dir, speed)
     case RandomWalkNPC.type:
@@ -71,9 +71,8 @@ export function spawnCharacter(
     case InertialNPC.type:
       return new InertialNPC(i, j, src, id, dir, speed)
   }
-
-  const _exhaustiveCheck: never = type
-  throw new Error(`Unknown character type: ${type}`)
+  typ satisfies never
+  throw new Error(`Unknown character type: ${typ}`)
 }
 
 type MoveBase = {
@@ -343,90 +342,94 @@ export abstract class Character implements IActor {
     return this.#actionQueue
   }
 
-  #getNextMovePlanWrap(field: IField): MovePlan {
-    if (this.#actionQueue.length > 0) {
-      const nextAction = this.#actionQueue.shift()!
-      if (nextAction.type === "speed") {
-        clearTimeout(this.#speedUpTimer)
-        switch (nextAction.change) {
-          case "2x":
-            this.speed = 2
-            break
-          case "4x":
-            this.speed = 4
-            break
-          case "reset":
-            this.speed = 1
-            break
-        }
-        if (nextAction.change !== "reset") {
-          this.#speedUpTimer = setTimeout(() => {
-            this.#actionQueue.push(
-              { type: "speed", change: "reset" },
-              { type: "jump" },
-            )
-          }, 15000)
-        }
-        return this.#getNextMovePlanWrap(field)
-      } else if (nextAction.type === "turn") {
-        const dir = nextAction.dir
-        switch (dir) {
-          case "north":
-            this.setDir("up")
-            break
-          case "south":
-            this.setDir("down")
-            break
-          case "west":
-            this.setDir("left")
-            break
-          case "east":
-            this.setDir("right")
-            break
-          case "left":
-            this.setDir(turnLeft(this.dir))
-            break
-          case "right":
-            this.setDir(turnRight(this.dir))
-            break
-          case "back":
-            this.setDir(opposite(this.dir))
-            break
-          default:
-            dir satisfies never
-        }
-        return this.#getNextMovePlanWrap(field)
-      } else if (nextAction.type === "wait") {
-        if (field.time < nextAction.until) {
-          this.#waitUntil = nextAction.until
-          return undefined
-        } else {
-          return this.#getNextMovePlanWrap(field)
-        }
-      } else if (nextAction.type === "splash") {
-        const { i, j } = this
-        const { rng } = seed(`${i}${j}`)
-        splashColor(
-          field,
-          i,
-          j,
-          nextAction.hue,
-          nextAction.sat,
-          nextAction.light,
-          nextAction.alpha,
-          nextAction.radius,
-          rng,
-        )
-        return this.#getNextMovePlanWrap(field)
-      }
-      return nextAction
+  #processQueue(field: IField): MovePlan | "idle" {
+    if (this.#actionQueue.length === 0) {
+      return "idle"
     }
-    return this.getNextMovePlan(field)
+
+    const nextAction = this.#actionQueue.shift()!
+    if (nextAction.type === "speed") {
+      clearTimeout(this.#speedUpTimer)
+      switch (nextAction.change) {
+        case "2x":
+          this.speed = 2
+          break
+        case "4x":
+          this.speed = 4
+          break
+        case "reset":
+          this.speed = 1
+          break
+      }
+      if (nextAction.change !== "reset") {
+        this.#speedUpTimer = setTimeout(() => {
+          this.#actionQueue.push(
+            { type: "speed", change: "reset" },
+            { type: "jump" },
+          )
+        }, 15000)
+      }
+      return this.#processQueue(field)
+    } else if (nextAction.type === "turn") {
+      const dir = nextAction.dir
+      switch (dir) {
+        case "north":
+          this.setDir("up")
+          break
+        case "south":
+          this.setDir("down")
+          break
+        case "west":
+          this.setDir("left")
+          break
+        case "east":
+          this.setDir("right")
+          break
+        case "left":
+          this.setDir(turnLeft(this.dir))
+          break
+        case "right":
+          this.setDir(turnRight(this.dir))
+          break
+        case "back":
+          this.setDir(opposite(this.dir))
+          break
+        default:
+          dir satisfies never
+      }
+      return this.#processQueue(field)
+    } else if (nextAction.type === "wait") {
+      if (field.time < nextAction.until) {
+        this.#waitUntil = nextAction.until
+        return undefined
+      } else {
+        return this.#processQueue(field)
+      }
+    } else if (nextAction.type === "splash") {
+      const { i, j } = this
+      const { rng } = seed(`${i}${j}`)
+      splashColor(
+        field,
+        i,
+        j,
+        nextAction.hue,
+        nextAction.sat,
+        nextAction.light,
+        nextAction.alpha,
+        nextAction.radius,
+        rng,
+      )
+      return this.#processQueue(field)
+    }
+    return nextAction
   }
 
   step(field: IField) {
     if (this.#waitUntil === null && this.#move === null) {
-      const nextPlan = this.#getNextMovePlanWrap(field)
+      let nextPlan = this.#processQueue(field)
+      if (nextPlan === "idle") {
+        nextPlan = this.getNextMovePlan(field)
+      }
       if (nextPlan) {
         this.#idleCounter = 0
 
