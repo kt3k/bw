@@ -325,14 +325,6 @@ export abstract class Character implements IActor {
     _move: Move,
   ): void {}
 
-  onMoveEndWrap(
-    field: IField,
-    move: Move,
-  ) {
-    this.#age++
-    this.onMoveEnd(field, move)
-  }
-
   enqueueAction(...actions: Action[]) {
     this.#actionQueue.push(...actions)
   }
