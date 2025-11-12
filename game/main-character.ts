@@ -8,23 +8,6 @@ import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import { seed } from "../util/random.ts"
 
-function colorCell(
-  i: number,
-  j: number,
-  hue: number,
-  sat: number,
-  light: number,
-  alpha: number,
-  field: IField,
-  rng: () => number,
-): void {
-  field.colorCell(
-    i,
-    j,
-    `hsla(${hue}, ${sat}%, ${light}%, ${alpha + rng() * 0.15 - 0.05})`,
-  )
-}
-
 export class MainCharacter extends Character {
   #lastMoveTypes: string[] = []
   override getNextMovePlan(_field: IField): MovePlan {

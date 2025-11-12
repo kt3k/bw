@@ -86,7 +86,7 @@ type MoveBase = {
 
 export type Move = CharacterGoMove | CharacterBounceMove | CharacterJumpMove
 
-class CharacterGoMove implements MoveBase {
+export class CharacterGoMove implements MoveBase {
   #phase: number = 0
   #speed: number = 1
   #dir: Dir
@@ -133,7 +133,7 @@ class CharacterGoMove implements MoveBase {
   }
 }
 
-class CharacterBounceMove implements MoveBase {
+export class CharacterBounceMove implements MoveBase {
   #phase: number = 0
   #dir: Dir
   #pushedActors: boolean
@@ -192,7 +192,7 @@ class CharacterBounceMove implements MoveBase {
   }
 }
 
-class CharacterJumpMove implements MoveBase {
+export class CharacterJumpMove implements MoveBase {
   #phase: number = 0
   #y: number = 0
 
@@ -420,6 +420,9 @@ export abstract class Character implements IActor {
         rng,
       )
       return this.#processQueue(field)
+    } else if (nextAction.type === "go-random") {
+      const { choice } = seed(`${this.i}.${this.j}`)
+      return { type: "go", dir: choice(DIRS) }
     }
     return nextAction
   }
@@ -672,6 +675,7 @@ export abstract class Character implements IActor {
           { type: "jump" },
           { type: "turn", dir: "east" },
           { type: "jump" },
+          { type: "go-random" },
         )
         break
       }

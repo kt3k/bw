@@ -6,7 +6,7 @@ import type { Dir, IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
 import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
 
-/** Converts the world grid coordinates to local chunk coordinates */
+/** Global coordinates to local chunk index */
 function g2c(i: number, j: number): [number, number] {
   const [localI, localJ] = g2l(i, j)
   const k = floorN(localI, BLOCK_CHUNK_SIZE) / BLOCK_CHUNK_SIZE
@@ -14,6 +14,7 @@ function g2c(i: number, j: number): [number, number] {
   return [k, l]
 }
 
+/** Global coordinates to local coordinates */
 function g2l(i: number, j: number): [number, number] {
   const localI = modulo(i, BLOCK_SIZE)
   const localJ = modulo(j, BLOCK_SIZE)

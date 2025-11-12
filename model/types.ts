@@ -89,6 +89,7 @@ export type MovePlan =
 
 export type Action =
   | MovePlan
+  | { readonly type: "go-random" }
   | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
   | {
     readonly type: "turn"

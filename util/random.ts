@@ -10,7 +10,7 @@ export function seed(seed: string) {
     return Math.floor(rng() * n)
   }
 
-  const choice = <T>(arr: T[]) => {
+  const choice = <T>(arr: readonly T[]) => {
     if (arr.length === 0) {
       throw new Error("Cannot choose from an empty array")
     }

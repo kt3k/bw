@@ -1,5 +1,5 @@
-import { RandomlyTurnNPC, StaticNPC } from "./character.ts"
-import { assertEquals } from "@std/assert"
+import { CharacterGoMove, RandomlyTurnNPC, StaticNPC } from "./character.ts"
+import { assert, assertEquals, assertFalse } from "@std/assert"
 
 Deno.test("Character", async (t) => {
   await t.step("physicalGridKey", () => {
@@ -21,4 +21,63 @@ Deno.test("Character", async (t) => {
     c.setDir("up")
     assertEquals(c.frontGrid(), [100, 99])
   })
+})
+
+Deno.test("CharacterGoMove", () => {
+  const move = new CharacterGoMove(1, "up")
+  assertFalse(move.halfPassed)
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 16)
+  move.step() // 1
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 15)
+  move.step() // 2
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 14)
+  move.step() // 3
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 13)
+  move.step() // 4
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 12)
+  move.step() // 5
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 11)
+  move.step() // 6
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 10)
+  move.step() // 7
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 9)
+  assertFalse(move.halfPassed)
+  move.step() // 8
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 8)
+  assert(move.halfPassed)
+  move.step() // 9
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 7)
+  move.step() // 10
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 6)
+  move.step() // 11
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 5)
+  move.step() // 12
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 4)
+  move.step() // 13
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 3)
+  move.step() // 14
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 2)
+  move.step() // 15
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 1)
+  assertFalse(move.finished)
+  move.step() // 16
+  assertEquals(move.x, 0)
+  assertEquals(move.y, 0)
+  assert(move.finished)
 })
