@@ -139,20 +139,22 @@ class CharacterBounceMove implements MoveBase {
   #dir: Dir
   #pushedActors: boolean
   #d = 0
+  #speed: 1 | 2 | 4 | 8 | 16
 
   type = "bounce" as const
 
-  constructor(dir: Dir, pushedActors: boolean) {
+  constructor(dir: Dir, pushedActors: boolean, speed: 1 | 2 | 4 | 8 | 16) {
     this.#dir = dir
     this.#pushedActors = pushedActors
+    this.#speed = speed
   }
 
   step() {
-    this.#phase += 1
+    this.#phase += this.#speed
     if (this.#phase <= 8) {
-      this.#d += 1
+      this.#d += this.#speed
     } else {
-      this.#d -= 1
+      this.#d -= this.#speed
     }
   }
 
@@ -444,7 +446,11 @@ export abstract class Character implements IActor {
                   field,
                 )
               })
-              this.#move = new CharacterBounceMove(dir, pushing.length > 0)
+              this.#move = new CharacterBounceMove(
+                dir,
+                pushing.length > 0,
+                this.#speed,
+              )
             }
             break
           }
