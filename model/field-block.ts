@@ -1,6 +1,6 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import { seed } from "../util/random.ts"
+import { randomInt, seed } from "../util/random.ts"
 import { floorN, modulo } from "../util/math.ts"
 import type { Dir, IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
@@ -515,13 +515,14 @@ export class FieldBlock {
     }
   }
 
-  drawCellColor(i: number, j: number, color: string) {
+  drawCellColor(i: number, j: number, color: string, margin = 1) {
     const [localI, localJ] = g2l(i, j)
+    margin = randomInt(3)
     this.canvasWrapper.drawRect(
-      localI * CELL_SIZE,
-      localJ * CELL_SIZE,
-      CELL_SIZE,
-      CELL_SIZE,
+      localI * CELL_SIZE + margin,
+      localJ * CELL_SIZE + margin,
+      CELL_SIZE - margin * 2,
+      CELL_SIZE - margin * 2,
       color,
     )
   }

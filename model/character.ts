@@ -680,6 +680,17 @@ export abstract class Character implements IActor {
         break
       }
       case "bounced": {
+        splashColor(
+          field,
+          this.i,
+          this.j,
+          120,
+          30,
+          0,
+          0.2,
+          2,
+          seed(this.#physicalGridKey).rng,
+        )
         if (this.#move) {
           this.unshiftAction({ type: "slide", dir: event.dir })
         } else {
