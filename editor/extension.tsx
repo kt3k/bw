@@ -35,10 +35,7 @@ function resolveCustomTextEditor(
       </head>
       <body class="key-handler p-0">
         <div class="main-container relative mt-10 w-[calc(3360px+196px)]"></div>
-        <div class="top-toolbox h-10 px-2 fixed left-0 top-0 flex items-center gap-2 bg-neutral-900/50 w-[calc(100%-12rem)]">
-          <div class="cell-switch flex items-center relative"></div>
-          <div class="h-full w-0 border-l border-neutral-500/50">&nbsp;</div>
-          <div class="object-switch flex items-center relative"></div>
+        <div class="tool-control-panel h-10 px-2 fixed left-0 top-0 flex items-center bg-neutral-900/50 w-[calc(100%-12rem)]">
           <div class="group relative">
             <span class="mode-indicator">dot</span>
             <span class="
@@ -101,7 +98,8 @@ function resolveCustomTextEditor(
   }
 
   function onMessage(e: type.Webview.Message) {
-    switch (e.type) {
+    const typ = e.type
+    switch (typ) {
       case "ready":
         updateWebview()
         break
@@ -114,6 +112,8 @@ function resolveCustomTextEditor(
       case "loadText":
         loadText(e)
         break
+      default:
+        typ satisfies never
     }
   }
 

@@ -15,6 +15,15 @@ import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
+type ToolBase = { id: string }
+type CellTool = ToolBase & { kind: "cell"; name: string }
+type ObjectTool =
+  & ToolBase
+  & (
+    | { kind: "object"; type: string; src: string }
+    | { kind: "object-remove" }
+  )
+
 const CANVAS_SIZE = BLOCK_SIZE * CELL_SIZE
 const SIDE_CANVAS_SIZE = CELL_SIZE * 5
 const blockMapSource = new GroupSignal({ uri: "", text: "" })
@@ -25,73 +34,63 @@ const gridIndex = new GroupSignal<{ i: number | null; j: number | null }>({
   j: null,
 })
 
-type CellTool = { name: string }
-type ObjectTool = { type: string; src: string } | "remove"
+class Toolbox {
+  cells: CellTool[] = []
+  objects: ObjectTool[] = []
+  #toolIndex: number = 0
 
-const selectedTool = new Signal<string | null>(null)
-const cellTools = [] as CellTool[]
-const objTools = [] as ObjectTool[]
-
-function parseToolIndex(
-  tool: string | null,
-): ["cell" | "object" | null, number] {
-  if (tool === null) return [null, -1]
-  if (tool.startsWith("cell-")) return ["cell", +tool.replace("cell-", "")]
-  if (tool.startsWith("object-")) {
-    return ["object", +tool.replace("object-", "")]
+  addCellTool(tool: CellTool) {
+    this.cells.push(tool)
   }
-  return [null, -1]
-}
 
-function toolIndex(kind: "cell" | "object", index: number): string {
-  return kind + "-" + index
-}
-
-function nextTool(current: string | null): string {
-  if (current === null) return toolIndex("cell", 0)
-  const [kind, index] = parseToolIndex(current)
-  if (kind === "cell") {
-    const nextIndex = index + 1
-    if (nextIndex >= cellTools.length) {
-      if (objTools.length === 0) return toolIndex("cell", 0)
-      return toolIndex("object", 0)
-    }
-    return toolIndex("cell", nextIndex)
-  } else if (kind === "object") {
-    const nextIndex = index + 1
-    if (nextIndex >= objTools.length) {
-      if (cellTools.length === 0) return toolIndex("object", 0)
-      return toolIndex("cell", 0)
-    }
-    return toolIndex("object", nextIndex)
-  } else {
-    return toolIndex("cell", 0)
+  addObjectTool(tool: ObjectTool) {
+    this.objects.push(tool)
   }
-}
 
-function prevTool(current: string | null): string {
-  if (current === null) return toolIndex("object", objTools.length - 1)
-  const [kind, index] = parseToolIndex(current)
-  if (kind === "cell") {
-    const prevIndex = index - 1
-    if (prevIndex < 0) {
-      if (objTools.length === 0) return toolIndex("cell", cellTools.length - 1)
-      return toolIndex("object", objTools.length - 1)
+  get length() {
+    return this.cells.length + this.objects.length
+  }
+
+  #get(index: number): CellTool | ObjectTool {
+    if (index < this.cells.length) {
+      return this.cells[index]
     }
-    return toolIndex("cell", prevIndex)
-  } else if (kind === "object") {
-    const prevIndex = index - 1
-    if (prevIndex < 0) {
-      if (cellTools.length === 0) {
-        return toolIndex("object", objTools.length - 1)
-      }
-      return toolIndex("cell", cellTools.length - 1)
+    const objIndex = index - this.cells.length
+    if (objIndex < this.objects.length) {
+      return this.objects[objIndex]
     }
-    return toolIndex("object", prevIndex)
-  } else {
-    return toolIndex("object", objTools.length - 1)
+    throw new RangeError("Tool index out of range: " + index)
+  }
+
+  selectNext(): void {
+    this.#toolIndex = (this.#toolIndex + 1) % this.length
+  }
+
+  selectPrev(): void {
+    this.#toolIndex = (this.#toolIndex - 1 + this.length) % this.length
+  }
+
+  selectById(id: string) {
+    const cellIndex = this.cells.findIndex((tool) => tool.id === id)
+    if (cellIndex >= 0) {
+      this.#toolIndex = cellIndex
+      return
+    }
+    const objectIndex = this.objects.findIndex((tool) => tool.id === id)
+    if (objectIndex >= 0) {
+      this.#toolIndex = this.cells.length + objectIndex
+      return
+    }
+    throw new Error("The tool of the given id is not found: " + id)
+  }
+
+  currentTool(): CellTool | ObjectTool {
+    return this.#get(this.#toolIndex)
   }
 }
+
+const toolbox = new Toolbox()
+const currentTool = new Signal<CellTool | ObjectTool | null>(null)
 
 blockMapSource.subscribe(({ uri, text }) => {
   if (uri === "" || text === "") {
@@ -103,26 +102,28 @@ blockMapSource.subscribe(({ uri, text }) => {
   )
 })
 
-const CELL_SWITCH_ACTIVE_CLASSES = ["bg-cyan-400"]
-const OBJECT_SWITCH_ACTIVE_CLASSES = ["bg-red-400"]
-const SWITCH_ACTIVE_CANVAS_CLASSES = ["opacity-70"]
+const SWITCH_ACTIVE = ["bg-cyan-400"]
+const SWITCH_ACTIVE_CANVAS = ["opacity-70"]
 
-function CellSwitch({ on, el, subscribe }: Context) {
+function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
   let initialized = false
+
   subscribe(fieldBlock, async (fieldBlock) => {
     if (fieldBlock === null) return
     if (initialized) return
     initialized = true
 
     const cells = await Promise.all(fieldBlock.cells.map(async (cell) => {
-      cellTools.push({ name: cell.name })
+      const id = "cell-" + cell.name
+      toolbox.addCellTool({ kind: "cell", name: cell.name, id })
       let div = el.querySelector<HTMLDivElement>(
-        '[name="' + cell.name + '"]',
+        '[id="' + id + '"]',
       )
       if (div) {
         return div
       }
       div = document.createElement("div")
+      div.id = id
       div.classList.add(
         "inline-block",
         "p-1",
@@ -149,71 +150,44 @@ function CellSwitch({ on, el, subscribe }: Context) {
       return div
     }))
     cells.forEach((cell) => {
-      if (!el.contains(cell)) {
-        el.appendChild(cell)
-      }
+      el.appendChild(cell)
     })
-    if (cells.length > 0 && selectedTool.get() === null) {
-      selectedTool.update(toolIndex("cell", 0))
-    }
-  })
-  subscribe(selectedTool, (selected) => {
-    const [kind, index] = parseToolIndex(selected)
-    const children = Array.from(el.children)
-    children.forEach((child, i) => {
-      const firstChild = child.firstChild as HTMLElement
-      if (kind === "cell" && i === index) {
-        child.classList.add(...CELL_SWITCH_ACTIVE_CLASSES)
-        firstChild.classList.add(...SWITCH_ACTIVE_CANVAS_CLASSES)
-      } else {
-        child.classList.remove(...CELL_SWITCH_ACTIVE_CLASSES)
-        firstChild.classList.remove(...SWITCH_ACTIVE_CANVAS_CLASSES)
-      }
-    })
-  })
-  on("click", (e) => {
-    const index = Array.from(el.children).indexOf(e.target as HTMLElement)
-    if (index >= 0) {
-      selectedTool.update(toolIndex("cell", index))
-    }
-  })
-}
 
-function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
-  subscribe(mode, (mode) => el.textContent = mode)
-}
-
-function ObjectSwitch({ subscribe, el, on }: Context) {
-  let initialized = false
-  subscribe(fieldBlock, async (fieldBlock) => {
-    if (fieldBlock === null) return
-    if (initialized) return
-    initialized = true
     const objKinds = new Set<string>()
     for (const object of fieldBlock.objectSpawns.getAll()) {
       objKinds.add(object.type + "|" + object.src)
     }
-    if (objKinds.size === 0) return
-    objTools.unshift("remove")
-    const div = document.createElement("div")
-    div.classList.add("inline-block", "p-1", "m-1", "rounded", "cursor-pointer")
-    const span = document.createElement("span")
-    span.classList.add(
-      "w-4",
-      "h-4",
-      "block",
-      "text-xs",
-      "text-center",
-      "text-white",
-      "pointer-events-none",
-    )
-    span.textContent = "φ"
-    div.appendChild(span)
-    el.appendChild(div)
+    if (objKinds.size > 0) {
+      const id = "object-remove"
+      toolbox.addObjectTool({ kind: "object-remove", id })
+      const div = document.createElement("div")
+      div.id = id
+      div.classList.add(
+        "inline-block",
+        "p-1",
+        "m-1",
+        "rounded",
+        "cursor-pointer",
+      )
+      const span = document.createElement("span")
+      span.classList.add(
+        "w-4",
+        "h-4",
+        "block",
+        "text-xs",
+        "text-center",
+        "text-white",
+        "pointer-events-none",
+      )
+      span.textContent = "φ"
+      div.appendChild(span)
+      el.appendChild(div)
+    }
 
     for (const spawn of objKinds) {
       const [type, src] = spawn.split("|")
-      objTools.push({ type, src })
+      const id = `object-${type}-${src}`
+      toolbox.addObjectTool({ kind: "object", type, src, id })
       const obj = new Object(
         null,
         0,
@@ -223,6 +197,7 @@ function ObjectSwitch({ subscribe, el, on }: Context) {
       )
       await obj.loadAssets({ loadImage })
       const div = document.createElement("div")
+      div.id = id
       div.classList.add(
         "inline-block",
         "p-1",
@@ -239,27 +214,34 @@ function ObjectSwitch({ subscribe, el, on }: Context) {
       div.appendChild(canvas)
       el.appendChild(div)
     }
+
+    currentTool.update(toolbox.currentTool())
   })
-  subscribe(selectedTool, (selected) => {
-    const [kind, index] = parseToolIndex(selected)
-    const children = Array.from(el.children)
-    children.forEach((child, i) => {
+
+  subscribe(currentTool, (tool) => {
+    if (tool === null) return
+    for (const child of Array.from(el.children)) {
       const firstChild = child.firstChild as HTMLElement
-      if (kind === "object" && i === index) {
-        child.classList.add(...OBJECT_SWITCH_ACTIVE_CLASSES)
-        firstChild.classList.add(...SWITCH_ACTIVE_CANVAS_CLASSES)
+      if (child.id === tool.id) {
+        child.classList.add(...SWITCH_ACTIVE)
+        firstChild.classList.add(...SWITCH_ACTIVE_CANVAS)
       } else {
-        child.classList.remove(...OBJECT_SWITCH_ACTIVE_CLASSES)
-        firstChild.classList.remove(...SWITCH_ACTIVE_CANVAS_CLASSES)
+        child.classList.remove(...SWITCH_ACTIVE)
+        firstChild.classList.remove(...SWITCH_ACTIVE_CANVAS)
       }
-    })
-  })
-  on("click", (e) => {
-    const index = Array.from(el.children).indexOf(e.target as HTMLElement)
-    if (index >= 0) {
-      selectedTool.update(toolIndex("object", index))
     }
   })
+
+  on("click", (e) => {
+    const div = e.target as HTMLDivElement
+    toolbox.selectById(div.id)
+    console.log("Updating current tool", toolbox.currentTool())
+    currentTool.update(toolbox.currentTool())
+  })
+}
+
+function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
+  subscribe(mode, (mode) => el.textContent = mode)
 }
 
 function MainContainer({ subscribe, el }: Context) {
@@ -298,12 +280,11 @@ function MainContainer({ subscribe, el }: Context) {
       objectsCanvas.style.top = SIDE_CANVAS_SIZE + "px"
       objectsCanvas.style.position = "absolute"
       objectsCanvas.classList.add(
-        "field-object-spawns-canvas",
+        "field-object-canvas",
         "pointer-events-none",
       )
       el.appendChild(objectsCanvas)
-      mount("field-object-spawns-canvas", el)
-
+      mount("field-object-canvas", el)
       const wrapper = new CanvasWrapper(objectsCanvas)
       for (const object of fieldBlock.objectSpawns.getAll()) {
         const obj = new Object(
@@ -422,10 +403,12 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   const paint = (e: MouseEvent) => {
     const block = fieldBlock.get()
     if (block === null) return
-    const [kind, index] = parseToolIndex(selectedTool.get())
+    const tool = currentTool.get()
+    if (tool === null) return
+    const kind = tool.kind
     if (kind !== "cell") return
     const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
-    const { name } = cellTools[index]
+    const { name } = tool
     const currentCell = block.getCell(i, j)
     if (!currentCell) return
     // The cell kind is already the same as selected cell
@@ -464,9 +447,9 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
     prev = block
   })
 
-  subscribe(selectedTool, (selected) => {
-    const [kind] = parseToolIndex(selected)
-    el.classList.toggle("pointer-events-none", kind !== "cell")
+  subscribe(currentTool, (tool) => {
+    if (tool === null) return
+    el.classList.toggle("pointer-events-none", tool.kind !== "cell")
   })
 }
 
@@ -483,7 +466,17 @@ function getCoordinatesFromMouseEvent(
   return { i, j }
 }
 
-function FieldObjectSpawnsCanvas(
+function FieldCharactersCanvas(
+  { on, el, subscribe }: Context<HTMLCanvasElement>,
+) {
+  const canvasWrapper = new CanvasWrapper(el)
+}
+
+function FieldItemsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
+  const canvasWrapper = new CanvasWrapper(el)
+}
+
+function FieldObjectCanvas(
   { el, on, subscribe }: Context<HTMLCanvasElement>,
 ) {
   const canvasWrapper = new CanvasWrapper(el)
@@ -491,12 +484,12 @@ function FieldObjectSpawnsCanvas(
   const paint = (e: MouseEvent) => {
     const block = fieldBlock.get()
     if (block === null) return
-    const [kind, index] = parseToolIndex(selectedTool.get())
-    if (kind !== "object") return
+    const tool = toolbox.currentTool()
+    if (tool === null) return
+    if (tool.kind !== "object" && tool.kind !== "object-remove") return
     const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
-    const tool = objTools[index]
     const b = block.clone()
-    if (tool === "remove") {
+    if (tool.kind === "object-remove") {
       if (block.objectSpawns.has(i, j)) {
         b.objectSpawns.remove(i, j)
         doUpdate(b)
@@ -540,9 +533,12 @@ function FieldObjectSpawnsCanvas(
     gridIndex.update({ i, j })
   })
 
-  subscribe(selectedTool, (tool) => {
-    const [kind] = parseToolIndex(tool)
-    el.classList.toggle("pointer-events-none", kind !== "object")
+  subscribe(currentTool, (tool) => {
+    if (tool === null) return
+    el.classList.toggle(
+      "pointer-events-none",
+      tool.kind !== "object" && tool.kind !== "object-remove",
+    )
   })
 
   let prev: FieldBlock = fieldBlock.get()!
@@ -581,10 +577,12 @@ function FieldObjectSpawnsCanvas(
 function KeyHandler({ on }: Context) {
   on("keydown", (e) => {
     if (e.key === "k") {
-      selectedTool.update(nextTool(selectedTool.get()))
+      toolbox.selectNext()
+      currentTool.update(toolbox.currentTool())
       mode.update("dot")
     } else if (e.key === "j") {
-      selectedTool.update(prevTool(selectedTool.get()))
+      toolbox.selectPrev()
+      currentTool.update(toolbox.currentTool())
       mode.update("dot")
     } else if (e.key === "s" && !e.altKey && !e.metaKey) {
       if (mode.get() === "dot") {
@@ -700,10 +698,9 @@ if (state) {
 }
 
 register(KeyHandler, "key-handler")
-register(CellSwitch, "cell-switch")
-register(ObjectSwitch, "object-switch")
+register(ToolControlPanel, "tool-control-panel")
 register(ModeIndicator, "mode-indicator")
 register(MainContainer, "main-container")
 register(FieldCellsCanvas, "field-block-canvas")
-register(FieldObjectSpawnsCanvas, "field-object-spawns-canvas")
+register(FieldObjectCanvas, "field-object-canvas")
 register(InfoPanel, "js-info-panel")
