@@ -8954,10 +8954,16 @@
       "src": "../obj/stool.png"
     },
     {
-      "i": 30,
-      "j": 2,
-      "type": "table",
-      "src": "../obj/table2.png"
+      "i": 35,
+      "j": 9,
+      "type": "stool",
+      "src": "../obj/stool.png"
+    },
+    {
+      "i": 39,
+      "j": 6,
+      "type": "stool",
+      "src": "../obj/stool.png"
     }
   ],
   "field": [

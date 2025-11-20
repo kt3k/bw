@@ -2,6 +2,7 @@
   "version": "5",
   "specifiers": {
     "jsr:@kt3k/cell@~0.7.6": "0.7.6",
+    "jsr:@kt3k/domx@~0.1.8": "0.1.8",
     "jsr:@kt3k/picojsx@~0.1.5": "0.1.6",
     "jsr:@kt3k/signal@0.3": "0.3.0",
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
@@ -20,6 +21,9 @@
       "dependencies": [
         "jsr:@kt3k/signal"
       ]
+    },
+    "@kt3k/domx@0.1.8": {
+      "integrity": "744185befc3efa78aa9a896cdaf506dbf5ca63da41e1616a3599b8aa926e89ab"
     },
     "@kt3k/picojsx@0.1.6": {
       "integrity": "b87ee2ca7499a1c082e9e2e9759dccb4ce51fe46ef0532e05bdc0bb8a68c4c15"
@@ -2349,6 +2353,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@kt3k/cell@~0.7.6",
+      "jsr:@kt3k/domx@~0.1.8",
       "jsr:@kt3k/picojsx@~0.1.5",
       "jsr:@kt3k/weak-value-map@~0.1.2",
       "jsr:@std/encoding@^1.0.6",

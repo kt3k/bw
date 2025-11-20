@@ -4,6 +4,9 @@
 /// <reference lib="dom" />
 /// <reference types="@types/vscode-webview" />
 
+/** @jsxImportSource @kt3k/domx */
+/** @jsxRuntime automatic */
+
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
 import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
@@ -116,37 +119,24 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
     const cells = await Promise.all(fieldBlock.cells.map(async (cell) => {
       const id = "cell-" + cell.name
       toolbox.addCellTool({ kind: "cell", name: cell.name, id })
-      let div = el.querySelector<HTMLDivElement>(
-        '[id="' + id + '"]',
+      let div = el.querySelector('[id="' + id + '"]')
+      if (div) return div
+      div = (
+        <div id={id} class="inline-block p-1 m-1 rounded cursor-pointer">
+          <canvas width="16" height="16" class="pointer-events-none"></canvas>
+        </div>
       )
-      if (div) {
-        return div
-      }
-      div = document.createElement("div")
-      div.id = id
-      div.classList.add(
-        "inline-block",
-        "p-1",
-        "m-1",
-        "rounded",
-        "cursor-pointer",
-      )
-      div.setAttribute("name", cell.name)
-      const canvas = document.createElement("canvas")
-      canvas.width = 16
-      canvas.height = 16
-      canvas.classList.add("pointer-events-none")
+      const canvas = div.querySelector("canvas")!
+      const ctx = canvas.getContext("2d")!
       if (cell.color) {
         canvas.style.backgroundColor = cell.color
       }
       if (cell.src) {
         for (const src of cell.src) {
           const img = await fieldBlock.loadCellImage(src, { loadImage })
-          const ctx = canvas.getContext("2d")!
           ctx.drawImage(img, 0, 0, 16, 16)
         }
       }
-      div.appendChild(canvas)
       return div
     }))
     cells.forEach((cell) => {
@@ -160,28 +150,13 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
     if (objKinds.size > 0) {
       const id = "object-remove"
       toolbox.addObjectTool({ kind: "object-remove", id })
-      const div = document.createElement("div")
-      div.id = id
-      div.classList.add(
-        "inline-block",
-        "p-1",
-        "m-1",
-        "rounded",
-        "cursor-pointer",
+      el.appendChild(
+        <div id={id} class="inline-block p-1 m-1 rounded cursor-pointer">
+          <span class="w-4 h-4 block text-xs text-center text-white pointer-events-none">
+            φ
+          </span>
+        </div>,
       )
-      const span = document.createElement("span")
-      span.classList.add(
-        "w-4",
-        "h-4",
-        "block",
-        "text-xs",
-        "text-center",
-        "text-white",
-        "pointer-events-none",
-      )
-      span.textContent = "φ"
-      div.appendChild(span)
-      el.appendChild(div)
     }
 
     for (const spawn of objKinds) {
@@ -196,22 +171,14 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
         new URL(src, fieldBlock.url).href,
       )
       await obj.loadAssets({ loadImage })
-      const div = document.createElement("div")
-      div.id = id
-      div.classList.add(
-        "inline-block",
-        "p-1",
-        "m-1",
-        "rounded",
-        "cursor-pointer",
+      const div = (
+        <div id={id} class="inline-block p-1 m-1 rounded cursor-pointer">
+          <canvas width="16" height="16" class="pointer-events-none"></canvas>
+        </div>
       )
-      const canvas = document.createElement("canvas")
-      canvas.width = 16
-      canvas.height = 16
-      canvas.classList.add("pointer-events-none")
+      const canvas = div.querySelector("canvas")!
       const ctx = canvas.getContext("2d")!
       ctx.drawImage(obj.image(), 0, 0, 16, 16)
-      div.appendChild(canvas)
       el.appendChild(div)
     }
 
@@ -221,13 +188,13 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
   subscribe(currentTool, (tool) => {
     if (tool === null) return
     for (const child of Array.from(el.children)) {
-      const firstChild = child.firstChild as HTMLElement
+      const firstChild = child.firstElementChild
       if (child.id === tool.id) {
         child.classList.add(...SWITCH_ACTIVE)
-        firstChild.classList.add(...SWITCH_ACTIVE_CANVAS)
+        firstChild?.classList.add(...SWITCH_ACTIVE_CANVAS)
       } else {
         child.classList.remove(...SWITCH_ACTIVE)
-        firstChild.classList.remove(...SWITCH_ACTIVE_CANVAS)
+        firstChild?.classList.remove(...SWITCH_ACTIVE_CANVAS)
       }
     }
   })
@@ -246,10 +213,14 @@ function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
 
 function MainContainer({ subscribe, el }: Context) {
   function createCanvasFromImageData(imageData: ImageData) {
-    const canvas = document.createElement("canvas")
-    canvas.width = imageData.width
-    canvas.height = imageData.height
-    canvas.classList.add("absolute", "top-0", "left-0")
+    const canvas = (
+      <canvas
+        width={imageData.width}
+        height={imageData.height}
+        class="absolute top-0 left-0"
+      >
+      </canvas>
+    ) as HTMLCanvasElement
     const ctx = canvas.getContext("2d")!
     ctx.putImageData(imageData, 0, 0)
     return canvas
@@ -273,16 +244,15 @@ function MainContainer({ subscribe, el }: Context) {
     mount("field-block-canvas", el)
 
     {
-      const objectsCanvas = document.createElement("canvas")
-      objectsCanvas.width = CANVAS_SIZE
-      objectsCanvas.height = CANVAS_SIZE
-      objectsCanvas.style.left = SIDE_CANVAS_SIZE + "px"
-      objectsCanvas.style.top = SIDE_CANVAS_SIZE + "px"
-      objectsCanvas.style.position = "absolute"
-      objectsCanvas.classList.add(
-        "field-object-canvas",
-        "pointer-events-none",
-      )
+      const objectsCanvas = (
+        <canvas
+          width={CANVAS_SIZE}
+          height={CANVAS_SIZE}
+          style={`left: ${SIDE_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px;`}
+          class="absolute field-object-canvas pointer-events-none"
+        >
+        </canvas>
+      ) as HTMLCanvasElement
       el.appendChild(objectsCanvas)
       mount("field-object-canvas", el)
       const wrapper = new CanvasWrapper(objectsCanvas)
@@ -327,15 +297,13 @@ function MainContainer({ subscribe, el }: Context) {
       const blockMap = new BlockMap(href, JSON.parse(text))
       const fieldBlock = new FieldBlock(blockMap)
       await fieldBlock.loadAssets({ loadImage })
-      const a = document.createElement("a")
-      a.href = href.replace(/^file:\/\//, "vscode://file")
-      a.textContent = `block_${k}.${l}.json`
-      a.classList.add(
-        "absolute",
-        "opacity-50",
-        "hover:bg-neutral-700",
-        "bg-neutral-800",
-        "break-all",
+      const a = (
+        <a
+          class="absolute opacity-50 hover:bg-neutral-700 bg-neutral-800 break-all"
+          href={href.replace(/^file:\/\//, "vscode://file")}
+        >
+          block_{k}.{l}.json
+        </a>
       )
       if (dx === -1) {
         const imageData = fieldBlock.createImageDataForRange(
@@ -522,6 +490,7 @@ function FieldObjectCanvas(
   on("click", (e) => {
     paint(e)
   })
+
   on("mousemove", (e) => {
     if (mode.get() === "stroke") {
       paint(e)
@@ -537,7 +506,7 @@ function FieldObjectCanvas(
     if (tool === null) return
     el.classList.toggle(
       "pointer-events-none",
-      tool.kind !== "object" && tool.kind !== "object-remove",
+      !(tool.kind === "object" || tool.kind === "object-remove"),
     )
   })
 
