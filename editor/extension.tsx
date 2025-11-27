@@ -1,6 +1,6 @@
 // Copyright 2024-2025 Yoshiya Hinosawa. MIT license.
 
-/** @jsxImportSource @kt3k/picojsx */
+/** @jsxImportSource @kt3k/stringx */
 /** @jsxRuntime automatic */
 
 // @ts-types="@types/vscode"

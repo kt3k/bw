@@ -2,9 +2,9 @@
   "version": "5",
   "specifiers": {
     "jsr:@kt3k/cell@~0.7.6": "0.7.6",
-    "jsr:@kt3k/domx@~0.1.8": "0.1.8",
-    "jsr:@kt3k/picojsx@~0.1.5": "0.1.6",
+    "jsr:@kt3k/ht@~0.1.3": "0.1.3",
     "jsr:@kt3k/signal@0.3": "0.3.0",
+    "jsr:@kt3k/stringx@~0.2.1": "0.2.1",
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
     "jsr:@std/encoding@^1.0.6": "1.0.10",
     "npm:@types/vscode-webview@^1.57.5": "1.57.5",
@@ -22,14 +22,14 @@
         "jsr:@kt3k/signal"
       ]
     },
-    "@kt3k/domx@0.1.8": {
-      "integrity": "744185befc3efa78aa9a896cdaf506dbf5ca63da41e1616a3599b8aa926e89ab"
-    },
-    "@kt3k/picojsx@0.1.6": {
-      "integrity": "b87ee2ca7499a1c082e9e2e9759dccb4ce51fe46ef0532e05bdc0bb8a68c4c15"
+    "@kt3k/ht@0.1.3": {
+      "integrity": "4cfffdeca6f1920905e906572244fb39cb5d2089db078bef42bcc5882a04fc02"
     },
     "@kt3k/signal@0.3.0": {
       "integrity": "5279863b78cbe475a8606864122abaad600e508e08eec7fff126f05c81aad7ff"
+    },
+    "@kt3k/stringx@0.2.1": {
+      "integrity": "c0dde0c519c0977487c078184e6a16cfb1d090a05cccdc351a78db15def7f519"
     },
     "@kt3k/weak-value-map@0.1.2": {
       "integrity": "b95ba4b9a56ba74191703707e3a2ff77cabe68a5d66fe35f4a73f5ece91a6b95"
@@ -2353,8 +2353,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@kt3k/cell@~0.7.6",
-      "jsr:@kt3k/domx@~0.1.8",
-      "jsr:@kt3k/picojsx@~0.1.5",
+      "jsr:@kt3k/ht@~0.1.3",
+      "jsr:@kt3k/stringx@~0.2.1",
       "jsr:@kt3k/weak-value-map@~0.1.2",
       "jsr:@std/encoding@^1.0.6",
       "npm:@types/vscode-webview@^1.57.5",

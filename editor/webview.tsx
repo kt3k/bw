@@ -4,17 +4,19 @@
 /// <reference lib="dom" />
 /// <reference types="@types/vscode-webview" />
 
-/** @jsxImportSource @kt3k/domx */
+/** @jsxImportSource @kt3k/stringx */
 /** @jsxRuntime automatic */
 
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
+
+import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
+import * as ht from "@kt3k/ht"
 
 import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
 import { Object } from "../model/object.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
-import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import type * as type from "./types.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
@@ -121,10 +123,9 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
       toolbox.addCellTool({ kind: "cell", name: cell.name, id })
       let div = el.querySelector('[id="' + id + '"]')
       if (div) return div
-      div = (
-        <div id={id} class="inline-block p-1 m-1 rounded cursor-pointer">
-          <canvas width="16" height="16" class="pointer-events-none"></canvas>
-        </div>
+      div = ht.div(
+        { id, class: "inline-block p-1 m-1 rounded cursor-pointer" },
+        <canvas width="16" height="16" class="pointer-events-none"></canvas>,
       )
       const canvas = div.querySelector("canvas")!
       const ctx = canvas.getContext("2d")!
@@ -151,11 +152,12 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
       const id = "object-remove"
       toolbox.addObjectTool({ kind: "object-remove", id })
       el.appendChild(
-        <div id={id} class="inline-block p-1 m-1 rounded cursor-pointer">
+        ht.div(
+          { id, class: "inline-block p-1 m-1 rounded cursor-pointer" },
           <span class="w-4 h-4 block text-xs text-center text-white pointer-events-none">
             φ
-          </span>
-        </div>,
+          </span>,
+        ),
       )
     }
 
@@ -171,10 +173,9 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
         new URL(src, fieldBlock.url).href,
       )
       await obj.loadAssets({ loadImage })
-      const div = (
-        <div id={id} class="inline-block p-1 m-1 rounded cursor-pointer">
-          <canvas width="16" height="16" class="pointer-events-none"></canvas>
-        </div>
+      const div = ht.div(
+        { id, class: "inline-block p-1 m-1 rounded cursor-pointer" },
+        <canvas width="16" height="16" class="pointer-events-none"></canvas>,
       )
       const canvas = div.querySelector("canvas")!
       const ctx = canvas.getContext("2d")!
@@ -213,14 +214,11 @@ function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
 
 function MainContainer({ subscribe, el }: Context) {
   function createCanvasFromImageData(imageData: ImageData) {
-    const canvas = (
-      <canvas
-        width={imageData.width}
-        height={imageData.height}
-        class="absolute top-0 left-0"
-      >
-      </canvas>
-    ) as HTMLCanvasElement
+    const canvas = ht.canvas({
+      width: imageData.width,
+      height: imageData.height,
+      class: "absolute top-0 left-0",
+    })
     const ctx = canvas.getContext("2d")!
     ctx.putImageData(imageData, 0, 0)
     return canvas
@@ -244,15 +242,12 @@ function MainContainer({ subscribe, el }: Context) {
     mount("field-block-canvas", el)
 
     {
-      const objectsCanvas = (
-        <canvas
-          width={CANVAS_SIZE}
-          height={CANVAS_SIZE}
-          style={`left: ${SIDE_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px;`}
-          class="absolute field-object-canvas pointer-events-none"
-        >
-        </canvas>
-      ) as HTMLCanvasElement
+      const objectsCanvas = ht.canvas({
+        width: CANVAS_SIZE,
+        height: CANVAS_SIZE,
+        style: `left: ${SIDE_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px;`,
+        class: "absolute field-object-canvas pointer-events-none",
+      })
       el.appendChild(objectsCanvas)
       mount("field-object-canvas", el)
       const wrapper = new CanvasWrapper(objectsCanvas)
@@ -297,14 +292,10 @@ function MainContainer({ subscribe, el }: Context) {
       const blockMap = new BlockMap(href, JSON.parse(text))
       const fieldBlock = new FieldBlock(blockMap)
       await fieldBlock.loadAssets({ loadImage })
-      const a = (
-        <a
-          class="absolute opacity-50 hover:bg-neutral-700 bg-neutral-800 break-all"
-          href={href.replace(/^file:\/\//, "vscode://file")}
-        >
-          block_{k}.{l}.json
-        </a>
-      )
+      const a = ht.a({
+        class: "absolute hover:bg-neutral-700 bg-neutral-800 break-all",
+        href: href.replace(/^file:\/\//, "vscode://file"),
+      }, `block_${k}.${l}.json`)
       if (dx === -1) {
         const imageData = fieldBlock.createImageDataForRange(
           BLOCK_SIZE - 5,
