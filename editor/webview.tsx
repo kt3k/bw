@@ -39,7 +39,7 @@ const gridIndex = new GroupSignal<{ i: number | null; j: number | null }>({
   j: null,
 })
 
-class Toolbox {
+class ToolManager {
   cells: CellTool[] = []
   objects: ObjectTool[] = []
   #toolIndex: number = 0
@@ -52,7 +52,7 @@ class Toolbox {
     this.objects.push(tool)
   }
 
-  get length() {
+  get toolCount() {
     return this.cells.length + this.objects.length
   }
 
@@ -68,11 +68,11 @@ class Toolbox {
   }
 
   selectNext(): void {
-    this.#toolIndex = (this.#toolIndex + 1) % this.length
+    this.#toolIndex = (this.#toolIndex + 1) % this.toolCount
   }
 
   selectPrev(): void {
-    this.#toolIndex = (this.#toolIndex - 1 + this.length) % this.length
+    this.#toolIndex = (this.#toolIndex - 1 + this.toolCount) % this.toolCount
   }
 
   selectById(id: string) {
@@ -94,7 +94,7 @@ class Toolbox {
   }
 }
 
-const toolbox = new Toolbox()
+const toolManager = new ToolManager()
 const currentTool = new Signal<CellTool | ObjectTool | null>(null)
 
 blockMapSource.subscribe(({ uri, text }) => {
@@ -107,10 +107,18 @@ blockMapSource.subscribe(({ uri, text }) => {
   )
 })
 
+function updateDocument(b: FieldBlock) {
+  fieldBlock.update(b)
+  vscode.postMessage({
+    type: "update",
+    map: b.toMap().toObject(),
+  })
+}
+
 const SWITCH_ACTIVE = ["bg-cyan-400"]
 const SWITCH_ACTIVE_CANVAS = ["opacity-70"]
 
-function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
+function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
   let initialized = false
 
   subscribe(fieldBlock, async (fieldBlock) => {
@@ -120,7 +128,7 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
 
     const cells = await Promise.all(fieldBlock.cells.map(async (cell) => {
       const id = "cell-" + cell.name
-      toolbox.addCellTool({ kind: "cell", name: cell.name, id })
+      toolManager.addCellTool({ kind: "cell", name: cell.name, id })
       let div = el.querySelector('[id="' + id + '"]')
       if (div) return div
       div = ht.div(
@@ -150,7 +158,7 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
     }
     if (objKinds.size > 0) {
       const id = "object-remove"
-      toolbox.addObjectTool({ kind: "object-remove", id })
+      toolManager.addObjectTool({ kind: "object-remove", id })
       el.appendChild(
         ht.div(
           { id, class: "inline-block p-1 m-1 rounded cursor-pointer" },
@@ -164,7 +172,7 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
     for (const spawn of objKinds) {
       const [type, src] = spawn.split("|")
       const id = `object-${type}-${src}`
-      toolbox.addObjectTool({ kind: "object", type, src, id })
+      toolManager.addObjectTool({ kind: "object", type, src, id })
       const obj = new Object(
         null,
         0,
@@ -183,7 +191,9 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
       el.appendChild(div)
     }
 
-    currentTool.update(toolbox.currentTool())
+    el.appendChild(el.firstChild!) // move mode indicator to last
+
+    currentTool.update(toolManager.currentTool()) // Initialize the tool selection
   })
 
   subscribe(currentTool, (tool) => {
@@ -202,9 +212,8 @@ function ToolControlPanel({ el, on, subscribe }: Context<HTMLElement>) {
 
   on("click", (e) => {
     const div = e.target as HTMLDivElement
-    toolbox.selectById(div.id)
-    console.log("Updating current tool", toolbox.currentTool())
-    currentTool.update(toolbox.currentTool())
+    toolManager.selectById(div.id)
+    currentTool.update(toolManager.currentTool())
   })
 }
 
@@ -212,18 +221,24 @@ function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
   subscribe(mode, (mode) => el.textContent = mode)
 }
 
-function MainContainer({ subscribe, el }: Context) {
-  function createCanvasFromImageData(imageData: ImageData) {
-    const canvas = ht.canvas({
-      width: imageData.width,
-      height: imageData.height,
-      class: "absolute top-0 left-0",
-    })
-    const ctx = canvas.getContext("2d")!
-    ctx.putImageData(imageData, 0, 0)
-    return canvas
-  }
+function createCanvasFromImageData(imageData: ImageData) {
+  const canvas = ht.canvas({
+    width: imageData.width,
+    height: imageData.height,
+    class: "absolute top-0 left-0",
+  })
+  const ctx = canvas.getContext("2d")!
+  ctx.putImageData(imageData, 0, 0)
+  return canvas
+}
 
+function getGridFromUri(uri: string) {
+  const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
+  if (!m) return { i: NaN, j: NaN }
+  return { i: parseInt(m[1]), j: parseInt(m[2]) }
+}
+
+function CanvasLayers({ subscribe, el }: Context) {
   let initialized = false
   subscribe(fieldBlock, async (fieldBlock) => {
     if (fieldBlock === null) return
@@ -235,21 +250,20 @@ function MainContainer({ subscribe, el }: Context) {
     canvas.style.left = SIDE_CANVAS_SIZE + "px"
     canvas.style.top = SIDE_CANVAS_SIZE + "px"
     canvas.style.position = "absolute"
-    canvas.classList.add("field-block-canvas")
+    canvas.classList.add("field-cells-canvas")
     el.innerHTML = ""
     el.appendChild(canvas)
     fieldBlock.renderAll()
-    mount("field-block-canvas", el)
-
+    mount("field-cells-canvas", el)
     {
       const objectsCanvas = ht.canvas({
         width: CANVAS_SIZE,
         height: CANVAS_SIZE,
         style: `left: ${SIDE_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px;`,
-        class: "absolute field-object-canvas pointer-events-none",
+        class: "absolute field-objects-canvas pointer-events-none",
       })
       el.appendChild(objectsCanvas)
-      mount("field-object-canvas", el)
+      mount("field-objects-canvas", el)
       const wrapper = new CanvasWrapper(objectsCanvas)
       for (const object of fieldBlock.objectSpawns.getAll()) {
         const obj = new Object(
@@ -348,12 +362,6 @@ function MainContainer({ subscribe, el }: Context) {
       el.appendChild(a)
     }
   })
-
-  function getGridFromUri(uri: string) {
-    const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
-    if (!m) return { i: NaN, j: NaN }
-    return { i: parseInt(m[1]), j: parseInt(m[2]) }
-  }
 }
 
 function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
@@ -374,16 +382,10 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
     if (currentCell.name === name) return
     const b = block.clone()
     b.updateCell(i, j, name)
-    fieldBlock.update(b)
-    vscode.postMessage({
-      type: "update",
-      map: b.toMap().toObject(),
-    })
+    updateDocument(b)
   }
 
-  on("click", (e) => {
-    paint(e)
-  })
+  on("click", paint)
 
   on("mousemove", (e) => {
     if (mode.get() === "stroke") {
@@ -443,7 +445,7 @@ function FieldObjectCanvas(
   const paint = (e: MouseEvent) => {
     const block = fieldBlock.get()
     if (block === null) return
-    const tool = toolbox.currentTool()
+    const tool = toolManager.currentTool()
     if (tool === null) return
     if (tool.kind !== "object" && tool.kind !== "object-remove") return
     const { i, j } = getCoordinatesFromMouseEvent(e, el, block)
@@ -451,7 +453,7 @@ function FieldObjectCanvas(
     if (tool.kind === "object-remove") {
       if (block.objectSpawns.has(i, j)) {
         b.objectSpawns.remove(i, j)
-        doUpdate(b)
+        updateDocument(b)
       }
     } else {
       const { type, src } = tool
@@ -466,22 +468,11 @@ function FieldObjectCanvas(
         block.url,
       )
       b.objectSpawns.add(spawn)
-      doUpdate(b)
-    }
-
-    function doUpdate(b: FieldBlock) {
-      fieldBlock.update(b)
-      vscode.postMessage({
-        type: "update",
-        map: b.toMap().toObject(),
-      })
+      updateDocument(b)
     }
   }
 
-  on("click", (e) => {
-    paint(e)
-  })
-
+  on("click", paint)
   on("mousemove", (e) => {
     if (mode.get() === "stroke") {
       paint(e)
@@ -522,12 +513,37 @@ function FieldObjectCanvas(
           modulo(object.y, CANVAS_SIZE),
         )
       } else {
+        // action === "remove"
         canvasWrapper.ctx.clearRect(
           modulo(object.x, CANVAS_SIZE),
           modulo(object.y, CANVAS_SIZE),
           CELL_SIZE,
           CELL_SIZE,
         )
+
+        // redraw the object below to fix overlapping area
+        canvasWrapper.ctx.clearRect(
+          modulo(object.x, CANVAS_SIZE),
+          modulo(object.y + CELL_SIZE, CANVAS_SIZE),
+          CELL_SIZE,
+          CELL_SIZE,
+        )
+        const spawnBelow = block.objectSpawns.get(object.i, object.j + 1)
+        if (spawnBelow) {
+          const objectBelow = new Object(
+            null,
+            spawnBelow.i,
+            spawnBelow.j,
+            spawnBelow.type,
+            new URL(spawnBelow.src, block.url).href,
+          )
+          await objectBelow.loadAssets({ loadImage })
+          canvasWrapper.drawImage(
+            objectBelow.image(),
+            modulo(objectBelow.x, CANVAS_SIZE),
+            modulo(objectBelow.y, CANVAS_SIZE),
+          )
+        }
       }
     }
     prev = block
@@ -537,12 +553,12 @@ function FieldObjectCanvas(
 function KeyHandler({ on }: Context) {
   on("keydown", (e) => {
     if (e.key === "k") {
-      toolbox.selectNext()
-      currentTool.update(toolbox.currentTool())
+      toolManager.selectNext()
+      currentTool.update(toolManager.currentTool())
       mode.update("dot")
     } else if (e.key === "j") {
-      toolbox.selectPrev()
-      currentTool.update(toolbox.currentTool())
+      toolManager.selectPrev()
+      currentTool.update(toolManager.currentTool())
       mode.update("dot")
     } else if (e.key === "s" && !e.altKey && !e.metaKey) {
       if (mode.get() === "dot") {
@@ -658,9 +674,9 @@ if (state) {
 }
 
 register(KeyHandler, "key-handler")
-register(ToolControlPanel, "tool-control-panel")
+register(Toolbox, "toolbox")
 register(ModeIndicator, "mode-indicator")
-register(MainContainer, "main-container")
-register(FieldCellsCanvas, "field-block-canvas")
-register(FieldObjectCanvas, "field-object-canvas")
+register(CanvasLayers, "canvas-layers")
+register(FieldCellsCanvas, "field-cells-canvas")
+register(FieldObjectCanvas, "field-objects-canvas")
 register(InfoPanel, "js-info-panel")

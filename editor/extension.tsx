@@ -34,9 +34,9 @@ function resolveCustomTextEditor(
         <link href={u("out/style.css")} rel="stylesheet" />
       </head>
       <body class="key-handler p-0">
-        <div class="main-container relative mt-10 w-[calc(3360px+196px)]"></div>
-        <div class="tool-control-panel h-10 px-2 fixed left-0 top-0 flex items-center bg-neutral-900/50 w-[calc(100%-12rem)]">
-          <div class="group relative">
+        <div class="canvas-layers relative mt-10 w-[calc(3360px+196px)]"></div>
+        <div class="toolbox h-10 px-2 fixed left-0 top-0 flex items-center bg-neutral-900/50 w-[calc(100%-12rem)]">
+          <div class="ml-2 group relative">
             <span class="mode-indicator">dot</span>
             <span class="
               absolute top-full left-1/2 -translate-x-1/2 mt-2
