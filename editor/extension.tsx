@@ -80,11 +80,11 @@ function resolveCustomTextEditor(
   panel.onDidDispose(() => sub.dispose())
   webview.onDidReceiveMessage(onMessage)
 
-  function postMessage(message: type.Extension.Message) {
+  const postMessage = (message: type.Extension.Message) =>
     webview.postMessage(message)
-  }
 
-  function updateWebview() {
+  function onDocChange(e: vscode.TextDocumentChangeEvent) {
+    if (e.document.uri.toString() !== document.uri.toString()) return
     postMessage({
       type: "update",
       text: document.getText(),
@@ -92,16 +92,15 @@ function resolveCustomTextEditor(
     })
   }
 
-  function onDocChange(e: vscode.TextDocumentChangeEvent) {
-    if (e.document.uri.toString() !== document.uri.toString()) return
-    updateWebview()
-  }
-
   function onMessage(e: type.Webview.Message) {
     const typ = e.type
     switch (typ) {
       case "ready":
-        updateWebview()
+        postMessage({
+          type: "init",
+          text: document.getText(),
+          uri: document.uri.toString(),
+        })
         break
       case "update":
         update(e)

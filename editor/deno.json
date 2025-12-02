@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@kt3k/cell": "jsr:@kt3k/cell@^0.7.6",
+    "@kt3k/cell": "jsr:@kt3k/cell@^0.7.9",
     "@kt3k/ht": "jsr:@kt3k/ht@^0.1.3",
     "@kt3k/stringx": "jsr:@kt3k/stringx@^0.2.1",
     "@kt3k/weak-value-map": "jsr:@kt3k/weak-value-map@^0.1.2",

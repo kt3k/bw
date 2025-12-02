@@ -1,5 +1,6 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import type { IObject, LoadOptions, ObjectType } from "./types.ts"
+import { ObjectSpawnInfo } from "./field-block.ts"
 
 const fallbackImage = await fetch(
   // TODO(kt3k): Update
@@ -16,6 +17,16 @@ export class Object implements IObject {
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
+
+  static fromSpawn(spawn: ObjectSpawnInfo) {
+    return new Object(
+      spawn.id,
+      spawn.i,
+      spawn.j,
+      spawn.type,
+      new URL(spawn.src, spawn.srcBase).href,
+    )
+  }
 
   /**
    * @param i The column of the grid coordinate

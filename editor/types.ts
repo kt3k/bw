@@ -2,6 +2,11 @@
 
 // deno-lint-ignore no-namespace
 export namespace Extension {
+  export type MessageInit = {
+    type: "init"
+    uri: string
+    text: string
+  }
   export type MessageUpdate = {
     type: "update"
     uri: string
@@ -22,6 +27,7 @@ export namespace Extension {
     error: string
   }
   export type Message =
+    | MessageInit
     | MessageUpdate
     | MessageLoadImageResponse
     | MessageLoadTextResponse

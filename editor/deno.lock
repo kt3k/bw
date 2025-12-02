@@ -1,9 +1,9 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@kt3k/cell@~0.7.6": "0.7.6",
+    "jsr:@kt3k/cell@~0.7.9": "0.7.9",
     "jsr:@kt3k/ht@~0.1.3": "0.1.3",
-    "jsr:@kt3k/signal@0.3": "0.3.0",
+    "jsr:@kt3k/signal@0.4": "0.4.0",
     "jsr:@kt3k/stringx@~0.2.1": "0.2.1",
     "jsr:@kt3k/weak-value-map@~0.1.2": "0.1.2",
     "jsr:@std/encoding@^1.0.6": "1.0.10",
@@ -16,8 +16,8 @@
     "npm:tailwindcss@3": "3.4.17_postcss@8.5.6"
   },
   "jsr": {
-    "@kt3k/cell@0.7.6": {
-      "integrity": "f5b7bdf5a75d434959d14d6fa2d426d976ed84f8a8d7d7a60ccd76683bf2deb3",
+    "@kt3k/cell@0.7.9": {
+      "integrity": "020ccdd1269cf9180d6fb7dab28944c19e1ce0850c7a50e34ff6b2993c65a8f2",
       "dependencies": [
         "jsr:@kt3k/signal"
       ]
@@ -25,8 +25,8 @@
     "@kt3k/ht@0.1.3": {
       "integrity": "4cfffdeca6f1920905e906572244fb39cb5d2089db078bef42bcc5882a04fc02"
     },
-    "@kt3k/signal@0.3.0": {
-      "integrity": "5279863b78cbe475a8606864122abaad600e508e08eec7fff126f05c81aad7ff"
+    "@kt3k/signal@0.4.0": {
+      "integrity": "0490d1f6d61690d1d2f7b8265e4975ae7f377d88c7a4af41168a6eb3ddf3781f"
     },
     "@kt3k/stringx@0.2.1": {
       "integrity": "c0dde0c519c0977487c078184e6a16cfb1d090a05cccdc351a78db15def7f519"
@@ -2352,7 +2352,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@kt3k/cell@~0.7.6",
+      "jsr:@kt3k/cell@~0.7.9",
       "jsr:@kt3k/ht@~0.1.3",
       "jsr:@kt3k/stringx@~0.2.1",
       "jsr:@kt3k/weak-value-map@~0.1.2",
