@@ -1,6 +1,9 @@
 {
   "i": 0,
   "j": 0,
+  "catalogs": [
+    "../catalog/base.json"
+  ],
   "cells": [
     {
       "name": "0",

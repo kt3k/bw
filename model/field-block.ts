@@ -5,6 +5,7 @@ import { floorN, modulo } from "../util/math.ts"
 import type { Dir, IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
 import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
+import { Catalog } from "./catalog.ts"
 
 /** Global coordinates to local chunk index */
 function g2c(i: number, j: number): [number, number] {
@@ -314,8 +315,9 @@ export class BlockMap {
   readonly field: string[]
   // deno-lint-ignore no-explicit-any
   #obj: any
+  catalogs: Catalog[]
   // deno-lint-ignore no-explicit-any
-  constructor(url: string, obj: any) {
+  constructor(url: string, obj: any, catalogs: Catalog[]) {
     this.url = url
     this.i = obj.i
     this.j = obj.j
@@ -366,10 +368,11 @@ export class BlockMap {
     )
     this.field = obj.field
     this.#obj = obj
+    this.catalogs = catalogs
   }
 
   clone(): BlockMap {
-    return new BlockMap(this.url, structuredClone(this.#obj))
+    return new BlockMap(this.url, structuredClone(this.#obj), this.catalogs)
   }
 
   toObject() {

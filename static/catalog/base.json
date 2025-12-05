@@ -1,0 +1,89 @@
+{
+  "cells": [
+    {
+      "name": "0",
+      "canEnter": true,
+      "src": "../cell/floor0.png"
+    },
+    {
+      "name": "1",
+      "canEnter": false,
+      "src": "../cell/wall0.png"
+    },
+    {
+      "name": "2",
+      "canEnter": false,
+      "src": "../cell/wall1.png"
+    },
+    {
+      "name": "3",
+      "canEnter": true,
+      "src": "../cell/floor2.png"
+    },
+    {
+      "name": "4",
+      "canEnter": true,
+      "src": "../cell/floor3.png"
+    },
+    {
+      "name": "5",
+      "canEnter": true,
+      "src": "../cell/floor4.png"
+    },
+    {
+      "name": "6",
+      "canEnter": true,
+      "src": "../cell/floor5.png"
+    }
+  ],
+  "actors": {
+    "random-walk": {
+      "main": "random-walk",
+      "src": "../char/not-found/"
+    },
+    "random": {
+      "main": "random",
+      "src": "../char/joob/"
+    },
+    "random-rotate": {
+      "main": "random-rotate",
+      "src": "../char/juni/"
+    },
+    "inertial": {
+      "main": "inertial",
+      "src": "../char/lena/"
+    }
+  },
+  "items": {
+    "apple": {
+      "src": "../item/apple.png"
+    },
+    "green-apple": {
+      "src": "../item/green-apple.png"
+    },
+    "mushroom": {
+      "src": "../item/mushroom.png"
+    },
+    "purple-mushroom": {
+      "src": "../item/purple-mushroom.png"
+    }
+  },
+  "objects": {
+    "stool": {
+      "src": "../obj/stool.png",
+      "canEnter": true
+    },
+    "table": {
+      "src": "../obj/table.png",
+      "canEnter": false
+    },
+    "table2": {
+      "src": "../obj/table2.png",
+      "canEnter": false
+    },
+    "d": {
+      "src": "../obj/d.png",
+      "canEnter": true
+    }
+  }
+}
