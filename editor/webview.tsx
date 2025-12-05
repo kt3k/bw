@@ -13,6 +13,7 @@ import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
+import { Catalog } from "../model/catalog.ts"
 import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
 import { Object } from "../model/object.ts"
 import { floorN, modulo } from "../util/math.ts"
@@ -244,9 +245,12 @@ if (state) {
   vscode.postMessage({ type: "ready" })
 }
 
-const blockMapSource = new GroupSignal(await initialData.promise)
+const { uri, text } = await initialData.promise
+const blockMapSource = new GroupSignal({ uri, text })
+const mapObj = JSON.parse(text)
+const catalog = await loadCatalogs(uri, mapObj.catalogs)
 const fieldBlock = blockMapSource.map(({ uri, text }) =>
-  new FieldBlock(new BlockMap(uri, JSON.parse(text)))
+  new FieldBlock(new BlockMap(uri, JSON.parse(text), catalog))
 )
 await fieldBlock.get().loadAssets({ loadImage })
 
@@ -354,6 +358,26 @@ function getGridFromUri(uri: string) {
   return { i: parseInt(m[1]), j: parseInt(m[2]) }
 }
 
+export async function loadCatalog(
+  baseUrl: string,
+  url: string,
+): Promise<Catalog> {
+  return Catalog.fromJSON(
+    JSON.parse(await loadText((new URL(url, baseUrl)).href)),
+    url,
+  )
+}
+
+export async function loadCatalogs(
+  baseUrl: string,
+  urls: string[],
+): Promise<Catalog> {
+  const catalogs = await Promise.all(
+    urls.map((url) => loadCatalog(baseUrl, url)),
+  )
+  return catalogs.reduce((acc, catalog) => acc.merge(catalog), new Catalog())
+}
+
 async function CanvasLayers({ el }: Context) {
   const block = fieldBlock.get()
 
@@ -401,7 +425,13 @@ async function CanvasLayers({ el }: Context) {
         new URL("block_not_found.json", blockMapSource.get().uri).href,
       )
     }
-    const blockMap = new BlockMap(href, JSON.parse(text))
+    const obj = JSON.parse(text)
+
+    const blockMap = new BlockMap(
+      href,
+      obj,
+      await loadCatalogs(href, obj.catalogs),
+    )
     const fieldBlock = new FieldBlock(blockMap)
     await fieldBlock.loadAssets({ loadImage })
     const a = ht.a({
@@ -414,6 +444,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         5,
         BLOCK_SIZE,
+        fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.left = "0"
@@ -426,6 +457,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         5,
         BLOCK_SIZE,
+        fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.left = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
@@ -438,6 +470,7 @@ async function CanvasLayers({ el }: Context) {
         BLOCK_SIZE - 5,
         BLOCK_SIZE,
         5,
+        fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.top = "0"
@@ -450,6 +483,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         BLOCK_SIZE,
         5,
+        fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.top = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
@@ -502,7 +536,8 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   subscribe(fieldBlock, async (block) => {
     await block.loadAssets({ loadImage })
     for (const [i, j] of prev.diffCells(block)) {
-      block.drawCell(canvasWrapper, i, j)
+      const cell = block.getCell(i, j)
+      block.drawCell(canvasWrapper, i, j, cell, block.imgMap[cell.name])
     }
     prev = block
   })

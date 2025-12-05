@@ -1,0 +1,211 @@
+import { loadJson } from "../util/load.ts"
+
+export class CellDefinition {
+  name: string
+  canEnter: boolean
+  src: string
+  baseUrl: string
+
+  constructor(name: string, canEnter: boolean, src: string, baseUrl: string) {
+    this.name = name
+    this.canEnter = canEnter
+    this.src = src
+    this.baseUrl = baseUrl
+  }
+}
+
+export class ItemDefinition {
+  type: string
+  src: string
+  baseUrl: string
+
+  constructor(type: string, src: string, baseUrl: string) {
+    this.type = type
+    this.src = src
+    this.baseUrl = baseUrl
+  }
+
+  get href(): string {
+    return new URL(this.src, this.baseUrl).href
+  }
+}
+
+export class ActorDefinition {
+  type: string
+  main: string
+  src: string
+  baseUrl: string
+
+  constructor(type: string, main: string, src: string, baseUrl: string) {
+    this.type = type
+    this.main = main
+    this.src = src
+    this.baseUrl = baseUrl
+  }
+
+  get href(): string {
+    return new URL(this.src, this.baseUrl).href
+  }
+}
+
+export class ObjectDefinition {
+  type: string
+  src: string
+  baseUrl: string
+
+  constructor(type: string, src: string, baseUrl: string) {
+    this.type = type
+    this.src = src
+    this.baseUrl = baseUrl
+  }
+
+  get href(): string {
+    return new URL(this.src, this.baseUrl).href
+  }
+}
+
+export class Catalog {
+  cells: Map<string, CellDefinition>
+  items: Map<string, ItemDefinition>
+  actors: Map<string, ActorDefinition>
+  objects: Map<string, ObjectDefinition>
+
+  // deno-lint-ignore no-explicit-any
+  static fromJSON(json: any, url: string): Catalog {
+    const catalog = new Catalog()
+    for (const cellData of json.cells) {
+      const cellDef = new CellDefinition(
+        cellData.name,
+        cellData.canEnter,
+        cellData.src,
+        url,
+      )
+      catalog.cells.set(cellDef.name, cellDef)
+    }
+
+    for (const itemType in json.items) {
+      const itemDef = new ItemDefinition(
+        itemType,
+        json.items[itemType].src,
+        url,
+      )
+      catalog.items.set(itemType, itemDef)
+    }
+
+    for (const actorType in json.actors) {
+      const actorDef = new ActorDefinition(
+        actorType,
+        json.actors[actorType].main,
+        json.actors[actorType].src,
+        url,
+      )
+      catalog.actors.set(actorType, actorDef)
+    }
+
+    for (const objectType in json.objects) {
+      const objectDef = new ObjectDefinition(
+        objectType,
+        json.objects[objectType].src,
+        url,
+      )
+      catalog.objects.set(objectType, objectDef)
+    }
+    return catalog
+  }
+
+  constructor() {
+    this.cells = new Map()
+    this.items = new Map()
+    this.actors = new Map()
+    this.objects = new Map()
+  }
+
+  cell(name: string): CellDefinition | undefined {
+    return this.cells.get(name)
+  }
+
+  item(type: string): ItemDefinition | undefined {
+    return this.items.get(type)
+  }
+
+  actor(type: string): ActorDefinition | undefined {
+    return this.actors.get(type)
+  }
+
+  object(type: string): ObjectDefinition | undefined {
+    return this.objects.get(type)
+  }
+
+  merge(other: Catalog): Catalog {
+    for (const [name, cellDef] of other.cells) {
+      this.cells.set(name, cellDef)
+    }
+    for (const [type, itemDef] of other.items) {
+      this.items.set(type, itemDef)
+    }
+    for (const [type, actorDef] of other.actors) {
+      this.actors.set(type, actorDef)
+    }
+    for (const [type, objectDef] of other.objects) {
+      this.objects.set(type, objectDef)
+    }
+    return this
+  }
+
+  toJSON(): object {
+    const cells: object[] = []
+    for (const cellDef of this.cells.values()) {
+      cells.push({
+        name: cellDef.name,
+        canEnter: cellDef.canEnter,
+        src: cellDef.src,
+      })
+    }
+
+    const items: Record<string, object> = {}
+    for (const itemDef of this.items.values()) {
+      items[itemDef.type] = {
+        src: itemDef.src,
+      }
+    }
+
+    const actors: Record<string, object> = {}
+    for (const actorDef of this.actors.values()) {
+      actors[actorDef.type] = {
+        main: actorDef.main,
+        src: actorDef.src,
+      }
+    }
+
+    const objects: Record<string, object> = {}
+    for (const objectDef of this.objects.values()) {
+      objects[objectDef.type] = {
+        src: objectDef.src,
+      }
+    }
+
+    return {
+      cells,
+      items,
+      actors,
+      objects,
+    }
+  }
+}
+
+export async function loadCatalog(
+  baseUrl: string,
+  url: string,
+): Promise<Catalog> {
+  return Catalog.fromJSON(await loadJson((new URL(url, baseUrl)).href), url)
+}
+
+export async function loadCatalogs(
+  baseUrl: string,
+  urls: string[],
+): Promise<Catalog> {
+  const catalogs = await Promise.all(
+    urls.map((url) => loadCatalog(baseUrl, url)),
+  )
+  return catalogs.reduce((acc, catalog) => acc.merge(catalog), new Catalog())
+}

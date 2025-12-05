@@ -2,9 +2,11 @@ import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import { randomInt, seed } from "../util/random.ts"
 import { floorN, modulo } from "../util/math.ts"
+import { loadImage } from "../util/load.ts"
 import type { Dir, IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
 import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
+import { Catalog } from "./catalog.ts"
 
 /** Global coordinates to local chunk index */
 function g2c(i: number, j: number): [number, number] {
@@ -314,8 +316,9 @@ export class BlockMap {
   readonly field: string[]
   // deno-lint-ignore no-explicit-any
   #obj: any
+  catalog: Catalog
   // deno-lint-ignore no-explicit-any
-  constructor(url: string, obj: any) {
+  constructor(url: string, obj: any, catalog: Catalog) {
     this.url = url
     this.i = obj.i
     this.j = obj.j
@@ -366,10 +369,11 @@ export class BlockMap {
     )
     this.field = obj.field
     this.#obj = obj
+    this.catalog = catalog
   }
 
   clone(): BlockMap {
-    return new BlockMap(this.url, structuredClone(this.#obj))
+    return new BlockMap(this.url, structuredClone(this.#obj), this.catalog)
   }
 
   toObject() {
@@ -388,7 +392,7 @@ export class FieldBlock {
   // The row of the world coordinates
   #j: number
   #cellMap: Record<string, FieldCell> = {}
-  #imgMap: Record<string, ImageBitmap> = {}
+  imgMap: Record<string, ImageBitmap> = {}
   characterSpawns: SpawnMap<CharacterSpawnInfo>
   itemSpawns: SpawnMap<ItemSpawnInfo>
   objectSpawns: SpawnMap<ObjectSpawnInfo>
@@ -434,7 +438,7 @@ export class FieldBlock {
       Object.values(this.#cellMap).map(async (cell) => {
         if (cell.src) {
           for (const src of cell.src) {
-            this.#imgMap[src] = await this.loadCellImage(src, options)
+            this.imgMap[cell.name] = await this.loadCellImage(src, options)
           }
         }
       }),
@@ -527,26 +531,19 @@ export class FieldBlock {
     )
   }
 
-  drawCell(wrapper: CanvasWrapper, i: number, j: number) {
+  drawCell(
+    wrapper: CanvasWrapper,
+    i: number,
+    j: number,
+    cell: FieldCell,
+    image: ImageBitmap,
+  ) {
     const [localI, localJ] = g2l(i, j)
-    const cell = this.getCell(i, j)
-    if (cell.src) {
-      for (const src of cell.src) {
-        wrapper.drawImage(
-          this.#imgMap[src],
-          localI * CELL_SIZE,
-          localJ * CELL_SIZE,
-        )
-      }
-    } else {
-      wrapper.drawRect(
-        localI * CELL_SIZE,
-        localJ * CELL_SIZE,
-        CELL_SIZE,
-        CELL_SIZE,
-        cell.color || "black",
-      )
-    }
+    wrapper.drawImage(
+      image,
+      localI * CELL_SIZE,
+      localJ * CELL_SIZE,
+    )
     const { rng } = seed(`${i}.${j}`)
     let color: string
     if (cell.canEnter) {
@@ -569,17 +566,25 @@ export class FieldBlock {
     j: number,
     width: number,
     height: number,
+    imgMap: Record<string, ImageBitmap>,
   ) {
     for (let ii = 0; ii < width; ii++) {
       for (let jj = 0; jj < height; jj++) {
-        this.drawCell(wrapper, i + ii, j + jj)
+        const cell = this.getCell(i + ii, j + jj)
+        this.drawCell(
+          wrapper,
+          i + ii,
+          j + jj,
+          cell,
+          imgMap[cell.name],
+        )
       }
     }
   }
 
   renderAll() {
     const wrapper = new CanvasWrapper(this.canvas)
-    this.#renderRange(wrapper, 0, 0, BLOCK_SIZE, BLOCK_SIZE)
+    this.#renderRange(wrapper, 0, 0, BLOCK_SIZE, BLOCK_SIZE, this.imgMap)
   }
 
   createImageDataForRange(
@@ -587,13 +592,14 @@ export class FieldBlock {
     j: number,
     gridWidth: number,
     gridHeight: number,
+    imgMap: Record<string, ImageBitmap>,
   ): ImageData {
     const canvas = new OffscreenCanvas(
       CELL_SIZE * BLOCK_SIZE,
       CELL_SIZE * BLOCK_SIZE,
     )
     const wrapper = new CanvasWrapper(canvas)
-    this.#renderRange(wrapper, i, j, gridWidth, gridHeight)
+    this.#renderRange(wrapper, i, j, gridWidth, gridHeight, imgMap)
     return canvas.getContext("2d")!.getImageData(
       CELL_SIZE * i,
       CELL_SIZE * j,
@@ -650,6 +656,7 @@ export class FieldBlock {
     worker.postMessage({
       url: this.#map.url,
       obj: { ...this.toMap().toObject(), characters: [], items: [] },
+      imgMap: this.imgMap,
       i: k * BLOCK_CHUNK_SIZE,
       j: l * BLOCK_CHUNK_SIZE,
       gridWidth: BLOCK_CHUNK_SIZE,
@@ -710,7 +717,7 @@ export class FieldBlock {
       items: this.itemSpawns.toJSON(),
       objects: this.objectSpawns.toJSON(),
       field: this.#field,
-    })
+    }, this.#map.catalog)
   }
 
   /**
@@ -753,7 +760,10 @@ export class FieldBlockChunk {
     return this.#fieldBlock.objectSpawns.getChunk(this.#i, this.#j)
   }
 
-  render(initialLoad: boolean) {
+  async render(initialLoad: boolean) {
+    if (!this.#fieldBlock.assetsReady) {
+      await this.#fieldBlock.loadAssets({ loadImage })
+    }
     return this.#fieldBlock.renderChunk(this.#i, this.#j, { initialLoad })
   }
 }

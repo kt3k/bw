@@ -1,6 +1,9 @@
 {
   "i": 0,
   "j": 0,
+  "catalogs": [
+    "../catalog/base.json"
+  ],
   "cells": [
     {
       "name": "0",
@@ -36,14 +39,6 @@
       "name": "6",
       "canEnter": true,
       "src": "../cell/floor5.png"
-    },
-    {
-      "name": "d",
-      "canEnter": true,
-      "src": [
-        "../cell/floor0.png",
-        "../cell/d.png"
-      ]
     }
   ],
   "characters": [

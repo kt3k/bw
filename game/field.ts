@@ -22,6 +22,7 @@ import {
 import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
 import { DIRS, nextGrid } from "../util/dir.ts"
+import { loadCatalogs } from "../model/catalog.ts"
 
 /** The items on the field */
 export class FieldItems implements IStepper, ILoader {
@@ -323,10 +324,10 @@ class BlockLoadScope extends RectScope {
 /** MapLoader manages the loading of maps */
 class BlockMapLoader {
   #loading = new Set<string>()
-  #root: string
+  #url: string
 
-  constructor(root: string) {
-    this.#root = root
+  constructor(url: string) {
+    this.#url = url
   }
 
   loadMaps(mapIds: string[]) {
@@ -334,18 +335,25 @@ class BlockMapLoader {
   }
 
   async loadMap(mapId: string) {
-    const url = new URL(`block_${mapId}.json`, this.#root).href
+    const url = new URL(`block_${mapId}.json`, this.#url).href
     this.#loading.add(url)
     try {
       const resp = await fetch(url)
-      return new BlockMap(url, await resp.json())
+      const mapObj = await resp.json()
+      const catalog = await loadCatalogs(url, mapObj.catalogs)
+      return new BlockMap(url, mapObj, catalog)
     } catch {
-      const fallbackUrl = new URL("block_not_found.json", this.#root).href
+      const fallbackUrl = new URL("block_not_found.json", this.#url).href
       const resp = await fetch(fallbackUrl)
-      const obj = await resp.json()
+      const mapObj = await resp.json()
       // Fix the map grid coordinates
       const [i, j] = mapId.split(".").map(Number) // mapId is in the form "i.j"
-      return new BlockMap(fallbackUrl, globalThis.Object.assign(obj, { i, j }))
+      const catalog = await loadCatalogs(fallbackUrl, mapObj.catalogs)
+      return new BlockMap(
+        fallbackUrl,
+        globalThis.Object.assign(mapObj, { i, j }),
+        catalog,
+      )
     } finally {
       // ensure the loading is removed even if an error occurs
       this.#loading.delete(url)

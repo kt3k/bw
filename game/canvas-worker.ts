@@ -1,17 +1,17 @@
 import { BlockMap, FieldBlock } from "../model/field-block.ts"
-import { loadImage } from "../util/load.ts"
+import { Catalog } from "../model/catalog.ts"
 
-addEventListener("message", async (event) => {
+addEventListener("message", (event) => {
   const start = performance.now()
-  const { url, obj, i, j, gridWidth, gridHeight } = event.data
-  const blockMap = new BlockMap(url, obj)
+  const { url, obj, imgMap, i, j, gridWidth, gridHeight } = event.data
+  const blockMap = new BlockMap(url, obj, new Catalog())
   const fieldBlock = new FieldBlock(blockMap)
-  await fieldBlock.loadCellImages({ loadImage })
   const imageData = fieldBlock.createImageDataForRange(
     i,
     j,
     gridWidth,
     gridHeight,
+    imgMap,
   )
   console.log("Canvas worker: Image data prepared", {
     i,
@@ -20,7 +20,5 @@ addEventListener("message", async (event) => {
     gridHeight,
     elapsed: (performance.now() - start).toFixed(0) + "ms",
   })
-  postMessage({
-    imageData,
-  })
+  postMessage({ imageData })
 })
