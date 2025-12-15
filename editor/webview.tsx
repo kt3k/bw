@@ -13,7 +13,7 @@ import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
-import { Catalog } from "../model/catalog.ts"
+import { loadCatalog } from "../model/catalog.ts"
 import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
 import { Object } from "../model/object.ts"
 import { floorN, modulo } from "../util/math.ts"
@@ -97,6 +97,11 @@ function onLoadTextResponse(message: type.Extension.MessageLoadTextResponse) {
     loadTextMap[message.id].reject(new Error(error))
   }
   delete loadTextMap[message.id]
+}
+
+const loadJson = async (uri: string) => {
+  const text = await loadText(uri)
+  return JSON.parse(text)
 }
 
 function onUpdate(message: { uri: string; text: string }) {
@@ -248,7 +253,7 @@ if (state) {
 const { uri, text } = await initialData.promise
 const blockMapSource = new GroupSignal({ uri, text })
 const mapObj = JSON.parse(text)
-const catalog = await loadCatalogs(uri, mapObj.catalogs)
+const catalog = await loadCatalog(uri, mapObj.catalogs, { loadJson })
 const fieldBlock = blockMapSource.map(({ uri, text }) =>
   new FieldBlock(new BlockMap(uri, JSON.parse(text), catalog))
 )
@@ -299,14 +304,9 @@ async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     const canvas = div.querySelector("canvas")!
     const ctx = canvas.getContext("2d")!
     const cell = block.cellMap[cellTool.name]
-    if (cell.color) {
-      canvas.style.backgroundColor = cell.color
-    }
     if (cell.src) {
-      for (const src of cell.src) {
-        const img = await block.loadCellImage(src, { loadImage })
-        ctx.drawImage(img, 0, 0, 16, 16)
-      }
+      const img = await block.loadCellImage(cell.src, { loadImage })
+      ctx.drawImage(img, 0, 0, 16, 16)
     }
   })
 
@@ -356,26 +356,6 @@ function getGridFromUri(uri: string) {
   const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
   if (!m) return { i: NaN, j: NaN }
   return { i: parseInt(m[1]), j: parseInt(m[2]) }
-}
-
-export async function loadCatalog(
-  baseUrl: string,
-  url: string,
-): Promise<Catalog> {
-  return Catalog.fromJSON(
-    JSON.parse(await loadText((new URL(url, baseUrl)).href)),
-    url,
-  )
-}
-
-export async function loadCatalogs(
-  baseUrl: string,
-  urls: string[],
-): Promise<Catalog> {
-  const catalogs = await Promise.all(
-    urls.map((url) => loadCatalog(baseUrl, url)),
-  )
-  return catalogs.reduce((acc, catalog) => acc.merge(catalog), new Catalog())
 }
 
 async function CanvasLayers({ el }: Context) {
@@ -430,7 +410,7 @@ async function CanvasLayers({ el }: Context) {
     const blockMap = new BlockMap(
       href,
       obj,
-      await loadCatalogs(href, obj.catalogs),
+      await loadCatalog(href, obj.catalogs, { loadJson }),
     )
     const fieldBlock = new FieldBlock(blockMap)
     await fieldBlock.loadAssets({ loadImage })
@@ -444,6 +424,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         5,
         BLOCK_SIZE,
+        fieldBlock.cellMap,
         fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
@@ -457,6 +438,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         5,
         BLOCK_SIZE,
+        fieldBlock.cellMap,
         fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
@@ -470,6 +452,7 @@ async function CanvasLayers({ el }: Context) {
         BLOCK_SIZE - 5,
         BLOCK_SIZE,
         5,
+        fieldBlock.cellMap,
         fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
@@ -483,6 +466,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         BLOCK_SIZE,
         5,
+        fieldBlock.cellMap,
         fieldBlock.imgMap,
       )
       a.appendChild(createCanvasFromImageData(imageData))
@@ -676,7 +660,7 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
       : "-"
     query(".cell-name")!.textContent = cell ? cell.name : "-"
     query(".cell-src")!.textContent = cellInfo && cellInfo.src
-      ? cellInfo.src.join(", ")
+      ? cellInfo.src
       : "-"
     query(".cell-can-enter")!.textContent = cellInfo
       ? String(cellInfo.canEnter)

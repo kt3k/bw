@@ -22,7 +22,7 @@ import {
 import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
 import { DIRS, nextGrid } from "../util/dir.ts"
-import { loadCatalogs } from "../model/catalog.ts"
+import { loadCatalog } from "../model/catalog.ts"
 
 /** The items on the field */
 export class FieldItems implements IStepper, ILoader {
@@ -340,7 +340,7 @@ class BlockMapLoader {
     try {
       const resp = await fetch(url)
       const mapObj = await resp.json()
-      const catalog = await loadCatalogs(url, mapObj.catalogs)
+      const catalog = await loadCatalog(url, mapObj.catalogs)
       return new BlockMap(url, mapObj, catalog)
     } catch {
       const fallbackUrl = new URL("block_not_found.json", this.#url).href
@@ -348,7 +348,7 @@ class BlockMapLoader {
       const mapObj = await resp.json()
       // Fix the map grid coordinates
       const [i, j] = mapId.split(".").map(Number) // mapId is in the form "i.j"
-      const catalog = await loadCatalogs(fallbackUrl, mapObj.catalogs)
+      const catalog = await loadCatalog(fallbackUrl, mapObj.catalogs)
       return new BlockMap(
         fallbackUrl,
         globalThis.Object.assign(mapObj, { i, j }),

@@ -3,7 +3,7 @@ import { Catalog } from "../model/catalog.ts"
 
 addEventListener("message", (event) => {
   const start = performance.now()
-  const { url, obj, imgMap, i, j, gridWidth, gridHeight } = event.data
+  const { url, obj, cellMap, imgMap, i, j, gridWidth, gridHeight } = event.data
   const blockMap = new BlockMap(url, obj, new Catalog())
   const fieldBlock = new FieldBlock(blockMap)
   const imageData = fieldBlock.createImageDataForRange(
@@ -11,6 +11,7 @@ addEventListener("message", (event) => {
     j,
     gridWidth,
     gridHeight,
+    cellMap,
     imgMap,
   )
   console.log("Canvas worker: Image data prepared", {

@@ -65,55 +65,63 @@ export class ObjectDefinition {
 }
 
 export class Catalog {
+  refs: string[]
   cells: Map<string, CellDefinition>
   items: Map<string, ItemDefinition>
   actors: Map<string, ActorDefinition>
   objects: Map<string, ObjectDefinition>
 
-  // deno-lint-ignore no-explicit-any
-  static fromJSON(json: any, url: string): Catalog {
-    const catalog = new Catalog()
-    for (const cellData of json.cells) {
-      const cellDef = new CellDefinition(
-        cellData.name,
-        cellData.canEnter,
-        cellData.src,
-        url,
-      )
-      catalog.cells.set(cellDef.name, cellDef)
-    }
+  static fromJSON(
+    // deno-lint-ignore no-explicit-any
+    source: { src: string; json: any }[],
+    baseUrl: string,
+  ): Catalog {
+    const catalog = new Catalog(source.map(({ src }) => src))
+    for (const { src, json } of source) {
+      const url = new URL(src, baseUrl).href
+      for (const cellData of json.cells) {
+        const cellDef = new CellDefinition(
+          cellData.name,
+          cellData.canEnter,
+          cellData.src,
+          url,
+        )
+        catalog.cells.set(cellDef.name, cellDef)
+      }
 
-    for (const itemType in json.items) {
-      const itemDef = new ItemDefinition(
-        itemType,
-        json.items[itemType].src,
-        url,
-      )
-      catalog.items.set(itemType, itemDef)
-    }
+      for (const itemType in json.items) {
+        const itemDef = new ItemDefinition(
+          itemType,
+          json.items[itemType].src,
+          url,
+        )
+        catalog.items.set(itemType, itemDef)
+      }
 
-    for (const actorType in json.actors) {
-      const actorDef = new ActorDefinition(
-        actorType,
-        json.actors[actorType].main,
-        json.actors[actorType].src,
-        url,
-      )
-      catalog.actors.set(actorType, actorDef)
-    }
+      for (const actorType in json.actors) {
+        const actorDef = new ActorDefinition(
+          actorType,
+          json.actors[actorType].main,
+          json.actors[actorType].src,
+          url,
+        )
+        catalog.actors.set(actorType, actorDef)
+      }
 
-    for (const objectType in json.objects) {
-      const objectDef = new ObjectDefinition(
-        objectType,
-        json.objects[objectType].src,
-        url,
-      )
-      catalog.objects.set(objectType, objectDef)
+      for (const objectType in json.objects) {
+        const objectDef = new ObjectDefinition(
+          objectType,
+          json.objects[objectType].src,
+          url,
+        )
+        catalog.objects.set(objectType, objectDef)
+      }
     }
     return catalog
   }
 
-  constructor() {
+  constructor(refs: string[] = []) {
+    this.refs = refs
     this.cells = new Map()
     this.items = new Map()
     this.actors = new Map()
@@ -195,17 +203,17 @@ export class Catalog {
 
 export async function loadCatalog(
   baseUrl: string,
-  url: string,
+  srcs: string[],
+  // deno-lint-ignore no-explicit-any
+  options?: { loadJson?: (url: string) => Promise<any> },
 ): Promise<Catalog> {
-  return Catalog.fromJSON(await loadJson((new URL(url, baseUrl)).href), url)
-}
-
-export async function loadCatalogs(
-  baseUrl: string,
-  urls: string[],
-): Promise<Catalog> {
+  const loader = options?.loadJson ?? loadJson
   const catalogs = await Promise.all(
-    urls.map((url) => loadCatalog(baseUrl, url)),
+    srcs.map(async (src) => {
+      const url = new URL(src, baseUrl).href
+      const json = await loader(url)
+      return { src, json }
+    }),
   )
-  return catalogs.reduce((acc, catalog) => acc.merge(catalog), new Catalog())
+  return Catalog.fromJSON(catalogs, baseUrl)
 }

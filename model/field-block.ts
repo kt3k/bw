@@ -26,22 +26,10 @@ function g2l(i: number, j: number): [number, number] {
 /**
  * {@linkcode FieldCell} represents the cell in the field block
  */
-export class FieldCell {
-  readonly name: string
-  readonly canEnter: boolean
-  readonly color?: string
-  readonly src?: string[]
-  constructor(
-    name: string,
-    canEnter: boolean,
-    color?: string,
-    src?: string[],
-  ) {
-    this.name = name
-    this.canEnter = canEnter
-    this.color = color
-    this.src = src
-  }
+export interface FieldCell {
+  name: string
+  canEnter: boolean
+  src: string
 }
 
 /** {@linkcode ItemSpawnInfo} represents the spawn info for the items in {@linkcode FieldBlock} */
@@ -304,12 +292,6 @@ export class BlockMap {
   readonly i: number
   // The row of the world coordinates
   readonly j: number
-  readonly cells: {
-    name: string
-    canEnter: boolean
-    color?: string
-    src?: string | string[]
-  }[]
   readonly characters: CharacterSpawnInfo[]
   readonly items: ItemSpawnInfo[]
   readonly objects: ObjectSpawnInfo[] = []
@@ -322,7 +304,6 @@ export class BlockMap {
     this.url = url
     this.i = obj.i
     this.j = obj.j
-    this.cells = obj.cells
     this.characters = (obj.characters ?? []).map((
       spawn: {
         i: number
@@ -410,13 +391,12 @@ export class FieldBlock {
     this.#y = this.#j * CELL_SIZE
     this.#h = BLOCK_SIZE * CELL_SIZE
     this.#w = BLOCK_SIZE * CELL_SIZE
-    for (const cell of map.cells) {
-      this.#cellMap[cell.name] = new FieldCell(
-        cell.name,
-        cell.canEnter,
-        cell.color,
-        cell.src ? Array.isArray(cell.src) ? cell.src : [cell.src] : undefined,
-      )
+    for (const [name, cellDef] of map.catalog.cells) {
+      this.#cellMap[name] = {
+        name: cellDef.name,
+        canEnter: cellDef.canEnter,
+        src: cellDef.src,
+      }
     }
     this.#field = map.field
     this.#map = map
@@ -436,11 +416,7 @@ export class FieldBlock {
   async loadCellImages(options: LoadOptions) {
     await Promise.all(
       Object.values(this.#cellMap).map(async (cell) => {
-        if (cell.src) {
-          for (const src of cell.src) {
-            this.imgMap[cell.name] = await this.loadCellImage(src, options)
-          }
-        }
+        this.imgMap[cell.name] = await this.loadCellImage(cell.src, options)
       }),
     )
   }
@@ -566,11 +542,13 @@ export class FieldBlock {
     j: number,
     width: number,
     height: number,
+    cellMap: Record<string, FieldCell>,
     imgMap: Record<string, ImageBitmap>,
   ) {
     for (let ii = 0; ii < width; ii++) {
       for (let jj = 0; jj < height; jj++) {
-        const cell = this.getCell(i + ii, j + jj)
+        const [localI, localJ] = g2l(i + ii, j + jj)
+        const cell = cellMap[this.#field[localJ][localI]]
         this.drawCell(
           wrapper,
           i + ii,
@@ -584,7 +562,15 @@ export class FieldBlock {
 
   renderAll() {
     const wrapper = new CanvasWrapper(this.canvas)
-    this.#renderRange(wrapper, 0, 0, BLOCK_SIZE, BLOCK_SIZE, this.imgMap)
+    this.#renderRange(
+      wrapper,
+      0,
+      0,
+      BLOCK_SIZE,
+      BLOCK_SIZE,
+      this.#cellMap,
+      this.imgMap,
+    )
   }
 
   createImageDataForRange(
@@ -592,6 +578,7 @@ export class FieldBlock {
     j: number,
     gridWidth: number,
     gridHeight: number,
+    cellMap: Record<string, FieldCell>,
     imgMap: Record<string, ImageBitmap>,
   ): ImageData {
     const canvas = new OffscreenCanvas(
@@ -599,7 +586,7 @@ export class FieldBlock {
       CELL_SIZE * BLOCK_SIZE,
     )
     const wrapper = new CanvasWrapper(canvas)
-    this.#renderRange(wrapper, i, j, gridWidth, gridHeight, imgMap)
+    this.#renderRange(wrapper, i, j, gridWidth, gridHeight, cellMap, imgMap)
     return canvas.getContext("2d")!.getImageData(
       CELL_SIZE * i,
       CELL_SIZE * j,
@@ -656,6 +643,7 @@ export class FieldBlock {
     worker.postMessage({
       url: this.#map.url,
       obj: { ...this.toMap().toObject(), characters: [], items: [] },
+      cellMap: this.#cellMap,
       imgMap: this.imgMap,
       i: k * BLOCK_CHUNK_SIZE,
       j: l * BLOCK_CHUNK_SIZE,
@@ -705,14 +693,7 @@ export class FieldBlock {
     return new BlockMap(this.#map.url, {
       i: this.#i,
       j: this.#j,
-      cells: this.cells.map((cell) => ({
-        name: cell.name,
-        canEnter: cell.canEnter,
-        color: cell.color,
-        src: cell.src
-          ? cell.src.length === 1 ? cell.src[0] : cell.src
-          : undefined,
-      })),
+      catalogs: this.#map.catalog.refs,
       characters: this.characterSpawns.toJSON(),
       items: this.itemSpawns.toJSON(),
       objects: this.objectSpawns.toJSON(),
