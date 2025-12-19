@@ -72,7 +72,6 @@ export class ItemSpawnInfo implements IBox {
       i: this.i,
       j: this.j,
       type: this.type,
-      src: this.src,
     }
   }
 }
@@ -117,7 +116,6 @@ export class ObjectSpawnInfo implements IBox {
       i: this.i,
       j: this.j,
       type: this.type,
-      src: this.src,
     }
   }
 }
@@ -173,7 +171,6 @@ export class CharacterSpawnInfo implements IBox {
       i: this.i,
       j: this.j,
       type: this.type,
-      src: this.src,
       dir: this.dir,
       speed: this.speed,
     }
@@ -309,7 +306,6 @@ export class BlockMap {
         i: number
         j: number
         type: NPCType
-        src: string
         dir?: Dir
         speed?: CharacterSpeed
       },
@@ -318,8 +314,8 @@ export class BlockMap {
         spawn.i,
         spawn.j,
         spawn.type,
-        spawn.src,
-        this.url,
+        catalog.actors.get(spawn.type)!.src,
+        catalog.actors.get(spawn.type)!.baseUrl,
         {
           dir: spawn.dir,
           speed: spawn.speed,
@@ -333,8 +329,8 @@ export class BlockMap {
         item.i,
         item.j,
         item.type,
-        item.src,
-        this.url,
+        catalog.items.get(item.type)!.src,
+        catalog.items.get(item.type)!.baseUrl,
       )
     )
     this.objects = (obj.objects ?? []).map((
@@ -344,8 +340,8 @@ export class BlockMap {
         obj.i,
         obj.j,
         obj.type,
-        obj.src,
-        this.url,
+        catalog.objects.get(obj.type)!.src,
+        catalog.objects.get(obj.type)!.baseUrl,
       )
     )
     this.field = obj.field
@@ -642,7 +638,12 @@ export class FieldBlock {
     }
     worker.postMessage({
       url: this.#map.url,
-      obj: { ...this.toMap().toObject(), characters: [], items: [] },
+      obj: {
+        ...this.toMap().toObject(),
+        characters: [],
+        items: [],
+        objects: [],
+      },
       cellMap: this.#cellMap,
       imgMap: this.imgMap,
       i: k * BLOCK_CHUNK_SIZE,

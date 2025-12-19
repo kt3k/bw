@@ -13,7 +13,7 @@ import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
-import { loadCatalog } from "../model/catalog.ts"
+import { Catalog, loadCatalog } from "../model/catalog.ts"
 import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
 import { Object } from "../model/object.ts"
 import { floorN, modulo } from "../util/math.ts"
@@ -154,6 +154,11 @@ class ToolManager {
       manager.addObjectTool({ kind: "object", type, src, id })
     }
     return manager
+  }
+
+  static fromCatalog(catalog: Catalog): ToolManager {
+    // deno-lint-ignore no-explicit-any
+    return catalog as any
   }
 
   addCellTool(tool: CellTool) {
