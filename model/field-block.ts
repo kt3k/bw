@@ -668,8 +668,9 @@ export class FieldBlock {
    * This is for editor use.
    */
   updateCell(i: number, j: number, cell: string): void {
-    this.#field[j] = this.#field[j].substring(0, i) + cell +
-      this.#field[j].substring(i + 1)
+    const [relI, relJ] = g2l(i, j)
+    this.#field[relJ] = this.#field[relJ].substring(0, relI) + cell +
+      this.#field[relJ].substring(relI + 1)
   }
   get i(): number {
     return this.#i
