@@ -1,41 +1,34 @@
 {
-  "cells": [
-    {
-      "name": "0",
+  "cells": {
+    "0": {
       "canEnter": true,
       "src": "../cell/floor0.png"
     },
-    {
-      "name": "1",
+    "1": {
       "canEnter": false,
       "src": "../cell/wall0.png"
     },
-    {
-      "name": "2",
+    "2": {
       "canEnter": false,
       "src": "../cell/wall1.png"
     },
-    {
-      "name": "3",
+    "3": {
       "canEnter": true,
       "src": "../cell/floor2.png"
     },
-    {
-      "name": "4",
+    "4": {
       "canEnter": true,
       "src": "../cell/floor3.png"
     },
-    {
-      "name": "5",
+    "5": {
       "canEnter": true,
       "src": "../cell/floor4.png"
     },
-    {
-      "name": "6",
+    "6": {
       "canEnter": true,
       "src": "../cell/floor5.png"
     }
-  ],
+  },
   "actors": {
     "random-walk": {
       "main": "random-walk",

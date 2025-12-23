@@ -1,5 +1,22 @@
 import { loadJson } from "../util/load.ts"
 
+interface CatalogSource {
+  cells: Record<string, {
+    canEnter: boolean
+    src: string
+  }>
+  items: Record<string, {
+    src: string
+  }>
+  actors: Record<string, {
+    main: string
+    src: string
+  }>
+  objects: Record<string, {
+    src: string
+  }>
+}
+
 export class CellDefinition {
   name: string
   canEnter: boolean
@@ -72,16 +89,15 @@ export class Catalog {
   objects: Map<string, ObjectDefinition>
 
   static fromJSON(
-    // deno-lint-ignore no-explicit-any
-    source: { src: string; json: any }[],
+    source: { src: string; json: CatalogSource }[],
     baseUrl: string,
   ): Catalog {
     const catalog = new Catalog(source.map(({ src }) => src))
     for (const { src, json } of source) {
       const url = new URL(src, baseUrl).href
-      for (const cellData of json.cells) {
+      for (const [name, cellData] of Object.entries(json.cells)) {
         const cellDef = new CellDefinition(
-          cellData.name,
+          name,
           cellData.canEnter,
           cellData.src,
           url,
