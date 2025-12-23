@@ -176,6 +176,7 @@ class ToolManager {
       0,
       0,
       tool.type as any,
+      true,
       new URL(tool.src, block.url).href,
     )
   }
@@ -580,6 +581,7 @@ function FieldObjectCanvas(
           i,
           j,
           tool.type as any,
+          true,
           tool.src,
           block.url,
         ),

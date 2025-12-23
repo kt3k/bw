@@ -603,15 +603,7 @@ export class Field implements IField {
           continue
         }
         i++
-        this.#objects.add(
-          new Object(
-            spawn.id,
-            spawn.i,
-            spawn.j,
-            spawn.type,
-            new URL(spawn.src, spawn.srcBase).href,
-          ),
-        )
+        this.#objects.add(Object.fromSpawn(spawn))
       }
       if (i > 0) {
         console.log(`Spawning ${i} objects`)

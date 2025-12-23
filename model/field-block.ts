@@ -82,6 +82,7 @@ export class ObjectSpawnInfo implements IBox {
   readonly i: number
   readonly j: number
   readonly type: ObjectType
+  readonly canEnter: boolean
   readonly src: string
   readonly srcBase: string
   readonly x: number
@@ -92,6 +93,7 @@ export class ObjectSpawnInfo implements IBox {
     i: number,
     j: number,
     type: ObjectType,
+    canEnter: boolean,
     src: string,
     srcBase: string,
   ) {
@@ -99,6 +101,7 @@ export class ObjectSpawnInfo implements IBox {
     this.i = i
     this.j = j
     this.type = type
+    this.canEnter = canEnter
     this.src = src
     this.srcBase = srcBase
     this.x = i * CELL_SIZE
@@ -271,6 +274,30 @@ export class SpawnMap<
   }
 }
 
+interface BlockMapSource {
+  i: number
+  j: number
+  catalogs: string[]
+  characters: {
+    i: number
+    j: number
+    type: string
+    dir?: Dir
+    speed?: CharacterSpeed
+  }[]
+  items: {
+    i: number
+    j: number
+    type: string
+  }[]
+  objects: {
+    i: number
+    j: number
+    type: string
+  }[]
+  field: string[][]
+}
+
 /**
  * {@linkcode BlockMap} is a map (serialized form) of {@linkcode FieldBlock}
  *
@@ -340,6 +367,7 @@ export class BlockMap {
         obj.i,
         obj.j,
         obj.type,
+        catalog.objects.get(obj.type)!.canEnter,
         catalog.objects.get(obj.type)!.src,
         catalog.objects.get(obj.type)!.baseUrl,
       )

@@ -14,6 +14,7 @@ interface CatalogSource {
   }>
   objects: Record<string, {
     src: string
+    canEnter: boolean
   }>
 }
 
@@ -67,11 +68,13 @@ export class ActorDefinition {
 
 export class ObjectDefinition {
   type: string
+  canEnter: boolean
   src: string
   baseUrl: string
 
-  constructor(type: string, src: string, baseUrl: string) {
+  constructor(type: string, canEnter: boolean, src: string, baseUrl: string) {
     this.type = type
+    this.canEnter = canEnter
     this.src = src
     this.baseUrl = baseUrl
   }
@@ -127,6 +130,7 @@ export class Catalog {
       for (const objectType in json.objects) {
         const objectDef = new ObjectDefinition(
           objectType,
+          json.objects[objectType].canEnter,
           json.objects[objectType].src,
           url,
         )

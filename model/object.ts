@@ -14,6 +14,7 @@ export class Object implements IObject {
   readonly j: number
   readonly type: ObjectType
   readonly src: string
+  readonly canEnter: boolean
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
@@ -24,6 +25,7 @@ export class Object implements IObject {
       spawn.i,
       spawn.j,
       spawn.type,
+      spawn.canEnter,
       new URL(spawn.src, spawn.srcBase).href,
     )
   }
@@ -39,12 +41,14 @@ export class Object implements IObject {
     i: number,
     j: number,
     type: ObjectType,
+    canEnter: boolean,
     src: string,
   ) {
     this.id = id
     this.i = i
     this.j = j
     this.type = type
+    this.canEnter = canEnter
     this.src = src
   }
 
@@ -69,12 +73,5 @@ export class Object implements IObject {
   }
   get y(): number {
     return this.j * CELL_SIZE
-  }
-
-  get canEnter(): boolean {
-    if (this.type === "table") {
-      return false
-    }
-    return true
   }
 }
