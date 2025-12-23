@@ -23,7 +23,7 @@ import type * as type from "./types.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
 type ToolBase = { id: string }
-type CellTool = ToolBase & { kind: "cell"; name: string }
+type CellTool = ToolBase & { kind: "cell"; name: string; src: string }
 type ObjectTool =
   & ToolBase
   & (
@@ -134,31 +134,29 @@ class ToolManager {
   objectTools: ObjectTool[] = []
   #toolIndex: number = 0
 
-  static fromFieldBlock(fieldBlock: FieldBlock): ToolManager {
+  static fromCatalog(catalog: Catalog): ToolManager {
     const manager = new ToolManager()
-    for (const cell of fieldBlock.cells) {
-      const id = "cell-" + cell.name
-      manager.addCellTool({ kind: "cell", name: cell.name, id })
+    for (const cellDef of catalog.cells.values()) {
+      const id = "cell-" + cellDef.name
+      manager.addCellTool({
+        kind: "cell",
+        name: cellDef.name,
+        id,
+        src: cellDef.href,
+      })
     }
-    const objKinds = new Set<string>()
-    for (const object of fieldBlock.objectSpawns.getAll()) {
-      objKinds.add(object.type + "|" + object.src)
-    }
-    if (objKinds.size > 0) {
-      const id = "object-remove"
-      manager.addObjectTool({ kind: "object-remove", id })
-    }
-    for (const spawn of objKinds) {
-      const [type, src] = spawn.split("|")
-      const id = `object-${type}-${src}`
-      manager.addObjectTool({ kind: "object", type, src, id })
+
+    manager.addObjectTool({ kind: "object-remove", id: "object-remove" })
+    for (const objectDef of catalog.objects.values()) {
+      const id = `object-${objectDef.type}`
+      manager.addObjectTool({
+        kind: "object",
+        type: objectDef.type,
+        src: objectDef.href,
+        id,
+      })
     }
     return manager
-  }
-
-  static fromCatalog(catalog: Catalog): ToolManager {
-    // deno-lint-ignore no-explicit-any
-    return catalog as any
   }
 
   addCellTool(tool: CellTool) {
@@ -265,7 +263,7 @@ const fieldBlock = blockMapSource.map(({ uri, text }) =>
 )
 await fieldBlock.get().loadAssets({ loadImage })
 
-const toolManager = ToolManager.fromFieldBlock(fieldBlock.get())
+const toolManager = ToolManager.fromCatalog(catalog)
 const currentTool = new Signal<CellTool | ObjectTool>(toolManager.currentTool())
 
 function updateTools(manager: ToolManager) {
@@ -309,11 +307,8 @@ async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     el.appendChild(div)
     const canvas = div.querySelector("canvas")!
     const ctx = canvas.getContext("2d")!
-    const cell = block.cellMap[cellTool.name]
-    if (cell.src) {
-      const img = await block.loadCellImage(cell.src, { loadImage })
-      ctx.drawImage(img, 0, 0, 16, 16)
-    }
+    const img = await block.loadCellImage(cellTool.src, { loadImage })
+    ctx.drawImage(img, 0, 0, 16, 16)
   })
 
   for (const objectTool of toolManager.objectTools) {

@@ -30,6 +30,10 @@ export class CellDefinition {
     this.src = src
     this.baseUrl = baseUrl
   }
+
+  get href(): string {
+    return new URL(this.src, this.baseUrl).href
+  }
 }
 
 export class ItemDefinition {
