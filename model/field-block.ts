@@ -5,7 +5,7 @@ import { floorN, modulo } from "../util/math.ts"
 import { loadImage } from "../util/load.ts"
 import type { Dir, IBox } from "./types.ts"
 import type { NPCType } from "./character.ts"
-import type { ItemType, LoadOptions, ObjectType } from "./types.ts"
+import type { ItemType, LoadOptions, PropType as PropType } from "./types.ts"
 import { Catalog } from "./catalog.ts"
 
 /** Global coordinates to local chunk index */
@@ -76,12 +76,12 @@ export class ItemSpawnInfo implements IBox {
   }
 }
 
-/** {@linkcode ObjectSpawnInfo} represents the spawn info for the objects in {@linkcode FieldBlock} */
-export class ObjectSpawnInfo implements IBox {
+/** {@linkcode PropSpawnInfo} represents the spawn info for the props in {@linkcode FieldBlock} */
+export class PropSpawnInfo implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
-  readonly type: ObjectType
+  readonly type: PropType
   readonly canEnter: boolean
   readonly src: string
   readonly srcBase: string
@@ -92,7 +92,7 @@ export class ObjectSpawnInfo implements IBox {
   constructor(
     i: number,
     j: number,
-    type: ObjectType,
+    type: PropType,
     canEnter: boolean,
     src: string,
     srcBase: string,
@@ -108,7 +108,7 @@ export class ObjectSpawnInfo implements IBox {
     this.y = j * CELL_SIZE
   }
 
-  equals(other: ObjectSpawnInfo): boolean {
+  equals(other: PropSpawnInfo): boolean {
     return this.i === other.i && this.j === other.j &&
       this.type === other.type &&
       this.src === other.src
@@ -290,12 +290,12 @@ interface BlockMapSource {
     j: number
     type: string
   }[]
-  objects: {
+  props: {
     i: number
     j: number
     type: string
   }[]
-  field: string[][]
+  field: string[]
 }
 
 /**
@@ -318,29 +318,19 @@ export class BlockMap {
   readonly j: number
   readonly characters: CharacterSpawnInfo[]
   readonly items: ItemSpawnInfo[]
-  readonly objects: ObjectSpawnInfo[] = []
+  readonly props: PropSpawnInfo[] = []
   readonly field: string[]
-  // deno-lint-ignore no-explicit-any
-  #obj: any
+  #source: BlockMapSource
   catalog: Catalog
-  // deno-lint-ignore no-explicit-any
-  constructor(url: string, obj: any, catalog: Catalog) {
+  constructor(url: string, obj: BlockMapSource, catalog: Catalog) {
     this.url = url
     this.i = obj.i
     this.j = obj.j
-    this.characters = (obj.characters ?? []).map((
-      spawn: {
-        i: number
-        j: number
-        type: NPCType
-        dir?: Dir
-        speed?: CharacterSpeed
-      },
-    ) =>
+    this.characters = (obj.characters ?? []).map((spawn) =>
       new CharacterSpawnInfo(
         spawn.i,
         spawn.j,
-        spawn.type,
+        spawn.type as NPCType,
         catalog.actors.get(spawn.type)!.src,
         catalog.actors.get(spawn.type)!.baseUrl,
         {
@@ -349,40 +339,36 @@ export class BlockMap {
         },
       )
     )
-    this.items = (obj.items ?? []).map((
-      item: { i: number; j: number; type: ItemType; src: string },
-    ) =>
+    this.items = (obj.items ?? []).map((item) =>
       new ItemSpawnInfo(
         item.i,
         item.j,
-        item.type,
+        item.type as ItemType,
         catalog.items.get(item.type)!.src,
         catalog.items.get(item.type)!.baseUrl,
       )
     )
-    this.objects = (obj.objects ?? []).map((
-      obj: { i: number; j: number; type: ObjectType; src: string },
-    ) =>
-      new ObjectSpawnInfo(
-        obj.i,
-        obj.j,
-        obj.type,
-        catalog.objects.get(obj.type)!.canEnter,
-        catalog.objects.get(obj.type)!.src,
-        catalog.objects.get(obj.type)!.baseUrl,
+    this.props = (obj.props ?? []).map((prop) =>
+      new PropSpawnInfo(
+        prop.i,
+        prop.j,
+        prop.type as PropType,
+        catalog.props.get(prop.type)!.canEnter,
+        catalog.props.get(prop.type)!.src,
+        catalog.props.get(prop.type)!.baseUrl,
       )
     )
     this.field = obj.field
-    this.#obj = obj
+    this.#source = obj
     this.catalog = catalog
   }
 
   clone(): BlockMap {
-    return new BlockMap(this.url, structuredClone(this.#obj), this.catalog)
+    return new BlockMap(this.url, structuredClone(this.#source), this.catalog)
   }
 
   toObject() {
-    return this.#obj
+    return this.#source
   }
 }
 
@@ -400,7 +386,7 @@ export class FieldBlock {
   imgMap: Record<string, ImageBitmap> = {}
   characterSpawns: SpawnMap<CharacterSpawnInfo>
   itemSpawns: SpawnMap<ItemSpawnInfo>
-  objectSpawns: SpawnMap<ObjectSpawnInfo>
+  propSpawns: SpawnMap<PropSpawnInfo>
   #field: string[]
   #map: BlockMap
   #canvas: HTMLCanvasElement | undefined
@@ -426,7 +412,7 @@ export class FieldBlock {
     this.#map = map
     this.characterSpawns = new SpawnMap(map.characters)
     this.itemSpawns = new SpawnMap(map.items)
-    this.objectSpawns = new SpawnMap(map.objects)
+    this.propSpawns = new SpawnMap(map.props)
   }
 
   loadCellImage(href: string, options: LoadOptions): Promise<ImageBitmap> {
@@ -724,9 +710,12 @@ export class FieldBlock {
       i: this.#i,
       j: this.#j,
       catalogs: this.#map.catalog.refs,
-      characters: this.characterSpawns.toJSON(),
-      items: this.itemSpawns.toJSON(),
-      objects: this.objectSpawns.toJSON(),
+      // deno-lint-ignore no-explicit-any
+      characters: this.characterSpawns.toJSON() as any,
+      // deno-lint-ignore no-explicit-any
+      items: this.itemSpawns.toJSON() as any,
+      // deno-lint-ignore no-explicit-any
+      props: this.propSpawns.toJSON() as any,
       field: this.#field,
     }, this.#map.catalog)
   }
@@ -767,8 +756,8 @@ export class FieldBlockChunk {
     return this.#fieldBlock.characterSpawns.getChunk(this.#i, this.#j)
   }
 
-  getObjectSpawns(): ObjectSpawnInfo[] {
-    return this.#fieldBlock.objectSpawns.getChunk(this.#i, this.#j)
+  getPropSpawns(): PropSpawnInfo[] {
+    return this.#fieldBlock.propSpawns.getChunk(this.#i, this.#j)
   }
 
   async render(initialLoad: boolean) {

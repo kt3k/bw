@@ -32,11 +32,11 @@ export type IItem = IEntity & {
   type: ItemType
 }
 
-export type ObjectType = "stool" | "table"
+export type PropType = "stool" | "table"
 
-export type IObject = IEntity & {
+export type IProp = IEntity & {
   id: string | null
-  type: ObjectType
+  type: PropType
   canEnter: boolean
 }
 

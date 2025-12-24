@@ -5,7 +5,7 @@ import { FpsMonitor, VMonitor } from "./ui/fps-monitor.ts"
 import {
   ActorsCounter,
   ItemsCounter,
-  ObjectsCounter,
+  PropsCounter,
 } from "./ui/spawns-counter.ts"
 import { SwipeHandler } from "./ui/swipe-handler.ts"
 import { ItemGetEffector } from "./ui/item-get-effector.ts"
@@ -25,4 +25,4 @@ register(AppleCounter, "js-apple-counter")
 register(ItemGetEffector, "js-item-get-effector")
 register(ActorsCounter, "js-actors-counter")
 register(ItemsCounter, "js-items-counter")
-register(ObjectsCounter, "js-objects-counter")
+register(PropsCounter, "js-props-counter")

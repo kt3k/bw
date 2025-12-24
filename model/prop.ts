@@ -1,26 +1,26 @@
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IObject, LoadOptions, ObjectType } from "./types.ts"
-import { ObjectSpawnInfo } from "./field-block.ts"
+import type { IProp, LoadOptions, PropType } from "./types.ts"
+import { PropSpawnInfo } from "./field-block.ts"
 
 const fallbackImage = await fetch(
   // TODO(kt3k): Update
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
 
-export class Object implements IObject {
+export class Prop implements IProp {
   /** The unique identifier of the item. Only items which are spawned from block map have ids. */
   readonly id: string | null
   readonly i: number
   readonly j: number
-  readonly type: ObjectType
+  readonly type: PropType
   readonly src: string
   readonly canEnter: boolean
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
 
-  static fromSpawn(spawn: ObjectSpawnInfo) {
-    return new Object(
+  static fromSpawn(spawn: PropSpawnInfo) {
+    return new Prop(
       spawn.id,
       spawn.i,
       spawn.j,
@@ -40,7 +40,7 @@ export class Object implements IObject {
     id: string | null,
     i: number,
     j: number,
-    type: ObjectType,
+    type: PropType,
     canEnter: boolean,
     src: string,
   ) {

@@ -15,9 +15,9 @@ export function ItemsCounter({ el, subscribe }: Context) {
   })
 }
 
-/** The ui which shows the current active objects count */
-export function ObjectsCounter({ el, subscribe }: Context) {
-  subscribe(signal.objectsCount, (count) => {
+/** The ui which shows the current active props count */
+export function PropsCounter({ el, subscribe }: Context) {
+  subscribe(signal.propsCount, (count) => {
     el.textContent = count.toString()
   })
 }

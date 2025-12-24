@@ -61,7 +61,7 @@
       "src": "../item/purple-mushroom.png"
     }
   },
-  "objects": {
+  "props": {
     "stool": {
       "src": "../obj/stool.png",
       "canEnter": true

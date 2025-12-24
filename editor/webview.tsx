@@ -14,8 +14,8 @@ import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
 import { Catalog, loadCatalog } from "../model/catalog.ts"
-import { BlockMap, FieldBlock, ObjectSpawnInfo } from "../model/field-block.ts"
-import { Object } from "../model/object.ts"
+import { BlockMap, FieldBlock, PropSpawnInfo } from "../model/field-block.ts"
+import { Prop } from "../model/prop.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper as CanvasWrapper_ } from "../util/canvas-wrapper.ts"
@@ -24,11 +24,11 @@ import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
 type ToolBase = { id: string }
 type CellTool = ToolBase & { kind: "cell"; name: string; src: string }
-type ObjectTool =
+type PropTool =
   & ToolBase
   & (
-    | { kind: "object"; type: string; src: string }
-    | { kind: "object-remove" }
+    | { kind: "prop"; type: string; src: string }
+    | { kind: "prop-remove" }
   )
 
 globalThis.addEventListener(
@@ -131,7 +131,7 @@ class CanvasWrapper extends CanvasWrapper_ {
 
 class ToolManager {
   cellTools: CellTool[] = []
-  objectTools: ObjectTool[] = []
+  propTools: PropTool[] = []
   #toolIndex: number = 0
 
   static fromCatalog(catalog: Catalog): ToolManager {
@@ -146,11 +146,11 @@ class ToolManager {
       })
     }
 
-    manager.addObjectTool({ kind: "object-remove", id: "object-remove" })
-    for (const objectDef of catalog.objects.values()) {
+    manager.addPropTool({ kind: "prop-remove", id: "prop-remove" })
+    for (const objectDef of catalog.props.values()) {
       const id = `object-${objectDef.type}`
-      manager.addObjectTool({
-        kind: "object",
+      manager.addPropTool({
+        kind: "prop",
         type: objectDef.type,
         src: objectDef.href,
         id,
@@ -163,13 +163,13 @@ class ToolManager {
     this.cellTools.push(tool)
   }
 
-  addObjectTool(tool: ObjectTool) {
-    this.objectTools.push(tool)
+  addPropTool(tool: PropTool) {
+    this.propTools.push(tool)
   }
 
-  toObject(tool: ObjectTool & { kind: "object" }): Object {
+  toProp(tool: PropTool & { kind: "prop" }): Prop {
     const block = fieldBlock.get()
-    return new Object(
+    return new Prop(
       null,
       0,
       0,
@@ -180,16 +180,16 @@ class ToolManager {
   }
 
   get toolCount() {
-    return this.cellTools.length + this.objectTools.length
+    return this.cellTools.length + this.propTools.length
   }
 
-  #get(index: number): CellTool | ObjectTool {
+  #get(index: number): CellTool | PropTool {
     if (index < this.cellTools.length) {
       return this.cellTools[index]
     }
     const objIndex = index - this.cellTools.length
-    if (objIndex < this.objectTools.length) {
-      return this.objectTools[objIndex]
+    if (objIndex < this.propTools.length) {
+      return this.propTools[objIndex]
     }
     throw new RangeError("Tool index out of range: " + index)
   }
@@ -208,7 +208,7 @@ class ToolManager {
       this.#toolIndex = cellIndex
       return
     }
-    const objectIndex = this.objectTools.findIndex((tool) => tool.id === id)
+    const objectIndex = this.propTools.findIndex((tool) => tool.id === id)
     if (objectIndex >= 0) {
       this.#toolIndex = this.cellTools.length + objectIndex
       return
@@ -216,13 +216,13 @@ class ToolManager {
     throw new Error("The tool of the given id is not found: " + id)
   }
 
-  currentTool(): CellTool | ObjectTool {
+  currentTool(): CellTool | PropTool {
     return this.#get(this.#toolIndex)
   }
 
-  currentObjectTool(): ObjectTool | null {
+  currentPropTool(): PropTool | null {
     const tool = this.currentTool()
-    if (tool.kind === "object" || tool.kind === "object-remove") {
+    if (tool.kind === "prop" || tool.kind === "prop-remove") {
       return tool
     }
     return null
@@ -264,7 +264,7 @@ const fieldBlock = blockMapSource.map(({ uri, text }) =>
 await fieldBlock.get().loadAssets({ loadImage })
 
 const toolManager = ToolManager.fromCatalog(catalog)
-const currentTool = new Signal<CellTool | ObjectTool>(toolManager.currentTool())
+const currentTool = new Signal<CellTool | PropTool>(toolManager.currentTool())
 
 function updateTools(manager: ToolManager) {
   const tool = manager.currentTool()
@@ -311,10 +311,10 @@ async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     ctx.drawImage(img, 0, 0, 16, 16)
   })
 
-  for (const objectTool of toolManager.objectTools) {
-    const id = objectTool.id
+  for (const propTool of toolManager.propTools) {
+    const id = propTool.id
     const attrs = { id, class: "inline-block p-1 m-1 rounded cursor-pointer" }
-    if (objectTool.kind === "object-remove") {
+    if (propTool.kind === "prop-remove") {
       el.appendChild(ht.div(
         attrs,
         <span class="w-4 h-4 block text-xs text-center text-white pointer-events-none">
@@ -323,7 +323,7 @@ async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
       ))
       continue
     }
-    const obj = toolManager.toObject(objectTool)
+    const obj = toolManager.toProp(propTool)
     const div = ht.div(
       attrs,
       <canvas width="16" height="16" class="pointer-events-none"></canvas>,
@@ -380,8 +380,8 @@ async function CanvasLayers({ el }: Context) {
   el.appendChild(objectsCanvas)
   mount("field-objects-canvas", el)
   const wrapper = new CanvasWrapper(objectsCanvas)
-  for (const object of block.objectSpawns.getAll()) {
-    const obj = Object.fromSpawn(object)
+  for (const object of block.propSpawns.getAll()) {
+    const obj = Prop.fromSpawn(object)
     await obj.loadAssets({ loadImage })
     wrapper.drawEntity(obj)
   }
@@ -545,34 +545,34 @@ function FieldItemsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 }
 
-function FieldObjectCanvas(
+function FieldPropCanvas(
   { el, on, subscribe }: Context<HTMLCanvasElement>,
 ) {
   const canvasWrapper = new CanvasWrapper(el)
 
   const paint = (e: MouseEvent) => {
     const block = fieldBlock.get()
-    const tool = toolManager.currentObjectTool()
+    const tool = toolManager.currentPropTool()
     if (tool === null) return
     const { i, j } = getCoordinatesFromMouseEvent(e, el)
-    if (tool.kind === "object-remove") {
-      if (block.objectSpawns.has(i, j)) {
+    if (tool.kind === "prop-remove") {
+      if (block.propSpawns.has(i, j)) {
         const b = block.clone()
-        b.objectSpawns.remove(i, j)
+        b.propSpawns.remove(i, j)
         updateDocument(b)
       }
     } else {
-      const spawn = block.objectSpawns.get(i, j)
+      const spawn = block.propSpawns.get(i, j)
       if (spawn && spawn.type === tool.type && spawn.src === tool.src) {
         // The object spawn is already the same as selected object
         return
       }
       const b = block.clone()
-      if (b.objectSpawns.has(i, j)) {
-        b.objectSpawns.remove(i, j)
+      if (b.propSpawns.has(i, j)) {
+        b.propSpawns.remove(i, j)
       }
-      b.objectSpawns.add(
-        new ObjectSpawnInfo(
+      b.propSpawns.add(
+        new PropSpawnInfo(
           i,
           j,
           tool.type as any,
@@ -594,16 +594,16 @@ function FieldObjectCanvas(
   subscribe(currentTool, () => {
     el.classList.toggle(
       "pointer-events-none",
-      toolManager.currentObjectTool() === null,
+      toolManager.currentPropTool() === null,
     )
   })
 
   let prev: FieldBlock = fieldBlock.get()
   subscribe(fieldBlock, async (block) => {
     for (
-      const [action, spawn] of prev.objectSpawns.diff(block.objectSpawns)
+      const [action, spawn] of prev.propSpawns.diff(block.propSpawns)
     ) {
-      const object = Object.fromSpawn(spawn)
+      const object = Prop.fromSpawn(spawn)
       await object.loadAssets({ loadImage })
       if (action === "add") {
         canvasWrapper.drawEntity(object)
@@ -613,9 +613,9 @@ function FieldObjectCanvas(
 
         // redraw the object below to fix overlapping area
         canvasWrapper.clearCell(object.i, object.j + 1)
-        const spawnBelow = block.objectSpawns.get(object.i, object.j + 1)
+        const spawnBelow = block.propSpawns.get(object.i, object.j + 1)
         if (spawnBelow) {
-          const objectBelow = Object.fromSpawn(spawnBelow)
+          const objectBelow = Prop.fromSpawn(spawnBelow)
           await objectBelow.loadAssets({ loadImage })
           canvasWrapper.drawEntity(objectBelow)
         }
@@ -654,9 +654,7 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
     if (!infoContent || !block) return
     const cell = (i !== null && j !== null) ? block.getCell(i, j) : null
     const cellInfo = cell ? block.cellMap[cell.name] : null
-    const spawn = (i !== null && j !== null)
-      ? block.objectSpawns.get(i, j)
-      : null
+    const spawn = (i !== null && j !== null) ? block.propSpawns.get(i, j) : null
     query(".grid-index")!.textContent = i !== null && j !== null
       ? `(${i}, ${j})`
       : "-"
@@ -676,6 +674,6 @@ register(KeyHandler, "key-handler")
 register(Toolbox, "toolbox")
 register(ModeIndicator, "mode-indicator")
 register(FieldCellsCanvas, "field-cells-canvas")
-register(FieldObjectCanvas, "field-objects-canvas")
+register(FieldPropCanvas, "field-objects-canvas")
 register(InfoPanel, "js-info-panel")
 register(CanvasLayers, "canvas-layers")

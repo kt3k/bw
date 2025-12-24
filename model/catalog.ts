@@ -12,7 +12,7 @@ interface CatalogSource {
     main: string
     src: string
   }>
-  objects: Record<string, {
+  props: Record<string, {
     src: string
     canEnter: boolean
   }>
@@ -70,7 +70,7 @@ export class ActorDefinition {
   }
 }
 
-export class ObjectDefinition {
+export class PropDefinition {
   type: string
   canEnter: boolean
   src: string
@@ -93,7 +93,7 @@ export class Catalog {
   cells: Map<string, CellDefinition>
   items: Map<string, ItemDefinition>
   actors: Map<string, ActorDefinition>
-  objects: Map<string, ObjectDefinition>
+  props: Map<string, PropDefinition>
 
   static fromJSON(
     source: { src: string; json: CatalogSource }[],
@@ -131,14 +131,14 @@ export class Catalog {
         catalog.actors.set(actorType, actorDef)
       }
 
-      for (const objectType in json.objects) {
-        const objectDef = new ObjectDefinition(
+      for (const objectType in json.props) {
+        const objectDef = new PropDefinition(
           objectType,
-          json.objects[objectType].canEnter,
-          json.objects[objectType].src,
+          json.props[objectType].canEnter,
+          json.props[objectType].src,
           url,
         )
-        catalog.objects.set(objectType, objectDef)
+        catalog.props.set(objectType, objectDef)
       }
     }
     return catalog
@@ -149,7 +149,7 @@ export class Catalog {
     this.cells = new Map()
     this.items = new Map()
     this.actors = new Map()
-    this.objects = new Map()
+    this.props = new Map()
   }
 
   cell(name: string): CellDefinition | undefined {
@@ -164,8 +164,8 @@ export class Catalog {
     return this.actors.get(type)
   }
 
-  object(type: string): ObjectDefinition | undefined {
-    return this.objects.get(type)
+  object(type: string): PropDefinition | undefined {
+    return this.props.get(type)
   }
 
   merge(other: Catalog): Catalog {
@@ -178,8 +178,8 @@ export class Catalog {
     for (const [type, actorDef] of other.actors) {
       this.actors.set(type, actorDef)
     }
-    for (const [type, objectDef] of other.objects) {
-      this.objects.set(type, objectDef)
+    for (const [type, objectDef] of other.props) {
+      this.props.set(type, objectDef)
     }
     return this
   }
@@ -210,7 +210,7 @@ export class Catalog {
     }
 
     const objects: Record<string, object> = {}
-    for (const objectDef of this.objects.values()) {
+    for (const objectDef of this.props.values()) {
       objects[objectDef.type] = {
         src: objectDef.src,
       }

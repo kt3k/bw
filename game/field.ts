@@ -6,13 +6,13 @@ import type {
   IField,
   IItem,
   ILoader,
-  IObject,
+  IProp,
   IStepper,
   LoadOptions,
 } from "../model/types.ts"
 import { spawnCharacter } from "../model/character.ts"
 import { Item } from "../model/item.ts"
-import { Object } from "../model/object.ts"
+import { Prop } from "../model/prop.ts"
 import {
   BlockMap,
   FieldBlock,
@@ -104,9 +104,9 @@ export class FieldItems implements IStepper, ILoader {
   }
 }
 
-export class FieldObjects implements IStepper, ILoader {
-  #objects: Set<IObject> = new Set()
-  #coordMap = {} as Record<string, IObject>
+export class FieldProps implements IStepper, ILoader {
+  #props: Set<IProp> = new Set()
+  #coordMap = {} as Record<string, IProp>
   #activateScope: RectScope
 
   constructor(scope: RectScope) {
@@ -115,22 +115,22 @@ export class FieldObjects implements IStepper, ILoader {
 
   checkDeactivate(i: number, j: number) {
     this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
-    this.#objects.values()
+    this.#props.values()
       .filter((obj) => !this.#activateScope.overlaps(obj))
       .forEach((obj) => {
         console.log("deactivating object", obj.id)
         this.#deactivate(obj.i, obj.j)
       })
-    signal.objectsCount.update(this.#objects.size)
+    signal.propsCount.update(this.#props.size)
   }
 
-  add(obj: IObject) {
-    this.#objects.add(obj)
+  add(obj: IProp) {
+    this.#props.add(obj)
     this.#coordMap[`${obj.i}.${obj.j}`] = obj
-    signal.objectsCount.update(this.#objects.size)
+    signal.propsCount.update(this.#props.size)
   }
 
-  get(i: number, j: number): IObject | undefined {
+  get(i: number, j: number): IProp | undefined {
     return this.#coordMap[`${i}.${j}`]
   }
 
@@ -139,28 +139,28 @@ export class FieldObjects implements IStepper, ILoader {
     return obj === undefined || obj.canEnter
   }
 
-  #deactivate(i: number, j: number): IObject | undefined {
+  #deactivate(i: number, j: number): IProp | undefined {
     const key = `${i}.${j}`
     const obj = this.#coordMap[key]
     if (!obj) {
       return
     }
-    this.#objects.delete(obj)
+    this.#props.delete(obj)
     delete this.#coordMap[key]
-    signal.objectsCount.update(this.#objects.size)
+    signal.propsCount.update(this.#props.size)
     return obj
   }
 
   async loadAssets(options: LoadOptions): Promise<void> {
     await Promise.all(
-      [...this.#objects]
+      [...this.#props]
         .filter((obj) => !obj.assetsReady)
         .map((obj) => obj.loadAssets(options)),
     )
   }
 
   get assetsReady(): boolean {
-    return [...this.#objects].every((x) => x.assetsReady)
+    return [...this.#props].every((x) => x.assetsReady)
   }
 
   step(_field: IField) {
@@ -168,7 +168,7 @@ export class FieldObjects implements IStepper, ILoader {
   }
 
   iter() {
-    return this.#objects[Symbol.iterator]()
+    return this.#props[Symbol.iterator]()
   }
 }
 
@@ -389,7 +389,7 @@ export class Field implements IField {
 
   #actors: FieldActors
   #items: FieldItems
-  #objects: FieldObjects
+  #objects: FieldProps
 
   #time = 0
 
@@ -398,7 +398,7 @@ export class Field implements IField {
     this.#activateScope = activateScope
     this.#actors = new FieldActors([], activateScope)
     this.#items = new FieldItems(activateScope)
-    this.#objects = new FieldObjects(activateScope)
+    this.#objects = new FieldProps(activateScope)
   }
 
   get actors() {
@@ -541,7 +541,7 @@ export class Field implements IField {
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
-    const newObjectSpawns = chunks.flatMap((c) => c.getObjectSpawns())
+    const newObjectSpawns = chunks.flatMap((c) => c.getPropSpawns())
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
 
@@ -603,7 +603,7 @@ export class Field implements IField {
           continue
         }
         i++
-        this.#objects.add(Object.fromSpawn(spawn))
+        this.#objects.add(Prop.fromSpawn(spawn))
       }
       if (i > 0) {
         console.log(`Spawning ${i} objects`)

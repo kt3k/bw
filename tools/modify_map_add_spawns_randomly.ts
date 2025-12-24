@@ -123,7 +123,7 @@ async function addCharactersRandomly(mapFile: string) {
     const i = randomInt(200)
     const j = randomInt(200)
     const cell = fb.getCell(i, j)
-    if (cell.canEnter && !fb.objectSpawns.has(i + fb.i, j + fb.j)) {
+    if (cell.canEnter && !fb.propSpawns.has(i + fb.i, j + fb.j)) {
       itemCount++
       const random = Math.random()
       let type: ItemType = "apple"
