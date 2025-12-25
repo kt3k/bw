@@ -2,7 +2,7 @@ import type { Context } from "@kt3k/cell"
 import { Gameloop } from "@kt3k/gameloop"
 import * as signal from "../util/signal.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import { MainCharacter } from "./main-character.ts"
+import { MainActor } from "./main-character.ts"
 import { DrawLayer } from "./draw-layer.ts"
 import { RectScope } from "../util/rect-scope.ts"
 
@@ -47,7 +47,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainCharacter(I, J, "char/kimi/", "kimi", "down", 1)
+  const me = new MainActor(I, J, "char/kimi/", "kimi", "down", 1)
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(screenSize, screenSize)

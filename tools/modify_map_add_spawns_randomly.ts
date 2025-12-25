@@ -1,7 +1,7 @@
 import { parseArgs } from "@std/cli/parse-args"
 import {
+  ActorSpawnInfo,
   BlockMap,
-  CharacterSpawnInfo,
   FieldBlock,
   ItemSpawnInfo,
 } from "../model/field-block.ts"
@@ -39,8 +39,8 @@ async function addCharactersRandomly(mapFile: string) {
     if (cell.canEnter) {
       c++
       const isRandom = Math.random() > 0.5
-      fb.characterSpawns.add(
-        new CharacterSpawnInfo(
+      fb.actorSpawn.add(
+        new ActorSpawnInfo(
           i + bm.i,
           j + bm.j,
           isRandom ? "random" : "random-walk",
@@ -56,8 +56,8 @@ async function addCharactersRandomly(mapFile: string) {
     )
 
     for (const i of [...Array(8).keys()]) {
-      fb.characterSpawns.add(
-        new CharacterSpawnInfo(
+      fb.actorSpawn.add(
+        new ActorSpawnInfo(
           69,
           8 + i,
           "random-rotate",
@@ -68,8 +68,8 @@ async function addCharactersRandomly(mapFile: string) {
     }
 
     for (const i of [...Array(7).keys()]) {
-      fb.characterSpawns.add(
-        new CharacterSpawnInfo(
+      fb.actorSpawn.add(
+        new ActorSpawnInfo(
           72,
           9 + i,
           "random-rotate",
@@ -80,8 +80,8 @@ async function addCharactersRandomly(mapFile: string) {
     }
 
     for (const i of [...Array(8).keys()]) {
-      fb.characterSpawns.add(
-        new CharacterSpawnInfo(
+      fb.actorSpawn.add(
+        new ActorSpawnInfo(
           75,
           8 + i,
           "inertial",
@@ -91,8 +91,8 @@ async function addCharactersRandomly(mapFile: string) {
       )
     }
 
-    fb.characterSpawns.add(
-      new CharacterSpawnInfo(72, 8, "inertial", "../char/lena/", mapJson.href),
+    fb.actorSpawn.add(
+      new ActorSpawnInfo(72, 8, "inertial", "../char/lena/", mapJson.href),
     )
   }
 

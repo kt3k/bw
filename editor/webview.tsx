@@ -13,7 +13,14 @@ import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
 import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
-import { Catalog, loadCatalog } from "../model/catalog.ts"
+import {
+  ActorDefinition,
+  Catalog,
+  CellDefinition,
+  ItemDefinition,
+  loadCatalog,
+  PropDefinition,
+} from "../model/catalog.ts"
 import {
   BlockMap,
   createImageDataForRange,
@@ -29,13 +36,26 @@ import type * as type from "./types.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 
 type ToolBase = { id: string }
-type CellTool = ToolBase & { kind: "cell"; name: string; src: string }
+type CellTool = ToolBase & { kind: "cell"; name: string; def: CellDefinition }
 type PropTool =
   & ToolBase
   & (
-    | { kind: "prop"; type: string; src: string }
+    | { kind: "prop"; type: string; def: PropDefinition }
     | { kind: "prop-remove" }
   )
+type ActorTool =
+  & ToolBase
+  & ({
+    kind: "actor"
+    type: string
+    def: ActorDefinition
+  } | { kind: "actor-remove" })
+type ItemTool =
+  & ToolBase
+  & ({ kind: "item"; type: string; def: ItemDefinition } | {
+    kind: "item-remove"
+  })
+type Tool = CellTool | PropTool | ActorTool | ItemTool
 
 globalThis.addEventListener(
   "message",
@@ -54,6 +74,8 @@ globalThis.addEventListener(
       case "loadTextResponse":
         onLoadTextResponse(data)
         break
+      default:
+        data satisfies never
     }
   },
 )
@@ -138,6 +160,9 @@ class CanvasWrapper extends CanvasWrapper_ {
 class ToolManager {
   cellTools: CellTool[] = []
   propTools: PropTool[] = []
+  actorTools: ActorTool[] = []
+  itemTools: ItemTool[] = []
+  tools: Tool[] = []
   #toolIndex: number = 0
 
   static fromCatalog(catalog: Catalog): ToolManager {
@@ -148,98 +173,99 @@ class ToolManager {
         kind: "cell",
         name: cellDef.name,
         id,
-        src: cellDef.href,
+        def: cellDef,
       })
     }
 
     manager.addPropTool({ kind: "prop-remove", id: "prop-remove" })
-    for (const objectDef of catalog.props.values()) {
-      const id = `object-${objectDef.type}`
+    for (const propDef of catalog.props.values()) {
+      const id = `prop-${propDef.type}`
       manager.addPropTool({
         kind: "prop",
-        type: objectDef.type,
-        src: objectDef.href,
+        type: propDef.type,
+        def: propDef,
         id,
       })
     }
+
     return manager
   }
 
   addCellTool(tool: CellTool) {
     this.cellTools.push(tool)
+    this.tools.push(tool)
   }
 
   addPropTool(tool: PropTool) {
     this.propTools.push(tool)
+    this.tools.push(tool)
+  }
+
+  addActorTool(tool: ActorTool) {
+    this.actorTools.push(tool)
+    this.tools.push(tool)
+  }
+
+  addItemTool(tool: ItemTool) {
+    this.itemTools.push(tool)
+    this.tools.push(tool)
   }
 
   toProp(tool: PropTool & { kind: "prop" }): Prop {
-    const block = fieldBlock.get()
     return new Prop(
       null,
       0,
       0,
       tool.type as any,
-      true,
-      new URL(tool.src, block.url).href,
+      tool.def,
     )
   }
 
-  get toolCount() {
-    return this.cellTools.length + this.propTools.length
-  }
-
-  #get(index: number): CellTool | PropTool {
-    if (index < this.cellTools.length) {
-      return this.cellTools[index]
-    }
-    const objIndex = index - this.cellTools.length
-    if (objIndex < this.propTools.length) {
-      return this.propTools[objIndex]
+  #get(index: number): Tool {
+    if (index < this.tools.length) {
+      return this.tools[index]
     }
     throw new RangeError("Tool index out of range: " + index)
   }
 
   selectNext(): void {
-    this.#toolIndex = (this.#toolIndex + 1) % this.toolCount
+    this.#toolIndex = modulo(this.#toolIndex + 1, this.tools.length)
   }
 
   selectPrev(): void {
-    this.#toolIndex = (this.#toolIndex - 1 + this.toolCount) % this.toolCount
+    this.#toolIndex = modulo(this.#toolIndex - 1, this.tools.length)
   }
 
   selectById(id: string) {
-    const cellIndex = this.cellTools.findIndex((tool) => tool.id === id)
-    if (cellIndex >= 0) {
-      this.#toolIndex = cellIndex
-      return
+    const i = this.tools.findIndex((tool) => tool.id === id)
+    if (i < 0) {
+      throw new Error("The tool of the given id is not found: " + id)
     }
-    const objectIndex = this.propTools.findIndex((tool) => tool.id === id)
-    if (objectIndex >= 0) {
-      this.#toolIndex = this.cellTools.length + objectIndex
-      return
-    }
-    throw new Error("The tool of the given id is not found: " + id)
+    this.#toolIndex = i
   }
 
-  currentTool(): CellTool | PropTool {
+  currentTool(): Tool {
     return this.#get(this.#toolIndex)
-  }
-
-  currentPropTool(): PropTool | null {
-    const tool = this.currentTool()
-    if (tool.kind === "prop" || tool.kind === "prop-remove") {
-      return tool
-    }
-    return null
   }
 
   currentCellTool(): CellTool | null {
     const tool = this.currentTool()
-    if (tool.kind === "cell") {
-      return tool
-    }
-    return null
+    return tool.kind === "cell" ? tool : null
+  }
+
+  currentPropTool(): PropTool | null {
+    const tool = this.currentTool()
+    return (tool.kind === "prop" || tool.kind === "prop-remove") ? tool : null
+  }
+
+  currentActorTool(): ActorTool | null {
+    const tool = this.currentTool()
+    return (tool.kind === "actor" || tool.kind === "actor-remove") ? tool : null
+  }
+
+  currentItemTool(): ItemTool | null {
+    const tool = this.currentTool()
+    return (tool.kind === "item" || tool.kind === "item-remove") ? tool : null
   }
 }
 
@@ -270,7 +296,7 @@ const fieldBlock = blockMapSource.map(({ uri, text }) =>
 await fieldBlock.get().loadAssets({ loadImage })
 
 const toolManager = ToolManager.fromCatalog(catalog)
-const currentTool = new Signal<CellTool | PropTool>(toolManager.currentTool())
+const currentTool = new Signal<Tool>(toolManager.currentTool())
 
 function updateTools(manager: ToolManager) {
   const tool = manager.currentTool()
@@ -313,7 +339,7 @@ async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     el.appendChild(div)
     const canvas = div.querySelector("canvas")!
     const ctx = canvas.getContext("2d")!
-    const img = await block.loadCellImage(cellTool.src, { loadImage })
+    const img = await block.loadCellImage(cellTool.def.href, { loadImage })
     ctx.drawImage(img, 0, 0, 16, 16)
   })
 
@@ -329,15 +355,15 @@ async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
       ))
       continue
     }
-    const obj = toolManager.toProp(propTool)
+    const prop = toolManager.toProp(propTool)
     const div = ht.div(
       attrs,
       <canvas width="16" height="16" class="pointer-events-none"></canvas>,
     )
     el.appendChild(div)
     const wrapper = new CanvasWrapper(div.querySelector("canvas")!)
-    obj.loadAssets({ loadImage }).then(() => {
-      wrapper.drawEntity(obj)
+    prop.loadAssets({ loadImage }).then(() => {
+      wrapper.drawEntity(prop)
     })
   }
 
@@ -386,10 +412,10 @@ async function CanvasLayers({ el }: Context) {
   el.appendChild(objectsCanvas)
   mount("field-objects-canvas", el)
   const wrapper = new CanvasWrapper(objectsCanvas)
-  for (const object of block.propSpawns.getAll()) {
-    const obj = Prop.fromSpawn(object)
-    await obj.loadAssets({ loadImage })
-    wrapper.drawEntity(obj)
+  for (const spawn of block.propSpawns.getAll()) {
+    const prop = Prop.fromSpawn(spawn)
+    await prop.loadAssets({ loadImage })
+    wrapper.drawEntity(prop)
   }
   el.appendChild(objectsCanvas)
 
@@ -545,7 +571,7 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   })
 }
 
-function FieldCharactersCanvas(
+function FieldActorsCanvas(
   { on, el, subscribe }: Context<HTMLCanvasElement>,
 ) {
   const canvasWrapper = new CanvasWrapper(el)
@@ -573,7 +599,7 @@ function FieldPropCanvas(
       }
     } else {
       const spawn = block.propSpawns.get(i, j)
-      if (spawn && spawn.type === tool.type && spawn.src === tool.src) {
+      if (spawn && spawn.type === tool.type) {
         // The object spawn is already the same as selected object
         return
       }
@@ -586,9 +612,7 @@ function FieldPropCanvas(
           i,
           j,
           tool.type as any,
-          true,
-          tool.src,
-          block.url,
+          tool.def,
         ),
       )
       updateDocument(b)
@@ -613,17 +637,17 @@ function FieldPropCanvas(
     for (
       const [action, spawn] of prev.propSpawns.diff(block.propSpawns)
     ) {
-      const object = Prop.fromSpawn(spawn)
-      await object.loadAssets({ loadImage })
+      const prop = Prop.fromSpawn(spawn)
+      await prop.loadAssets({ loadImage })
       if (action === "add") {
-        canvasWrapper.drawEntity(object)
+        canvasWrapper.drawEntity(prop)
       } else {
         // action === "remove"
-        canvasWrapper.clearCell(object.i, object.j)
+        canvasWrapper.clearCell(prop.i, prop.j)
 
         // redraw the object below to fix overlapping area
-        canvasWrapper.clearCell(object.i, object.j + 1)
-        const spawnBelow = block.propSpawns.get(object.i, object.j + 1)
+        canvasWrapper.clearCell(prop.i, prop.j + 1)
+        const spawnBelow = block.propSpawns.get(prop.i, prop.j + 1)
         if (spawnBelow) {
           const objectBelow = Prop.fromSpawn(spawnBelow)
           await objectBelow.loadAssets({ loadImage })
@@ -676,7 +700,7 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
       ? String(cellInfo.canEnter)
       : "-"
     query(".object-type")!.textContent = spawn ? spawn.type : "-"
-    query(".object-src")!.textContent = spawn ? spawn.src : "-"
+    query(".object-src")!.textContent = spawn ? spawn.def.src : "-"
   })
 }
 

@@ -10,7 +10,7 @@ import type {
   IStepper,
   LoadOptions,
 } from "../model/types.ts"
-import { spawnCharacter } from "../model/character.ts"
+import { spawnActor } from "../model/actor.ts"
 import { Item } from "../model/item.ts"
 import { Prop } from "../model/prop.ts"
 import {
@@ -549,12 +549,12 @@ export class Field implements IField {
       let i = 0
       for (const spawn of newCharSpawns) {
         i++
-        this.#actors.add(spawnCharacter(
+        this.#actors.add(spawnActor(
           spawn.id,
           spawn.type,
           spawn.i,
           spawn.j,
-          new URL(spawn.src, spawn.srcBase).href,
+          spawn.def.href,
           {
             dir: spawn.dir,
             speed: spawn.speed,
@@ -583,7 +583,7 @@ export class Field implements IField {
             spawn.i,
             spawn.j,
             spawn.type,
-            new URL(spawn.src, spawn.srcBase).href,
+            spawn.def.href,
           ),
         )
       }

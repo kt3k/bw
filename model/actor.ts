@@ -30,7 +30,7 @@ const fallbackImagePhase1 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD5JREFUOE9jZGBg+M+AChjR+HjlQYqHgQFoXibNS+gBBjKMpDAZHAaQ5GQGBgYUV4+mA7QAgaYokgJ14NMBAK1TIAlUJpxYAAAAAElFTkSuQmCC",
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
 
-type CharacterAppearance =
+type ActorAppearance =
   | "up0"
   | "up1"
   | "down0"
@@ -40,20 +40,20 @@ type CharacterAppearance =
   | "right0"
   | "right1"
 
-type CharacterAssets = {
-  [K in CharacterAppearance]: ImageBitmap
+type ActorAssets = {
+  [K in ActorAppearance]: ImageBitmap
 }
 
-export type NPCType =
+export type ActorType =
   | typeof RandomlyTurnNPC.type
   | typeof RandomWalkNPC.type
   | typeof StaticNPC.type
   | typeof InertialNPC.type
   | typeof RandomRotateNPC.type
 
-export function spawnCharacter(
+export function spawnActor(
   id: string,
-  typ: NPCType,
+  typ: ActorType,
   i: number,
   j: number,
   src: string,
@@ -72,7 +72,7 @@ export function spawnCharacter(
       return new InertialNPC(i, j, src, id, dir, speed)
   }
   typ satisfies never
-  throw new Error(`Unknown character type: ${typ}`)
+  throw new Error(`Unknown actor type: ${typ}`)
 }
 
 type MoveBase = {
@@ -84,9 +84,9 @@ type MoveBase = {
   halfPassed: boolean
 }
 
-export type Move = CharacterGoMove | CharacterBounceMove | CharacterJumpMove
+export type Move = ActorGoMove | ActorBounceMove | ActorJumpMove
 
-export class CharacterGoMove implements MoveBase {
+export class ActorGoMove implements MoveBase {
   #phase: number = 0
   #speed: number = 1
   #dir: Dir
@@ -133,7 +133,7 @@ export class CharacterGoMove implements MoveBase {
   }
 }
 
-export class CharacterBounceMove implements MoveBase {
+export class ActorBounceMove implements MoveBase {
   #phase: number = 0
   #dir: Dir
   #pushedActors: boolean
@@ -192,7 +192,7 @@ export class CharacterBounceMove implements MoveBase {
   }
 }
 
-export class CharacterJumpMove implements MoveBase {
+export class ActorJumpMove implements MoveBase {
   #phase: number = 0
   #y: number = 0
 
@@ -236,17 +236,17 @@ export class CharacterJumpMove implements MoveBase {
   }
 }
 
-/** The abstract character class
- * The parent class of MainCharacter and NPC.
+/** The abstract actor class
+ * The parent class of {@code MainCharacter} and NPC.
  */
-export abstract class Character implements IActor {
-  /** The current direction of the character */
+export abstract class Actor implements IActor {
+  /** The current direction of the actor */
   #dir: Dir = "down"
   /** The column of the world coordinates */
   #i: number
   /** The row of the world coordinates */
   #j: number
-  /** The id of the character */
+  /** The id of the actor */
   #id: string
   /** The speed of the move */
   #speed: 1 | 2 | 4 | 8 | 16 = 1
@@ -260,13 +260,13 @@ export abstract class Character implements IActor {
   #physicalGridKey: string
   /** The prefix of assets */
   #src: string
-  /** The images necessary to render this character */
-  #assets?: CharacterAssets
+  /** The images necessary to render this actor */
+  #assets?: ActorAssets
   /** The queue of actions to be performed */
   #actionQueue: Action[] = []
   /** The timer for speed up actions */
   #speedUpTimer: ReturnType<typeof setTimeout> | undefined
-  /** The move of the character */
+  /** The move of the actor */
   #move: Move | null = null
 
   constructor(
@@ -290,17 +290,17 @@ export abstract class Character implements IActor {
     this.#dir = state
   }
 
-  /** Returns the grid coordinates of the 1 cell front of the character. */
+  /** Returns the grid coordinates of the 1 cell front of the actor. */
   frontGrid(): [i: number, j: number] {
     return this.nextGrid(this.#dir)
   }
 
-  /** Returns the next grid coordinates of the 1 cell next of the character to the given direction */
+  /** Returns the next grid coordinates of the 1 cell next of the actor to the given direction */
   nextGrid(dir: Dir, distance = 1): [i: number, j: number] {
     return nextGrid(this.#i, this.#j, dir, distance)
   }
 
-  /** Returns true if the character can go to the given direction */
+  /** Returns true if the actor can go to the given direction */
   canGo(
     dir: Dir,
     field: IField,
@@ -309,11 +309,11 @@ export abstract class Character implements IActor {
     return field.canEnter(i, j)
   }
 
-  /** Returns the next state of the character.
+  /** Returns the next state of the actor.
    * This method is called in each step.
    *
-   * Returning the direction causes the character to move in that direction.
-   * Returning undefined causes the character to stay in the current state.
+   * Returning the direction causes the actor to move in that direction.
+   * Returning undefined causes the actor to stay in the current state.
    */
   getNextMovePlan(
     _field: IField,
@@ -442,7 +442,7 @@ export abstract class Character implements IActor {
             const dir = nextPlan.dir
             if (nextPlan?.type === "go") this.setDir(dir)
             if (this.canGo(dir, field)) {
-              this.#move = new CharacterGoMove(this.#speed, dir)
+              this.#move = new ActorGoMove(this.#speed, dir)
               const [nextI, nextJ] = this.nextGrid(dir)
               this.#i = nextI
               this.#j = nextJ
@@ -455,7 +455,7 @@ export abstract class Character implements IActor {
                   field,
                 )
               })
-              this.#move = new CharacterBounceMove(
+              this.#move = new ActorBounceMove(
                 dir,
                 pushing.length > 0,
                 this.#speed,
@@ -464,7 +464,7 @@ export abstract class Character implements IActor {
             break
           }
           case "jump":
-            this.#move = new CharacterJumpMove()
+            this.#move = new ActorJumpMove()
             break
         }
       }
@@ -512,7 +512,7 @@ export abstract class Character implements IActor {
   /**
    * Gets the x of the world coordinates.
    *
-   * This defines where the character is drawn.
+   * This defines where the actor is drawn.
    */
   get x(): number {
     return this.#i * CELL_SIZE + (this.#move ? this.#move.x : 0)
@@ -538,7 +538,7 @@ export abstract class Character implements IActor {
   /**
    * Gets the y of the world coordinates
    *
-   * This defines where the character is drawn.
+   * This defines where the actor is drawn.
    */
   get y(): number {
     return this.#j * CELL_SIZE + (this.#move ? this.#move.y : 0)
@@ -702,7 +702,7 @@ export abstract class Character implements IActor {
     }
   }
 }
-export class RandomlyTurnNPC extends Character {
+export class RandomlyTurnNPC extends Actor {
   static type = "random" as const
 
   #counter = 32
@@ -711,7 +711,7 @@ export class RandomlyTurnNPC extends Character {
     if (this.#counter <= 0) {
       const { randomInt, choice } = seed(field.time.toString())
       this.#counter = randomInt(8) + 4
-      // If the character can keep going in the current direction,
+      // If the actor can keep going in the current direction,
       // it will keep going with 96% probability.
       if (
         this.canGo(this.dir, field) &&
@@ -739,7 +739,7 @@ export class RandomlyTurnNPC extends Character {
   }
 }
 
-export class RandomRotateNPC extends Character {
+export class RandomRotateNPC extends Actor {
   static type = "random-rotate" as const
 
   #delay = 0
@@ -776,7 +776,7 @@ export class RandomRotateNPC extends Character {
   }
 }
 
-export class RandomWalkNPC extends Character {
+export class RandomWalkNPC extends Actor {
   static type = "random-walk" as const
 
   override getNextMovePlan(field: IField): MovePlan {
@@ -794,7 +794,7 @@ export class RandomWalkNPC extends Character {
   }
 }
 
-export class InertialNPC extends Character {
+export class InertialNPC extends Actor {
   static type = "inertial" as const
 
   override onMoveEnd(_field: IField, move: Move): void {
@@ -809,8 +809,8 @@ export class InertialNPC extends Character {
       }
       case "bounce": {
         if (!move.pushedActors) {
-          // The character was bounced to the wall.
-          // In that case, the character go back to the opposite direction
+          // The actor was bounced to the wall.
+          // In that case, the actor go back to the opposite direction
           this.enqueueAction({ type: "go", dir: opposite(move.dir) })
         }
       }
@@ -818,6 +818,6 @@ export class InertialNPC extends Character {
   }
 }
 
-export class StaticNPC extends Character {
+export class StaticNPC extends Actor {
   static type = "static" as const
 }

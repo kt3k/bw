@@ -4,9 +4,14 @@ import { randomInt, seed } from "../util/random.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { loadImage } from "../util/load.ts"
 import type { Dir, IBox } from "./types.ts"
-import type { NPCType } from "./character.ts"
+import type { ActorType } from "./actor.ts"
 import type { ItemType, LoadOptions, PropType as PropType } from "./types.ts"
-import { Catalog } from "./catalog.ts"
+import {
+  ActorDefinition,
+  Catalog,
+  ItemDefinition,
+  PropDefinition,
+} from "./catalog.ts"
 
 /** Global coordinates to local chunk index */
 function g2c(i: number, j: number): [number, number] {
@@ -38,8 +43,7 @@ export class ItemSpawnInfo implements IBox {
   readonly i: number
   readonly j: number
   readonly type: ItemType
-  readonly src: string
-  readonly srcBase: string
+  readonly def: ItemDefinition
   readonly x: number
   readonly y: number
   readonly w = CELL_SIZE
@@ -48,23 +52,20 @@ export class ItemSpawnInfo implements IBox {
     i: number,
     j: number,
     type: ItemType,
-    src: string,
-    srcBase: string,
+    def: ItemDefinition,
   ) {
     this.id = `${i}.${j}.${type}` // Unique ID for the spawn
     this.i = i
     this.j = j
     this.type = type
-    this.src = src
-    this.srcBase = srcBase
+    this.def = def
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
   }
 
   equals(other: ItemSpawnInfo): boolean {
     return this.i === other.i && this.j === other.j &&
-      this.type === other.type &&
-      this.src === other.src
+      this.type === other.type
   }
 
   toJSON() {
@@ -82,9 +83,7 @@ export class PropSpawnInfo implements IBox {
   readonly i: number
   readonly j: number
   readonly type: PropType
-  readonly canEnter: boolean
-  readonly src: string
-  readonly srcBase: string
+  readonly def: PropDefinition
   readonly x: number
   readonly y: number
   readonly w = CELL_SIZE
@@ -93,25 +92,20 @@ export class PropSpawnInfo implements IBox {
     i: number,
     j: number,
     type: PropType,
-    canEnter: boolean,
-    src: string,
-    srcBase: string,
+    def: PropDefinition,
   ) {
     this.id = `${i}.${j}.${type}` // Unique ID for the spawn
     this.i = i
     this.j = j
     this.type = type
-    this.canEnter = canEnter
-    this.src = src
-    this.srcBase = srcBase
+    this.def = def
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
   }
 
   equals(other: PropSpawnInfo): boolean {
     return this.i === other.i && this.j === other.j &&
-      this.type === other.type &&
-      this.src === other.src
+      this.type === other.type
   }
 
   toJSON() {
@@ -123,17 +117,16 @@ export class PropSpawnInfo implements IBox {
   }
 }
 
-type CharacterSpeed = 1 | 2 | 4 | 8 | 16
+type ActorSpeed = 1 | 2 | 4 | 8 | 16
 
-export class CharacterSpawnInfo implements IBox {
+export class ActorSpawnInfo implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
-  readonly type: NPCType
-  readonly src: string
-  readonly srcBase: string
+  readonly type: ActorType
+  readonly def: ActorDefinition
   readonly dir?: Dir
-  readonly speed?: CharacterSpeed
+  readonly speed?: ActorSpeed
   readonly x: number
   readonly y: number
   readonly w = CELL_SIZE
@@ -141,12 +134,11 @@ export class CharacterSpawnInfo implements IBox {
   constructor(
     i: number,
     j: number,
-    type: NPCType,
-    src: string,
-    srcBase: string,
+    type: ActorType,
+    def: ActorDefinition,
     { dir, speed }: {
       dir?: Dir
-      speed?: CharacterSpeed
+      speed?: ActorSpeed
     } = {},
   ) {
     this.id = `${i}.${j}.${type}.${speed ?? "-"}.${dir ?? "-"}` // Unique ID for the spawn
@@ -155,16 +147,14 @@ export class CharacterSpawnInfo implements IBox {
     this.dir = dir
     this.speed = speed
     this.type = type
-    this.src = src
-    this.srcBase = srcBase
+    this.def = def
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
   }
 
-  equals(other: CharacterSpawnInfo): boolean {
+  equals(other: ActorSpawnInfo): boolean {
     return this.i === other.i && this.j === other.j &&
       this.type === other.type &&
-      this.src === other.src &&
       this.dir === other.dir &&
       this.speed === other.speed
   }
@@ -284,7 +274,7 @@ interface BlockMapSource {
     j: number
     type: string
     dir?: Dir
-    speed?: CharacterSpeed
+    speed?: ActorSpeed
   }[]
   items: {
     i: number
@@ -317,7 +307,7 @@ export class BlockMap {
   readonly i: number
   // The row of the world coordinates
   readonly j: number
-  readonly characters: CharacterSpawnInfo[]
+  readonly characters: ActorSpawnInfo[]
   readonly items: ItemSpawnInfo[]
   readonly props: PropSpawnInfo[] = []
   readonly field: string[]
@@ -328,12 +318,11 @@ export class BlockMap {
     this.i = obj.i
     this.j = obj.j
     this.characters = (obj.characters ?? []).map((spawn) =>
-      new CharacterSpawnInfo(
+      new ActorSpawnInfo(
         spawn.i,
         spawn.j,
-        spawn.type as NPCType,
-        catalog.actors.get(spawn.type)!.src,
-        catalog.actors.get(spawn.type)!.baseUrl,
+        spawn.type as ActorType,
+        catalog.actors.get(spawn.type)!,
         {
           dir: spawn.dir,
           speed: spawn.speed,
@@ -345,8 +334,7 @@ export class BlockMap {
         item.i,
         item.j,
         item.type as ItemType,
-        catalog.items.get(item.type)!.src,
-        catalog.items.get(item.type)!.baseUrl,
+        catalog.items.get(item.type)!,
       )
     )
     this.props = (obj.props ?? []).map((prop) =>
@@ -354,9 +342,7 @@ export class BlockMap {
         prop.i,
         prop.j,
         prop.type as PropType,
-        catalog.props.get(prop.type)!.canEnter,
-        catalog.props.get(prop.type)!.src,
-        catalog.props.get(prop.type)!.baseUrl,
+        catalog.props.get(prop.type)!,
       )
     )
     this.field = obj.field
@@ -481,7 +467,7 @@ export class FieldBlock {
   #j: number
   #cellMap: Record<string, FieldCell> = {}
   imgMap: Record<string, ImageBitmap> = {}
-  characterSpawns: SpawnMap<CharacterSpawnInfo>
+  actorSpawn: SpawnMap<ActorSpawnInfo>
   itemSpawns: SpawnMap<ItemSpawnInfo>
   propSpawns: SpawnMap<PropSpawnInfo>
   field: string[]
@@ -507,7 +493,7 @@ export class FieldBlock {
     }
     this.field = map.field
     this.#map = map
-    this.characterSpawns = new SpawnMap(map.characters)
+    this.actorSpawn = new SpawnMap(map.characters)
     this.itemSpawns = new SpawnMap(map.items)
     this.propSpawns = new SpawnMap(map.props)
   }
@@ -719,7 +705,7 @@ export class FieldBlock {
       i: this.#i,
       j: this.#j,
       catalogs: this.#map.catalog.refs,
-      characters: this.characterSpawns.toJSON(),
+      characters: this.actorSpawn.toJSON(),
       items: this.itemSpawns.toJSON(),
       props: this.propSpawns.toJSON(),
       field: this.field,
@@ -758,8 +744,8 @@ export class FieldBlockChunk {
     return this.#fieldBlock.itemSpawns.getChunk(this.#i, this.#j)
   }
 
-  getCharacterSpawns(): CharacterSpawnInfo[] {
-    return this.#fieldBlock.characterSpawns.getChunk(this.#i, this.#j)
+  getCharacterSpawns(): ActorSpawnInfo[] {
+    return this.#fieldBlock.actorSpawn.getChunk(this.#i, this.#j)
   }
 
   getPropSpawns(): PropSpawnInfo[] {

@@ -1,4 +1,4 @@
-import { CharacterGoMove, RandomlyTurnNPC, StaticNPC } from "./character.ts"
+import { ActorGoMove, RandomlyTurnNPC, StaticNPC } from "./actor.ts"
 import { assert, assertEquals, assertFalse } from "@std/assert"
 
 Deno.test("Character", async (t) => {
@@ -24,7 +24,7 @@ Deno.test("Character", async (t) => {
 })
 
 Deno.test("CharacterGoMove", () => {
-  const move = new CharacterGoMove(1, "up")
+  const move = new ActorGoMove(1, "up")
   assertFalse(move.halfPassed)
   assertEquals(move.x, 0)
   assertEquals(move.y, 16)

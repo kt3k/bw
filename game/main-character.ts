@@ -1,14 +1,14 @@
 import { DIRS, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { loadImage } from "../util/load.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import { Character, Move, spawnCharacter } from "../model/character.ts"
+import { Actor, Move, spawnActor } from "../model/actor.ts"
 import { splashColor } from "./field.ts"
 import type { IField, MovePlan } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import { seed } from "../util/random.ts"
 
-export class MainCharacter extends Character {
+export class MainActor extends Actor {
   #lastMoveTypes: string[] = []
   override getNextMovePlan(_field: IField): MovePlan {
     if (Input.up) {
@@ -42,7 +42,7 @@ export class MainCharacter extends Character {
           for (const dir of DIRS) {
             if (dir === this.dir) continue
             if (!this.canGo(dir, field)) continue
-            const actor = spawnCharacter(
+            const actor = spawnActor(
               `${this.i}.${this.j}.inertial.${crypto.randomUUID()}`,
               "inertial",
               this.i,

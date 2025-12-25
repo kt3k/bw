@@ -1,6 +1,7 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import type { IProp, LoadOptions, PropType } from "./types.ts"
 import { PropSpawnInfo } from "./field-block.ts"
+import { PropDefinition } from "./catalog.ts"
 
 const fallbackImage = await fetch(
   // TODO(kt3k): Update
@@ -13,8 +14,7 @@ export class Prop implements IProp {
   readonly i: number
   readonly j: number
   readonly type: PropType
-  readonly src: string
-  readonly canEnter: boolean
+  readonly def: PropDefinition
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
@@ -25,8 +25,7 @@ export class Prop implements IProp {
       spawn.i,
       spawn.j,
       spawn.type,
-      spawn.canEnter,
-      new URL(spawn.src, spawn.srcBase).href,
+      spawn.def,
     )
   }
 
@@ -41,15 +40,13 @@ export class Prop implements IProp {
     i: number,
     j: number,
     type: PropType,
-    canEnter: boolean,
-    src: string,
+    def: PropDefinition,
   ) {
     this.id = id
     this.i = i
     this.j = j
     this.type = type
-    this.canEnter = canEnter
-    this.src = src
+    this.def = def
   }
 
   async loadAssets(options: LoadOptions) {
@@ -57,7 +54,7 @@ export class Prop implements IProp {
     if (!loadImage) {
       throw new Error("Cannot load assets as loadImage not specified")
     }
-    this.#image = await loadImage(this.src)
+    this.#image = await loadImage(this.def.href)
   }
 
   get assetsReady(): boolean {
@@ -73,5 +70,9 @@ export class Prop implements IProp {
   }
   get y(): number {
     return this.j * CELL_SIZE
+  }
+
+  get canEnter(): boolean {
+    return this.def.canEnter
   }
 }
