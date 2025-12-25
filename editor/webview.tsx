@@ -14,7 +14,13 @@ import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
 import { Catalog, loadCatalog } from "../model/catalog.ts"
-import { BlockMap, FieldBlock, PropSpawnInfo } from "../model/field-block.ts"
+import {
+  BlockMap,
+  createImageDataForRange,
+  drawCell,
+  FieldBlock,
+  PropSpawnInfo,
+} from "../model/field-block.ts"
 import { Prop } from "../model/prop.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { memoizedLoading } from "../util/memo.ts"
@@ -420,13 +426,14 @@ async function CanvasLayers({ el }: Context) {
       href: href.replace(/^file:\/\//, "vscode://file"),
     }, `block_${k}.${l}.json`)
     if (dx === -1) {
-      const imageData = fieldBlock.createImageDataForRange(
+      const imageData = createImageDataForRange(
         BLOCK_SIZE - 5,
         0,
         5,
         BLOCK_SIZE,
         fieldBlock.cellMap,
         fieldBlock.imgMap,
+        fieldBlock.field,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.left = "0"
@@ -434,13 +441,14 @@ async function CanvasLayers({ el }: Context) {
       a.style.height = CANVAS_SIZE + "px"
       a.style.width = SIDE_CANVAS_SIZE + "px"
     } else if (dx === 1) {
-      const imageData = fieldBlock.createImageDataForRange(
+      const imageData = createImageDataForRange(
         0,
         0,
         5,
         BLOCK_SIZE,
         fieldBlock.cellMap,
         fieldBlock.imgMap,
+        fieldBlock.field,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.left = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
@@ -448,13 +456,14 @@ async function CanvasLayers({ el }: Context) {
       a.style.height = CANVAS_SIZE + "px"
       a.style.width = SIDE_CANVAS_SIZE + "px"
     } else if (dy === -1) {
-      const imageData = fieldBlock.createImageDataForRange(
+      const imageData = createImageDataForRange(
         0,
         BLOCK_SIZE - 5,
         BLOCK_SIZE,
         5,
         fieldBlock.cellMap,
         fieldBlock.imgMap,
+        fieldBlock.field,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.top = "0"
@@ -462,13 +471,14 @@ async function CanvasLayers({ el }: Context) {
       a.style.width = CANVAS_SIZE + "px"
       a.style.height = SIDE_CANVAS_SIZE + "px"
     } else if (dy === 1) {
-      const imageData = fieldBlock.createImageDataForRange(
+      const imageData = createImageDataForRange(
         0,
         0,
         BLOCK_SIZE,
         5,
         fieldBlock.cellMap,
         fieldBlock.imgMap,
+        fieldBlock.field,
       )
       a.appendChild(createCanvasFromImageData(imageData))
       a.style.top = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
@@ -522,7 +532,7 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
     await block.loadAssets({ loadImage })
     for (const [i, j] of prev.diffCells(block)) {
       const cell = block.getCell(i, j)
-      block.drawCell(canvasWrapper, i, j, cell, block.imgMap[cell.name])
+      drawCell(canvasWrapper, i, j, cell, block.imgMap[cell.name])
     }
     prev = block
   })

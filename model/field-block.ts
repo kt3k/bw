@@ -188,8 +188,9 @@ export class SpawnMap<
     i: number
     j: number
     equals(other: T): boolean
-    toJSON(): unknown
+    toJSON(): S
   },
+  S = ReturnType<T["toJSON"]>,
 > {
   #chunks: T[][][] = Array.from(
     { length: CHUNK_COUNT_X },
@@ -250,7 +251,7 @@ export class SpawnMap<
     return Object.values(this.#map)
   }
 
-  diff(other: SpawnMap<T>): (["add", T] | ["remove", T])[] {
+  diff(other: SpawnMap<T, S>): (["add", T] | ["remove", T])[] {
     const diff: (["add", T] | ["remove", T])[] = []
     for (const spawn of other.getAll()) {
       const existing = this.get(spawn.i, spawn.j)
@@ -269,7 +270,7 @@ export class SpawnMap<
     return diff
   }
 
-  toJSON(): unknown[] {
+  toJSON(): S[] {
     return this.getAll().map((s) => s.toJSON())
   }
 }
@@ -372,6 +373,102 @@ export class BlockMap {
   }
 }
 
+export function drawCellColor(
+  wrapper: CanvasWrapper,
+  i: number,
+  j: number,
+  color: string,
+  margin = 1,
+) {
+  const [localI, localJ] = g2l(i, j)
+  margin = randomInt(3)
+  wrapper.drawRect(
+    localI * CELL_SIZE + margin,
+    localJ * CELL_SIZE + margin,
+    CELL_SIZE - margin * 2,
+    CELL_SIZE - margin * 2,
+    color,
+  )
+}
+
+/** Draws a cell on the canvas */
+export function drawCell(
+  wrapper: CanvasWrapper,
+  i: number,
+  j: number,
+  cell: FieldCell,
+  image: ImageBitmap,
+) {
+  const [localI, localJ] = g2l(i, j)
+  wrapper.drawImage(
+    image,
+    localI * CELL_SIZE,
+    localJ * CELL_SIZE,
+  )
+  const { rng } = seed(`${i}.${j}`)
+  let color: string
+  if (cell.canEnter) {
+    color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
+  } else {
+    color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
+  }
+  wrapper.drawRect(
+    localI * CELL_SIZE,
+    localJ * CELL_SIZE,
+    CELL_SIZE,
+    CELL_SIZE,
+    color,
+  )
+}
+
+function renderRange(
+  wrapper: CanvasWrapper,
+  i: number,
+  j: number,
+  width: number,
+  height: number,
+  cellMap: Record<string, FieldCell>,
+  imgMap: Record<string, ImageBitmap>,
+  field: string[],
+) {
+  for (let ii = 0; ii < width; ii++) {
+    for (let jj = 0; jj < height; jj++) {
+      const [localI, localJ] = g2l(i + ii, j + jj)
+      const cell = cellMap[field[localJ][localI]]
+      drawCell(
+        wrapper,
+        i + ii,
+        j + jj,
+        cell,
+        imgMap[cell.name],
+      )
+    }
+  }
+}
+
+export function createImageDataForRange(
+  i: number,
+  j: number,
+  gridWidth: number,
+  gridHeight: number,
+  cellMap: Record<string, FieldCell>,
+  imgMap: Record<string, ImageBitmap>,
+  field: string[],
+): ImageData {
+  const canvas = new OffscreenCanvas(
+    CELL_SIZE * BLOCK_SIZE,
+    CELL_SIZE * BLOCK_SIZE,
+  )
+  const wrapper = new CanvasWrapper(canvas)
+  renderRange(wrapper, i, j, gridWidth, gridHeight, cellMap, imgMap, field)
+  return canvas.getContext("2d")!.getImageData(
+    CELL_SIZE * i,
+    CELL_SIZE * j,
+    CELL_SIZE * gridWidth,
+    CELL_SIZE * gridHeight,
+  )
+}
+
 /** {@linkcode FieldBlock} represents a {@linkcode BLOCK_SIZE} x {@linkcode BLOCK_SIZE} block of a field */
 export class FieldBlock {
   #x: number
@@ -387,7 +484,7 @@ export class FieldBlock {
   characterSpawns: SpawnMap<CharacterSpawnInfo>
   itemSpawns: SpawnMap<ItemSpawnInfo>
   propSpawns: SpawnMap<PropSpawnInfo>
-  #field: string[]
+  field: string[]
   #map: BlockMap
   #canvas: HTMLCanvasElement | undefined
   #canvasWrapper: CanvasWrapper | undefined
@@ -408,7 +505,7 @@ export class FieldBlock {
         src: cellDef.src,
       }
     }
-    this.#field = map.field
+    this.field = map.field
     this.#map = map
     this.characterSpawns = new SpawnMap(map.characters)
     this.itemSpawns = new SpawnMap(map.items)
@@ -506,73 +603,12 @@ export class FieldBlock {
   }
 
   drawCellColor(i: number, j: number, color: string, margin = 1) {
-    const [localI, localJ] = g2l(i, j)
-    margin = randomInt(3)
-    this.canvasWrapper.drawRect(
-      localI * CELL_SIZE + margin,
-      localJ * CELL_SIZE + margin,
-      CELL_SIZE - margin * 2,
-      CELL_SIZE - margin * 2,
-      color,
-    )
-  }
-
-  drawCell(
-    wrapper: CanvasWrapper,
-    i: number,
-    j: number,
-    cell: FieldCell,
-    image: ImageBitmap,
-  ) {
-    const [localI, localJ] = g2l(i, j)
-    wrapper.drawImage(
-      image,
-      localI * CELL_SIZE,
-      localJ * CELL_SIZE,
-    )
-    const { rng } = seed(`${i}.${j}`)
-    let color: string
-    if (cell.canEnter) {
-      color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
-    } else {
-      color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
-    }
-    wrapper.drawRect(
-      localI * CELL_SIZE,
-      localJ * CELL_SIZE,
-      CELL_SIZE,
-      CELL_SIZE,
-      color,
-    )
-  }
-
-  #renderRange(
-    wrapper: CanvasWrapper,
-    i: number,
-    j: number,
-    width: number,
-    height: number,
-    cellMap: Record<string, FieldCell>,
-    imgMap: Record<string, ImageBitmap>,
-  ) {
-    for (let ii = 0; ii < width; ii++) {
-      for (let jj = 0; jj < height; jj++) {
-        const [localI, localJ] = g2l(i + ii, j + jj)
-        const cell = cellMap[this.#field[localJ][localI]]
-        this.drawCell(
-          wrapper,
-          i + ii,
-          j + jj,
-          cell,
-          imgMap[cell.name],
-        )
-      }
-    }
+    drawCellColor(this.canvasWrapper, i, j, color, margin)
   }
 
   renderAll() {
     const wrapper = new CanvasWrapper(this.canvas)
-    this.#renderRange(
+    renderRange(
       wrapper,
       0,
       0,
@@ -580,28 +616,7 @@ export class FieldBlock {
       BLOCK_SIZE,
       this.#cellMap,
       this.imgMap,
-    )
-  }
-
-  createImageDataForRange(
-    i: number,
-    j: number,
-    gridWidth: number,
-    gridHeight: number,
-    cellMap: Record<string, FieldCell>,
-    imgMap: Record<string, ImageBitmap>,
-  ): ImageData {
-    const canvas = new OffscreenCanvas(
-      CELL_SIZE * BLOCK_SIZE,
-      CELL_SIZE * BLOCK_SIZE,
-    )
-    const wrapper = new CanvasWrapper(canvas)
-    this.#renderRange(wrapper, i, j, gridWidth, gridHeight, cellMap, imgMap)
-    return canvas.getContext("2d")!.getImageData(
-      CELL_SIZE * i,
-      CELL_SIZE * j,
-      CELL_SIZE * gridWidth,
-      CELL_SIZE * gridHeight,
+      this.field,
     )
   }
 
@@ -651,19 +666,13 @@ export class FieldBlock {
       removeOverlay()
     }
     worker.postMessage({
-      url: this.#map.url,
-      obj: {
-        ...this.toMap().toObject(),
-        characters: [],
-        items: [],
-        objects: [],
-      },
       cellMap: this.#cellMap,
       imgMap: this.imgMap,
       i: k * BLOCK_CHUNK_SIZE,
       j: l * BLOCK_CHUNK_SIZE,
       gridWidth: BLOCK_CHUNK_SIZE,
       gridHeight: BLOCK_CHUNK_SIZE,
+      field: this.field,
     })
     await render.promise
     return
@@ -676,15 +685,15 @@ export class FieldBlock {
    */
   getCell(i: number, j: number): FieldCell {
     const [localI, localJ] = g2l(i, j)
-    return this.#cellMap[this.#field[localJ][localI]]
+    return this.#cellMap[this.field[localJ][localI]]
   }
   /** Updates a cell at the given coordinates with the given cell name.
    * This is for editor use.
    */
   updateCell(i: number, j: number, cell: string): void {
     const [relI, relJ] = g2l(i, j)
-    this.#field[relJ] = this.#field[relJ].substring(0, relI) + cell +
-      this.#field[relJ].substring(relI + 1)
+    this.field[relJ] = this.field[relJ].substring(0, relI) + cell +
+      this.field[relJ].substring(relI + 1)
   }
   get i(): number {
     return this.#i
@@ -710,13 +719,10 @@ export class FieldBlock {
       i: this.#i,
       j: this.#j,
       catalogs: this.#map.catalog.refs,
-      // deno-lint-ignore no-explicit-any
-      characters: this.characterSpawns.toJSON() as any,
-      // deno-lint-ignore no-explicit-any
-      items: this.itemSpawns.toJSON() as any,
-      // deno-lint-ignore no-explicit-any
-      props: this.propSpawns.toJSON() as any,
-      field: this.#field,
+      characters: this.characterSpawns.toJSON(),
+      items: this.itemSpawns.toJSON(),
+      props: this.propSpawns.toJSON(),
+      field: this.field,
     }, this.#map.catalog)
   }
 

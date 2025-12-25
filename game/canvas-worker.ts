@@ -1,18 +1,16 @@
-import { BlockMap, FieldBlock } from "../model/field-block.ts"
-import { Catalog } from "../model/catalog.ts"
+import { createImageDataForRange } from "../model/field-block.ts"
 
 addEventListener("message", (event) => {
   const start = performance.now()
-  const { url, obj, cellMap, imgMap, i, j, gridWidth, gridHeight } = event.data
-  const blockMap = new BlockMap(url, obj, new Catalog())
-  const fieldBlock = new FieldBlock(blockMap)
-  const imageData = fieldBlock.createImageDataForRange(
+  const { cellMap, imgMap, i, j, gridWidth, gridHeight, field } = event.data
+  const imageData = createImageDataForRange(
     i,
     j,
     gridWidth,
     gridHeight,
     cellMap,
     imgMap,
+    field,
   )
   console.log("Canvas worker: Image data prepared", {
     i,
