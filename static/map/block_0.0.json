@@ -4,7 +4,7 @@
   "catalogs": [
     "../catalog/base.json"
   ],
-  "characters": [
+  "actors": [
     {
       "i": 107,
       "j": 194,

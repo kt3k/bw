@@ -1,4 +1,5 @@
 import { CELL_SIZE } from "../util/constants.ts"
+import { ItemDefinition } from "./catalog.ts"
 import type { IItem, ItemType, LoadOptions } from "./types.ts"
 
 const fallbackImage = await fetch(
@@ -11,7 +12,7 @@ export class Item implements IItem {
   readonly i: number
   readonly j: number
   readonly type: ItemType
-  readonly src: string
+  readonly def: ItemDefinition
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
@@ -30,20 +31,20 @@ export class Item implements IItem {
    * @param i The column of the grid coordinate
    * @param j The row of the grid coordinate
    * @param type The type of item
-   * @param src The path to the asset image
+   * @param def The item definition
    */
   constructor(
     id: string | null,
     i: number,
     j: number,
     type: ItemType,
-    src: string,
+    def: ItemDefinition,
   ) {
     this.id = id
     this.i = i
     this.j = j
     this.type = type
-    this.src = src
+    this.def = def
   }
 
   async loadAssets(options: LoadOptions) {
@@ -51,7 +52,7 @@ export class Item implements IItem {
     if (!loadImage) {
       throw new Error("Cannot load assets as loadImage not specified")
     }
-    this.#image = await loadImage(this.src)
+    this.#image = await loadImage(this.def.href)
   }
 
   get assetsReady(): boolean {

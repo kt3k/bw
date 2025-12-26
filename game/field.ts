@@ -17,12 +17,11 @@ import {
   BlockMap,
   FieldBlock,
   type FieldBlockChunk,
-  type FieldCell,
 } from "../model/field-block.ts"
 import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
 import { DIRS, nextGrid } from "../util/dir.ts"
-import { loadCatalog } from "../model/catalog.ts"
+import { CellDefinition, loadCatalog } from "../model/catalog.ts"
 
 /** The items on the field */
 export class FieldItems implements IStepper, ILoader {
@@ -452,7 +451,7 @@ export class Field implements IField {
    * Gets the cell for the given grid coordinate
    * Mainly used by characters to get the cell they are trying to enter
    */
-  #getCell(i: number, j: number): FieldCell {
+  #getCell(i: number, j: number): CellDefinition {
     return this.#getBlock(i, j).getCell(i, j)
   }
   step(): void {
@@ -554,7 +553,7 @@ export class Field implements IField {
           spawn.type,
           spawn.i,
           spawn.j,
-          spawn.def.href,
+          spawn.def,
           {
             dir: spawn.dir,
             speed: spawn.speed,
@@ -583,7 +582,7 @@ export class Field implements IField {
             spawn.i,
             spawn.j,
             spawn.type,
-            spawn.def.href,
+            spawn.def,
           ),
         )
       }

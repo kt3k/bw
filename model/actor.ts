@@ -21,6 +21,7 @@ import type {
   LoadOptions,
   MovePlan,
 } from "./types.ts"
+import { ActorDefinition } from "./catalog.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -56,20 +57,20 @@ export function spawnActor(
   typ: ActorType,
   i: number,
   j: number,
-  src: string,
+  def: ActorDefinition,
   { dir = "down", speed = 1 }: { dir?: Dir; speed?: 1 | 2 | 4 | 8 | 16 } = {},
 ): IActor {
   switch (typ) {
     case RandomlyTurnNPC.type:
-      return new RandomlyTurnNPC(i, j, src, id, dir, speed)
+      return new RandomlyTurnNPC(i, j, def, id, dir, speed)
     case RandomWalkNPC.type:
-      return new RandomWalkNPC(i, j, src, id, dir, speed)
+      return new RandomWalkNPC(i, j, def, id, dir, speed)
     case StaticNPC.type:
-      return new StaticNPC(i, j, src, id, dir, speed)
+      return new StaticNPC(i, j, def, id, dir, speed)
     case RandomRotateNPC.type:
-      return new RandomRotateNPC(i, j, src, id, dir, speed)
+      return new RandomRotateNPC(i, j, def, id, dir, speed)
     case InertialNPC.type:
-      return new InertialNPC(i, j, src, id, dir, speed)
+      return new InertialNPC(i, j, def, id, dir, speed)
   }
   typ satisfies never
   throw new Error(`Unknown actor type: ${typ}`)
@@ -259,7 +260,7 @@ export abstract class Actor implements IActor {
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
-  #src: string
+  #def: ActorDefinition
   /** The images necessary to render this actor */
   #assets?: ActorAssets
   /** The queue of actions to be performed */
@@ -272,7 +273,7 @@ export abstract class Actor implements IActor {
   constructor(
     i: number,
     j: number,
-    src: string,
+    def: ActorDefinition,
     id: string,
     dir: Dir = DOWN,
     speed: 1 | 2 | 4 | 8 | 16 = 1,
@@ -281,7 +282,7 @@ export abstract class Actor implements IActor {
     this.#j = j
     this.#speed = speed
     this.#id = id
-    this.#src = src
+    this.#def = def
     this.#physicalGridKey = this.#calcPhysicalGridKey()
     this.#dir = dir
   }
@@ -581,14 +582,14 @@ export abstract class Actor implements IActor {
     }
     const [up0, up1, down0, down1, left0, left1, right0, right1] = await Promise
       .all([
-        `${this.#src}up0.png`,
-        `${this.#src}up1.png`,
-        `${this.#src}down0.png`,
-        `${this.#src}down1.png`,
-        `${this.#src}left0.png`,
-        `${this.#src}left1.png`,
-        `${this.#src}right0.png`,
-        `${this.#src}right1.png`,
+        `${this.#def.href}up0.png`,
+        `${this.#def.href}up1.png`,
+        `${this.#def.href}down0.png`,
+        `${this.#def.href}down1.png`,
+        `${this.#def.href}left0.png`,
+        `${this.#def.href}left1.png`,
+        `${this.#def.href}right0.png`,
+        `${this.#def.href}right1.png`,
       ].map(loadImage))
     this.#assets = {
       up0,
@@ -687,7 +688,7 @@ export abstract class Actor implements IActor {
           120,
           30,
           0,
-          0.2,
+          0.001,
           2,
           seed(this.#physicalGridKey).rng,
         )
@@ -749,12 +750,12 @@ export class RandomRotateNPC extends Actor {
   constructor(
     i: number,
     j: number,
-    src: string,
+    def: ActorDefinition,
     id: string,
     dir: Dir = DOWN,
     speed: 1 | 2 | 4 | 8 | 16 = 1,
   ) {
-    super(i, j, src, id, dir, speed)
+    super(i, j, def, id, dir, speed)
     const { randomInt } = seed(id)
     this.#delay = 43 + randomInt(8)
     this.#counter = this.#delay

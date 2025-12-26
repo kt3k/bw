@@ -1,17 +1,26 @@
 import { ActorGoMove, RandomlyTurnNPC, StaticNPC } from "./actor.ts"
+import { ActorDefinition } from "./catalog.ts"
 import { assert, assertEquals, assertFalse } from "@std/assert"
 
-Deno.test("Character", async (t) => {
+const actorDef: ActorDefinition = {
+  src: "main/",
+  type: "main",
+  main: "main",
+  href: "main/",
+  // other properties if needed
+}
+
+Deno.test("Actor", async (t) => {
   await t.step("physicalGridKey", () => {
-    const mc = new StaticNPC(100, 100, "main/", "main")
+    const mc = new StaticNPC(100, 100, actorDef, "main")
     assertEquals(mc.physicalGridKey, "100.100")
 
-    const npc = new RandomlyTurnNPC(200, 200, "npc/", "npc")
+    const npc = new RandomlyTurnNPC(200, 200, actorDef, "npc")
     assertEquals(npc.physicalGridKey, "200.200")
   })
 
   await t.step("frontGrid", () => {
-    const c = new StaticNPC(100, 100, "main/", "main")
+    const c = new StaticNPC(100, 100, actorDef, "main")
     assertEquals(c.frontGrid(), [100, 101])
 
     c.setDir("right")
@@ -23,7 +32,7 @@ Deno.test("Character", async (t) => {
   })
 })
 
-Deno.test("CharacterGoMove", () => {
+Deno.test("ActorGoMove", () => {
   const move = new ActorGoMove(1, "up")
   assertFalse(move.halfPassed)
   assertEquals(move.x, 0)

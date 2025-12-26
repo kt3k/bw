@@ -8,6 +8,13 @@ import * as signal from "../util/signal.ts"
 import { bindToggleFullscreenOnce } from "../util/fullscreen.ts"
 import { seed } from "../util/random.ts"
 
+const lenaDef = {
+  type: "inertial" as const,
+  main: "inertial",
+  src: "../char/lena/",
+  href: "/char/lena/",
+}
+
 export class MainActor extends Actor {
   #lastMoveTypes: string[] = []
   override getNextMovePlan(_field: IField): MovePlan {
@@ -47,7 +54,7 @@ export class MainActor extends Actor {
               "inertial",
               this.i,
               this.j,
-              "char/lena/",
+              lenaDef,
               { dir },
             )
             actor.loadAssets({ loadImage })

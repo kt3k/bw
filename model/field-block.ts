@@ -9,6 +9,7 @@ import type { ItemType, LoadOptions, PropType as PropType } from "./types.ts"
 import {
   ActorDefinition,
   Catalog,
+  CellDefinition,
   ItemDefinition,
   PropDefinition,
 } from "./catalog.ts"
@@ -26,15 +27,6 @@ function g2l(i: number, j: number): [number, number] {
   const localI = modulo(i, BLOCK_SIZE)
   const localJ = modulo(j, BLOCK_SIZE)
   return [localI, localJ]
-}
-
-/**
- * {@linkcode FieldCell} represents the cell in the field block
- */
-export interface FieldCell {
-  name: string
-  canEnter: boolean
-  src: string
 }
 
 /** {@linkcode ItemSpawnInfo} represents the spawn info for the items in {@linkcode FieldBlock} */
@@ -68,7 +60,7 @@ export class ItemSpawnInfo implements IBox {
       this.type === other.type
   }
 
-  toJSON() {
+  toJSON(): BlockMapSource["items"][number] {
     return {
       i: this.i,
       j: this.j,
@@ -108,7 +100,7 @@ export class PropSpawnInfo implements IBox {
       this.type === other.type
   }
 
-  toJSON() {
+  toJSON(): BlockMapSource["props"][number] {
     return {
       i: this.i,
       j: this.j,
@@ -153,13 +145,14 @@ export class ActorSpawnInfo implements IBox {
   }
 
   equals(other: ActorSpawnInfo): boolean {
-    return this.i === other.i && this.j === other.j &&
+    return this.i === other.i &&
+      this.j === other.j &&
       this.type === other.type &&
       this.dir === other.dir &&
       this.speed === other.speed
   }
 
-  toJSON() {
+  toJSON(): BlockMapSource["actors"][number] {
     return {
       i: this.i,
       j: this.j,
@@ -269,7 +262,7 @@ interface BlockMapSource {
   i: number
   j: number
   catalogs: string[]
-  characters: {
+  actors: {
     i: number
     j: number
     type: string
@@ -307,7 +300,7 @@ export class BlockMap {
   readonly i: number
   // The row of the world coordinates
   readonly j: number
-  readonly characters: ActorSpawnInfo[]
+  readonly actors: ActorSpawnInfo[]
   readonly items: ItemSpawnInfo[]
   readonly props: PropSpawnInfo[] = []
   readonly field: string[]
@@ -317,12 +310,12 @@ export class BlockMap {
     this.url = url
     this.i = obj.i
     this.j = obj.j
-    this.characters = (obj.characters ?? []).map((spawn) =>
+    this.actors = (obj.actors ?? []).map((spawn) =>
       new ActorSpawnInfo(
         spawn.i,
         spawn.j,
         spawn.type as ActorType,
-        catalog.actors.get(spawn.type)!,
+        catalog.actors[spawn.type]!,
         {
           dir: spawn.dir,
           speed: spawn.speed,
@@ -334,7 +327,7 @@ export class BlockMap {
         item.i,
         item.j,
         item.type as ItemType,
-        catalog.items.get(item.type)!,
+        catalog.items[item.type]!,
       )
     )
     this.props = (obj.props ?? []).map((prop) =>
@@ -342,7 +335,7 @@ export class BlockMap {
         prop.i,
         prop.j,
         prop.type as PropType,
-        catalog.props.get(prop.type)!,
+        catalog.props[prop.type]!,
       )
     )
     this.field = obj.field
@@ -382,7 +375,7 @@ export function drawCell(
   wrapper: CanvasWrapper,
   i: number,
   j: number,
-  cell: FieldCell,
+  cell: CellDefinition,
   image: ImageBitmap,
 ) {
   const [localI, localJ] = g2l(i, j)
@@ -413,14 +406,14 @@ function renderRange(
   j: number,
   width: number,
   height: number,
-  cellMap: Record<string, FieldCell>,
+  cells: Record<string, CellDefinition>,
   imgMap: Record<string, ImageBitmap>,
   field: string[],
 ) {
   for (let ii = 0; ii < width; ii++) {
     for (let jj = 0; jj < height; jj++) {
       const [localI, localJ] = g2l(i + ii, j + jj)
-      const cell = cellMap[field[localJ][localI]]
+      const cell = cells[field[localJ][localI]]
       drawCell(
         wrapper,
         i + ii,
@@ -437,7 +430,7 @@ export function createImageDataForRange(
   j: number,
   gridWidth: number,
   gridHeight: number,
-  cellMap: Record<string, FieldCell>,
+  cells: Record<string, CellDefinition>,
   imgMap: Record<string, ImageBitmap>,
   field: string[],
 ): ImageData {
@@ -446,7 +439,7 @@ export function createImageDataForRange(
     CELL_SIZE * BLOCK_SIZE,
   )
   const wrapper = new CanvasWrapper(canvas)
-  renderRange(wrapper, i, j, gridWidth, gridHeight, cellMap, imgMap, field)
+  renderRange(wrapper, i, j, gridWidth, gridHeight, cells, imgMap, field)
   return canvas.getContext("2d")!.getImageData(
     CELL_SIZE * i,
     CELL_SIZE * j,
@@ -465,7 +458,6 @@ export class FieldBlock {
   #i: number
   // The row of the world coordinates
   #j: number
-  #cellMap: Record<string, FieldCell> = {}
   imgMap: Record<string, ImageBitmap> = {}
   actorSpawn: SpawnMap<ActorSpawnInfo>
   itemSpawns: SpawnMap<ItemSpawnInfo>
@@ -484,32 +476,23 @@ export class FieldBlock {
     this.#y = this.#j * CELL_SIZE
     this.#h = BLOCK_SIZE * CELL_SIZE
     this.#w = BLOCK_SIZE * CELL_SIZE
-    for (const [name, cellDef] of map.catalog.cells) {
-      this.#cellMap[name] = {
-        name: cellDef.name,
-        canEnter: cellDef.canEnter,
-        src: cellDef.src,
-      }
-    }
     this.field = map.field
     this.#map = map
-    this.actorSpawn = new SpawnMap(map.characters)
+    this.actorSpawn = new SpawnMap(map.actors)
     this.itemSpawns = new SpawnMap(map.items)
     this.propSpawns = new SpawnMap(map.props)
   }
 
   loadCellImage(href: string, options: LoadOptions): Promise<ImageBitmap> {
     return options.loadImage
-      ? options.loadImage(
-        new URL(href, this.#map.url).href,
-      )
+      ? options.loadImage(href)
       : Promise.reject(new Error("no loadImage specified"))
   }
 
   async loadCellImages(options: LoadOptions) {
     await Promise.all(
-      Object.values(this.#cellMap).map(async (cell) => {
-        this.imgMap[cell.name] = await this.loadCellImage(cell.src, options)
+      Object.values(this.#map.catalog.cells).map(async (def) => {
+        this.imgMap[def.name] = await this.loadCellImage(def.href, options)
       }),
     )
   }
@@ -526,12 +509,8 @@ export class FieldBlock {
     return this.#map.url
   }
 
-  get cells(): FieldCell[] {
-    return Object.values(this.#cellMap)
-  }
-
-  get cellMap(): Record<string, FieldCell> {
-    return this.#cellMap
+  get cells(): Record<string, CellDefinition> {
+    return this.#map.catalog.cells
   }
 
   get canvas(): HTMLCanvasElement {
@@ -593,14 +572,13 @@ export class FieldBlock {
   }
 
   renderAll() {
-    const wrapper = new CanvasWrapper(this.canvas)
     renderRange(
-      wrapper,
+      new CanvasWrapper(this.canvas),
       0,
       0,
       BLOCK_SIZE,
       BLOCK_SIZE,
-      this.#cellMap,
+      this.#map.catalog.cells,
       this.imgMap,
       this.field,
     )
@@ -622,7 +600,7 @@ export class FieldBlock {
     { initialLoad = false } = {},
   ): Promise<void> {
     const [k, l] = g2c(i, j)
-    const layer = new CanvasWrapper(this.canvas)
+    const wrapper = new CanvasWrapper(this.canvas)
 
     const chunkKey = `${k}.${l}`
     const chunkState = this.#chunks[chunkKey]
@@ -641,7 +619,7 @@ export class FieldBlock {
       const { imageData } = event.data
       const offsetX = k * BLOCK_CHUNK_SIZE * CELL_SIZE
       const offsetY = l * BLOCK_CHUNK_SIZE * CELL_SIZE
-      layer.ctx.putImageData(
+      wrapper.ctx.putImageData(
         imageData,
         offsetX,
         offsetY,
@@ -652,7 +630,7 @@ export class FieldBlock {
       removeOverlay()
     }
     worker.postMessage({
-      cellMap: this.#cellMap,
+      cells: this.#map.catalog.cells,
       imgMap: this.imgMap,
       i: k * BLOCK_CHUNK_SIZE,
       j: l * BLOCK_CHUNK_SIZE,
@@ -669,9 +647,9 @@ export class FieldBlock {
    * @param j world grid index
    * @returns the cell at the given world grid coordinates
    */
-  getCell(i: number, j: number): FieldCell {
+  getCell(i: number, j: number): CellDefinition {
     const [localI, localJ] = g2l(i, j)
-    return this.#cellMap[this.field[localJ][localI]]
+    return this.#map.catalog.cells[this.field[localJ][localI]]
   }
   /** Updates a cell at the given coordinates with the given cell name.
    * This is for editor use.
@@ -705,7 +683,7 @@ export class FieldBlock {
       i: this.#i,
       j: this.#j,
       catalogs: this.#map.catalog.refs,
-      characters: this.actorSpawn.toJSON(),
+      actors: this.actorSpawn.toJSON(),
       items: this.itemSpawns.toJSON(),
       props: this.propSpawns.toJSON(),
       field: this.field,

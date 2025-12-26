@@ -57,28 +57,25 @@ type ItemTool =
   })
 type Tool = CellTool | PropTool | ActorTool | ItemTool
 
-globalThis.addEventListener(
-  "message",
-  (event: MessageEvent<type.Extension.Message>) => {
-    const { data } = event
-    switch (data.type) {
-      case "init":
-        initialData.resolve(data)
-        break
-      case "update":
-        onUpdate(data)
-        break
-      case "loadImageResponse":
-        onLoadImageResponse(data)
-        break
-      case "loadTextResponse":
-        onLoadTextResponse(data)
-        break
-      default:
-        data satisfies never
-    }
-  },
-)
+function onExtensionMessage({ data }: MessageEvent<type.Extension.Message>) {
+  switch (data.type) {
+    case "init":
+      initialData.resolve(data)
+      break
+    case "update":
+      onUpdate(data)
+      break
+    case "loadImageResponse":
+      onLoadImageResponse(data)
+      break
+    case "loadTextResponse":
+      onLoadTextResponse(data)
+      break
+    default:
+      data satisfies never
+  }
+}
+addEventListener("message", onExtensionMessage)
 
 type ResolveImage = (image: ImageBitmap) => void
 const loadImageMap: Record<string, { resolve: ResolveImage }> = {}
@@ -167,7 +164,7 @@ class ToolManager {
 
   static fromCatalog(catalog: Catalog): ToolManager {
     const manager = new ToolManager()
-    for (const cellDef of catalog.cells.values()) {
+    for (const cellDef of Object.values(catalog.cells)) {
       const id = "cell-" + cellDef.name
       manager.addCellTool({
         kind: "cell",
@@ -178,7 +175,7 @@ class ToolManager {
     }
 
     manager.addPropTool({ kind: "prop-remove", id: "prop-remove" })
-    for (const propDef of catalog.props.values()) {
+    for (const propDef of Object.values(catalog.props)) {
       const id = `prop-${propDef.type}`
       manager.addPropTool({
         kind: "prop",
@@ -457,7 +454,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         5,
         BLOCK_SIZE,
-        fieldBlock.cellMap,
+        fieldBlock.cells,
         fieldBlock.imgMap,
         fieldBlock.field,
       )
@@ -472,7 +469,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         5,
         BLOCK_SIZE,
-        fieldBlock.cellMap,
+        fieldBlock.cells,
         fieldBlock.imgMap,
         fieldBlock.field,
       )
@@ -487,7 +484,7 @@ async function CanvasLayers({ el }: Context) {
         BLOCK_SIZE - 5,
         BLOCK_SIZE,
         5,
-        fieldBlock.cellMap,
+        fieldBlock.cells,
         fieldBlock.imgMap,
         fieldBlock.field,
       )
@@ -502,7 +499,7 @@ async function CanvasLayers({ el }: Context) {
         0,
         BLOCK_SIZE,
         5,
-        fieldBlock.cellMap,
+        fieldBlock.cells,
         fieldBlock.imgMap,
         fieldBlock.field,
       )
@@ -687,7 +684,7 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
     const block = fieldBlock.get()
     if (!infoContent || !block) return
     const cell = (i !== null && j !== null) ? block.getCell(i, j) : null
-    const cellInfo = cell ? block.cellMap[cell.name] : null
+    const cellInfo = cell ? block.cells[cell.name] : null
     const spawn = (i !== null && j !== null) ? block.propSpawns.get(i, j) : null
     query(".grid-index")!.textContent = i !== null && j !== null
       ? `(${i}, ${j})`

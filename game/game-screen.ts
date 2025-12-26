@@ -31,6 +31,13 @@ class ActivateScope extends RectScope {
   }
 }
 
+const kimiDef = {
+  type: "main",
+  main: "main",
+  src: "../char/kimi/",
+  href: "/char/kimi/",
+}
+
 export function GameScreen({ el, query }: Context) {
   const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
   const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
@@ -47,7 +54,7 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainActor(I, J, "char/kimi/", "kimi", "down", 1)
+  const me = new MainActor(I, J, kimiDef, "down")
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(screenSize, screenSize)

@@ -1,99 +1,56 @@
 import { loadJson } from "../util/load.ts"
 
 interface CatalogSource {
-  cells: Record<string, {
-    canEnter: boolean
-    src: string
+  readonly cells: Record<string, {
+    readonly canEnter: boolean
+    readonly src: string
   }>
-  items: Record<string, {
-    src: string
+  readonly items: Record<string, {
+    readonly src: string
   }>
-  actors: Record<string, {
-    main: string
-    src: string
+  readonly actors: Record<string, {
+    readonly main: string
+    readonly src: string
   }>
-  props: Record<string, {
-    src: string
-    canEnter: boolean
+  readonly props: Record<string, {
+    readonly src: string
+    readonly canEnter: boolean
   }>
 }
 
-export class CellDefinition {
-  name: string
-  canEnter: boolean
-  src: string
-  baseUrl: string
-
-  constructor(name: string, canEnter: boolean, src: string, baseUrl: string) {
-    this.name = name
-    this.canEnter = canEnter
-    this.src = src
-    this.baseUrl = baseUrl
-  }
-
-  get href(): string {
-    return new URL(this.src, this.baseUrl).href
-  }
+export interface CellDefinition {
+  readonly name: string
+  readonly canEnter: boolean
+  readonly src: string
+  readonly href: string
 }
 
-export class ItemDefinition {
-  type: string
-  src: string
-  baseUrl: string
-
-  constructor(type: string, src: string, baseUrl: string) {
-    this.type = type
-    this.src = src
-    this.baseUrl = baseUrl
-  }
-
-  get href(): string {
-    return new URL(this.src, this.baseUrl).href
-  }
+export interface ItemDefinition {
+  readonly type: string
+  readonly src: string
+  readonly href: string
 }
 
-export class ActorDefinition {
-  type: string
-  main: string
-  src: string
-  baseUrl: string
-
-  constructor(type: string, main: string, src: string, baseUrl: string) {
-    this.type = type
-    this.main = main
-    this.src = src
-    this.baseUrl = baseUrl
-  }
-
-  get href(): string {
-    return new URL(this.src, this.baseUrl).href
-  }
+export interface ActorDefinition {
+  readonly type: string
+  readonly main: string
+  readonly src: string
+  readonly href: string
 }
 
-export class PropDefinition {
-  type: string
-  canEnter: boolean
-  src: string
-  baseUrl: string
-
-  constructor(type: string, canEnter: boolean, src: string, baseUrl: string) {
-    this.type = type
-    this.canEnter = canEnter
-    this.src = src
-    this.baseUrl = baseUrl
-  }
-
-  get href(): string {
-    return new URL(this.src, this.baseUrl).href
-  }
+export interface PropDefinition {
+  readonly type: string
+  readonly canEnter: boolean
+  readonly src: string
+  readonly href: string
 }
 
 export class Catalog {
-  refs: string[]
-  cells: Map<string, CellDefinition>
-  items: Map<string, ItemDefinition>
-  actors: Map<string, ActorDefinition>
-  props: Map<string, PropDefinition>
+  readonly refs: string[]
+  readonly cells: Record<string, CellDefinition> = {}
+  readonly items: Record<string, ItemDefinition> = {}
+  readonly actors: Record<string, ActorDefinition> = {}
+  readonly props: Record<string, PropDefinition> = {}
 
   static fromJSON(
     source: { src: string; json: CatalogSource }[],
@@ -102,126 +59,81 @@ export class Catalog {
     const catalog = new Catalog(source.map(({ src }) => src))
     for (const { src, json } of source) {
       const url = new URL(src, baseUrl).href
-      for (const [name, cellData] of Object.entries(json.cells)) {
-        const cellDef = new CellDefinition(
+      for (const [name, def] of Object.entries(json.cells)) {
+        catalog.cells[name] = {
           name,
-          cellData.canEnter,
-          cellData.src,
-          url,
-        )
-        catalog.cells.set(cellDef.name, cellDef)
+          canEnter: def.canEnter,
+          src: def.src,
+          href: new URL(def.src, url).href,
+        }
       }
 
-      for (const itemType in json.items) {
-        const itemDef = new ItemDefinition(
-          itemType,
-          json.items[itemType].src,
-          url,
-        )
-        catalog.items.set(itemType, itemDef)
+      for (const [type, def] of Object.entries(json.items)) {
+        catalog.items[type] = {
+          type: type,
+          src: def.src,
+          href: new URL(def.src, url).href,
+        }
       }
 
-      for (const actorType in json.actors) {
-        const actorDef = new ActorDefinition(
-          actorType,
-          json.actors[actorType].main,
-          json.actors[actorType].src,
-          url,
-        )
-        catalog.actors.set(actorType, actorDef)
+      for (const [type, def] of Object.entries(json.actors)) {
+        catalog.actors[type] = {
+          type: type,
+          main: def.main,
+          src: def.src,
+          href: new URL(def.src, url).href,
+        }
       }
 
-      for (const objectType in json.props) {
-        const objectDef = new PropDefinition(
-          objectType,
-          json.props[objectType].canEnter,
-          json.props[objectType].src,
-          url,
-        )
-        catalog.props.set(objectType, objectDef)
+      for (const [type, def] of Object.entries(json.props)) {
+        catalog.props[type] = {
+          type: type,
+          canEnter: def.canEnter,
+          src: def.src,
+          href: new URL(def.src, url).href,
+        }
       }
     }
     return catalog
   }
 
-  constructor(refs: string[] = []) {
+  constructor(refs: string[]) {
     this.refs = refs
-    this.cells = new Map()
-    this.items = new Map()
-    this.actors = new Map()
-    this.props = new Map()
   }
 
-  cell(name: string): CellDefinition | undefined {
-    return this.cells.get(name)
-  }
-
-  item(type: string): ItemDefinition | undefined {
-    return this.items.get(type)
-  }
-
-  actor(type: string): ActorDefinition | undefined {
-    return this.actors.get(type)
-  }
-
-  object(type: string): PropDefinition | undefined {
-    return this.props.get(type)
-  }
-
-  merge(other: Catalog): Catalog {
-    for (const [name, cellDef] of other.cells) {
-      this.cells.set(name, cellDef)
-    }
-    for (const [type, itemDef] of other.items) {
-      this.items.set(type, itemDef)
-    }
-    for (const [type, actorDef] of other.actors) {
-      this.actors.set(type, actorDef)
-    }
-    for (const [type, objectDef] of other.props) {
-      this.props.set(type, objectDef)
-    }
-    return this
-  }
-
-  toJSON(): object {
-    const cells: object[] = []
-    for (const cellDef of this.cells.values()) {
-      cells.push({
-        name: cellDef.name,
-        canEnter: cellDef.canEnter,
-        src: cellDef.src,
-      })
-    }
-
-    const items: Record<string, object> = {}
-    for (const itemDef of this.items.values()) {
-      items[itemDef.type] = {
-        src: itemDef.src,
+  toJSON(): CatalogSource {
+    const cells: CatalogSource["cells"] = {}
+    for (const def of Object.values(this.cells)) {
+      cells[def.name] = {
+        canEnter: def.canEnter,
+        src: def.src,
       }
     }
 
-    const actors: Record<string, object> = {}
-    for (const actorDef of this.actors.values()) {
-      actors[actorDef.type] = {
-        main: actorDef.main,
-        src: actorDef.src,
+    const items: CatalogSource["items"] = {}
+    for (const def of Object.values(this.items)) {
+      items[def.type] = {
+        src: def.src,
       }
     }
 
-    const objects: Record<string, object> = {}
-    for (const objectDef of this.props.values()) {
-      objects[objectDef.type] = {
-        src: objectDef.src,
+    const actors: CatalogSource["actors"] = {}
+    for (const def of Object.values(this.actors)) {
+      actors[def.type] = {
+        main: def.main,
+        src: def.src,
       }
     }
 
-    return {
-      cells,
-      items,
-      actors,
-      objects,
+    const props: CatalogSource["props"] = {}
+    for (const def of Object.values(this.props)) {
+      props[def.type] = {
+        src: def.src,
+        canEnter: def.canEnter,
+      }
     }
+
+    return { cells, items, actors, props }
   }
 }
 
