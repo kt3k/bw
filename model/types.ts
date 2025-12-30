@@ -60,7 +60,7 @@ export type IField = {
 /** The implementor of 'step' function */
 export type IStepper = { step(field: IField): void }
 
-export type FieldEvent = { type: "green-apple-collected" } | {
+export type FieldEvent = {
   type: "bounced"
   dir: "up" | "down" | "left" | "right"
   peakAt: number

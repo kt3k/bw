@@ -343,12 +343,13 @@ export abstract class Actor implements IActor {
     return this.#actionQueue
   }
 
-  #processQueue(field: IField): MovePlan | "idle" {
+  #processActionQueue(field: IField): MovePlan | "idle" {
     if (this.#actionQueue.length === 0) {
       return "idle"
     }
 
     const nextAction = this.#actionQueue.shift()!
+
     if (nextAction.type === "speed") {
       clearTimeout(this.#speedUpTimer)
       switch (nextAction.change) {
@@ -370,7 +371,7 @@ export abstract class Actor implements IActor {
           )
         }, 15000)
       }
-      return this.#processQueue(field)
+      return this.#processActionQueue(field)
     } else if (nextAction.type === "turn") {
       const dir = nextAction.dir
       switch (dir) {
@@ -398,13 +399,13 @@ export abstract class Actor implements IActor {
         default:
           dir satisfies never
       }
-      return this.#processQueue(field)
+      return this.#processActionQueue(field)
     } else if (nextAction.type === "wait") {
       if (field.time < nextAction.until) {
         this.#waitUntil = nextAction.until
         return undefined
       } else {
-        return this.#processQueue(field)
+        return this.#processActionQueue(field)
       }
     } else if (nextAction.type === "splash") {
       const { i, j } = this
@@ -420,7 +421,7 @@ export abstract class Actor implements IActor {
         nextAction.radius,
         rng,
       )
-      return this.#processQueue(field)
+      return this.#processActionQueue(field)
     } else if (nextAction.type === "go-random") {
       const { choice } = seed(`${this.i}.${this.j}`)
       return { type: "go", dir: choice(DIRS) }
@@ -430,7 +431,7 @@ export abstract class Actor implements IActor {
 
   step(field: IField) {
     if (this.#waitUntil === null && this.#move === null) {
-      let nextPlan = this.#processQueue(field)
+      let nextPlan = this.#processActionQueue(field)
       if (nextPlan === "idle") {
         nextPlan = this.getNextMovePlan(field)
       }
@@ -639,47 +640,6 @@ export abstract class Actor implements IActor {
 
   onEvent(event: FieldEvent, field: IField): void {
     switch (event.type) {
-      case "green-apple-collected": {
-        this.enqueueAction(
-          { type: "turn", dir: "west" },
-          { type: "wait", until: field.time + 4 },
-          { type: "turn", dir: "south" },
-          { type: "wait", until: field.time + 8 },
-          { type: "turn", dir: "east" },
-          { type: "wait", until: field.time + 12 },
-          { type: "turn", dir: "north" },
-          { type: "wait", until: field.time + 16 },
-          { type: "turn", dir: "west" },
-          { type: "wait", until: field.time + 20 },
-          { type: "turn", dir: "south" },
-          { type: "wait", until: field.time + 24 },
-          { type: "turn", dir: "east" },
-          { type: "wait", until: field.time + 28 },
-          { type: "turn", dir: "north" },
-          { type: "wait", until: field.time + 32 },
-          { type: "turn", dir: "east" },
-          { type: "slide", dir: "left" },
-          { type: "turn", dir: "north" },
-          { type: "slide", dir: "down" },
-          { type: "turn", dir: "west" },
-          { type: "slide", dir: "right" },
-          { type: "turn", dir: "south" },
-          { type: "slide", dir: "up" },
-          { type: "turn", dir: "east" },
-          { type: "slide", dir: "left" },
-          { type: "turn", dir: "east" },
-          { type: "turn", dir: "west" },
-          { type: "jump" },
-          { type: "turn", dir: "east" },
-          { type: "jump" },
-          { type: "turn", dir: "west" },
-          { type: "jump" },
-          { type: "turn", dir: "east" },
-          { type: "jump" },
-          { type: "go-random" },
-        )
-        break
-      }
       case "bounced": {
         splashColor(
           field,
@@ -700,6 +660,8 @@ export abstract class Actor implements IActor {
         }
         break
       }
+      default:
+        event.type satisfies never
     }
   }
 }

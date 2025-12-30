@@ -85,12 +85,25 @@ export class MainActor extends Actor {
         case "green-apple": {
           field.collectItem(this.i, this.j)
 
+          const { rng } = seed(this.i + " " + this.j)
+          const hue = 120
+          const sat = 59.4
+          const light = 32
+          const alpha = 0.40
+          splashColor(
+            field,
+            this.i,
+            this.j,
+            hue,
+            sat,
+            light,
+            alpha,
+            4,
+            rng,
+          )
+
           const count = signal.greenAppleCount.get()
           signal.greenAppleCount.update(count + 1)
-          for (const actor of field.actors.iter()) {
-            if (actor === this) continue
-            actor.onEvent({ type: "green-apple-collected" }, field)
-          }
           break
         }
         case "mushroom": {
