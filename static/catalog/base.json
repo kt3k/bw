@@ -31,20 +31,23 @@
   },
   "actors": {
     "random-walk": {
-      "main": "random-walk",
+      "idle": "random-walk",
       "src": "../char/not-found/"
     },
     "random": {
-      "main": "random",
+      "idle": "wander",
       "src": "../char/joob/"
     },
     "random-rotate": {
-      "main": "random-rotate",
+      "idle": "random-rotate",
       "src": "../char/juni/"
     },
     "inertial": {
-      "main": "inertial",
+      "moveEnd": "inertial",
       "src": "../char/lena/"
+    },
+    "static": {
+      "src": "../char/juni/"
     }
   },
   "items": {

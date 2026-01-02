@@ -550,7 +550,6 @@ export class Field implements IField {
         i++
         this.#actors.add(spawnActor(
           spawn.id,
-          spawn.type,
           spawn.i,
           spawn.j,
           spawn.def,

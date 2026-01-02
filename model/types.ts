@@ -81,11 +81,24 @@ export type IActor =
     enqueueAction(...actions: Action[]): void
   }
 
+export type Move = {
+  type: "move" | "bounce" | "jump"
+  x: number
+  y: number
+  step(): void
+  finished: boolean
+  halfPassed: boolean
+}
+
 export type MovePlan =
-  | { readonly type: "go"; readonly dir: Dir }
-  | { readonly type: "slide"; readonly dir: Dir }
-  | { readonly type: "jump" }
-  | undefined
+  & {
+    readonly cb?: (move: Move) => void
+  }
+  & (
+    | { readonly type: "go"; readonly dir: Dir }
+    | { readonly type: "slide"; readonly dir: Dir }
+    | { readonly type: "jump" }
+  )
 
 export type Action =
   | MovePlan

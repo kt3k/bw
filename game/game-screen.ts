@@ -2,11 +2,12 @@ import type { Context } from "@kt3k/cell"
 import { Gameloop } from "@kt3k/gameloop"
 import * as signal from "../util/signal.ts"
 import { CELL_SIZE } from "../util/constants.ts"
-import { MainActor } from "./main-character.ts"
+import { IdleMainActor, MoveEndMainActor } from "./main-character.ts"
 import { DrawLayer } from "./draw-layer.ts"
 import { RectScope } from "../util/rect-scope.ts"
 
 import { Field } from "./field.ts"
+import { Actor } from "../model/actor.ts"
 
 /** The starting X coordinate */
 const I = 50
@@ -54,7 +55,16 @@ export function GameScreen({ el, query }: Context) {
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
-  const me = new MainActor(I, J, kimiDef, "down")
+  const me = new Actor(
+    I,
+    J,
+    kimiDef,
+    "main",
+    "down",
+    1,
+    new MoveEndMainActor(),
+    new IdleMainActor(),
+  )
   signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
   const viewScope = new ViewScope(screenSize, screenSize)

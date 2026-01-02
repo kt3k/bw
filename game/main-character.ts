@@ -1,7 +1,13 @@
 import { DIRS, DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { loadImage } from "../util/load.ts"
 import { Input, inputQueue } from "./ui/input.ts"
-import { Actor, Move, spawnActor } from "../model/actor.ts"
+import {
+  Actor,
+  ActorMove,
+  type IdleDelegate,
+  type MoveEndDelegate,
+  spawnActor,
+} from "../model/actor.ts"
 import { splashColor } from "./field.ts"
 import type { IField, MovePlan } from "../model/types.ts"
 import * as signal from "../util/signal.ts"
@@ -10,14 +16,14 @@ import { seed } from "../util/random.ts"
 
 const lenaDef = {
   type: "inertial" as const,
-  main: "inertial",
+  moveEnd: "inertial" as const,
   src: "../char/lena/",
   href: "/char/lena/",
 }
 
-export class MainActor extends Actor {
-  #lastMoveTypes: string[] = []
-  override getNextMovePlan(_field: IField): MovePlan {
+export class IdleMainActor implements IdleDelegate {
+  readonly type = "main"
+  onIdle(_actor: Actor, _field: IField): MovePlan | undefined {
     if (Input.up) {
       return { type: "go", dir: UP }
     } else if (Input.down) {
@@ -37,69 +43,70 @@ export class MainActor extends Actor {
       inputQueue.shift()
       return { type: "jump" }
     }
-    return undefined
   }
+}
 
-  override onMoveEnd(field: IField, move: Move): void {
-    const item = field.peekItem(this.i, this.j)
+export class MoveEndMainActor implements MoveEndDelegate {
+  readonly type = "main"
+  #lastMoveTypes: string[] = []
+
+  onMoveEnd(actor: Actor, field: IField, move: ActorMove): void {
+    const item = field.peekItem(actor.i, actor.j)
     if (item) {
       switch (item.type) {
         case "apple": {
-          field.collectItem(this.i, this.j)
+          field.collectItem(actor.i, actor.j)
           for (const dir of DIRS) {
-            if (dir === this.dir) continue
-            if (!this.canGo(dir, field)) continue
-            const actor = spawnActor(
-              `${this.i}.${this.j}.inertial.${crypto.randomUUID()}`,
-              "inertial",
-              this.i,
-              this.j,
+            if (dir === actor.dir) continue
+            if (!actor.canGo(dir, field)) continue
+            const actor_ = spawnActor(
+              `${actor.i}.${actor.j}.inertial.${crypto.randomUUID()}`,
+              actor.i,
+              actor.j,
               lenaDef,
               { dir },
             )
-            actor.loadAssets({ loadImage })
-            actor.enqueueAction({ type: "go", dir })
-            field.actors.add(actor)
+            actor_.loadAssets({ loadImage })
+            actor_.enqueueAction({ type: "go", dir })
+            field.actors.add(actor_)
           }
 
-          const { rng } = seed(this.i + " " + this.j)
           const hue = 333.3
           const sat = 59.4
           const light = 32
           const alpha = 0.40
           splashColor(
             field,
-            this.i,
-            this.j,
+            actor.i,
+            actor.j,
             hue,
             sat,
             light,
             alpha,
             4,
-            rng,
+            seed(actor.i + " " + actor.j).rng,
           )
           const count = signal.appleCount.get()
           signal.appleCount.update(count + 1)
           break
         }
         case "green-apple": {
-          field.collectItem(this.i, this.j)
+          field.collectItem(actor.i, actor.j)
 
-          const { rng } = seed(this.i + " " + this.j)
-          const hue = 120
-          const sat = 59.4
+          const hue = 113.1
+          const sat = 40.4
           const light = 32
           const alpha = 0.40
           splashColor(
             field,
-            this.i,
-            this.j,
+            actor.i,
+            actor.j,
             hue,
             sat,
             light,
             alpha,
             4,
-            rng,
+            seed(actor.i + " " + actor.j).rng,
           )
 
           const count = signal.greenAppleCount.get()
@@ -107,36 +114,64 @@ export class MainActor extends Actor {
           break
         }
         case "mushroom": {
-          field.collectItem(this.i, this.j)
-          this.clearActionQueue()
-          this.enqueueAction(
+          field.collectItem(actor.i, actor.j)
+
+          const hue = 21.3
+          const sat = 40.4
+          const light = 32
+          const alpha = 0.40
+          splashColor(
+            field,
+            actor.i,
+            actor.j,
+            hue,
+            sat,
+            light,
+            alpha,
+            4,
+            seed(actor.i + " " + actor.j).rng,
+          )
+
+          actor.clearActionQueue()
+          actor.enqueueAction(
             { type: "jump" },
             { type: "speed", change: "2x" },
           )
           break
         }
         case "purple-mushroom": {
-          field.collectItem(this.i, this.j)
-          this.clearActionQueue()
-          this.enqueueAction(
+          field.collectItem(actor.i, actor.j)
+          actor.clearActionQueue()
+          actor.enqueueAction(
             { type: "jump" },
             { type: "speed", change: "4x" },
           )
+          const end = () => {
+            actor.enqueueAction(
+              { type: "speed", change: "reset" },
+              { type: "jump" },
+            )
+          }
           for (const _ of Array(30)) {
-            this.enqueueAction({
+            actor.enqueueAction({
               type: "splash",
               hue: 280,
               sat: 40,
               light: 30,
               alpha: 0.2,
               radius: 3,
+            }, {
+              type: "go",
+              dir: actor.dir,
+              cb: (move) => {
+                if (move.type === "bounce") {
+                  actor.clearActionQueue()
+                  end()
+                }
+              },
             })
-            this.enqueueAction({ type: "go", dir: this.dir })
           }
-          this.enqueueAction(
-            { type: "speed", change: "reset" },
-            { type: "jump" },
-          )
+          end()
           break
         }
       }

@@ -1624,6 +1624,46 @@
       "i": 102,
       "j": 114,
       "type": "random-walk"
+    },
+    {
+      "i": 70,
+      "j": 8,
+      "type": "inertial"
+    },
+    {
+      "i": 70,
+      "j": 9,
+      "type": "random-rotate"
+    },
+    {
+      "i": 70,
+      "j": 10,
+      "type": "random-rotate"
+    },
+    {
+      "i": 70,
+      "j": 11,
+      "type": "random-rotate"
+    },
+    {
+      "i": 70,
+      "j": 12,
+      "type": "random-rotate"
+    },
+    {
+      "i": 70,
+      "j": 13,
+      "type": "random-rotate"
+    },
+    {
+      "i": 70,
+      "j": 14,
+      "type": "random-rotate"
+    },
+    {
+      "i": 70,
+      "j": 15,
+      "type": "random-rotate"
     }
   ],
   "items": [

@@ -9,7 +9,8 @@ interface CatalogSource {
     readonly src: string
   }>
   readonly actors: Record<string, {
-    readonly main: string
+    readonly moveEnd?: string
+    readonly idle?: string
     readonly src: string
   }>
   readonly props: Record<string, {
@@ -33,7 +34,8 @@ export interface ItemDefinition {
 
 export interface ActorDefinition {
   readonly type: string
-  readonly main: string
+  readonly moveEnd?: string
+  readonly idle?: string
   readonly src: string
   readonly href: string
 }
@@ -79,7 +81,8 @@ export class Catalog {
       for (const [type, def] of Object.entries(json.actors)) {
         catalog.actors[type] = {
           type: type,
-          main: def.main,
+          moveEnd: def.moveEnd,
+          idle: def.idle,
           src: def.src,
           href: new URL(def.src, url).href,
         }
@@ -120,7 +123,8 @@ export class Catalog {
     const actors: CatalogSource["actors"] = {}
     for (const def of Object.values(this.actors)) {
       actors[def.type] = {
-        main: def.main,
+        moveEnd: def.moveEnd,
+        idle: def.idle,
         src: def.src,
       }
     }
