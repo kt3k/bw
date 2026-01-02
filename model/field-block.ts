@@ -4,7 +4,6 @@ import { randomInt, seed } from "../util/random.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { loadImage } from "../util/load.ts"
 import type { Dir, IBox } from "./types.ts"
-import type { ActorType } from "./actor.ts"
 import type { ItemType, LoadOptions, PropType as PropType } from "./types.ts"
 import {
   ActorDefinition,
@@ -115,7 +114,6 @@ export class ActorSpawnInfo implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
-  readonly type: ActorType
   readonly def: ActorDefinition
   readonly dir?: Dir
   readonly speed?: ActorSpeed
@@ -126,19 +124,17 @@ export class ActorSpawnInfo implements IBox {
   constructor(
     i: number,
     j: number,
-    type: ActorType,
     def: ActorDefinition,
     { dir, speed }: {
       dir?: Dir
       speed?: ActorSpeed
     } = {},
   ) {
-    this.id = `${i}.${j}.${type}.${speed ?? "-"}.${dir ?? "-"}` // Unique ID for the spawn
+    this.id = `${i}.${j}.${def.type}.${speed ?? "-"}.${dir ?? "-"}` // Unique ID for the spawn
     this.i = i
     this.j = j
     this.dir = dir
     this.speed = speed
-    this.type = type
     this.def = def
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
@@ -147,7 +143,7 @@ export class ActorSpawnInfo implements IBox {
   equals(other: ActorSpawnInfo): boolean {
     return this.i === other.i &&
       this.j === other.j &&
-      this.type === other.type &&
+      this.def.type === other.def.type &&
       this.dir === other.dir &&
       this.speed === other.speed
   }
@@ -156,7 +152,7 @@ export class ActorSpawnInfo implements IBox {
     return {
       i: this.i,
       j: this.j,
-      type: this.type,
+      type: this.def.type,
       dir: this.dir,
       speed: this.speed,
     }
@@ -314,7 +310,6 @@ export class BlockMap {
       new ActorSpawnInfo(
         spawn.i,
         spawn.j,
-        spawn.type as ActorType,
         catalog.actors[spawn.type]!,
         {
           dir: spawn.dir,
