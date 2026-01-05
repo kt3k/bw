@@ -33,26 +33,26 @@
     "random-walk": {
       "idle": "random-walk",
       "pushed": "rotate8s",
-      "src": "../char/not-found/"
+      "src": "../actor/not-found/"
     },
     "random": {
       "idle": "wander",
       "pushed": "jump",
-      "src": "../char/joob/"
+      "src": "../actor/joob/"
     },
     "random-rotate": {
       "idle": "random-rotate",
       "pushed": "slide",
-      "src": "../char/juni/"
+      "src": "../actor/juni/"
     },
     "inertial": {
       "moveEnd": "inertial",
       "pushed": "slide",
-      "src": "../char/lena/"
+      "src": "../actor/lena/"
     },
     "static": {
       "pushed": "jump",
-      "src": "../char/juni/"
+      "src": "../actor/juni/"
     }
   },
   "items": {
@@ -75,19 +75,24 @@
   },
   "props": {
     "stool": {
-      "src": "../obj/stool.png",
+      "src": "../prop/stool.png",
       "canEnter": true
     },
     "table": {
-      "src": "../obj/table.png",
+      "src": "../prop/table.png",
       "canEnter": false
     },
     "table2": {
-      "src": "../obj/table2.png",
+      "src": "../prop/table2.png",
+      "canEnter": false
+    },
+    "crate": {
+      "src": "../prop/crate.png",
+      "pushed": "break",
       "canEnter": false
     },
     "d": {
-      "src": "../obj/d.png",
+      "src": "../prop/d.png",
       "canEnter": true
     }
   }

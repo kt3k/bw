@@ -35,8 +35,8 @@ class ActivateScope extends RectScope {
 const kimiDef = {
   type: "main",
   main: "main",
-  src: "../char/kimi/",
-  href: "/char/kimi/",
+  src: "../actor/kimi/",
+  href: "/actor/kimi/",
 }
 
 export function GameScreen({ el, query }: Context) {

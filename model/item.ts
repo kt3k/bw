@@ -16,8 +16,8 @@ const fallbackImage = await fetch(
 const lenaDef = {
   type: "inertial" as const,
   moveEnd: "inertial" as const,
-  src: "../char/lena/",
-  href: "/char/lena/",
+  src: "../actor/lena/",
+  href: "/actor/lena/",
 }
 
 export class Item implements IItem {
