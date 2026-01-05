@@ -32,35 +32,44 @@
   "actors": {
     "random-walk": {
       "idle": "random-walk",
+      "pushed": "rotate8s",
       "src": "../char/not-found/"
     },
     "random": {
       "idle": "wander",
+      "pushed": "jump",
       "src": "../char/joob/"
     },
     "random-rotate": {
       "idle": "random-rotate",
+      "pushed": "slide",
       "src": "../char/juni/"
     },
     "inertial": {
       "moveEnd": "inertial",
+      "pushed": "slide",
       "src": "../char/lena/"
     },
     "static": {
+      "pushed": "jump",
       "src": "../char/juni/"
     }
   },
   "items": {
     "apple": {
+      "collect": "apple",
       "src": "../item/apple.png"
     },
     "green-apple": {
+      "collect": "green-apple",
       "src": "../item/green-apple.png"
     },
     "mushroom": {
+      "collect": "mushroom",
       "src": "../item/mushroom.png"
     },
     "purple-mushroom": {
+      "collect": "purple-mushroom",
       "src": "../item/purple-mushroom.png"
     }
   },

@@ -7,6 +7,7 @@ interface CatalogSource {
   }>
   readonly items: Record<string, {
     readonly src: string
+    readonly collect: string
   }>
   readonly actors: Record<string, {
     readonly moveEnd?: string
@@ -28,6 +29,7 @@ export interface CellDefinition {
 
 export interface ItemDefinition {
   readonly type: string
+  readonly collect: string
   readonly src: string
   readonly href: string
 }
@@ -73,6 +75,7 @@ export class Catalog {
       for (const [type, def] of Object.entries(json.items)) {
         catalog.items[type] = {
           type: type,
+          collect: def.collect,
           src: def.src,
           href: new URL(def.src, url).href,
         }
@@ -117,6 +120,7 @@ export class Catalog {
     for (const def of Object.values(this.items)) {
       items[def.type] = {
         src: def.src,
+        collect: def.collect,
       }
     }
 

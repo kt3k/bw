@@ -29,7 +29,7 @@ export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
 
 export type IItem = IEntity & {
   id: string | null
-  type: ItemType
+  onCollect(actor: IActor, field: IField): void
 }
 
 export type PropType = "stool" | "table"
@@ -78,7 +78,10 @@ export type IActor =
   & {
     get id(): string
     get physicalGridKey(): string
+    get dir(): Dir
+    canGo(dir: Dir, field: IField): boolean
     enqueueAction(...actions: Action[]): void
+    clearActionQueue(): void
   }
 
 export type Move = {

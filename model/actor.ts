@@ -662,12 +662,10 @@ export class Actor implements IActor {
 }
 
 export interface MoveEndDelegate {
-  readonly type: "main" | "inertial"
   onMoveEnd(actor: Actor, field: IField, move: ActorMove): void
 }
 
 export class MoveEndInertial implements MoveEndDelegate {
-  readonly type = "inertial"
   onMoveEnd(actor: Actor, _field: IField, move: ActorMove): void {
     if (actor.actionQueue.length > 0) {
       return
@@ -690,12 +688,10 @@ export class MoveEndInertial implements MoveEndDelegate {
 }
 
 export interface IdleDelegate {
-  readonly type: "main" | "random-rotate" | "random-walk" | "wander"
   onIdle(actor: Actor, field: IField): MovePlan | undefined
 }
 
 export class IdleRandomWalk implements IdleDelegate {
-  readonly type = "random-walk"
   onIdle(actor: Actor, field: IField): MovePlan | undefined {
     const dirs = DIRS.filter((d) => {
       const [i, j] = actor.nextGrid(d)
@@ -712,7 +708,6 @@ export class IdleRandomWalk implements IdleDelegate {
 }
 
 export class IdleWander implements IdleDelegate {
-  readonly type = "wander"
   #counter = 32
   onIdle(actor: Actor, field: IField): MovePlan | undefined {
     this.#counter -= 1
@@ -747,7 +742,6 @@ export class IdleWander implements IdleDelegate {
 }
 
 export class IdleRandomRotate implements IdleDelegate {
-  readonly type = "random-rotate"
   #config: {
     delay: number
     counter: number
