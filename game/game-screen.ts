@@ -109,7 +109,7 @@ export function GameScreen({ el, query }: Context) {
 
     itemLayer.drawIterable(field.items.iter())
     charLayer.drawIterable(field.actors.iter())
-    objectLayer.drawIterable(field.objects.iter())
+    objectLayer.drawIterable(field.props.iter())
 
     if (i % 300 === 299) {
       field.actors.checkDeactivate(me.i, me.j)
@@ -118,7 +118,7 @@ export function GameScreen({ el, query }: Context) {
       field.items.checkDeactivate(me.i, me.j)
     }
     if (i % 300 === 99) {
-      field.objects.checkDeactivate(me.i, me.j)
+      field.props.checkDeactivate(me.i, me.j)
     }
     if (i % 60 === 59) {
       field.checkActivate(me.i, me.j, { viewScope })

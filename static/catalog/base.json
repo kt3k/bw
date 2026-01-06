@@ -42,12 +42,12 @@
     },
     "random-rotate": {
       "idle": "random-rotate",
-      "pushed": "slide",
+      "pushed": "inertial-slide",
       "src": "../actor/juni/"
     },
     "inertial": {
       "moveEnd": "inertial",
-      "pushed": "slide",
+      "pushed": "inertial-slide",
       "src": "../actor/lena/"
     },
     "static": {

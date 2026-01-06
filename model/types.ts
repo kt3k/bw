@@ -34,11 +34,15 @@ export type IItem = IEntity & {
 
 export type PropType = "stool" | "table"
 
-export type IProp = IEntity & {
-  id: string | null
-  type: PropType
-  canEnter: boolean
-}
+export type IProp =
+  & IEntity
+  & IStepper
+  & FieldEventTarget
+  & {
+    id: string | null
+    type: PropType
+    canEnter: boolean
+  }
 
 export type IField = {
   /** can enter the cell considering dynamic objects */
@@ -53,6 +57,10 @@ export type IField = {
     get(i: number, j: number): IActor[]
     add(actor: IActor): void
   }
+  props: {
+    get(i: number, j: number): IProp | undefined
+    remove(i: number, j: number): void
+  }
   get time(): number
   colorCell(i: number, j: number, color: string): void
 }
@@ -66,8 +74,14 @@ export type FieldEvent = {
   peakAt: number
 }
 
+type PushedEvent = {
+  type: "pushed"
+  dir: Dir
+  peakAt: number
+}
+
 export type FieldEventTarget = {
-  onEvent(event: FieldEvent, field: IField): void
+  onPushed(event: PushedEvent, field: IField): void
 }
 
 /** The interface represents a character */

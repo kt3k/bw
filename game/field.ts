@@ -118,7 +118,7 @@ export class FieldProps implements IStepper, ILoader {
       .filter((obj) => !this.#activateScope.overlaps(obj))
       .forEach((obj) => {
         console.log("deactivating object", obj.id)
-        this.#deactivate(obj.i, obj.j)
+        this.remove(obj.i, obj.j)
       })
     signal.propsCount.update(this.#props.size)
   }
@@ -133,12 +133,7 @@ export class FieldProps implements IStepper, ILoader {
     return this.#coordMap[`${i}.${j}`]
   }
 
-  canEnter(i: number, j: number): boolean {
-    const obj = this.get(i, j)
-    return obj === undefined || obj.canEnter
-  }
-
-  #deactivate(i: number, j: number): IProp | undefined {
+  remove(i: number, j: number): IProp | undefined {
     const key = `${i}.${j}`
     const obj = this.#coordMap[key]
     if (!obj) {
@@ -148,6 +143,11 @@ export class FieldProps implements IStepper, ILoader {
     delete this.#coordMap[key]
     signal.propsCount.update(this.#props.size)
     return obj
+  }
+
+  canEnter(i: number, j: number): boolean {
+    const obj = this.get(i, j)
+    return obj === undefined || obj.canEnter
   }
 
   async loadAssets(options: LoadOptions): Promise<void> {
@@ -162,8 +162,10 @@ export class FieldProps implements IStepper, ILoader {
     return [...this.#props].every((x) => x.assetsReady)
   }
 
-  step(_field: IField) {
-    // Implement this when there are moving objects
+  step(field: IField) {
+    for (const prop of this.#props) {
+      prop.step(field)
+    }
   }
 
   iter() {
@@ -388,7 +390,7 @@ export class Field implements IField {
 
   #actors: FieldActors
   #items: FieldItems
-  #objects: FieldProps
+  #props: FieldProps
 
   #time = 0
 
@@ -397,7 +399,7 @@ export class Field implements IField {
     this.#activateScope = activateScope
     this.#actors = new FieldActors([], activateScope)
     this.#items = new FieldItems(activateScope)
-    this.#objects = new FieldProps(activateScope)
+    this.#props = new FieldProps(activateScope)
   }
 
   get actors() {
@@ -408,8 +410,8 @@ export class Field implements IField {
     return this.#items
   }
 
-  get objects() {
-    return this.#objects
+  get props() {
+    return this.#props
   }
 
   /** The current time in the field */
@@ -458,14 +460,14 @@ export class Field implements IField {
     this.#time++
     this.#actors.step(this)
     this.#items.step(this)
-    this.#objects.step(this)
+    this.#props.step(this)
   }
   canEnter(i: number, j: number): boolean {
     return this.#getCell(i, j).canEnter && !this.#actors.checkCollision(i, j) &&
-      this.#objects.canEnter(i, j)
+      this.#props.canEnter(i, j)
   }
   canEnterStatic(i: number, j: number): boolean {
-    return this.#getCell(i, j).canEnter && this.#objects.canEnter(i, j)
+    return this.#getCell(i, j).canEnter && this.#props.canEnter(i, j)
   }
   peekItem(i: number, j: number): IItem | undefined {
     return this.#items.get(i, j)
@@ -596,19 +598,19 @@ export class Field implements IField {
     if (newObjectSpawns.length > 0) {
       let i = 0
       for (const spawn of newObjectSpawns) {
-        if (this.#objects.get(spawn.i, spawn.j)) {
+        if (this.#props.get(spawn.i, spawn.j)) {
           // The space is already occupied by some other object
           continue
         }
         i++
-        this.#objects.add(Prop.fromSpawn(spawn))
+        this.#props.add(Prop.fromSpawn(spawn))
       }
       if (i > 0) {
         console.log(`Spawning ${i} objects`)
-        await this.#objects.loadAssets({ loadImage })
+        await this.#props.loadAssets({ loadImage })
       }
     } else if (initialLoad) {
-      await this.#objects.loadAssets({ loadImage })
+      await this.#props.loadAssets({ loadImage })
     }
   }
 

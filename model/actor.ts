@@ -15,7 +15,6 @@ import { seed } from "../util/random.ts"
 import type {
   Action,
   Dir,
-  FieldEvent,
   IActor,
   IField,
   LoadOptions,
@@ -48,6 +47,12 @@ type ActorAssets = {
 
 export type MoveEndType = "inertial"
 export type IdleType = "random-rotate" | "random-walk" | "wander"
+
+export type PushedEvent = {
+  type: "pushed"
+  dir: Dir
+  peakAt: number
+}
 
 export function spawnActor(
   id: string,
@@ -443,16 +448,16 @@ export class Actor implements IActor {
               this.#j = nextJ
             } else {
               const [i, j] = this.nextGrid(dir)
-              const pushing = field.actors.get(i, j)
-              pushing.forEach((actor) => {
-                actor.onEvent(
-                  { type: "bounced", dir, peakAt: 7 },
-                  field,
-                )
-              })
+              const ev = { type: "pushed", dir, peakAt: 7 } as const
+              let actorPushed = false
+              for (const actor of field.actors.get(i, j)) {
+                actorPushed = true
+                actor.onPushed(ev, field)
+              }
+              field.props.get(i, j)?.onPushed(ev, field)
               this.#move = new ActorBounceMove(
                 dir,
-                pushing.length > 0,
+                actorPushed,
                 this.#speed,
               )
             }
@@ -633,30 +638,23 @@ export class Actor implements IActor {
     return this.#age
   }
 
-  onEvent(event: FieldEvent, field: IField): void {
-    switch (event.type) {
-      case "bounced": {
-        splashColor(
-          field,
-          this.i,
-          this.j,
-          120,
-          30,
-          0,
-          0.001,
-          2,
-          seed(this.#physicalGridKey).rng,
-        )
-        if (this.#move) {
-          this.unshiftAction({ type: "slide", dir: event.dir })
-        } else {
-          this.enqueueAction({ type: "wait", until: field.time + event.peakAt })
-          this.enqueueAction({ type: "slide", dir: event.dir })
-        }
-        break
-      }
-      default:
-        event.type satisfies never
+  onPushed(event: PushedEvent, field: IField): void {
+    splashColor(
+      field,
+      this.i,
+      this.j,
+      120,
+      30,
+      0,
+      0.001,
+      2,
+      seed(this.#physicalGridKey).rng,
+    )
+    if (this.#move) {
+      this.unshiftAction({ type: "slide", dir: event.dir })
+    } else {
+      this.enqueueAction({ type: "wait", until: field.time + event.peakAt })
+      this.enqueueAction({ type: "slide", dir: event.dir })
     }
   }
 }

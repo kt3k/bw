@@ -17,6 +17,7 @@ interface CatalogSource {
   readonly props: Record<string, {
     readonly src: string
     readonly canEnter: boolean
+    readonly pushed?: string
   }>
 }
 
@@ -45,6 +46,7 @@ export interface ActorDefinition {
 export interface PropDefinition {
   readonly type: string
   readonly canEnter: boolean
+  readonly pushed?: string
   readonly src: string
   readonly href: string
 }
@@ -95,6 +97,7 @@ export class Catalog {
         catalog.props[type] = {
           type: type,
           canEnter: def.canEnter,
+          pushed: def.pushed,
           src: def.src,
           href: new URL(def.src, url).href,
         }
@@ -138,6 +141,7 @@ export class Catalog {
       props[def.type] = {
         src: def.src,
         canEnter: def.canEnter,
+        pushed: def.pushed,
       }
     }
 
