@@ -36,7 +36,7 @@ const kimiDef = {
   type: "main",
   main: "main",
   src: "../actor/kimi/",
-  href: "/actor/kimi/",
+  href: "./actor/kimi/",
 }
 
 export function GameScreen({ el, query }: Context) {

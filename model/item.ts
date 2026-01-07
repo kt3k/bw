@@ -17,7 +17,7 @@ const lenaDef = {
   type: "inertial" as const,
   moveEnd: "inertial" as const,
   src: "../actor/lena/",
-  href: "/actor/lena/",
+  href: "./actor/lena/",
 }
 
 export class Item implements IItem {
