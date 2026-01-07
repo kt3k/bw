@@ -70,21 +70,21 @@ export function spawnActor(
   }
   switch (def.idle) {
     case "random-rotate":
-      idle = new IdleRandomRotate()
+      idle = new IdleDelegateRandomRotate()
       break
     case "random-walk":
-      idle = new IdleRandomWalk()
+      idle = new IdleDelegateRandomWalk()
       break
     case "wander":
-      idle = new IdleWander()
+      idle = new IdleDelegateWander()
       break
   }
   return new Actor(i, j, def, id, dir, speed, moveEnd, idle)
 }
 
-export type ActorMove = ActorGoMove | ActorBounceMove | ActorJumpMove
+export type ActorMove = MoveGo | MoveBounce | MoveJump
 
-export class ActorGoMove implements Move {
+export class MoveGo implements Move {
   #phase: number = 0
   #speed: number = 1
   #dir: Dir
@@ -131,7 +131,7 @@ export class ActorGoMove implements Move {
   }
 }
 
-export class ActorBounceMove implements Move {
+export class MoveBounce implements Move {
   #phase: number = 0
   #dir: Dir
   #pushedActors: boolean
@@ -190,7 +190,7 @@ export class ActorBounceMove implements Move {
   }
 }
 
-export class ActorJumpMove implements Move {
+export class MoveJump implements Move {
   #phase: number = 0
   #y: number = 0
 
@@ -442,7 +442,7 @@ export class Actor implements IActor {
             const dir = nextPlan.dir
             if (nextPlan?.type === "go") this.setDir(dir)
             if (this.canGo(dir, field)) {
-              this.#move = new ActorGoMove(this.#speed, dir)
+              this.#move = new MoveGo(this.#speed, dir)
               const [nextI, nextJ] = this.nextGrid(dir)
               this.#i = nextI
               this.#j = nextJ
@@ -455,7 +455,7 @@ export class Actor implements IActor {
                 actor.onPushed(ev, field)
               }
               field.props.get(i, j)?.onPushed(ev, field)
-              this.#move = new ActorBounceMove(
+              this.#move = new MoveBounce(
                 dir,
                 actorPushed,
                 this.#speed,
@@ -464,7 +464,7 @@ export class Actor implements IActor {
             break
           }
           case "jump":
-            this.#move = new ActorJumpMove()
+            this.#move = new MoveJump()
             break
         }
       }
@@ -689,7 +689,7 @@ export interface IdleDelegate {
   onIdle(actor: Actor, field: IField): MovePlan | undefined
 }
 
-export class IdleRandomWalk implements IdleDelegate {
+export class IdleDelegateRandomWalk implements IdleDelegate {
   onIdle(actor: Actor, field: IField): MovePlan | undefined {
     const dirs = DIRS.filter((d) => {
       const [i, j] = actor.nextGrid(d)
@@ -705,7 +705,7 @@ export class IdleRandomWalk implements IdleDelegate {
   }
 }
 
-export class IdleWander implements IdleDelegate {
+export class IdleDelegateWander implements IdleDelegate {
   #counter = 32
   onIdle(actor: Actor, field: IField): MovePlan | undefined {
     this.#counter -= 1
@@ -739,7 +739,7 @@ export class IdleWander implements IdleDelegate {
   }
 }
 
-export class IdleRandomRotate implements IdleDelegate {
+export class IdleDelegateRandomRotate implements IdleDelegate {
   #config: {
     delay: number
     counter: number

@@ -654,7 +654,7 @@ export function splashColor(
   if (radius < 1) {
     return
   }
-  colorCell(i, j, hue, sat, light, alpha, field, rng)
+  colorCell(i, j, hue, sat, light, alpha, field)
   if (radius < 2) {
     return
   }
@@ -671,7 +671,6 @@ export function splashColor(
           light,
           alpha * 0.6 ** dist,
           field,
-          rng,
         )
       }, dist * 32)
     }
@@ -686,11 +685,10 @@ function colorCell(
   light: number,
   alpha: number,
   field: IField,
-  rng: () => number,
 ): void {
   field.colorCell(
     i,
     j,
-    `hsla(${hue}, ${sat}%, ${light}%, ${alpha + rng() * 0.15 - 0.05})`,
+    `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`,
   )
 }

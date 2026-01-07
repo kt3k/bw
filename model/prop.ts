@@ -1,5 +1,12 @@
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IEntity, IField, IProp, LoadOptions, PropType } from "./types.ts"
+import type {
+  Dir,
+  IEntity,
+  IField,
+  IProp,
+  LoadOptions,
+  PropType,
+} from "./types.ts"
 import { PropSpawnInfo } from "./field-block.ts"
 import { PropDefinition } from "./catalog.ts"
 import { type PushedEvent } from "./actor.ts"
@@ -34,8 +41,6 @@ export class Prop implements IProp {
     },
   )
   readonly #pushed: PushedDelegate | null
-  readonly w = CELL_SIZE
-  readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
 
   static fromSpawn(spawn: PropSpawnInfo) {
@@ -101,6 +106,14 @@ export class Prop implements IProp {
     return this.j * CELL_SIZE
   }
 
+  get w(): number {
+    return CELL_SIZE
+  }
+
+  get h(): number {
+    return CELL_SIZE
+  }
+
   get canEnter(): boolean {
     return this.def.canEnter
   }
@@ -136,7 +149,7 @@ type CommonAction = {
 
 type PropAction =
   | CommonAction
-  | { type: "break" }
+  | { type: "break"; dir: Dir }
   | { type: "remove" }
 
 class ActionQueue<
@@ -224,10 +237,5 @@ class PushedDelegateBreak implements PushedDelegate {
       { type: "splash", hue: 0, sat: 1, light: 0, alpha: 0.15, radius: 2 },
       { type: "remove" },
     )
-
-    // push wait until `peakAt` to action queue
-    // then break animation
-    // splash some color
-    // remove the prop from field
   }
 }

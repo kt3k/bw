@@ -355,6 +355,7 @@ export function drawCellColor(
   margin = 1,
 ) {
   const [localI, localJ] = g2l(i, j)
+  const { randomInt } = seed(`${i}.${j}`)
   margin = randomInt(3)
   wrapper.drawRect(
     localI * CELL_SIZE + margin,
@@ -364,6 +365,9 @@ export function drawCellColor(
     color,
   )
 }
+
+const ENABLE_AMBIENT_CELL_COLOR = false
+const ENABLE_AMBIENT_CELL_NOISE = true
 
 /** Draws a cell on the canvas */
 export function drawCell(
@@ -379,20 +383,36 @@ export function drawCell(
     localI * CELL_SIZE,
     localJ * CELL_SIZE,
   )
-  const { rng } = seed(`${i}.${j}`)
-  let color: string
-  if (cell.canEnter) {
-    color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
-  } else {
-    color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
+  if (ENABLE_AMBIENT_CELL_COLOR) {
+    const { rng } = seed(`${i}.${j}`)
+    let color: string
+    if (cell.canEnter) {
+      color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
+    } else {
+      color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
+    }
+    wrapper.drawRect(
+      localI * CELL_SIZE,
+      localJ * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE,
+      color,
+    )
   }
-  wrapper.drawRect(
-    localI * CELL_SIZE,
-    localJ * CELL_SIZE,
-    CELL_SIZE,
-    CELL_SIZE,
-    color,
-  )
+  if (ENABLE_AMBIENT_CELL_NOISE) {
+    const { randomInt } = seed(`${i}.${j}`)
+    const width = randomInt(3) + 1
+    const x = randomInt(15 - width) + 1
+    const y = randomInt(14) + 1
+    const color = cell.canEnter ? "#b9bcb9" : "black"
+    wrapper.drawRect(
+      localI * CELL_SIZE + x,
+      localJ * CELL_SIZE + y,
+      width,
+      1,
+      color,
+    )
+  }
 }
 
 function renderRange(

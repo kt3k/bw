@@ -1,4 +1,4 @@
-import { ActorGoMove, RandomlyTurnNPC, StaticNPC } from "./actor.ts"
+import { MoveGo, RandomlyTurnNPC, StaticNPC } from "./actor.ts"
 import { ActorDefinition } from "./catalog.ts"
 import { assert, assertEquals, assertFalse } from "@std/assert"
 
@@ -33,7 +33,7 @@ Deno.test("Actor", async (t) => {
 })
 
 Deno.test("ActorGoMove", () => {
-  const move = new ActorGoMove(1, "up")
+  const move = new MoveGo(1, "up")
   assertFalse(move.halfPassed)
   assertEquals(move.x, 0)
   assertEquals(move.y, 16)
