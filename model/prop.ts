@@ -1,8 +1,13 @@
 import { CELL_SIZE } from "../util/constants.ts"
-import type { IField, IProp, LoadOptions, PropType } from "./types.ts"
+import type {
+  IField,
+  IProp,
+  LoadOptions,
+  PropType,
+  PushedEvent,
+} from "./types.ts"
 import { PropSpawnInfo } from "./field-block.ts"
 import { PropDefinition } from "./catalog.ts"
-import { type PushedEvent } from "./actor.ts"
 import { ActionQueue, type PropAction } from "./action-queue.ts"
 
 const fallbackImage = await fetch(
@@ -21,14 +26,15 @@ export class Prop implements IProp {
     (field, action) => {
       switch (action.type) {
         case "break": {
-          break
+          return "next"
         }
         case "remove": {
           field.props.remove(this.i, this.j)
-          break
+          return "next"
         }
         default: {
           action satisfies never
+          throw new Error("Unreachable")
         }
       }
     },

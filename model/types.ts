@@ -74,7 +74,7 @@ export type FieldEvent = {
   peakAt: number
 }
 
-type PushedEvent = {
+export type PushedEvent = {
   type: "pushed"
   dir: Dir
   peakAt: number
@@ -98,18 +98,33 @@ export type IActor =
     clearActionQueue(): void
   }
 
-export type Move = {
+export type CommonMove = {
   type: "move" | "bounce" | "jump"
   x: number
   y: number
   step(): void
   finished: boolean
   halfPassed: boolean
+  cb?: (move: Move) => void
 }
+export type Move =
+  & CommonMove
+  & ({
+    type: "move"
+    dir: Dir
+  } | {
+    type: "bounce"
+    dir: Dir
+    pushedActors: boolean
+  } | {
+    type: "jump"
+  })
 
-export type MovePlan =
+export type MoveAction =
   & {
     readonly cb?: (move: Move) => void
+    move?: Move
+    isFinished?: boolean
   }
   & (
     | { readonly type: "go"; readonly dir: Dir }
@@ -118,7 +133,7 @@ export type MovePlan =
   )
 
 export type Action =
-  | MovePlan
+  | MoveAction
   | { readonly type: "go-random" }
   | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
   | {

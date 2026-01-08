@@ -2,22 +2,25 @@ import { DOWN, LEFT, RIGHT, UP } from "../util/dir.ts"
 import { Input, inputQueue } from "./ui/input.ts"
 import {
   Actor,
-  ActorMove,
   type IdleDelegate,
   type MoveEndDelegate,
 } from "../model/actor.ts"
-import type { IField, MovePlan } from "../model/types.ts"
+import type { IField, Move } from "../model/types.ts"
 
 export class IdleMainActor implements IdleDelegate {
-  onIdle(_actor: Actor, _field: IField): MovePlan | undefined {
+  onIdle(actor: Actor, field: IField): void {
     if (Input.up) {
-      return { type: "go", dir: UP }
+      actor.tryMove("go", UP, field)
+      return
     } else if (Input.down) {
-      return { type: "go", dir: DOWN }
+      actor.tryMove("go", DOWN, field)
+      return
     } else if (Input.left) {
-      return { type: "go", dir: LEFT }
+      actor.tryMove("go", LEFT, field)
+      return
     } else if (Input.right) {
-      return { type: "go", dir: RIGHT }
+      actor.tryMove("go", RIGHT, field)
+      return
     }
 
     const queueHead = inputQueue[0]
@@ -27,13 +30,13 @@ export class IdleMainActor implements IdleDelegate {
       queueHead === "touchendempty"
     ) {
       inputQueue.shift()
-      return { type: "jump" }
+      actor.jump()
     }
   }
 }
 
 export class MoveEndMainActor implements MoveEndDelegate {
-  onMoveEnd(actor: Actor, field: IField, _move: ActorMove): void {
+  onMoveEnd(actor: Actor, field: IField, _move: Move): void {
     field.peekItem(actor.i, actor.j)?.onCollect(actor, field)
   }
 }

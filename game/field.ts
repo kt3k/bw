@@ -10,7 +10,7 @@ import type {
   IStepper,
   LoadOptions,
 } from "../model/types.ts"
-import { spawnActor } from "../model/actor.ts"
+import { Actor } from "../model/actor.ts"
 import { Item } from "../model/item.ts"
 import { Prop } from "../model/prop.ts"
 import {
@@ -550,16 +550,7 @@ export class Field implements IField {
       let i = 0
       for (const spawn of newCharSpawns) {
         i++
-        this.#actors.add(spawnActor(
-          spawn.id,
-          spawn.i,
-          spawn.j,
-          spawn.def,
-          {
-            dir: spawn.dir,
-            speed: spawn.speed,
-          },
-        ))
+        this.#actors.add(Actor.fromSpawn(spawn))
       }
       if (i > 0) {
         console.log(`Spawning ${i} actors`)

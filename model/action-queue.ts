@@ -1,4 +1,4 @@
-import type { Dir, IEntity, IField, MovePlan } from "./types.ts"
+import type { Dir, IEntity, IField, MoveAction } from "./types.ts"
 import { splashColor } from "../game/field.ts"
 
 type CommonAction = {
@@ -20,7 +20,7 @@ export type PropAction =
 
 export type ActorAction =
   | CommonAction
-  | MovePlan
+  | MoveAction
   | { readonly type: "go-random" }
   | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
   | {
@@ -38,19 +38,18 @@ export type ActorAction =
 export class ActionQueue<
   T extends IEntity,
   A extends Record<string, unknown>,
-  R = undefined,
 > {
   #queue: A[] = []
   #handler: (
     field: IField,
     action: Exclude<A, CommonAction>,
-  ) => R | undefined
+  ) => "next" | "end"
 
   constructor(
     handler: (
       field: IField,
       action: Exclude<A, CommonAction>,
-    ) => R | undefined,
+    ) => "next" | "end",
   ) {
     this.#handler = handler
   }
@@ -71,7 +70,7 @@ export class ActionQueue<
     this.#queue = []
   }
 
-  process(entity: T, field: IField): R | "idle" | "wait" {
+  process(entity: T, field: IField): "idle" | undefined {
     while (true) {
       const action = this.#queue[0] as unknown as CommonAction
       if (!action) {
@@ -80,7 +79,7 @@ export class ActionQueue<
 
       if (action.type === "wait") {
         if (field.time < action.until) {
-          return "wait"
+          return
         }
         this.#queue.shift()
         continue
@@ -106,8 +105,8 @@ export class ActionQueue<
         }
         default: {
           const result = this.#handler(field, action)
-          if (result) {
-            return result
+          if (result === "end") {
+            return
           }
         }
       }
