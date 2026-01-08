@@ -22,6 +22,7 @@ import type {
   MovePlan,
 } from "./types.ts"
 import { ActorDefinition } from "./catalog.ts"
+import { ActionQueue, type ActorAction } from "./action-queue.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -234,8 +235,8 @@ export class MoveJump implements Move {
   }
 }
 
-/** The abstract actor class
- * The parent class of {@code MainCharacter} and NPC.
+/**
+ * The actor class
  */
 export class Actor implements IActor {
   /** The current direction of the actor */
@@ -252,8 +253,6 @@ export class Actor implements IActor {
   #age = 0
   /** The counter of the idle state */
   #idleCounter: number = 0
-  /** The time until the next action */
-  #waitUntil: number | null = null
   /** The key of the physical grid, which is used for collision detection */
   #physicalGridKey: string
   /** The prefix of assets */
@@ -261,7 +260,73 @@ export class Actor implements IActor {
   /** The images necessary to render this actor */
   #assets?: ActorAssets
   /** The queue of actions to be performed */
-  #actionQueue: Action[] = []
+  #actionQueue: ActionQueue<Actor, ActorAction, MovePlan> = new ActionQueue(
+    (_field, action) => {
+      switch (action.type) {
+        case "speed": {
+          clearTimeout(this.#speedUpTimer)
+          switch (action.change) {
+            case "2x":
+              this.speed = 2
+              break
+            case "4x":
+              this.speed = 4
+              break
+            case "reset":
+              this.speed = 1
+              break
+            default:
+              action.change satisfies never
+          }
+          if (action.change !== "reset") {
+            this.#speedUpTimer = setTimeout(() => {
+              this.enqueueActions(
+                { type: "speed", change: "reset" },
+                { type: "jump" },
+              )
+            }, 15000)
+          }
+          return
+        }
+        case "turn": {
+          const dir = action.dir
+          switch (dir) {
+            case "north":
+              this.setDir("up")
+              break
+            case "south":
+              this.setDir("down")
+              break
+            case "west":
+              this.setDir("left")
+              break
+            case "east":
+              this.setDir("right")
+              break
+            case "left":
+              this.setDir(turnLeft(this.dir))
+              break
+            case "right":
+              this.setDir(turnRight(this.dir))
+              break
+            case "back":
+              this.setDir(opposite(this.dir))
+              break
+            default:
+              dir satisfies never
+          }
+          return
+        }
+        case "go-random": {
+          const { choice } = seed(`${this.i}.${this.j}`)
+          return { type: "go", dir: choice(DIRS) }
+        }
+        default: {
+          return action
+        }
+      }
+    },
+  )
   /** The timer for speed up actions */
   #speedUpTimer: ReturnType<typeof setTimeout> | undefined
   /** The move of the actor */
@@ -317,120 +382,30 @@ export class Actor implements IActor {
     return field.canEnter(i, j)
   }
 
-  enqueueAction(...actions: Action[]) {
-    this.#actionQueue.push(...actions)
+  enqueueActions(...actions: Action[]) {
+    this.#actionQueue.enqueue(...actions)
   }
 
-  unshiftAction(...actions: Action[]) {
+  unshiftActions(...actions: Action[]) {
     this.#actionQueue.unshift(...actions)
   }
 
   clearActionQueue() {
-    this.#actionQueue = []
+    this.#actionQueue.clear()
   }
 
-  get actionQueue(): readonly Action[] {
-    return this.#actionQueue
-  }
-
-  #processActionQueue(field: IField): MovePlan | undefined | "idle" {
-    const action = this.#actionQueue.shift()
-    if (!action) {
-      return "idle"
-    }
-    switch (action.type) {
-      case "speed": {
-        clearTimeout(this.#speedUpTimer)
-        switch (action.change) {
-          case "2x":
-            this.speed = 2
-            break
-          case "4x":
-            this.speed = 4
-            break
-          case "reset":
-            this.speed = 1
-            break
-          default:
-            action.change satisfies never
-        }
-        if (action.change !== "reset") {
-          this.#speedUpTimer = setTimeout(() => {
-            this.#actionQueue.push(
-              { type: "speed", change: "reset" },
-              { type: "jump" },
-            )
-          }, 15000)
-        }
-        return this.#processActionQueue(field)
-      }
-      case "turn": {
-        const dir = action.dir
-        switch (dir) {
-          case "north":
-            this.setDir("up")
-            break
-          case "south":
-            this.setDir("down")
-            break
-          case "west":
-            this.setDir("left")
-            break
-          case "east":
-            this.setDir("right")
-            break
-          case "left":
-            this.setDir(turnLeft(this.dir))
-            break
-          case "right":
-            this.setDir(turnRight(this.dir))
-            break
-          case "back":
-            this.setDir(opposite(this.dir))
-            break
-          default:
-            dir satisfies never
-        }
-        return this.#processActionQueue(field)
-      }
-      case "wait": {
-        if (field.time < action.until) {
-          this.#waitUntil = action.until
-          return undefined
-        }
-        return this.#processActionQueue(field)
-      }
-      case "splash": {
-        const { i, j } = this
-        const { rng } = seed(`${i}${j}`)
-        splashColor(
-          field,
-          i,
-          j,
-          action.hue,
-          action.sat,
-          action.light,
-          action.alpha,
-          action.radius,
-          rng,
-        )
-        return this.#processActionQueue(field)
-      }
-      case "go-random": {
-        const { choice } = seed(`${this.i}.${this.j}`)
-        return { type: "go", dir: choice(DIRS) }
-      }
-    }
-
-    action satisfies MovePlan
-    return action
+  isActionQueueEmpty(): boolean {
+    return this.#actionQueue.isEmpty()
   }
 
   step(field: IField) {
-    if (this.#waitUntil === null && this.#move === null) {
-      let nextPlan = this.#processActionQueue(field)
+    if (this.#move === null) {
+      let nextPlan = this.#actionQueue.process(this, field)
       if (nextPlan === "idle") {
-        nextPlan = this.#idle?.onIdle(this, field)
+        nextPlan = this.#idle?.onIdle(this, field) ?? "wait"
+      }
+      if (nextPlan === "wait") {
+        return
       }
       if (nextPlan) {
         this.#movePlan = nextPlan
@@ -468,11 +443,6 @@ export class Actor implements IActor {
             break
         }
       }
-    }
-
-    // check waitUntil against the field time
-    if (this.#waitUntil !== null && field.time >= this.#waitUntil) {
-      this.#waitUntil = null
     }
 
     if (this.#move) {
@@ -651,10 +621,10 @@ export class Actor implements IActor {
       seed(this.#physicalGridKey).rng,
     )
     if (this.#move) {
-      this.unshiftAction({ type: "slide", dir: event.dir })
+      this.unshiftActions({ type: "slide", dir: event.dir })
     } else {
-      this.enqueueAction({ type: "wait", until: field.time + event.peakAt })
-      this.enqueueAction({ type: "slide", dir: event.dir })
+      this.enqueueActions({ type: "wait", until: field.time + event.peakAt })
+      this.enqueueActions({ type: "slide", dir: event.dir })
     }
   }
 }
@@ -665,20 +635,20 @@ export interface MoveEndDelegate {
 
 export class MoveEndInertial implements MoveEndDelegate {
   onMoveEnd(actor: Actor, _field: IField, move: ActorMove): void {
-    if (actor.actionQueue.length > 0) {
+    if (!actor.isActionQueueEmpty()) {
       return
     }
 
     switch (move.type) {
       case "move": {
-        actor.enqueueAction({ type: "go", dir: move.dir })
+        actor.enqueueActions({ type: "go", dir: move.dir })
         break
       }
       case "bounce": {
         if (!move.pushedActors) {
           // The actor was bounced to the wall.
           // In that case, the actor go back to the opposite direction
-          actor.enqueueAction({ type: "go", dir: opposite(move.dir) })
+          actor.enqueueActions({ type: "go", dir: opposite(move.dir) })
         }
       }
     }
@@ -686,17 +656,17 @@ export class MoveEndInertial implements MoveEndDelegate {
 }
 
 export interface IdleDelegate {
-  onIdle(actor: Actor, field: IField): MovePlan | undefined
+  onIdle(actor: Actor, field: IField): MovePlan | "wait"
 }
 
 export class IdleDelegateRandomWalk implements IdleDelegate {
-  onIdle(actor: Actor, field: IField): MovePlan | undefined {
+  onIdle(actor: Actor, field: IField): MovePlan | "wait" {
     const dirs = DIRS.filter((d) => {
       const [i, j] = actor.nextGrid(d)
       return field.canEnterStatic(i, j)
     })
     if (dirs.length === 0) {
-      return undefined
+      return "wait"
     }
     const { choice } = seed(
       actor.age.toString() + actor.i.toString() + actor.j.toString(),
@@ -707,7 +677,7 @@ export class IdleDelegateRandomWalk implements IdleDelegate {
 
 export class IdleDelegateWander implements IdleDelegate {
   #counter = 32
-  onIdle(actor: Actor, field: IField): MovePlan | undefined {
+  onIdle(actor: Actor, field: IField): MovePlan | "wait" {
     this.#counter -= 1
     if (this.#counter <= 0) {
       const { randomInt, choice } = seed(field.time.toString())
@@ -725,17 +695,18 @@ export class IdleDelegateWander implements IdleDelegate {
       }
       const nextCandidate = DIRS.filter((d) => actor.canGo(d, field))
       if (nextCandidate.length === 0) {
-        actor.enqueueAction({
+        actor.enqueueActions({
           type: "turn",
           dir: choice(["left", "right"]),
         })
-        return undefined
+        return "wait"
       }
       return {
         type: "go",
         dir: choice(nextCandidate),
       }
     }
+    return "wait"
   }
 }
 
@@ -746,7 +717,7 @@ export class IdleDelegateRandomRotate implements IdleDelegate {
     turnRight: boolean
   } | null = null
 
-  onIdle(actor: Actor, _field: IField): MovePlan | undefined {
+  onIdle(actor: Actor, _field: IField): MovePlan | "wait" {
     if (!this.#config) {
       const { randomInt } = seed(actor.id)
       const delay = 43 + randomInt(8)
@@ -757,7 +728,7 @@ export class IdleDelegateRandomRotate implements IdleDelegate {
       }
     }
     if (--this.#config.counter > 0) {
-      return
+      return "wait"
     }
 
     this.#config.counter = this.#config.delay
@@ -766,5 +737,6 @@ export class IdleDelegateRandomRotate implements IdleDelegate {
     } else {
       actor.setDir(turnLeft(actor.dir))
     }
+    return "wait"
   }
 }

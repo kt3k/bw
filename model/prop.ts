@@ -1,16 +1,9 @@
 import { CELL_SIZE } from "../util/constants.ts"
-import type {
-  Dir,
-  IEntity,
-  IField,
-  IProp,
-  LoadOptions,
-  PropType,
-} from "./types.ts"
+import type { IField, IProp, LoadOptions, PropType } from "./types.ts"
 import { PropSpawnInfo } from "./field-block.ts"
 import { PropDefinition } from "./catalog.ts"
 import { type PushedEvent } from "./actor.ts"
-import { splashColor } from "../game/field.ts"
+import { ActionQueue, type PropAction } from "./action-queue.ts"
 
 const fallbackImage = await fetch(
   // TODO(kt3k): Update
@@ -25,13 +18,13 @@ export class Prop implements IProp {
   readonly type: PropType
   readonly def: PropDefinition
   readonly #actionQueue = new ActionQueue<Prop, PropAction>(
-    (prop, field, action) => {
+    (field, action) => {
       switch (action.type) {
         case "break": {
           break
         }
         case "remove": {
-          field.props.remove(prop.i, prop.j)
+          field.props.remove(this.i, this.j)
           break
         }
         default: {
@@ -132,97 +125,6 @@ export class Prop implements IProp {
 
   clearActions(): void {
     this.#actionQueue.clear()
-  }
-}
-
-type CommonAction = {
-  type: "wait"
-  until: number
-} | {
-  type: "splash"
-  hue: number
-  sat: number
-  light: number
-  alpha: number
-  radius: number
-}
-
-type PropAction =
-  | CommonAction
-  | { type: "break"; dir: Dir }
-  | { type: "remove" }
-
-class ActionQueue<
-  T extends IEntity,
-  A extends Record<string, unknown>,
-  R = undefined,
-> {
-  #queue: A[] = []
-  #handler: (
-    e: T,
-    field: IField,
-    action: Exclude<A, CommonAction>,
-  ) => R | undefined
-
-  constructor(
-    handler: (
-      e: T,
-      field: IField,
-      action: Exclude<A, CommonAction>,
-    ) => R | undefined,
-  ) {
-    this.#handler = handler
-  }
-
-  enqueue(...actions: A[]): void {
-    this.#queue.push(...actions)
-  }
-
-  clear(): void {
-    this.#queue = []
-  }
-
-  process(entity: T, field: IField): R | "idle" | "wait" {
-    while (true) {
-      const action = this.#queue[0] as unknown as CommonAction
-      if (!action) {
-        return "idle"
-      }
-
-      if (action.type === "wait") {
-        if (field.time < action.until) {
-          return "wait"
-        }
-        this.#queue.shift()
-        continue
-      }
-
-      this.#queue.shift()
-
-      switch (action.type) {
-        case "splash": {
-          const { i, j } = entity
-          splashColor(
-            field,
-            i,
-            j,
-            action.hue,
-            action.sat,
-            action.light,
-            action.alpha,
-            action.radius,
-            () => 1,
-          )
-          break
-        }
-        default: {
-          const result = this.#handler(entity, field, action)
-          if (result) {
-            return result
-          }
-        }
-      }
-    }
   }
 }
 

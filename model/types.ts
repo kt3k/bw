@@ -94,7 +94,7 @@ export type IActor =
     get physicalGridKey(): string
     get dir(): Dir
     canGo(dir: Dir, field: IField): boolean
-    enqueueAction(...actions: Action[]): void
+    enqueueActions(...actions: Action[]): void
     clearActionQueue(): void
   }
 

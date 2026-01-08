@@ -131,7 +131,7 @@ export class CollectApple implements CollectDelegate {
         { dir },
       )
       actor_.loadAssets({ loadImage })
-      actor_.enqueueAction({ type: "go", dir })
+      actor_.enqueueActions({ type: "go", dir })
       field.actors.add(actor_)
     }
 
@@ -201,7 +201,7 @@ export class CollectMushroom implements CollectDelegate {
     )
 
     actor.clearActionQueue()
-    actor.enqueueAction(
+    actor.enqueueActions(
       { type: "jump" },
       { type: "speed", change: "2x" },
     )
@@ -212,18 +212,18 @@ export class CollectPurpleMushroom implements CollectDelegate {
   onCollect(actor: IActor, field: IField, _item: Item): void {
     field.collectItem(actor.i, actor.j)
     actor.clearActionQueue()
-    actor.enqueueAction(
+    actor.enqueueActions(
       { type: "jump" },
       { type: "speed", change: "4x" },
     )
     const end = () => {
-      actor.enqueueAction(
+      actor.enqueueActions(
         { type: "speed", change: "reset" },
         { type: "jump" },
       )
     }
     for (const _ of Array(30)) {
-      actor.enqueueAction({
+      actor.enqueueActions({
         type: "splash",
         hue: 280,
         sat: 40,
