@@ -1,5 +1,6 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import type {
+  Dir,
   IField,
   IProp,
   LoadOptions,
@@ -22,11 +23,14 @@ export class Prop implements IProp {
   readonly j: number
   readonly type: PropType
   readonly def: PropDefinition
+  #motion: Motion | null = null
   readonly #actionQueue = new ActionQueue<Prop, PropAction>(
     (field, action) => {
       switch (action.type) {
         case "break": {
-          return "next"
+          this.#motion = new MotionBreak(this.#image!, action.dir)
+          this.#motion.cb = action.cb
+          return "end"
         }
         case "remove": {
           field.props.remove(this.i, this.j)
@@ -81,6 +85,16 @@ export class Prop implements IProp {
     this.#pushed = pushed
   }
 
+  /**
+   * Vanishes the prop, but keeps its space occupied
+   * Useful for removing the visual representation, but keeping the processing of the action queue
+   */
+  vanish(): void {
+    const canvas = new OffscreenCanvas(CELL_SIZE, CELL_SIZE)
+    canvas.getContext("2d")
+    this.#image = canvas.transferToImageBitmap()
+  }
+
   async loadAssets(options: LoadOptions) {
     const loadImage = options.loadImage
     if (!loadImage) {
@@ -94,6 +108,9 @@ export class Prop implements IProp {
   }
 
   image(): ImageBitmap {
+    if (this.#motion instanceof MotionBreak) {
+      return this.#motion.image()
+    }
     return this.#image ?? fallbackImage
   }
 
@@ -118,7 +135,17 @@ export class Prop implements IProp {
   }
 
   step(field: IField) {
-    this.#actionQueue.process(this, field)
+    if (!this.#motion) {
+      this.#actionQueue.process(this, field)
+    }
+
+    if (this.#motion) {
+      this.#motion.step()
+      if (this.#motion.finished) {
+        this.#motion.cb?.(this.#motion)
+        this.#motion = null
+      }
+    }
   }
 
   onPushed(event: PushedEvent, field: IField): void {
@@ -142,8 +169,62 @@ class PushedDelegateBreak implements PushedDelegate {
   onPushed(event: PushedEvent, prop: Prop, field: IField): void {
     prop.enqueueActions(
       { type: "wait", until: field.time + event.peakAt },
+      {
+        type: "break",
+        dir: event.dir,
+        cb: () => {
+          prop.vanish()
+        },
+      },
       { type: "splash", hue: 0, sat: 1, light: 0, alpha: 0.15, radius: 2 },
       { type: "remove" },
     )
+  }
+}
+
+interface Motion {
+  step(): void
+  finished: boolean
+  cb?: (motion: Motion) => void
+}
+
+class MotionBreak implements Motion {
+  #image: ImageBitmap
+  #dir: Dir
+  #positions = [...Array(16).keys()]
+  cb?: (motion: Motion) => void
+  constructor(image: ImageBitmap, dir: Dir) {
+    this.#image = image
+    this.#dir = dir
+  }
+
+  step(): void {
+    const y = this.#positions.shift()!
+    const canvas = new OffscreenCanvas(CELL_SIZE, CELL_SIZE)
+    const ctx = canvas.getContext("2d")!
+    ctx.drawImage(this.#image, 0, 0)
+    switch (this.#dir) {
+      case "up":
+        ctx.clearRect(0, CELL_SIZE - 1 - y, CELL_SIZE, 1)
+        break
+      case "down":
+        ctx.clearRect(0, y, CELL_SIZE, 1)
+        break
+      case "left":
+        ctx.clearRect(CELL_SIZE - 1 - y, 0, 1, CELL_SIZE)
+        break
+      case "right":
+        ctx.clearRect(y, 0, 1, CELL_SIZE)
+        break
+    }
+    this.#image = canvas.transferToImageBitmap()
+  }
+
+  image(): ImageBitmap {
+    return this.#image
+  }
+
+  get finished(): boolean {
+    return this.#positions.length === 0
   }
 }

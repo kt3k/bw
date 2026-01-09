@@ -1,8 +1,8 @@
 import seedrandom from "seedrandom"
 
-const { randomInt, choice } = seed("Hello.")
+const { randomInt, choice, shuffle } = seed("Hello.")
 
-export { choice, randomInt }
+export { choice, randomInt, shuffle }
 
 export function seed(seed: string) {
   const rng = seedrandom(seed)
@@ -17,9 +17,19 @@ export function seed(seed: string) {
     return arr[randomInt(arr.length)]
   }
 
+  const shuffle = <T>(arr: T[]): T[] => {
+    const result = arr.slice()
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = randomInt(i + 1)
+      ;[result[i], result[j]] = [result[j], result[i]]
+    }
+    return result
+  }
+
   return {
     rng,
     randomInt,
     choice,
+    shuffle,
   }
 }

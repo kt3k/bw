@@ -13,9 +13,14 @@ type CommonAction = {
   radius: number
 }
 
+export type Motion = {
+  step(): void
+  finished: boolean
+}
+
 export type PropAction =
   | CommonAction
-  | { type: "break"; dir: Dir }
+  | { type: "break"; dir: Dir; cb?: (motion: Motion) => void }
   | { type: "remove" }
 
 export type ActorAction =
