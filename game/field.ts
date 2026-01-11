@@ -27,16 +27,17 @@ import { CellDefinition, loadCatalog } from "../model/catalog.ts"
 export class FieldItems implements IStepper, ILoader {
   #items: Set<IItem> = new Set()
   #coordMap = {} as Record<string, IItem>
-  #activateScope: RectScope
+  #deactivateScope: RectScope
 
   constructor(scope: RectScope) {
-    this.#activateScope = scope
+    this.#deactivateScope = scope
   }
 
   checkDeactivate(i: number, j: number) {
-    this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
+    this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+
     this.#items.values()
-      .filter((item) => !this.#activateScope.overlaps(item))
+      .filter((item) => !this.#deactivateScope.overlaps(item))
       .forEach((item) => {
         console.log("deactivating item", item.id)
         this.#deactivate(item.i, item.j)
@@ -106,16 +107,17 @@ export class FieldItems implements IStepper, ILoader {
 export class FieldProps implements IStepper, ILoader {
   #props: Set<IProp> = new Set()
   #coordMap = {} as Record<string, IProp>
-  #activateScope: RectScope
+  #deactivateScope: RectScope
 
   constructor(scope: RectScope) {
-    this.#activateScope = scope
+    this.#deactivateScope = scope
   }
 
   checkDeactivate(i: number, j: number) {
-    this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
+    this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+
     this.#props.values()
-      .filter((obj) => !this.#activateScope.overlaps(obj))
+      .filter((obj) => !this.#deactivateScope.overlaps(obj))
       .forEach((obj) => {
         console.log("deactivating object", obj.id)
         this.remove(obj.i, obj.j)
@@ -207,7 +209,7 @@ class CoordCountMap {
 export class FieldActors implements IStepper, ILoader {
   #actors: IActor[] = []
   #coordCountMap = new CoordCountMap()
-  #activateScope: RectScope
+  #deactivateScope: RectScope
   #idSet: Set<string> = new Set()
 
   /**
@@ -219,8 +221,8 @@ export class FieldActors implements IStepper, ILoader {
     return this.#coordCountMap.get(`${i}.${j}`) > 0
   }
 
-  constructor(chars: IActor[] = [], activateScope: RectScope) {
-    this.#activateScope = activateScope
+  constructor(chars: IActor[] = [], deactivateScope: RectScope) {
+    this.#deactivateScope = deactivateScope
     for (const actor of chars) {
       this.add(actor)
     }
@@ -264,10 +266,11 @@ export class FieldActors implements IStepper, ILoader {
   }
 
   checkDeactivate(i: number, j: number) {
-    this.#activateScope.setCenter(CELL_SIZE * i, CELL_SIZE * j)
+    this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+
     const actors = [] as IActor[]
     for (const actor of this.#actors) {
-      if (this.#activateScope.overlaps(actor)) {
+      if (this.#deactivateScope.overlaps(actor)) {
         actors.push(actor)
         continue
       }
@@ -384,6 +387,7 @@ export class Field implements IField {
   #loadScope = new BlockLoadScope()
   #unloadScope = new BlockUnloadScope()
   #activateScope: RectScope
+  #deactivateScope: RectScope
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
   #initialBlocksLoaded = false
   #initialActivateReady = false
@@ -394,12 +398,17 @@ export class Field implements IField {
 
   #time = 0
 
-  constructor(el: HTMLElement, activateScope: RectScope) {
+  constructor(
+    el: HTMLElement,
+    activateScope: RectScope,
+    deactivateScope: RectScope,
+  ) {
     this.#el = el
     this.#activateScope = activateScope
-    this.#actors = new FieldActors([], activateScope)
-    this.#items = new FieldItems(activateScope)
-    this.#props = new FieldProps(activateScope)
+    this.#deactivateScope = deactivateScope
+    this.#actors = new FieldActors([], deactivateScope)
+    this.#items = new FieldItems(deactivateScope)
+    this.#props = new FieldProps(deactivateScope)
   }
 
   get actors() {
@@ -531,6 +540,8 @@ export class Field implements IField {
       initialLoad?: boolean
     },
   ) {
+    this.#activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
+
     const chunks = [...this.#getChunks(i, j)]
     const newCharSpawns = chunks.flatMap((c) => c.getCharacterSpawns())
       .filter((spawn) => !this.#actors.has(spawn.id)) // isn't spawned yet

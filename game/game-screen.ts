@@ -32,6 +32,16 @@ class ActivateScope extends RectScope {
   }
 }
 
+class DeactivateScope extends RectScope {
+  static MARGIN = 22 * CELL_SIZE
+  constructor(screenSize: number) {
+    super(
+      screenSize + DeactivateScope.MARGIN,
+      screenSize + DeactivateScope.MARGIN,
+    )
+  }
+}
+
 const kimiDef = {
   type: "main",
   main: "main",
@@ -74,13 +84,14 @@ export function GameScreen({ el, query }: Context) {
   const charLayer = new DrawLayer(charCanvas, viewScope, { enableNoise: true })
 
   const activateScope = new ActivateScope(screenSize)
+  const deactivateScope = new DeactivateScope(screenSize)
 
-  const field = new Field(query(".field")!, activateScope)
+  const field = new Field(query(".field")!, activateScope, deactivateScope)
   field.actors.add(me)
 
   signal.centerGrid10.subscribe(({ i, j }) => {
-    field.checkBlockLoad(i, j, viewScope)
-    field.checkBlockUnload(i, j)
+    field.checkBlockLoad(me.i, me.j, viewScope)
+    field.checkBlockUnload(me.i, me.j)
   })
 
   signal.centerPixel.subscribe(({ x, y }) => {
