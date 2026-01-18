@@ -498,6 +498,10 @@ export class FieldBlock {
     this.propSpawns = new SpawnMap(map.props)
   }
 
+  get catalog(): Catalog {
+    return this.#map.catalog
+  }
+
   loadCellImage(href: string, options: LoadOptions): Promise<ImageBitmap> {
     return options.loadImage
       ? options.loadImage(href)

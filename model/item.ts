@@ -4,21 +4,12 @@ import { ItemDefinition } from "./catalog.ts"
 import type { IActor, IField, IItem, ItemType, LoadOptions } from "./types.ts"
 import { splashColor } from "../game/field.ts"
 import { seed } from "../util/random.ts"
-import { spawnActor } from "./actor.ts"
-import { loadImage } from "../util/load.ts"
 import { DIRS } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
 
 const fallbackImage = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
-
-const lenaDef = {
-  type: "inertial" as const,
-  moveEnd: "inertial" as const,
-  src: "../actor/lena/",
-  href: "./actor/lena/",
-}
 
 export class Item implements IItem {
   /** The unique identifier of the item. Only items which are spawned from block map have ids. */
@@ -123,16 +114,9 @@ export class CollectApple implements CollectDelegate {
     for (const dir of DIRS) {
       if (dir === actor.dir) continue
       if (!actor.canGo(dir, field)) continue
-      const actor_ = spawnActor(
-        `${actor.i}.${actor.j}.inertial.${crypto.randomUUID()}`,
-        actor.i,
-        actor.j,
-        lenaDef,
-        { dir },
-      )
-      actor_.loadAssets({ loadImage })
-      actor_.enqueueActions({ type: "go", dir })
-      field.actors.add(actor_)
+      const spawned = field.spawnActor("inertial", actor.i, actor.j, dir)
+      if (!spawned) continue
+      spawned.enqueueActions({ type: "go", dir })
     }
 
     const hue = 333.3

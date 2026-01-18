@@ -38,7 +38,7 @@
     "random": {
       "idle": "wander",
       "pushed": "jump",
-      "src": "../actor/joob/"
+      "src": "../actor/lena/"
     },
     "random-rotate": {
       "idle": "random-rotate",
@@ -48,7 +48,7 @@
     "inertial": {
       "moveEnd": "inertial",
       "pushed": "inertial-slide",
-      "src": "../actor/lena/"
+      "src": "../actor/joob/"
     },
     "static": {
       "pushed": "jump",

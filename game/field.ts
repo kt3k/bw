@@ -2,6 +2,7 @@ import * as signal from "../util/signal.ts"
 import { ceilN, floorN } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import type {
+  Dir,
   IActor,
   IField,
   IItem,
@@ -10,7 +11,7 @@ import type {
   IStepper,
   LoadOptions,
 } from "../model/types.ts"
-import { Actor } from "../model/actor.ts"
+import { Actor, spawnActor } from "../model/actor.ts"
 import { Item } from "../model/item.ts"
 import { Prop } from "../model/prop.ts"
 import {
@@ -387,7 +388,6 @@ export class Field implements IField {
   #loadScope = new BlockLoadScope()
   #unloadScope = new BlockUnloadScope()
   #activateScope: RectScope
-  #deactivateScope: RectScope
   #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
   #initialBlocksLoaded = false
   #initialActivateReady = false
@@ -405,7 +405,6 @@ export class Field implements IField {
   ) {
     this.#el = el
     this.#activateScope = activateScope
-    this.#deactivateScope = deactivateScope
     this.#actors = new FieldActors([], deactivateScope)
     this.#items = new FieldItems(deactivateScope)
     this.#props = new FieldProps(deactivateScope)
@@ -483,6 +482,29 @@ export class Field implements IField {
   }
   collectItem(i: number, j: number): void {
     this.#items.collect(i, j)
+  }
+
+  // Spawns a new actor at the given grid coordinate
+  // if the actor type is unavailable in the given block, returns null
+  spawnActor(type: string, i: number, j: number, dir: Dir): IActor | null {
+    const def = this.#getBlock(i, j).catalog.actors[type]
+
+    if (!def) {
+      console.log("Unable to spawn actor of type:", type)
+      return null
+    }
+
+    const actor = spawnActor(
+      `${i}.${j}.${type}.${crypto.randomUUID()}`,
+      i,
+      j,
+      def,
+      { dir },
+    )
+    this.actors.add(actor)
+    actor.loadAssets({ loadImage })
+
+    return actor
   }
 
   #hasBlock(blockId: string) {

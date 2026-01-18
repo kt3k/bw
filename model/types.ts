@@ -50,6 +50,7 @@ export type IField = {
   /** can enter the cell without considering dynamic objects */
   canEnterStatic(i: number, j: number): boolean
   peekItem(i: number, j: number): IItem | undefined
+  spawnActor(type: string, i: number, j: number, dir: Dir): IActor | null
   collectItem(i: number, j: number): void
   actors: {
     iter(): Iterable<IActor>
