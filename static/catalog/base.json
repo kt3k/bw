@@ -91,8 +91,113 @@
       "pushed": "break",
       "canEnter": false
     },
+    "hatena": {
+      "src": "../prop/hatena.png",
+      "pushed": "break",
+      "canEnter": false
+    },
+    "a": {
+      "src": "../prop/a.png",
+      "canEnter": true
+    },
+    "b": {
+      "src": "../prop/b.png",
+      "canEnter": true
+    },
+    "c": {
+      "src": "../prop/c.png",
+      "canEnter": true
+    },
     "d": {
       "src": "../prop/d.png",
+      "canEnter": true
+    },
+    "e": {
+      "src": "../prop/e.png",
+      "canEnter": true
+    },
+    "f": {
+      "src": "../prop/f.png",
+      "canEnter": true
+    },
+    "g": {
+      "src": "../prop/g.png",
+      "canEnter": true
+    },
+    "h": {
+      "src": "../prop/h.png",
+      "canEnter": true
+    },
+    "i": {
+      "src": "../prop/i.png",
+      "canEnter": true
+    },
+    "j": {
+      "src": "../prop/j.png",
+      "canEnter": true
+    },
+    "k": {
+      "src": "../prop/k.png",
+      "canEnter": true
+    },
+    "l": {
+      "src": "../prop/l.png",
+      "canEnter": true
+    },
+    "m": {
+      "src": "../prop/m.png",
+      "canEnter": true
+    },
+    "n": {
+      "src": "../prop/n.png",
+      "canEnter": true
+    },
+    "o": {
+      "src": "../prop/o.png",
+      "canEnter": true
+    },
+    "p": {
+      "src": "../prop/p.png",
+      "canEnter": true
+    },
+    "q": {
+      "src": "../prop/q.png",
+      "canEnter": true
+    },
+    "r": {
+      "src": "../prop/r.png",
+      "canEnter": true
+    },
+    "s": {
+      "src": "../prop/s.png",
+      "canEnter": true
+    },
+    "t": {
+      "src": "../prop/t.png",
+      "canEnter": true
+    },
+    "u": {
+      "src": "../prop/u.png",
+      "canEnter": true
+    },
+    "v": {
+      "src": "../prop/v.png",
+      "canEnter": true
+    },
+    "w": {
+      "src": "../prop/w.png",
+      "canEnter": true
+    },
+    "x": {
+      "src": "../prop/x.png",
+      "canEnter": true
+    },
+    "y": {
+      "src": "../prop/y.png",
+      "canEnter": true
+    },
+    "z": {
+      "src": "../prop/z.png",
       "canEnter": true
     }
   }

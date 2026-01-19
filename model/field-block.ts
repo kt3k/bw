@@ -1,6 +1,6 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
-import { randomInt, seed } from "../util/random.ts"
+import { seed } from "../util/random.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { loadImage } from "../util/load.ts"
 import type { Dir, IBox } from "./types.ts"
@@ -366,7 +366,8 @@ export function drawCellColor(
   )
 }
 
-const ENABLE_AMBIENT_CELL_COLOR = false
+const ENABLE_AMBIENT_CELL_COLOR_FIELD = false
+const ENABLE_AMBIENT_CELL_COLOR_WALL = false
 const ENABLE_AMBIENT_CELL_NOISE = true
 
 /** Draws a cell on the canvas */
@@ -383,22 +384,6 @@ export function drawCell(
     localI * CELL_SIZE,
     localJ * CELL_SIZE,
   )
-  if (ENABLE_AMBIENT_CELL_COLOR) {
-    const { rng } = seed(`${i}.${j}`)
-    let color: string
-    if (cell.canEnter) {
-      color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
-    } else {
-      color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
-    }
-    wrapper.drawRect(
-      localI * CELL_SIZE,
-      localJ * CELL_SIZE,
-      CELL_SIZE,
-      CELL_SIZE,
-      color,
-    )
-  }
   if (ENABLE_AMBIENT_CELL_NOISE) {
     const { randomInt } = seed(`${i}.${j}`)
     const width = randomInt(3) + 1
@@ -410,6 +395,28 @@ export function drawCell(
       localJ * CELL_SIZE + y,
       width,
       1,
+      color,
+    )
+  }
+  if (ENABLE_AMBIENT_CELL_COLOR_FIELD && cell.canEnter) {
+    const { rng } = seed(`${i}.${j}`)
+    const color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
+    wrapper.drawRect(
+      localI * CELL_SIZE,
+      localJ * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE,
+      color,
+    )
+  }
+  if (ENABLE_AMBIENT_CELL_COLOR_WALL && !cell.canEnter) {
+    const { rng } = seed(`${i}.${j}`)
+    const color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
+    wrapper.drawRect(
+      localI * CELL_SIZE,
+      localJ * CELL_SIZE,
+      CELL_SIZE,
+      CELL_SIZE,
       color,
     )
   }
