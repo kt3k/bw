@@ -215,6 +215,7 @@ class ToolManager {
       0,
       tool.type as any,
       tool.def,
+      null,
     )
   }
 
@@ -375,7 +376,7 @@ function createCanvasFromImageData(imageData: ImageData) {
   const canvas = ht.canvas({
     width: imageData.width,
     height: imageData.height,
-    class: "absolute top-0 left-0",
+    class: "absolute top-0 left-0 crisp-edges",
   })
   const ctx = canvas.getContext("2d")!
   ctx.putImageData(imageData, 0, 0)
@@ -395,7 +396,7 @@ async function CanvasLayers({ el }: Context) {
   cellsCanvas.style.left = SIDE_CANVAS_SIZE + "px"
   cellsCanvas.style.top = SIDE_CANVAS_SIZE + "px"
   cellsCanvas.style.position = "absolute"
-  cellsCanvas.classList.add("field-cells-canvas")
+  cellsCanvas.classList.add("field-cells-canvas", "crisp-edges")
   el.appendChild(cellsCanvas)
   block.renderAll()
   mount("field-cells-canvas", el)
@@ -404,7 +405,7 @@ async function CanvasLayers({ el }: Context) {
     width: CANVAS_SIZE,
     height: CANVAS_SIZE,
     style: `left: ${SIDE_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px;`,
-    class: "absolute field-objects-canvas pointer-events-none",
+    class: "absolute field-objects-canvas pointer-events-none crisp-edges",
   })
   el.appendChild(objectsCanvas)
   mount("field-objects-canvas", el)

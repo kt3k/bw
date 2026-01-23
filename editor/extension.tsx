@@ -32,10 +32,18 @@ function resolveCustomTextEditor(
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link href={u("out/style.css")} rel="stylesheet" />
+        <style>
+          {`
+          .crisp-edges {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+          }
+        `}
+        </style>
       </head>
       <body class="key-handler p-0">
-        <div class="canvas-layers relative mt-10 w-[calc(3360px+196px)]"></div>
-        <div class="toolbox h-10 px-2 fixed left-0 top-0 flex items-center bg-neutral-900/50 w-[calc(100%-12rem)]">
+        <div class="canvas-layers relative mt-20 w-[calc(3360px+196px)]"></div>
+        <div class="toolbox px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100%-12rem)]">
           <div class="ml-2 group relative">
             <span class="mode-indicator">dot</span>
             <span class="
@@ -71,7 +79,7 @@ function resolveCustomTextEditor(
             </div>
           </div>
         </div>
-        <script src={u("out/webview.js")} type="module"></script>
+        <script src={u("out/editor.js")} type="module"></script>
       </body>
     </html>
   )
