@@ -89,7 +89,7 @@ export function GameScreen({ el, query }: Context) {
   const field = new Field(query(".field")!, activateScope, deactivateScope)
   field.actors.add(me)
 
-  signal.centerGrid10.subscribe(({ i, j }) => {
+  signal.centerGrid10.subscribe(() => {
     field.checkBlockLoad(me.i, me.j, viewScope)
     field.checkBlockUnload(me.i, me.j)
   })

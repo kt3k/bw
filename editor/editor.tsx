@@ -213,6 +213,7 @@ class ToolManager {
       null,
       0,
       0,
+      // deno-lint-ignore no-explicit-any
       tool.type as any,
       tool.def,
       null,
@@ -312,7 +313,7 @@ function updateDocument(b: FieldBlock) {
 const SWITCH_ACTIVE = "bg-cyan-400"
 const SWITCH_ACTIVE_CANVAS = "opacity-70"
 
-async function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
+function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
   subscribe(currentTool, (tool) => {
     for (const child of Array.from(el.children)) {
       const firstChild = child.firstElementChild
@@ -569,6 +570,7 @@ function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   })
 }
 
+/*
 function FieldActorsCanvas(
   { on, el, subscribe }: Context<HTMLCanvasElement>,
 ) {
@@ -578,6 +580,7 @@ function FieldActorsCanvas(
 function FieldItemsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
   const canvasWrapper = new CanvasWrapper(el)
 }
+*/
 
 function FieldPropCanvas(
   { el, on, subscribe }: Context<HTMLCanvasElement>,
@@ -609,6 +612,7 @@ function FieldPropCanvas(
         new PropSpawnInfo(
           i,
           j,
+          // deno-lint-ignore no-explicit-any
           tool.type as any,
           tool.def,
         ),

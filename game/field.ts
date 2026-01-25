@@ -673,7 +673,7 @@ export function splashColor(
   light: number,
   alpha: number = 0.40,
   radius: number = 2,
-  rng: () => number = Math.random,
+  _rng: () => number = Math.random,
 ): void {
   if (radius < 1) {
     return
