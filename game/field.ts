@@ -59,8 +59,7 @@ export class FieldItems implements IStepper, ILoader {
 
   checkDeactivate(i: number, j: number) {
     this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-
-    this.#items.values()
+    ;[...this.#items.values()]
       .filter((item) => !this.#deactivateScope.overlaps(item))
       .forEach((item) => {
         console.log("deactivating item", item.id)
@@ -139,8 +138,7 @@ export class FieldProps implements IStepper, ILoader {
 
   checkDeactivate(i: number, j: number) {
     this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-
-    this.#props.values()
+    ;[...this.#props.values()]
       .filter((obj) => !this.#deactivateScope.overlaps(obj))
       .forEach((obj) => {
         console.log("deactivating object", obj.id)
@@ -559,7 +557,7 @@ export class Field implements IField {
     }
     const initialLoad = !this.#initialBlocksLoaded
     await Promise.all(
-      this.#getChunks(i, j).map((c) => c.render(initialLoad)).toArray(),
+      [...this.#getChunks(i, j)].map((c) => c.render(initialLoad)),
     )
     if (!this.#initialBlocksLoaded) {
       this.#initialBlocksLoaded = true
