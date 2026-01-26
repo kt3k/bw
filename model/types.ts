@@ -19,6 +19,10 @@ export type IBox = {
   get h(): number
 }
 
+export type IColorBox = IBox & {
+  color: string
+}
+
 export type IEntity = IBox & ILoader & {
   i: number
   j: number
@@ -62,12 +66,19 @@ export type IField = {
     get(i: number, j: number): IProp | undefined
     remove(i: number, j: number): void
   }
+  effects: {
+    add(effect: IColorBox & IStepper & IFinishable): void
+  }
   get time(): number
   colorCell(i: number, j: number, color: string): void
 }
 
 /** The implementor of 'step' function */
 export type IStepper = { step(field: IField): void }
+
+export type IFinishable = {
+  readonly finished: boolean
+}
 
 export type FieldEvent = {
   type: "bounced"

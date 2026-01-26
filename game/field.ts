@@ -4,7 +4,9 @@ import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import type {
   Dir,
   IActor,
+  IColorBox,
   IField,
+  IFinishable,
   IItem,
   ILoader,
   IProp,
@@ -23,6 +25,27 @@ import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
 import { DIRS, nextGrid } from "../util/dir.ts"
 import { CellDefinition, loadCatalog } from "../model/catalog.ts"
+
+class FieldEffects implements IStepper {
+  #effects = new Set<IStepper & IColorBox & IFinishable>()
+
+  step(field: IField): void {
+    for (const effect of this.#effects) {
+      effect.step(field)
+      if (effect.finished) {
+        this.#effects.delete(effect)
+      }
+    }
+  }
+
+  add(effect: IStepper & IColorBox & IFinishable) {
+    this.#effects.add(effect)
+  }
+
+  iter() {
+    return this.#effects[Symbol.iterator]()
+  }
+}
 
 /** The items on the field */
 export class FieldItems implements IStepper, ILoader {
@@ -395,6 +418,7 @@ export class Field implements IField {
   #actors: FieldActors
   #items: FieldItems
   #props: FieldProps
+  #effects: FieldEffects
 
   #time = 0
 
@@ -408,6 +432,7 @@ export class Field implements IField {
     this.#actors = new FieldActors([], deactivateScope)
     this.#items = new FieldItems(deactivateScope)
     this.#props = new FieldProps(deactivateScope)
+    this.#effects = new FieldEffects()
   }
 
   get actors() {
@@ -420,6 +445,10 @@ export class Field implements IField {
 
   get props() {
     return this.#props
+  }
+
+  get effects() {
+    return this.#effects
   }
 
   /** The current time in the field */
@@ -469,6 +498,7 @@ export class Field implements IField {
     this.#actors.step(this)
     this.#items.step(this)
     this.#props.step(this)
+    this.#effects.step(this)
   }
   canEnter(i: number, j: number): boolean {
     return this.#getCell(i, j).canEnter && !this.#actors.checkCollision(i, j) &&

@@ -1,6 +1,6 @@
 import { CanvasWrapper } from "../util/canvas-wrapper.ts"
 import { type RectScope } from "../util/rect-scope.ts"
-import type { IEntity } from "../model/types.ts"
+import type { IColorBox, IEntity } from "../model/types.ts"
 import { randomInt } from "../util/random.ts"
 
 export class DrawLayer {
@@ -24,10 +24,24 @@ export class DrawLayer {
     )
   }
 
-  drawIterable(iterable: Iterable<IEntity>): void {
+  drawIterableEntity(iterable: Iterable<IEntity>): void {
     for (const obj of iterable) {
       if (this.#viewScope.overlaps(obj)) {
         this.draw(obj)
+      }
+    }
+  }
+
+  drawIterableColorBox(iterable: Iterable<IColorBox>): void {
+    for (const obj of iterable) {
+      if (this.#viewScope.overlaps(obj)) {
+        this.#canvasWrapper.ctx.fillStyle = obj.color
+        this.#canvasWrapper.ctx.fillRect(
+          obj.x - this.#viewScope.left,
+          obj.y - this.#viewScope.top,
+          obj.w,
+          obj.h,
+        )
       }
     }
   }

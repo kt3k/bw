@@ -6,6 +6,7 @@ import { splashColor } from "../game/field.ts"
 import { seed } from "../util/random.ts"
 import { DIRS } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
+import { EffectLine } from "./effect.ts"
 
 const fallbackImage = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",
@@ -142,7 +143,43 @@ export class CollectApple implements CollectDelegate {
 export class CollectGreenApple implements CollectDelegate {
   onCollect(actor: IActor, field: IField, _item: Item): void {
     field.collectItem(actor.i, actor.j)
+    const baseX = _item.i * CELL_SIZE
+    const baseY = _item.j * CELL_SIZE
 
+    for (const dir of DIRS) {
+      for (const i of Array(5).keys()) {
+        let dx = 0, dy = 0, offsetX = 0, offsetY = 0
+        switch (dir) {
+          case "up":
+            dx = 4
+            break
+          case "down":
+            dx = 4
+            offsetY = CELL_SIZE
+            break
+          case "left":
+            dy = 4
+            break
+          case "right":
+            dy = 4
+            offsetX = CELL_SIZE
+            break
+        }
+        const speed = 1 + (2 - Math.abs(i - 2)) * 0.7
+        field.effects.add(
+          new EffectLine(
+            offsetX + baseX + dx * i,
+            offsetY + baseY + dy * i,
+            dir,
+            "#4a4d4a",
+            CELL_SIZE,
+            16 * 3 / speed,
+            speed,
+          ),
+        )
+      }
+    }
+    /*
     const hue = 113.1
     const sat = 40.4
     const light = 32
@@ -158,6 +195,7 @@ export class CollectGreenApple implements CollectDelegate {
       4,
       seed(actor.i + " " + actor.j).rng,
     )
+      */
 
     const count = signal.greenAppleCount.get()
     signal.greenAppleCount.update(count + 1)

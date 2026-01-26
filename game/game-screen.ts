@@ -10,9 +10,9 @@ import { Field } from "./field.ts"
 import { Actor } from "../model/actor.ts"
 
 /** The starting X coordinate */
-const I = 32
+const I = 45
 /** The starting Y coordinate */
-const J = 40
+const J = 43
 
 /**
  * The area which is visible to the user
@@ -111,9 +111,10 @@ export function GameScreen({ el, query }: Context) {
     signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
     entityLayer.clear()
-    entityLayer.drawIterable(field.props.iter())
-    entityLayer.drawIterable(field.items.iter())
-    entityLayer.drawIterable(field.actors.iter())
+    entityLayer.drawIterableEntity(field.props.iter())
+    entityLayer.drawIterableEntity(field.items.iter())
+    entityLayer.drawIterableEntity(field.actors.iter())
+    entityLayer.drawIterableColorBox(field.effects.iter())
     entityLayer.drawWhiteNoise()
 
     if (i % 300 === 299) {
