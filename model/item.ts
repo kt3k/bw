@@ -179,24 +179,6 @@ export class CollectGreenApple implements CollectDelegate {
         )
       }
     }
-    /*
-    const hue = 113.1
-    const sat = 40.4
-    const light = 32
-    const alpha = 0.40
-    splashColor(
-      field,
-      actor.i,
-      actor.j,
-      hue,
-      sat,
-      light,
-      alpha,
-      4,
-      seed(actor.i + " " + actor.j).rng,
-    )
-      */
-
     const count = signal.greenAppleCount.get()
     signal.greenAppleCount.update(count + 1)
   }
