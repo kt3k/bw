@@ -7,16 +7,13 @@ export class DrawLayer {
   #canvasWrapper: CanvasWrapper
   #viewScope: RectScope
   #noiseCount = 0
-  #enableNoise: boolean
 
   constructor(
     canvas: HTMLCanvasElement,
     viewScope: RectScope,
-    options: { enableNoise?: boolean } = {},
   ) {
     this.#canvasWrapper = new CanvasWrapper(canvas)
     this.#viewScope = viewScope
-    this.#enableNoise = options.enableNoise ?? false
   }
 
   draw(obj: IEntity): void {
@@ -28,14 +25,10 @@ export class DrawLayer {
   }
 
   drawIterable(iterable: Iterable<IEntity>): void {
-    this.#canvasWrapper.clear()
     for (const obj of iterable) {
       if (this.#viewScope.overlaps(obj)) {
         this.draw(obj)
       }
-    }
-    if (this.#enableNoise) {
-      this.drawWhiteNoise()
     }
   }
 

@@ -50,18 +50,12 @@ const kimiDef = {
 }
 
 export function GameScreen({ el, query }: Context) {
-  const charCanvas = query<HTMLCanvasElement>(".canvas-chars")!
-  const itemCanvas = query<HTMLCanvasElement>(".canvas-items")!
-  const objectCanvas = query<HTMLCanvasElement>(".canvas-objects")!
+  const entityCanvas = query<HTMLCanvasElement>(".canvas-entity")!
 
   const screenSize = Math.min(globalThis.screen.width, 450)
 
-  charCanvas.width = screenSize
-  charCanvas.height = screenSize
-  itemCanvas.width = screenSize
-  itemCanvas.height = screenSize
-  objectCanvas.width = screenSize
-  objectCanvas.height = screenSize
+  entityCanvas.width = screenSize
+  entityCanvas.height = screenSize
   el.style.width = screenSize + "px"
   el.style.height = screenSize + "px"
 
@@ -79,9 +73,7 @@ export function GameScreen({ el, query }: Context) {
 
   const viewScope = new ViewScope(screenSize, screenSize)
 
-  const objectLayer = new DrawLayer(objectCanvas, viewScope)
-  const itemLayer = new DrawLayer(itemCanvas, viewScope)
-  const charLayer = new DrawLayer(charCanvas, viewScope, { enableNoise: true })
+  const entityLayer = new DrawLayer(entityCanvas, viewScope)
 
   const activateScope = new ActivateScope(screenSize)
   const deactivateScope = new DeactivateScope(screenSize)
@@ -118,9 +110,11 @@ export function GameScreen({ el, query }: Context) {
     field.step()
     signal.centerPixel.update({ x: me.centerX, y: me.centerY })
 
-    itemLayer.drawIterable(field.items.iter())
-    charLayer.drawIterable(field.actors.iter())
-    objectLayer.drawIterable(field.props.iter())
+    entityLayer.clear()
+    entityLayer.drawIterable(field.props.iter())
+    entityLayer.drawIterable(field.items.iter())
+    entityLayer.drawIterable(field.actors.iter())
+    entityLayer.drawWhiteNoise()
 
     if (i % 300 === 299) {
       field.actors.checkDeactivate(me.i, me.j)
