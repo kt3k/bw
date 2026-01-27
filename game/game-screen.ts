@@ -10,9 +10,9 @@ import { Field } from "./field.ts"
 import { Actor } from "../model/actor.ts"
 
 /** The starting X coordinate */
-const I = 45
+const I = 58
 /** The starting Y coordinate */
-const J = 43
+const J = 49
 
 /**
  * The area which is visible to the user

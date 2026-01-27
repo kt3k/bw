@@ -168,3 +168,13 @@ export type Action =
     readonly alpha: number
     readonly radius: number
   }
+  | {
+    readonly type: "line-pattern-0"
+    readonly dirs: readonly Dir[]
+    readonly baseSpeed: number
+    readonly p0: number
+    readonly dist: number
+    readonly color: string
+    readonly offsetI?: number
+    readonly offsetJ?: number
+  }

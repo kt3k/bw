@@ -1,5 +1,6 @@
 import type { Dir, IEntity, IField, MoveAction } from "./types.ts"
 import { splashColor } from "../game/field.ts"
+import { linePattern0 } from "./effect.ts"
 
 type CommonAction = {
   type: "wait"
@@ -11,6 +12,15 @@ type CommonAction = {
   light: number
   alpha: number
   radius: number
+} | {
+  type: "line-pattern-0"
+  dirs: readonly Dir[]
+  baseSpeed: number
+  p0: number
+  dist: number
+  color: string
+  offsetI?: number
+  offsetJ?: number
 }
 
 export type Motion = {
@@ -106,6 +116,23 @@ export class ActionQueue<
             action.radius,
             () => 1,
           )
+          break
+        }
+        case "line-pattern-0": {
+          console.log("offset", action.offsetI, action.offsetJ)
+          for (
+            const effect of linePattern0(
+              action.dirs,
+              entity.i + (action.offsetI ?? 0),
+              entity.j + (action.offsetJ ?? 0),
+              action.baseSpeed,
+              action.p0,
+              action.dist,
+              action.color,
+            )
+          ) {
+            field.effects.add(effect)
+          }
           break
         }
         default: {

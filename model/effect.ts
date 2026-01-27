@@ -1,3 +1,4 @@
+import { CELL_SIZE } from "../util/constants.ts"
 import type { Dir, IColorBox, IField, IFinishable, IStepper } from "./types.ts"
 
 export class EffectLine implements IColorBox, IFinishable, IStepper {
@@ -18,7 +19,7 @@ export class EffectLine implements IColorBox, IFinishable, IStepper {
     startX: number,
     startY: number,
     dir: Dir,
-    public color: string,
+    public readonly color: string,
     length: number,
     duration: number,
     speed: number = 1,
@@ -75,4 +76,52 @@ export class EffectLine implements IColorBox, IFinishable, IStepper {
   get finished(): boolean {
     return this.#duration <= 0
   }
+}
+
+export function linePattern0(
+  dirs: readonly Dir[],
+  i: number,
+  j: number,
+  baseSpeed: number,
+  p0: number,
+  dist: number,
+  color: string,
+): EffectLine[] {
+  const baseX = i * CELL_SIZE
+  const baseY = j * CELL_SIZE
+  const effects: EffectLine[] = []
+  for (const dir of dirs) {
+    for (const i of Array(5).keys()) {
+      let dx = 0, dy = 0, offsetX = 0, offsetY = 0
+      switch (dir) {
+        case "up":
+          dx = 4
+          break
+        case "down":
+          dx = 4
+          offsetY = CELL_SIZE
+          break
+        case "left":
+          dy = 4
+          break
+        case "right":
+          dy = 4
+          offsetX = CELL_SIZE
+          break
+      }
+      const speed = baseSpeed + (2 - Math.abs(i - 2)) * p0
+      effects.push(
+        new EffectLine(
+          offsetX + baseX + dx * i,
+          offsetY + baseY + dy * i,
+          dir,
+          color,
+          CELL_SIZE,
+          16 * dist / speed,
+          speed,
+        ),
+      )
+    }
+  }
+  return effects
 }

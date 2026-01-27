@@ -25,6 +25,7 @@ import type {
 import { ActorDefinition } from "./catalog.ts"
 import { ActionQueue, type ActorAction } from "./action-queue.ts"
 import { ActorSpawnInfo } from "./field-block.ts"
+import { linePattern0 } from "./effect.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -614,17 +615,27 @@ export class Actor implements IActor {
   }
 
   onPushed(event: PushedEvent, field: IField): void {
-    splashColor(
-      field,
-      this.i,
-      this.j,
-      120,
-      30,
-      0,
-      0.001,
-      2,
-      seed(this.#physicalGridKey).rng,
-    )
+    let i = this.i, j = this.j
+    switch (event.dir) {
+      case "up":
+        j++
+        break
+      case "down":
+        j--
+        break
+      case "left":
+        i++
+        break
+      case "right":
+        i--
+        break
+    }
+    for (
+      const effect of linePattern0([event.dir], i, j, 1, 0.3, 3, "white")
+    ) {
+      field.effects.add(effect)
+    }
+
     if (this.#move) {
       this.unshiftActions({ type: "slide", dir: event.dir })
     } else {

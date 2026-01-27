@@ -1,12 +1,19 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import { Actor } from "./actor.ts"
 import { ItemDefinition } from "./catalog.ts"
-import type { IActor, IField, IItem, ItemType, LoadOptions } from "./types.ts"
+import type {
+  Dir,
+  IActor,
+  IField,
+  IItem,
+  ItemType,
+  LoadOptions,
+} from "./types.ts"
 import { splashColor } from "../game/field.ts"
 import { seed } from "../util/random.ts"
 import { DIRS } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
-import { EffectLine } from "./effect.ts"
+import { linePattern0 } from "./effect.ts"
 
 const fallbackImage = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",
@@ -112,29 +119,22 @@ interface CollectDelegate {
 export class CollectApple implements CollectDelegate {
   onCollect(actor: IActor, field: IField, _item: Item): void {
     field.collectItem(actor.i, actor.j)
+    const dirs = [] as Dir[]
     for (const dir of DIRS) {
       if (dir === actor.dir) continue
       if (!actor.canGo(dir, field)) continue
       const spawned = field.spawnActor("inertial", actor.i, actor.j, dir)
       if (!spawned) continue
       spawned.enqueueActions({ type: "go", dir })
+      dirs.push(dir)
     }
 
-    const hue = 333.3
-    const sat = 59.4
-    const light = 32
-    const alpha = 0.40
-    splashColor(
-      field,
-      actor.i,
-      actor.j,
-      hue,
-      sat,
-      light,
-      alpha,
-      4,
-      seed(actor.i + " " + actor.j).rng,
-    )
+    for (
+      const effect of linePattern0(dirs, actor.i, actor.j, 1, 1, 2, "#4a4d4a")
+    ) {
+      field.effects.add(effect)
+    }
+
     const count = signal.appleCount.get()
     signal.appleCount.update(count + 1)
   }
@@ -143,42 +143,13 @@ export class CollectApple implements CollectDelegate {
 export class CollectGreenApple implements CollectDelegate {
   onCollect(actor: IActor, field: IField, _item: Item): void {
     field.collectItem(actor.i, actor.j)
-    const baseX = _item.i * CELL_SIZE
-    const baseY = _item.j * CELL_SIZE
 
-    for (const dir of DIRS) {
-      for (const i of Array(5).keys()) {
-        let dx = 0, dy = 0, offsetX = 0, offsetY = 0
-        switch (dir) {
-          case "up":
-            dx = 4
-            break
-          case "down":
-            dx = 4
-            offsetY = CELL_SIZE
-            break
-          case "left":
-            dy = 4
-            break
-          case "right":
-            dy = 4
-            offsetX = CELL_SIZE
-            break
-        }
-        const speed = 1 + (2 - Math.abs(i - 2)) * 0.7
-        field.effects.add(
-          new EffectLine(
-            offsetX + baseX + dx * i,
-            offsetY + baseY + dy * i,
-            dir,
-            "#4a4d4a",
-            CELL_SIZE,
-            16 * 3 / speed,
-            speed,
-          ),
-        )
-      }
+    for (
+      const effect of linePattern0(DIRS, actor.i, actor.j, 1, 0.7, 3, "#4a4d4a")
+    ) {
+      field.effects.add(effect)
     }
+
     const count = signal.greenAppleCount.get()
     signal.greenAppleCount.update(count + 1)
   }
@@ -226,14 +197,37 @@ export class CollectPurpleMushroom implements CollectDelegate {
         { type: "jump" },
       )
     }
+    let dirs = [] as Dir[], offsetI = 0, offsetJ = 0
+    const offset = 2
+    switch (actor.dir) {
+      case "up":
+        dirs = ["down"]
+        offsetJ = -1 * offset
+        break
+      case "down":
+        dirs = ["up"]
+        offsetJ = 1 * offset
+        break
+      case "left":
+        dirs = ["right"]
+        offsetI = -1 * offset
+        break
+      case "right":
+        dirs = ["left"]
+        offsetI = 1 * offset
+        break
+    }
+
     for (const _ of Array(30)) {
       actor.enqueueActions({
-        type: "splash",
-        hue: 280,
-        sat: 40,
-        light: 30,
-        alpha: 0.2,
-        radius: 3,
+        type: "line-pattern-0",
+        dirs,
+        baseSpeed: 1.3,
+        p0: 0.4,
+        dist: 3,
+        color: "#951fa9",
+        offsetI,
+        offsetJ,
       }, {
         type: "go",
         dir: actor.dir,
