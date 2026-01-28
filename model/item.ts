@@ -130,7 +130,7 @@ export class CollectApple implements CollectDelegate {
     }
 
     for (
-      const effect of linePattern0(dirs, actor.i, actor.j, 1, 1, 2, "#4a4d4a")
+      const effect of linePattern0(dirs, actor.i, actor.j, 1, 1, 2, "#5a0019")
     ) {
       field.effects.add(effect)
     }
@@ -145,7 +145,7 @@ export class CollectGreenApple implements CollectDelegate {
     field.collectItem(actor.i, actor.j)
 
     for (
-      const effect of linePattern0(DIRS, actor.i, actor.j, 1, 0.7, 3, "#4a4d4a")
+      const effect of linePattern0(DIRS, actor.i, actor.j, 1, 0.7, 3, "#004000")
     ) {
       field.effects.add(effect)
     }
@@ -225,7 +225,7 @@ export class CollectPurpleMushroom implements CollectDelegate {
         baseSpeed: 1.3,
         p0: 0.4,
         dist: 3,
-        color: "#951fa9",
+        color: "#540056", //"#951fa9",
         offsetI,
         offsetJ,
       }, {

@@ -9,10 +9,9 @@ import { RectScope } from "../util/rect-scope.ts"
 import { Field } from "./field.ts"
 import { Actor } from "../model/actor.ts"
 
-/** The starting X coordinate */
-const I = 58
-/** The starting Y coordinate */
-const J = 49
+// The starting position of the main character
+const I = 63
+const J = 10
 
 /**
  * The area which is visible to the user
