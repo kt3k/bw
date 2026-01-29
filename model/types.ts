@@ -107,6 +107,7 @@ export type IActor =
     get dir(): Dir
     canGo(dir: Dir, field: IField): boolean
     enqueueActions(...actions: Action[]): void
+    unshiftActions(...actions: Action[]): void
     clearActionQueue(): void
   }
 
@@ -146,8 +147,18 @@ export type MoveAction =
 
 export type Action =
   | MoveAction
-  | { readonly type: "go-random" }
-  | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
+  | {
+    readonly type: "go-random"
+  }
+  | {
+    readonly type: "speed"
+    readonly change: "2x" | "4x" | "reset"
+  }
+  | {
+    readonly type: "speed-timeout"
+    readonly timeout: number
+    readonly cb?: () => void
+  }
   | {
     readonly type: "turn"
     readonly dir:
@@ -159,7 +170,10 @@ export type Action =
       | "right"
       | "back"
   }
-  | { readonly type: "wait"; readonly until: number }
+  | {
+    readonly type: "wait"
+    readonly until: number
+  }
   | {
     readonly type: "splash"
     readonly hue: number
@@ -177,4 +191,13 @@ export type Action =
     readonly color: string
     readonly offsetI?: number
     readonly offsetJ?: number
+  }
+  | {
+    readonly type: "add-buff"
+    readonly buff: string
+    readonly value?: unknown
+  }
+  | {
+    readonly type: "remove-buff"
+    readonly buff: string
   }

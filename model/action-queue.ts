@@ -39,6 +39,11 @@ export type ActorAction =
   | { readonly type: "go-random" }
   | { readonly type: "speed"; readonly change: "2x" | "4x" | "reset" }
   | {
+    readonly type: "speed-timeout"
+    readonly timeout: number
+    readonly cb?: () => void
+  }
+  | {
     readonly type: "turn"
     readonly dir:
       | "north"
@@ -48,6 +53,15 @@ export type ActorAction =
       | "left"
       | "right"
       | "back"
+  }
+  | {
+    type: "add-buff"
+    buff: string
+    value?: unknown
+  }
+  | {
+    type: "remove-buff"
+    buff: string
   }
 
 export class ActionQueue<
@@ -119,7 +133,6 @@ export class ActionQueue<
           break
         }
         case "line-pattern-0": {
-          console.log("offset", action.offsetI, action.offsetJ)
           for (
             const effect of linePattern0(
               action.dirs,

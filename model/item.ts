@@ -9,8 +9,6 @@ import type {
   ItemType,
   LoadOptions,
 } from "./types.ts"
-import { splashColor } from "../game/field.ts"
-import { seed } from "../util/random.ts"
 import { DIRS } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
 import { linePattern0 } from "./effect.ts"
@@ -158,27 +156,18 @@ export class CollectGreenApple implements CollectDelegate {
 export class CollectMushroom implements CollectDelegate {
   onCollect(actor: IActor, field: IField, _item: Item): void {
     field.collectItem(actor.i, actor.j)
-
-    const hue = 21.3
-    const sat = 40.4
-    const light = 32
-    const alpha = 0.40
-    splashColor(
-      field,
-      actor.i,
-      actor.j,
-      hue,
-      sat,
-      light,
-      alpha,
-      4,
-      seed(actor.i + " " + actor.j).rng,
-    )
-
     actor.clearActionQueue()
     actor.enqueueActions(
       { type: "jump" },
       { type: "speed", change: "2x" },
+      { type: "add-buff", buff: "mushroom" },
+      {
+        type: "speed-timeout",
+        timeout: 15000,
+        cb: () => {
+          actor.unshiftActions({ type: "remove-buff", buff: "mushroom" })
+        },
+      },
     )
   }
 }

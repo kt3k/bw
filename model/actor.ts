@@ -9,7 +9,6 @@ import {
   turnRight,
   UP,
 } from "../util/dir.ts"
-import { splashColor } from "../game/field.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
 import type {
@@ -255,12 +254,27 @@ export class Actor implements IActor {
   #def: ActorDefinition
   /** The images necessary to render this actor */
   #assets?: ActorAssets
+  /** The timer for speed up actions */
+  #speedUpTimer: ReturnType<typeof setTimeout> | undefined
+  /** The callback when speed up times out */
+  #speedUpCb?: () => void
+  /** The move of the actor */
+  #move: Move | null = null
+  /** MoveEnd delegate */
+  #moveEnd: MoveEndDelegate | null
+  /** Idle delegate */
+  #idle: IdleDelegate | null
+  /** buff labels */
+  buff: Record<string, unknown> = { __proto__: null }
+
   /** The queue of actions to be performed */
   #actionQueue: ActionQueue<Actor, ActorAction> = new ActionQueue(
     (field, action) => {
       switch (action.type) {
         case "speed": {
           clearTimeout(this.#speedUpTimer)
+          this.#speedUpCb?.()
+          this.#speedUpCb = undefined
           switch (action.change) {
             case "2x":
               this.speed = 2
@@ -274,14 +288,18 @@ export class Actor implements IActor {
             default:
               action.change satisfies never
           }
-          if (action.change !== "reset") {
-            this.#speedUpTimer = setTimeout(() => {
-              this.enqueueActions(
-                { type: "speed", change: "reset" },
-                { type: "jump" },
-              )
-            }, 15000)
-          }
+          return "next"
+        }
+        case "speed-timeout": {
+          this.#speedUpTimer = setTimeout(() => {
+            this.enqueueActions(
+              { type: "speed", change: "reset" },
+              { type: "jump" },
+            )
+            this.#speedUpCb?.()
+          }, action.timeout)
+          this.#speedUpCb?.()
+          this.#speedUpCb = action.cb
           return "next"
         }
         case "turn": {
@@ -329,6 +347,16 @@ export class Actor implements IActor {
           this.jump(action.cb)
           return "end"
         }
+        case "add-buff": {
+          console.trace("add-buff")
+          this.buff[action.buff] = "value" in action ? action.value : true
+          return "next"
+        }
+        case "remove-buff": {
+          console.trace("remove-buff")
+          delete this.buff[action.buff]
+          return "next"
+        }
         default: {
           action satisfies never
           throw new Error("Unreachable")
@@ -336,14 +364,6 @@ export class Actor implements IActor {
       }
     },
   )
-  /** The timer for speed up actions */
-  #speedUpTimer: ReturnType<typeof setTimeout> | undefined
-  /** The move of the actor */
-  #move: Move | null = null
-  /** MoveEnd delegate */
-  #moveEnd: MoveEndDelegate | null
-  /** Idle delegate */
-  #idle: IdleDelegate | null
 
   static fromSpawn(spawn: ActorSpawnInfo): Actor {
     return spawnActor(spawn.id, spawn.i, spawn.j, spawn.def, {

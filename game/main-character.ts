@@ -5,21 +5,45 @@ import {
   type IdleDelegate,
   type MoveEndDelegate,
 } from "../model/actor.ts"
-import type { IField, Move } from "../model/types.ts"
+import { opposite } from "../util/dir.ts"
+import type { Dir, IField, Move } from "../model/types.ts"
+import { linePattern0 } from "../model/effect.ts"
+
+const mushroomEffect = function (
+  actor: Actor,
+  dir: Dir,
+) {
+  return linePattern0(
+    [dir],
+    actor.i,
+    actor.j,
+    1,
+    0.5,
+    2,
+    "#AA0000",
+  )
+}
 
 export class IdleMainActor implements IdleDelegate {
   onIdle(actor: Actor, field: IField): void {
+    let dir: Dir | null = null
     if (Input.up) {
-      actor.tryMove("go", UP, field)
-      return
+      dir = UP
     } else if (Input.down) {
-      actor.tryMove("go", DOWN, field)
-      return
+      dir = DOWN
     } else if (Input.left) {
-      actor.tryMove("go", LEFT, field)
-      return
+      dir = LEFT
     } else if (Input.right) {
-      actor.tryMove("go", RIGHT, field)
+      dir = RIGHT
+    }
+
+    if (dir !== null) {
+      actor.tryMove("go", dir, field)
+      if (actor.buff.mushroom) {
+        for (const effect of mushroomEffect(actor, opposite(dir))) {
+          field.effects.add(effect)
+        }
+      }
       return
     }
 
