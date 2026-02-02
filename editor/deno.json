@@ -11,8 +11,8 @@
   },
   "tasks": {
     "compile": "deno task extension && deno task webview && deno task webview-style",
-    "extension": "deno -A jsr:@kt3k/pack@0.1.14 extension.tsx -o out/extension.js --external vscode --format cjs",
-    "webview": "deno -A jsr:@kt3k/pack@0.1.14 editor.tsx -o out/editor.js",
+    "extension": "deno bundle --platform browser extension.tsx -o out/extension.js --external vscode --format cjs",
+    "webview": "deno bundle --platform browser editor.tsx -o out/editor.js",
     "webview-style": "deno -A npm:tailwindcss@3 -o out/style.css",
     "package": "deno task compile && deno -A --unstable-unsafe-proto npm:@vscode/vsce package",
     "update-package": "deno task package && code --install-extension vscode-bw-block-editor-0.4.0.vsix"
