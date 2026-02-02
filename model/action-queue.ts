@@ -1,6 +1,8 @@
 import type { Dir, IEntity, IField, MoveAction } from "./types.ts"
 import { splashColor } from "../game/field.ts"
-import { linePattern0 } from "./effect.ts"
+import { EffectLine1, linePattern0 } from "./effect.ts"
+import { UP } from "../util/dir.ts"
+import { CELL_SIZE } from "../util/constants.ts"
 
 type CommonAction = {
   type: "wait"
@@ -21,6 +23,9 @@ type CommonAction = {
   color: string
   offsetI?: number
   offsetJ?: number
+} | {
+  type: "line-pattern-1"
+  dirs: readonly Dir[]
 }
 
 export type Motion = {
@@ -145,6 +150,47 @@ export class ActionQueue<
             )
           ) {
             field.effects.add(effect)
+          }
+          break
+        }
+        case "line-pattern-1": {
+          for (const dir of action.dirs) {
+            let i: number, j: number
+            switch (dir) {
+              case "up":
+                i = entity.i
+                j = entity.j + 1
+                break
+              case "down":
+                i = entity.i
+                j = entity.j
+                break
+              case "left":
+                i = entity.i + 1
+                j = entity.j
+                break
+              case "right":
+                i = entity.i
+                j = entity.j
+                break
+            }
+
+            for (const c of Array(4).keys()) {
+              const speed = 1
+              const delay = c * 4
+              field.effects.add(
+                new EffectLine1(
+                  i * CELL_SIZE,
+                  j * CELL_SIZE,
+                  dir,
+                  16,
+                  "#4d4a4d",
+                  2,
+                  speed,
+                  delay,
+                ),
+              )
+            }
           }
           break
         }

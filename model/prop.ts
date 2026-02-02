@@ -169,6 +169,7 @@ class PushedDelegateBreak implements PushedDelegate {
   onPushed(event: PushedEvent, prop: Prop, field: IField): void {
     prop.enqueueActions(
       { type: "wait", until: field.time + event.peakAt },
+      { type: "line-pattern-1", dirs: [event.dir] },
       {
         type: "break",
         dir: event.dir,
@@ -176,7 +177,6 @@ class PushedDelegateBreak implements PushedDelegate {
           prop.vanish()
         },
       },
-      { type: "splash", hue: 0, sat: 1, light: 0, alpha: 0.15, radius: 2 },
       { type: "remove" },
     )
   }

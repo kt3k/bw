@@ -214,7 +214,7 @@ export class CollectPurpleMushroom implements CollectDelegate {
         baseSpeed: 1.3,
         p0: 0.4,
         dist: 3,
-        color: "#540056", //"#951fa9",
+        color: "#540056",
         offsetI,
         offsetJ,
       }, {

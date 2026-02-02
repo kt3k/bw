@@ -193,6 +193,10 @@ export type Action =
     readonly offsetJ?: number
   }
   | {
+    readonly type: "line-pattern-1"
+    readonly dirs: readonly Dir[]
+  }
+  | {
     readonly type: "add-buff"
     readonly buff: string
     readonly value?: unknown

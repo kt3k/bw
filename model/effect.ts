@@ -1,7 +1,7 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import type { Dir, IColorBox, IField, IFinishable, IStepper } from "./types.ts"
 
-export class EffectLine implements IColorBox, IFinishable, IStepper {
+export class EffectLine0 implements IColorBox, IFinishable, IStepper {
   #startX: number
   #startY: number
   #dir: Dir
@@ -62,16 +62,16 @@ export class EffectLine implements IColorBox, IFinishable, IStepper {
     }
   }
   get x(): number {
-    return this.#x
+    return Math.round(this.#x)
   }
   get y(): number {
-    return this.#y
+    return Math.round(this.#y)
   }
   get w(): number {
-    return this.#w
+    return Math.round(this.#w)
   }
   get h(): number {
-    return this.#h
+    return Math.round(this.#h)
   }
   get finished(): boolean {
     return this.#duration <= 0
@@ -86,10 +86,10 @@ export function linePattern0(
   p0: number,
   dist: number,
   color: string,
-): EffectLine[] {
+): EffectLine0[] {
   const baseX = i * CELL_SIZE
   const baseY = j * CELL_SIZE
-  const effects: EffectLine[] = []
+  const effects: EffectLine0[] = []
   for (const dir of dirs) {
     for (const i of Array(5).keys()) {
       let dx = 0, dy = 0, offsetX = 0, offsetY = 0
@@ -111,7 +111,7 @@ export function linePattern0(
       }
       const speed = baseSpeed + (2 - Math.abs(i - 2)) * p0
       effects.push(
-        new EffectLine(
+        new EffectLine0(
           offsetX + baseX + dx * i,
           offsetY + baseY + dy * i,
           dir,
@@ -124,4 +124,97 @@ export function linePattern0(
     }
   }
   return effects
+}
+
+export class EffectLine1 implements IColorBox, IFinishable, IStepper {
+  #x: number
+  #y: number
+  #w: number
+  #h: number
+  #dir: Dir
+  #speed: number
+  #duration: number
+  #delay: number
+
+  constructor(
+    x: number,
+    y: number,
+    dir: Dir,
+    duration: number,
+    public readonly color: string,
+    width: number = 1,
+    speed: number = 1,
+    delay: number = 0,
+  ) {
+    this.#x = x
+    this.#y = y
+    this.#dir = dir
+    this.#duration = duration
+    this.#delay = delay
+    this.#speed = speed
+    this.#w = 1
+    this.#h = 1
+    switch (this.#dir) {
+      case "up":
+      case "down":
+        this.#h = width
+        this.#w = CELL_SIZE
+        break
+      case "left":
+      case "right":
+        this.#w = width
+        this.#h = CELL_SIZE
+        break
+    }
+  }
+
+  step(_field: IField): void {
+    if (this.#delay > 0) {
+      this.#delay--
+      return
+    }
+    switch (this.#dir) {
+      case "up":
+        this.#y -= this.#speed
+        break
+      case "down":
+        this.#y += this.#speed
+        break
+      case "left":
+        this.#x -= this.#speed
+        break
+      case "right":
+        this.#x += this.#speed
+        break
+    }
+    this.#duration--
+  }
+
+  get x(): number {
+    if (this.#delay > 0) {
+      return 0
+    }
+    return Math.round(this.#x)
+  }
+  get y(): number {
+    if (this.#delay > 0) {
+      return 0
+    }
+    return Math.round(this.#y)
+  }
+  get w(): number {
+    if (this.#delay > 0) {
+      return 0
+    }
+    return Math.round(this.#w)
+  }
+  get h(): number {
+    if (this.#delay > 0) {
+      return 0
+    }
+    return Math.round(this.#h)
+  }
+  get finished(): boolean {
+    return this.#duration <= 0
+  }
 }
