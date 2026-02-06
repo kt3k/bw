@@ -34,6 +34,8 @@ import { memoizedLoading } from "../util/memo.ts"
 import { CanvasWrapper as CanvasWrapper_ } from "../util/canvas-wrapper.ts"
 import type * as type from "./types.ts"
 import { BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
+import { Item } from "../model/item.ts"
+import { Actor } from "../model/actor.ts"
 
 type ToolBase = { id: string }
 type CellTool = ToolBase & { kind: "cell"; name: string; def: CellDefinition }
@@ -185,6 +187,28 @@ class ToolManager {
       })
     }
 
+    manager.addItemTool({ kind: "item-remove", id: "item-remove" })
+    for (const itemDef of Object.values(catalog.items)) {
+      const id = `item-${itemDef.type}`
+      manager.addItemTool({
+        kind: "item",
+        type: itemDef.type,
+        def: itemDef,
+        id,
+      })
+    }
+
+    manager.addActorTool({ kind: "actor-remove", id: "actor-remove" })
+    for (const actorDef of Object.values(catalog.actors)) {
+      const id = `actor-${actorDef.type}`
+      manager.addActorTool({
+        kind: "actor",
+        type: actorDef.type,
+        def: actorDef,
+        id,
+      })
+    }
+
     return manager
   }
 
@@ -217,6 +241,26 @@ class ToolManager {
       tool.type as any,
       tool.def,
       null,
+    )
+  }
+
+  toItem(tool: ItemTool & { kind: "item" }): Item {
+    return new Item(
+      null,
+      0,
+      0,
+      // deno-lint-ignore no-explicit-any
+      tool.type as any,
+      tool.def,
+    )
+  }
+
+  toActor(tool: ActorTool & { kind: "actor" }) {
+    return new Actor(
+      0,
+      0,
+      tool.def,
+      tool.id,
     )
   }
 
@@ -349,7 +393,7 @@ function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
       el.appendChild(ht.div(
         attrs,
         <span class="w-4 h-4 block text-xs text-center text-white pointer-events-none">
-          φ
+          φp
         </span>,
       ))
       continue
@@ -363,6 +407,54 @@ function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     const wrapper = new CanvasWrapper(div.querySelector("canvas")!)
     prop.loadAssets({ loadImage }).then(() => {
       wrapper.drawEntity(prop)
+    })
+  }
+
+  for (const itemTool of toolManager.itemTools) {
+    const id = itemTool.id
+    const attrs = { id, class: "inline-block p-1 m-1 rounded cursor-pointer" }
+    if (itemTool.kind === "item-remove") {
+      el.appendChild(ht.div(
+        attrs,
+        <span class="w-4 h-4 block text-xs text-center text-white pointer-events-none">
+          φi
+        </span>,
+      ))
+      continue
+    }
+    const item = toolManager.toItem(itemTool)
+    const div = ht.div(
+      attrs,
+      <canvas width="16" height="16" class="pointer-events-none"></canvas>,
+    )
+    el.appendChild(div)
+    const wrapper = new CanvasWrapper(div.querySelector("canvas")!)
+    item.loadAssets({ loadImage }).then(() => {
+      wrapper.drawEntity(item)
+    })
+  }
+
+  for (const actorTool of toolManager.actorTools) {
+    const id = actorTool.id
+    const attrs = { id, class: "inline-block p-1 m-1 rounded cursor-pointer" }
+    if (actorTool.kind === "actor-remove") {
+      el.appendChild(ht.div(
+        attrs,
+        <span class="w-4 h-4 block text-xs text-center text-white pointer-events-none">
+          φa
+        </span>,
+      ))
+      continue
+    }
+    const actor = toolManager.toActor(actorTool)
+    const div = ht.div(
+      attrs,
+      <canvas width="16" height="16" class="pointer-events-none"></canvas>,
+    )
+    el.appendChild(div)
+    const wrapper = new CanvasWrapper(div.querySelector("canvas")!)
+    actor.loadAssets({ loadImage }).then(() => {
+      wrapper.drawEntity(actor)
     })
   }
 
