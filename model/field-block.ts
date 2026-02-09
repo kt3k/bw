@@ -597,9 +597,9 @@ export class FieldBlock {
     drawCellColor(this.canvasWrapper, i, j, color, margin)
   }
 
-  renderAll() {
+  renderAll(canvas = this.canvas) {
     renderRange(
-      new CanvasWrapper(this.canvas),
+      new CanvasWrapper(canvas),
       0,
       0,
       BLOCK_SIZE,

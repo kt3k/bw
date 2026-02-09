@@ -19,13 +19,22 @@ export function activate(ctx: vscode.ExtensionContext) {
   )
 }
 
+const CELL_SIZE = 16
+
 function resolveCustomTextEditor(
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
 ) {
   const webview = panel.webview
   webview.options = { enableScripts: true }
+  const { i, j } = getGridFromUri(document.uri.path)
   const u = (path: string) => webview.asWebviewUri(Uri.joinPath(uri, path))
+  const MAIN_CANVAS_SIZE = CELL_SIZE * 200 // 200 cells wide
+  const SIDE_CANVAS_SIZE = 5 * CELL_SIZE // 5 cells on each side
+  const INFO_PANEL_WIDTH = 48 // info-panel has w-48
+  const CONTAINER_WIDTH = MAIN_CANVAS_SIZE +
+    SIDE_CANVAS_SIZE * 2 +
+    INFO_PANEL_WIDTH * 4
   webview.html = (
     <html lang="en">
       <head>
@@ -42,8 +51,83 @@ function resolveCustomTextEditor(
         </style>
       </head>
       <body class="key-handler p-0">
-        <div class="canvas-layers relative mt-20 w-[calc(3360px+196px)]"></div>
-        <div class="toolbox px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100%-12rem)]">
+        <div
+          class="canvas-container relative mt-20"
+          style={`width: ${CONTAINER_WIDTH}px`}
+        >
+          <div
+            class="canvas-layers absolute"
+            style={`width: ${MAIN_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px; left: ${SIDE_CANVAS_SIZE}px`}
+          >
+            <canvas
+              class="field-cells-canvas absolute field-cells-canvas pointer-events-none crisp-edges"
+              width={MAIN_CANVAS_SIZE}
+              height={MAIN_CANVAS_SIZE}
+            >
+            </canvas>
+            <canvas
+              class="field-props-canvas absolute field-props-canvas pointer-events-none crisp-edges"
+              width={MAIN_CANVAS_SIZE}
+              height={MAIN_CANVAS_SIZE}
+            >
+            </canvas>
+            <canvas
+              class="field-items-canvas absolute field-items-canvas pointer-events-none crisp-edges"
+              width={MAIN_CANVAS_SIZE}
+              height={MAIN_CANVAS_SIZE}
+            >
+            </canvas>
+            <canvas
+              class="field-actors-canvas absolute field-actors-canvas pointer-events-none crisp-edges"
+              width={MAIN_CANVAS_SIZE}
+              height={MAIN_CANVAS_SIZE}
+            >
+            </canvas>
+          </div>
+          <a
+            class="next-field absolute hover:opacity-75 opacity-50"
+            style={`left: ${SIDE_CANVAS_SIZE}px; top: 0px;`}
+            data-i={i}
+            data-j={j - 200}
+            data-range={`0,195,200,5`}
+          >
+          </a>
+          <a
+            class="next-field absolute hover:opacity-75 opacity-50"
+            style={`left: ${SIDE_CANVAS_SIZE}px; top: ${
+              SIDE_CANVAS_SIZE + MAIN_CANVAS_SIZE
+            }px;`}
+            data-i={i}
+            data-j={j + 200}
+            data-range={`0,0,200,5`}
+          >
+          </a>
+          <a
+            class="next-field absolute hover:opacity-75 opacity-50"
+            style={`left: ${
+              SIDE_CANVAS_SIZE + MAIN_CANVAS_SIZE
+            }px; top: ${SIDE_CANVAS_SIZE}px;`}
+            data-i={i + 200}
+            data-j={j}
+            data-range={`0,0,5,200`}
+          >
+          </a>
+          <a
+            class="next-field absolute hover:opacity-75 opacity-50"
+            style={`left: 0px; top: ${SIDE_CANVAS_SIZE}px;`}
+            data-i={i - 200}
+            data-j={j}
+            data-range={`195,0,5,200`}
+          >
+          </a>
+        </div>
+        <div class="layer-tool px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-16">
+          <div>ACTORS</div>
+          <div>ITEMS</div>
+          <div>PROPS</div>
+          <div>FIELD</div>
+        </div>
+        <div class="toolbox px-2 fixed left-16 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100%-16em)]">
           <div class="ml-2 group relative">
             <span class="mode-indicator">dot</span>
             <span class="
@@ -159,4 +243,10 @@ function resolveCustomTextEditor(
       })
     }
   }
+}
+
+function getGridFromUri(uri: string) {
+  const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
+  if (!m) return { i: NaN, j: NaN }
+  return { i: parseInt(m[1]), j: parseInt(m[2]) }
 }

@@ -9,7 +9,7 @@
 
 const vscode = acquireVsCodeApi<{ uri: string; text: string }>()
 
-import { type Context, GroupSignal, mount, register, Signal } from "@kt3k/cell"
+import { type Context, GroupSignal, register, Signal } from "@kt3k/cell"
 import * as ht from "@kt3k/ht"
 
 import { IEntity } from "../model/types.ts"
@@ -154,6 +154,9 @@ class CanvasWrapper extends CanvasWrapper_ {
       CELL_SIZE,
     )
   }
+}
+
+class LayerManager {
 }
 
 class ToolManager {
@@ -476,135 +479,55 @@ function createCanvasFromImageData(imageData: ImageData) {
   return canvas
 }
 
-function getGridFromUri(uri: string) {
-  const m = uri.match(/block_(-?\d+)\.(-?\d+)\.json$/)
-  if (!m) return { i: NaN, j: NaN }
-  return { i: parseInt(m[1]), j: parseInt(m[2]) }
-}
-
-async function CanvasLayers({ el }: Context) {
+async function CanvasContainer({ query }: Context) {
   const block = fieldBlock.get()
+  block.renderAll(query<HTMLCanvasElement>(".field-cells-canvas")!)
 
-  const cellsCanvas = block.canvas
-  cellsCanvas.style.left = SIDE_CANVAS_SIZE + "px"
-  cellsCanvas.style.top = SIDE_CANVAS_SIZE + "px"
-  cellsCanvas.style.position = "absolute"
-  cellsCanvas.classList.add("field-cells-canvas", "crisp-edges")
-  el.appendChild(cellsCanvas)
-  block.renderAll()
-  mount("field-cells-canvas", el)
-
-  const objectsCanvas = ht.canvas({
-    width: CANVAS_SIZE,
-    height: CANVAS_SIZE,
-    style: `left: ${SIDE_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px;`,
-    class: "absolute field-objects-canvas pointer-events-none crisp-edges",
-  })
-  el.appendChild(objectsCanvas)
-  mount("field-objects-canvas", el)
-  const wrapper = new CanvasWrapper(objectsCanvas)
+  const propsCanvas = query<HTMLCanvasElement>(".field-props-canvas")!
+  const wrapper = new CanvasWrapper(propsCanvas)
   for (const spawn of block.propSpawns.getAll()) {
     const prop = Prop.fromSpawn(spawn)
-    await prop.loadAssets({ loadImage })
-    wrapper.drawEntity(prop)
+    prop.loadAssets({ loadImage }).then(() => wrapper.drawEntity(prop))
   }
-  el.appendChild(objectsCanvas)
+}
 
-  const { i, j } = getGridFromUri(block.url)
-  const x = [
-    [-1, 0],
-    [0, -1],
-    [0, 1],
-    [1, 0],
+async function NextField({ el }: Context<HTMLAnchorElement>) {
+  const i = el.dataset.i!
+  const j = el.dataset.j!
+  const range = el.dataset.range!.split(",").map((s) => parseInt(s)) as [
+    number,
+    number,
+    number,
+    number,
   ]
-  for (const [dx, dy] of x) {
-    const k = i + dx * 200
-    const l = j + dy * 200
-    const href = new URL(`block_${k}.${l}.json`, blockMapSource.get().uri).href
-    let text
-    try {
-      text = await loadText(href)
-    } catch {
-      text = await loadText(
-        new URL("block_not_found.json", blockMapSource.get().uri).href,
-      )
-    }
-    const obj = JSON.parse(text)
-
-    const blockMap = new BlockMap(
-      href,
-      obj,
-      await loadCatalog(href, obj.catalogs, { loadJson }),
+  const href = new URL(`block_${i}.${j}.json`, blockMapSource.get().uri).href
+  el.href = href.replace(/^file:\/\//, "vscode://file")
+  let text
+  try {
+    text = await loadText(href)
+  } catch {
+    text = await loadText(
+      new URL("block_not_found.json", blockMapSource.get().uri).href,
     )
-    const fieldBlock = new FieldBlock(blockMap)
-    await fieldBlock.loadAssets({ loadImage })
-    const a = ht.a({
-      class: "absolute hover:opacity-75 opacity-50 break-all",
-      href: href.replace(/^file:\/\//, "vscode://file"),
-    }, `block_${k}.${l}.json`)
-    if (dx === -1) {
-      const imageData = createImageDataForRange(
-        BLOCK_SIZE - 5,
-        0,
-        5,
-        BLOCK_SIZE,
-        fieldBlock.cells,
-        fieldBlock.imgMap,
-        fieldBlock.field,
-      )
-      a.appendChild(createCanvasFromImageData(imageData))
-      a.style.left = "0"
-      a.style.top = SIDE_CANVAS_SIZE + "px"
-      a.style.height = CANVAS_SIZE + "px"
-      a.style.width = SIDE_CANVAS_SIZE + "px"
-    } else if (dx === 1) {
-      const imageData = createImageDataForRange(
-        0,
-        0,
-        5,
-        BLOCK_SIZE,
-        fieldBlock.cells,
-        fieldBlock.imgMap,
-        fieldBlock.field,
-      )
-      a.appendChild(createCanvasFromImageData(imageData))
-      a.style.left = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
-      a.style.top = SIDE_CANVAS_SIZE + "px"
-      a.style.height = CANVAS_SIZE + "px"
-      a.style.width = SIDE_CANVAS_SIZE + "px"
-    } else if (dy === -1) {
-      const imageData = createImageDataForRange(
-        0,
-        BLOCK_SIZE - 5,
-        BLOCK_SIZE,
-        5,
-        fieldBlock.cells,
-        fieldBlock.imgMap,
-        fieldBlock.field,
-      )
-      a.appendChild(createCanvasFromImageData(imageData))
-      a.style.top = "0"
-      a.style.left = SIDE_CANVAS_SIZE + "px"
-      a.style.width = CANVAS_SIZE + "px"
-      a.style.height = SIDE_CANVAS_SIZE + "px"
-    } else if (dy === 1) {
-      const imageData = createImageDataForRange(
-        0,
-        0,
-        BLOCK_SIZE,
-        5,
-        fieldBlock.cells,
-        fieldBlock.imgMap,
-        fieldBlock.field,
-      )
-      a.appendChild(createCanvasFromImageData(imageData))
-      a.style.top = (CANVAS_SIZE + SIDE_CANVAS_SIZE) + "px"
-      a.style.left = SIDE_CANVAS_SIZE + "px"
-      a.style.width = CANVAS_SIZE + "px"
-      a.style.height = SIDE_CANVAS_SIZE + "px"
-    }
-    el.appendChild(a)
   }
+  const obj = JSON.parse(text)
+  const blockMap = new BlockMap(
+    href,
+    obj,
+    await loadCatalog(href, obj.catalogs, { loadJson }),
+  )
+  const fieldBlock = new FieldBlock(blockMap)
+  await fieldBlock.loadAssets({ loadImage })
+  const imageData = createImageDataForRange(
+    range[0],
+    range[1],
+    range[2],
+    range[3],
+    fieldBlock.cells,
+    fieldBlock.imgMap,
+    fieldBlock.field,
+  )
+  el.appendChild(createCanvasFromImageData(imageData))
 }
 
 function getCoordinatesFromMouseEvent(
@@ -802,6 +725,7 @@ register(KeyHandler, "key-handler")
 register(Toolbox, "toolbox")
 register(ModeIndicator, "mode-indicator")
 register(FieldCellsCanvas, "field-cells-canvas")
-register(FieldPropCanvas, "field-objects-canvas")
+register(FieldPropCanvas, "field-props-canvas")
 register(InfoPanel, "js-info-panel")
-register(CanvasLayers, "canvas-layers")
+register(CanvasContainer, "canvas-container")
+register(NextField, "next-field")
