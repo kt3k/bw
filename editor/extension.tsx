@@ -60,25 +60,25 @@ function resolveCustomTextEditor(
             style={`width: ${MAIN_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px; left: ${SIDE_CANVAS_SIZE}px`}
           >
             <canvas
-              class="field-cells-canvas absolute field-cells-canvas pointer-events-none crisp-edges"
+              class="field-cells-canvas absolute crisp-edges"
               width={MAIN_CANVAS_SIZE}
               height={MAIN_CANVAS_SIZE}
             >
             </canvas>
             <canvas
-              class="field-props-canvas absolute field-props-canvas pointer-events-none crisp-edges"
+              class="field-props-canvas absolute crisp-edges"
               width={MAIN_CANVAS_SIZE}
               height={MAIN_CANVAS_SIZE}
             >
             </canvas>
             <canvas
-              class="field-items-canvas absolute field-items-canvas pointer-events-none crisp-edges"
+              class="field-items-canvas absolute crisp-edges"
               width={MAIN_CANVAS_SIZE}
               height={MAIN_CANVAS_SIZE}
             >
             </canvas>
             <canvas
-              class="field-actors-canvas absolute field-actors-canvas pointer-events-none crisp-edges"
+              class="field-actors-canvas absolute crisp-edges"
               width={MAIN_CANVAS_SIZE}
               height={MAIN_CANVAS_SIZE}
             >

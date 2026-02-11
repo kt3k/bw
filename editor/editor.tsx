@@ -313,10 +313,37 @@ class ToolManager {
     const tool = this.currentTool()
     return (tool.kind === "item" || tool.kind === "item-remove") ? tool : null
   }
+
+  withCellTool(cb: (tool: CellTool) => void) {
+    const tool = this.currentTool()
+    if (tool.kind === "cell") {
+      cb(tool)
+    }
+  }
+
+  withPropTool(cb: (tool: PropTool) => void) {
+    const tool = this.currentTool()
+    if (tool.kind === "prop" || tool.kind === "prop-remove") {
+      cb(tool)
+    }
+  }
+
+  withActorTool(cb: (tool: ActorTool) => void) {
+    const tool = this.currentTool()
+    if (tool.kind === "actor" || tool.kind === "actor-remove") {
+      cb(tool)
+    }
+  }
+
+  withItemTool(cb: (tool: ItemTool) => void) {
+    const tool = this.currentTool()
+    if (tool.kind === "item" || tool.kind === "item-remove") {
+      cb(tool)
+    }
+  }
 }
 
 const CANVAS_SIZE = BLOCK_SIZE * CELL_SIZE
-const SIDE_CANVAS_SIZE = CELL_SIZE * 5
 
 const mode = new Signal<"dot" | "stroke">("dot")
 const gridIndex = new GroupSignal<{ i: number | null; j: number | null }>({
@@ -340,6 +367,12 @@ const fieldBlock = blockMapSource.map(({ uri, text }) =>
   new FieldBlock(new BlockMap(uri, JSON.parse(text), catalog))
 )
 await fieldBlock.get().loadAssets({ loadImage })
+
+function editBlock(cb: (block: FieldBlock) => void) {
+  const block = fieldBlock.get().clone()
+  cb(block)
+  updateDocument(block)
+}
 
 const toolManager = ToolManager.fromCatalog(catalog)
 const currentTool = new Signal<Tool>(toolManager.currentTool())
@@ -479,55 +512,104 @@ function createCanvasFromImageData(imageData: ImageData) {
   return canvas
 }
 
-async function CanvasContainer({ query }: Context) {
-  const block = fieldBlock.get()
-  block.renderAll(query<HTMLCanvasElement>(".field-cells-canvas")!)
-
+async function CanvasLayers({ query, on, el, subscribe }: Context) {
+  const cellsCanvas = query<HTMLCanvasElement>(".field-cells-canvas")!
+  const cellsCanvasWrapper = new CanvasWrapper(cellsCanvas)
   const propsCanvas = query<HTMLCanvasElement>(".field-props-canvas")!
-  const wrapper = new CanvasWrapper(propsCanvas)
+  const propsCanvasWrapper = new CanvasWrapper(propsCanvas)
+  const itemsCanvas = query<HTMLCanvasElement>(".field-items-canvas")!
+  const itemsCanvasWrapper = new CanvasWrapper(itemsCanvas)
+  const actorsCanvas = query<HTMLCanvasElement>(".field-actors-canvas")!
+  const actorsCanvasWrapper = new CanvasWrapper(actorsCanvas)
+
+  const block = fieldBlock.get()
+  block.renderAll(cellsCanvas)
+
   for (const spawn of block.propSpawns.getAll()) {
     const prop = Prop.fromSpawn(spawn)
-    prop.loadAssets({ loadImage }).then(() => wrapper.drawEntity(prop))
+    prop.loadAssets({ loadImage })
+      .then(() => propsCanvasWrapper.drawEntity(prop))
   }
-}
 
-async function NextField({ el }: Context<HTMLAnchorElement>) {
-  const i = el.dataset.i!
-  const j = el.dataset.j!
-  const range = el.dataset.range!.split(",").map((s) => parseInt(s)) as [
-    number,
-    number,
-    number,
-    number,
-  ]
-  const href = new URL(`block_${i}.${j}.json`, blockMapSource.get().uri).href
-  el.href = href.replace(/^file:\/\//, "vscode://file")
-  let text
-  try {
-    text = await loadText(href)
-  } catch {
-    text = await loadText(
-      new URL("block_not_found.json", blockMapSource.get().uri).href,
-    )
+  const paint = (e: MouseEvent) => {
+    const block = fieldBlock.get()
+    const { i, j } = getCoordinatesFromMouseEvent(e, el)
+
+    toolManager.withCellTool(({ name }) => {
+      const cell = block.getCell(i, j)
+      if (cell && cell.name !== name) {
+        editBlock((b) => b.updateCell(i, j, name))
+      }
+    })
+
+    toolManager.withPropTool((tool) => {
+      if (tool.kind === "prop-remove") {
+        if (block.propSpawns.has(i, j)) {
+          editBlock((b) => b.propSpawns.remove(i, j))
+        }
+      } else {
+        const spawn = block.propSpawns.get(i, j)
+        if (spawn && spawn.type === tool.type) {
+          // The object spawn is already the same as selected object
+          return
+        }
+        editBlock((b) => {
+          if (b.propSpawns.has(i, j)) {
+            b.propSpawns.remove(i, j)
+          }
+          b.propSpawns.add(
+            new PropSpawnInfo(
+              i,
+              j,
+              // deno-lint-ignore no-explicit-any
+              tool.type as any,
+              tool.def,
+            ),
+          )
+        })
+      }
+    })
   }
-  const obj = JSON.parse(text)
-  const blockMap = new BlockMap(
-    href,
-    obj,
-    await loadCatalog(href, obj.catalogs, { loadJson }),
-  )
-  const fieldBlock = new FieldBlock(blockMap)
-  await fieldBlock.loadAssets({ loadImage })
-  const imageData = createImageDataForRange(
-    range[0],
-    range[1],
-    range[2],
-    range[3],
-    fieldBlock.cells,
-    fieldBlock.imgMap,
-    fieldBlock.field,
-  )
-  el.appendChild(createCanvasFromImageData(imageData))
+
+  on("click", paint)
+  on("mousemove", (e) => {
+    gridIndex.update(getCoordinatesFromMouseEvent(e, el))
+    if (mode.get() === "stroke") paint(e)
+  })
+
+  let prev: FieldBlock = fieldBlock.get()
+  subscribe(fieldBlock, async (block) => {
+    const cellsDiff = prev.diffCells(block)
+    const propsDiff = prev.propSpawns.diff(block.propSpawns)
+    prev = block
+
+    block.loadAssets({ loadImage }).then(() => {
+      for (const [i, j] of cellsDiff) {
+        const cell = block.getCell(i, j)
+        drawCell(cellsCanvasWrapper, i, j, cell, block.imgMap[cell.name])
+      }
+    })
+
+    for (const [action, spawn] of propsDiff) {
+      const prop = Prop.fromSpawn(spawn)
+      await prop.loadAssets({ loadImage })
+      if (action === "add") {
+        propsCanvasWrapper.drawEntity(prop)
+      } else {
+        // action === "remove"
+        propsCanvasWrapper.clearCell(prop.i, prop.j)
+
+        // redraw the object below to fix overlapping area
+        propsCanvasWrapper.clearCell(prop.i, prop.j + 1)
+        const spawnBelow = block.propSpawns.get(prop.i, prop.j + 1)
+        if (spawnBelow) {
+          const objectBelow = Prop.fromSpawn(spawnBelow)
+          await objectBelow.loadAssets({ loadImage })
+          propsCanvasWrapper.drawEntity(objectBelow)
+        }
+      }
+    }
+  })
 }
 
 function getCoordinatesFromMouseEvent(
@@ -541,139 +623,6 @@ function getCoordinatesFromMouseEvent(
   const i = x / 16 + block.i
   const j = y / 16 + block.j
   return { i, j }
-}
-
-function FieldCellsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
-  const canvasWrapper = new CanvasWrapper(el)
-
-  const paint = (e: MouseEvent) => {
-    const tool = toolManager.currentCellTool()
-    if (tool === null) return
-    const block = fieldBlock.get()
-    const { i, j } = getCoordinatesFromMouseEvent(e, el)
-    const { name } = tool
-    const currentCell = block.getCell(i, j)
-    if (!currentCell) return
-    // The cell kind is already the same as selected cell
-    if (currentCell.name === name) return
-    const b = block.clone()
-    b.updateCell(i, j, name)
-    updateDocument(b)
-  }
-
-  on("click", paint)
-  on("mousemove", (e) => {
-    gridIndex.update(getCoordinatesFromMouseEvent(e, el))
-    if (mode.get() === "stroke") paint(e)
-  })
-
-  let prev = fieldBlock.get()!
-  subscribe(fieldBlock, async (block) => {
-    await block.loadAssets({ loadImage })
-    for (const [i, j] of prev.diffCells(block)) {
-      const cell = block.getCell(i, j)
-      drawCell(canvasWrapper, i, j, cell, block.imgMap[cell.name])
-    }
-    prev = block
-  })
-
-  subscribe(currentTool, () => {
-    el.classList.toggle(
-      "pointer-events-none",
-      toolManager.currentCellTool() === null,
-    )
-  })
-}
-
-/*
-function FieldActorsCanvas(
-  { on, el, subscribe }: Context<HTMLCanvasElement>,
-) {
-  const canvasWrapper = new CanvasWrapper(el)
-}
-
-function FieldItemsCanvas({ on, el, subscribe }: Context<HTMLCanvasElement>) {
-  const canvasWrapper = new CanvasWrapper(el)
-}
-*/
-
-function FieldPropCanvas(
-  { el, on, subscribe }: Context<HTMLCanvasElement>,
-) {
-  const canvasWrapper = new CanvasWrapper(el)
-
-  const paint = (e: MouseEvent) => {
-    const block = fieldBlock.get()
-    const tool = toolManager.currentPropTool()
-    if (tool === null) return
-    const { i, j } = getCoordinatesFromMouseEvent(e, el)
-    if (tool.kind === "prop-remove") {
-      if (block.propSpawns.has(i, j)) {
-        const b = block.clone()
-        b.propSpawns.remove(i, j)
-        updateDocument(b)
-      }
-    } else {
-      const spawn = block.propSpawns.get(i, j)
-      if (spawn && spawn.type === tool.type) {
-        // The object spawn is already the same as selected object
-        return
-      }
-      const b = block.clone()
-      if (b.propSpawns.has(i, j)) {
-        b.propSpawns.remove(i, j)
-      }
-      b.propSpawns.add(
-        new PropSpawnInfo(
-          i,
-          j,
-          // deno-lint-ignore no-explicit-any
-          tool.type as any,
-          tool.def,
-        ),
-      )
-      updateDocument(b)
-    }
-  }
-
-  on("click", paint)
-  on("mousemove", (e) => {
-    gridIndex.update(getCoordinatesFromMouseEvent(e, el))
-    if (mode.get() === "stroke") paint(e)
-  })
-
-  subscribe(currentTool, () => {
-    el.classList.toggle(
-      "pointer-events-none",
-      toolManager.currentPropTool() === null,
-    )
-  })
-
-  let prev: FieldBlock = fieldBlock.get()
-  subscribe(fieldBlock, async (block) => {
-    for (
-      const [action, spawn] of prev.propSpawns.diff(block.propSpawns)
-    ) {
-      const prop = Prop.fromSpawn(spawn)
-      await prop.loadAssets({ loadImage })
-      if (action === "add") {
-        canvasWrapper.drawEntity(prop)
-      } else {
-        // action === "remove"
-        canvasWrapper.clearCell(prop.i, prop.j)
-
-        // redraw the object below to fix overlapping area
-        canvasWrapper.clearCell(prop.i, prop.j + 1)
-        const spawnBelow = block.propSpawns.get(prop.i, prop.j + 1)
-        if (spawnBelow) {
-          const objectBelow = Prop.fromSpawn(spawnBelow)
-          await objectBelow.loadAssets({ loadImage })
-          canvasWrapper.drawEntity(objectBelow)
-        }
-      }
-    }
-    prev = block
-  })
 }
 
 function KeyHandler({ on }: Context) {
@@ -721,11 +670,48 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
   })
 }
 
+async function NextField({ el }: Context<HTMLAnchorElement>) {
+  const i = el.dataset.i!
+  const j = el.dataset.j!
+  const range = el.dataset.range!.split(",").map((s) => parseInt(s)) as [
+    number,
+    number,
+    number,
+    number,
+  ]
+  const href = new URL(`block_${i}.${j}.json`, blockMapSource.get().uri).href
+  el.href = href.replace(/^file:\/\//, "vscode://file")
+  let text
+  try {
+    text = await loadText(href)
+  } catch {
+    text = await loadText(
+      new URL("block_not_found.json", blockMapSource.get().uri).href,
+    )
+  }
+  const obj = JSON.parse(text)
+  const blockMap = new BlockMap(
+    href,
+    obj,
+    await loadCatalog(href, obj.catalogs, { loadJson }),
+  )
+  const nextBlock = new FieldBlock(blockMap)
+  await nextBlock.loadAssets({ loadImage })
+  const imageData = createImageDataForRange(
+    range[0],
+    range[1],
+    range[2],
+    range[3],
+    nextBlock.cells,
+    nextBlock.imgMap,
+    nextBlock.field,
+  )
+  el.appendChild(createCanvasFromImageData(imageData))
+}
+
 register(KeyHandler, "key-handler")
 register(Toolbox, "toolbox")
 register(ModeIndicator, "mode-indicator")
-register(FieldCellsCanvas, "field-cells-canvas")
-register(FieldPropCanvas, "field-props-canvas")
 register(InfoPanel, "js-info-panel")
-register(CanvasContainer, "canvas-container")
+register(CanvasLayers, "canvas-layers")
 register(NextField, "next-field")
