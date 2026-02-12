@@ -22,7 +22,7 @@ async function clear(mapFile: string) {
   const bm = new BlockMap(mapJson.href, map)
   const fb = new FieldBlock(bm)
 
-  fb.actorSpawn.clear()
+  fb.actorSpawns.clear()
   fb.itemSpawns.clear()
 
   console.log(`Cleared all characters and items from the map ${mapFile}`)

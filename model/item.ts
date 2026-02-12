@@ -1,5 +1,6 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import { Actor } from "./actor.ts"
+import { ItemSpawnInfo } from "./field-block.ts"
 import { ItemDefinition } from "./catalog.ts"
 import type {
   Dir,
@@ -36,6 +37,16 @@ export class Item implements IItem {
 
   static collect(id: string) {
     this.#collectedItemIds.add(id)
+  }
+
+  static fromSpawn(spawn: ItemSpawnInfo): Item {
+    return new Item(
+      spawn.id,
+      spawn.i,
+      spawn.j,
+      spawn.type,
+      spawn.def,
+    )
   }
 
   /**

@@ -22,10 +22,12 @@ import {
   PropDefinition,
 } from "../model/catalog.ts"
 import {
+  ActorSpawnInfo,
   BlockMap,
   createImageDataForRange,
   drawCell,
   FieldBlock,
+  ItemSpawnInfo,
   PropSpawnInfo,
 } from "../model/field-block.ts"
 import { Prop } from "../model/prop.ts"
@@ -154,9 +156,6 @@ class CanvasWrapper extends CanvasWrapper_ {
       CELL_SIZE,
     )
   }
-}
-
-class LayerManager {
 }
 
 class ToolManager {
@@ -294,51 +293,85 @@ class ToolManager {
     return this.#get(this.#toolIndex)
   }
 
-  currentCellTool(): CellTool | null {
+  edit({ i, j }: { i: number; j: number }): void {
     const tool = this.currentTool()
-    return tool.kind === "cell" ? tool : null
-  }
+    const block = fieldBlock.get()
 
-  currentPropTool(): PropTool | null {
-    const tool = this.currentTool()
-    return (tool.kind === "prop" || tool.kind === "prop-remove") ? tool : null
-  }
-
-  currentActorTool(): ActorTool | null {
-    const tool = this.currentTool()
-    return (tool.kind === "actor" || tool.kind === "actor-remove") ? tool : null
-  }
-
-  currentItemTool(): ItemTool | null {
-    const tool = this.currentTool()
-    return (tool.kind === "item" || tool.kind === "item-remove") ? tool : null
-  }
-
-  withCellTool(cb: (tool: CellTool) => void) {
-    const tool = this.currentTool()
     if (tool.kind === "cell") {
-      cb(tool)
-    }
-  }
-
-  withPropTool(cb: (tool: PropTool) => void) {
-    const tool = this.currentTool()
-    if (tool.kind === "prop" || tool.kind === "prop-remove") {
-      cb(tool)
-    }
-  }
-
-  withActorTool(cb: (tool: ActorTool) => void) {
-    const tool = this.currentTool()
-    if (tool.kind === "actor" || tool.kind === "actor-remove") {
-      cb(tool)
-    }
-  }
-
-  withItemTool(cb: (tool: ItemTool) => void) {
-    const tool = this.currentTool()
-    if (tool.kind === "item" || tool.kind === "item-remove") {
-      cb(tool)
+      const cell = block.getCell(i, j)
+      if (cell && cell.name !== tool.name) {
+        editBlock((b) => b.updateCell(i, j, tool.name))
+      }
+    } else if (tool.kind === "prop-remove") {
+      if (block.propSpawns.has(i, j)) {
+        editBlock((b) => b.propSpawns.remove(i, j))
+      }
+    } else if (tool.kind === "prop") {
+      const spawn = block.propSpawns.get(i, j)
+      if (spawn && spawn.type === tool.type) {
+        // The object spawn is already the same as selected object
+        return
+      }
+      editBlock((b) => {
+        if (b.propSpawns.has(i, j)) {
+          b.propSpawns.remove(i, j)
+        }
+        b.propSpawns.add(
+          new PropSpawnInfo(
+            i,
+            j,
+            // deno-lint-ignore no-explicit-any
+            tool.type as any,
+            tool.def,
+          ),
+        )
+      })
+    } else if (tool.kind === "item-remove") {
+      if (block.itemSpawns.has(i, j)) {
+        editBlock((b) => b.itemSpawns.remove(i, j))
+      }
+    } else if (tool.kind === "item") {
+      const spawn = block.itemSpawns.get(i, j)
+      if (spawn && spawn.type === tool.type) {
+        // The item spawn is already the same as selected item
+        return
+      }
+      editBlock((b) => {
+        if (b.itemSpawns.has(i, j)) {
+          b.itemSpawns.remove(i, j)
+        }
+        b.itemSpawns.add(
+          new ItemSpawnInfo(
+            i,
+            j,
+            // deno-lint-ignore no-explicit-any
+            tool.type as any,
+            tool.def,
+          ),
+        )
+      })
+    } else if (tool.kind === "actor-remove") {
+      if (block.actorSpawns.has(i, j)) {
+        editBlock((b) => b.actorSpawns.remove(i, j))
+      }
+    } else if (tool.kind === "actor") {
+      const spawn = block.actorSpawns.get(i, j)
+      if (spawn && spawn.def.type === tool.type) {
+        // The actor spawn is already the same as selected actor
+        return
+      }
+      editBlock((b) => {
+        if (b.actorSpawns.has(i, j)) {
+          b.actorSpawns.remove(i, j)
+        }
+        b.actorSpawns.add(
+          new ActorSpawnInfo(
+            i,
+            j,
+            tool.def,
+          ),
+        )
+      })
     }
   }
 }
@@ -531,56 +564,35 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
       .then(() => propsCanvasWrapper.drawEntity(prop))
   }
 
-  const paint = (e: MouseEvent) => {
-    const block = fieldBlock.get()
-    const { i, j } = getCoordinatesFromMouseEvent(e, el)
-
-    toolManager.withCellTool(({ name }) => {
-      const cell = block.getCell(i, j)
-      if (cell && cell.name !== name) {
-        editBlock((b) => b.updateCell(i, j, name))
-      }
-    })
-
-    toolManager.withPropTool((tool) => {
-      if (tool.kind === "prop-remove") {
-        if (block.propSpawns.has(i, j)) {
-          editBlock((b) => b.propSpawns.remove(i, j))
-        }
-      } else {
-        const spawn = block.propSpawns.get(i, j)
-        if (spawn && spawn.type === tool.type) {
-          // The object spawn is already the same as selected object
-          return
-        }
-        editBlock((b) => {
-          if (b.propSpawns.has(i, j)) {
-            b.propSpawns.remove(i, j)
-          }
-          b.propSpawns.add(
-            new PropSpawnInfo(
-              i,
-              j,
-              // deno-lint-ignore no-explicit-any
-              tool.type as any,
-              tool.def,
-            ),
-          )
-        })
-      }
-    })
+  for (const spawn of block.itemSpawns.getAll()) {
+    const item = Item.fromSpawn(spawn)
+    item.loadAssets({ loadImage })
+      .then(() => itemsCanvasWrapper.drawEntity(item))
   }
 
-  on("click", paint)
+  for (const spawn of block.actorSpawns.getAll()) {
+    const actor = Actor.fromSpawn(spawn)
+    actor.loadAssets({ loadImage })
+      .then(() => actorsCanvasWrapper.drawEntity(actor))
+  }
+
+  on("click", (e) => {
+    toolManager.edit(getGridIndexFromMouseEvent(e, el))
+  })
   on("mousemove", (e) => {
-    gridIndex.update(getCoordinatesFromMouseEvent(e, el))
-    if (mode.get() === "stroke") paint(e)
+    const index = getGridIndexFromMouseEvent(e, el)
+    gridIndex.update(index)
+    if (mode.get() === "stroke") {
+      toolManager.edit(index)
+    }
   })
 
-  let prev: FieldBlock = fieldBlock.get()
+  let prev: FieldBlock = block
   subscribe(fieldBlock, async (block) => {
     const cellsDiff = prev.diffCells(block)
     const propsDiff = prev.propSpawns.diff(block.propSpawns)
+    const itemsDiff = prev.itemSpawns.diff(block.itemSpawns)
+    const actorsDiff = prev.actorSpawns.diff(block.actorSpawns)
     prev = block
 
     block.loadAssets({ loadImage }).then(() => {
@@ -600,6 +612,7 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
         propsCanvasWrapper.clearCell(prop.i, prop.j)
 
         // redraw the object below to fix overlapping area
+        // This is necessary because some props are taller than CELL_SIZE e.g. table
         propsCanvasWrapper.clearCell(prop.i, prop.j + 1)
         const spawnBelow = block.propSpawns.get(prop.i, prop.j + 1)
         if (spawnBelow) {
@@ -609,10 +622,52 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
         }
       }
     }
+
+    for (const [action, spawn] of itemsDiff) {
+      const item = Item.fromSpawn(spawn)
+      await item.loadAssets({ loadImage })
+      if (action === "add") {
+        itemsCanvasWrapper.drawEntity(item)
+      } else {
+        // action === "remove"
+        itemsCanvasWrapper.clearCell(item.i, item.j)
+      }
+    }
+
+    for (const [action, spawn] of actorsDiff) {
+      const actor = Actor.fromSpawn(spawn)
+      await actor.loadAssets({ loadImage })
+      if (action === "add") {
+        actorsCanvasWrapper.drawEntity(actor)
+      } else {
+        // action === "remove"
+        actorsCanvasWrapper.clearCell(actor.i, actor.j)
+      }
+    }
+  })
+
+  subscribe(currentTool, (tool) => {
+    if (tool.kind === "cell") {
+      propsCanvas.classList.add("opacity-50")
+      itemsCanvas.classList.add("opacity-50")
+      actorsCanvas.classList.add("opacity-50")
+    } else if (tool.kind === "prop" || tool.kind === "prop-remove") {
+      propsCanvas.classList.remove("opacity-50")
+      itemsCanvas.classList.add("opacity-50")
+      actorsCanvas.classList.add("opacity-50")
+    } else if (tool.kind === "item" || tool.kind === "item-remove") {
+      propsCanvas.classList.remove("opacity-50")
+      itemsCanvas.classList.remove("opacity-50")
+      actorsCanvas.classList.add("opacity-50")
+    } else if (tool.kind === "actor" || tool.kind === "actor-remove") {
+      propsCanvas.classList.remove("opacity-50")
+      itemsCanvas.classList.remove("opacity-50")
+      actorsCanvas.classList.remove("opacity-50")
+    }
   })
 }
 
-function getCoordinatesFromMouseEvent(
+function getGridIndexFromMouseEvent(
   e: MouseEvent,
   el: HTMLElement,
 ) {

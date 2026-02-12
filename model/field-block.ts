@@ -481,7 +481,7 @@ export class FieldBlock {
   // The row of the world coordinates
   #j: number
   imgMap: Record<string, ImageBitmap> = {}
-  actorSpawn: SpawnMap<ActorSpawnInfo>
+  actorSpawns: SpawnMap<ActorSpawnInfo>
   itemSpawns: SpawnMap<ItemSpawnInfo>
   propSpawns: SpawnMap<PropSpawnInfo>
   field: string[]
@@ -500,7 +500,7 @@ export class FieldBlock {
     this.#w = BLOCK_SIZE * CELL_SIZE
     this.field = map.field
     this.#map = map
-    this.actorSpawn = new SpawnMap(map.actors)
+    this.actorSpawns = new SpawnMap(map.actors)
     this.itemSpawns = new SpawnMap(map.items)
     this.propSpawns = new SpawnMap(map.props)
   }
@@ -709,7 +709,7 @@ export class FieldBlock {
       i: this.#i,
       j: this.#j,
       catalogs: this.#map.catalog.refs,
-      actors: this.actorSpawn.toJSON(),
+      actors: this.actorSpawns.toJSON(),
       items: this.itemSpawns.toJSON(),
       props: this.propSpawns.toJSON(),
       field: this.field,
@@ -749,7 +749,7 @@ export class FieldBlockChunk {
   }
 
   getCharacterSpawns(): ActorSpawnInfo[] {
-    return this.#fieldBlock.actorSpawn.getChunk(this.#i, this.#j)
+    return this.#fieldBlock.actorSpawns.getChunk(this.#i, this.#j)
   }
 
   getPropSpawns(): PropSpawnInfo[] {

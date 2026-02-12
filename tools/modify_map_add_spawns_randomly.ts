@@ -39,7 +39,7 @@ async function addCharactersRandomly(mapFile: string) {
     if (cell.canEnter) {
       c++
       const isRandom = Math.random() > 0.5
-      fb.actorSpawn.add(
+      fb.actorSpawns.add(
         new ActorSpawnInfo(
           i + bm.i,
           j + bm.j,
@@ -56,7 +56,7 @@ async function addCharactersRandomly(mapFile: string) {
     )
 
     for (const i of [...Array(8).keys()]) {
-      fb.actorSpawn.add(
+      fb.actorSpawns.add(
         new ActorSpawnInfo(
           69,
           8 + i,
@@ -68,7 +68,7 @@ async function addCharactersRandomly(mapFile: string) {
     }
 
     for (const i of [...Array(7).keys()]) {
-      fb.actorSpawn.add(
+      fb.actorSpawns.add(
         new ActorSpawnInfo(
           72,
           9 + i,
@@ -80,7 +80,7 @@ async function addCharactersRandomly(mapFile: string) {
     }
 
     for (const i of [...Array(8).keys()]) {
-      fb.actorSpawn.add(
+      fb.actorSpawns.add(
         new ActorSpawnInfo(
           75,
           8 + i,
@@ -91,7 +91,7 @@ async function addCharactersRandomly(mapFile: string) {
       )
     }
 
-    fb.actorSpawn.add(
+    fb.actorSpawns.add(
       new ActorSpawnInfo(72, 8, "inertial", "../char/lena/", mapJson.href),
     )
   }
