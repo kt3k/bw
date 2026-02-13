@@ -10,8 +10,8 @@ import { Field } from "./field.ts"
 import { Actor } from "../model/actor.ts"
 
 // The starting position of the main character
-const I = 32
-const J = 36
+const I = -131
+const J = 183
 
 /**
  * The area which is visible to the user
