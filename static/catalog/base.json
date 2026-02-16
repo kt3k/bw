@@ -71,6 +71,10 @@
     "purple-mushroom": {
       "collect": "purple-mushroom",
       "src": "../item/purple-mushroom.png"
+    },
+    "fish": {
+      "collect": "fish",
+      "src": "../item/fish.png"
     }
   },
   "props": {

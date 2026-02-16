@@ -9,9 +9,19 @@ import { RectScope } from "../util/rect-scope.ts"
 import { Field } from "./field.ts"
 import { Actor } from "../model/actor.ts"
 
+const parseStart = (hash: string) => {
+  const m = hash.match(/#(-?\d+),(-?\d+)/)
+  if (m) {
+    return { i: +m[1], j: +m[2] }
+  }
+  return null
+}
+
+const start = parseStart(globalThis.location.hash)
+
 // The starting position of the main character
-const I = -131
-const J = 183
+const I = start?.i ?? -131
+const J = start?.j ?? 183
 
 /**
  * The area which is visible to the user
