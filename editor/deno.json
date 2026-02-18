@@ -14,7 +14,7 @@
     "extension": "deno bundle --platform browser extension.tsx -o out/extension.js --external vscode --format cjs",
     "webview": "deno bundle --platform browser editor.tsx -o out/editor.js",
     "webview-style": "deno -A npm:tailwindcss@3 -o out/style.css",
-    "package": "deno task compile && deno -A --unstable-unsafe-proto npm:@vscode/vsce package",
+    "package": "deno task compile && deno -A npm:@vscode/vsce@3.7.1 package",
     "update-package": "deno task package && code --install-extension vscode-bw-block-editor-0.4.0.vsix"
   },
   "lint": {
