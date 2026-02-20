@@ -203,6 +203,18 @@
     "z": {
       "src": "../prop/z.png",
       "canEnter": true
+    },
+    "1": {
+      "src": "../prop/1.png",
+      "canEnter": true
+    },
+    "2": {
+      "src": "../prop/2.png",
+      "canEnter": true
+    },
+    "3": {
+      "src": "../prop/3.png",
+      "canEnter": true
     }
   }
 }

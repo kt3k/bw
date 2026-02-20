@@ -1,22 +1,19 @@
 import {
   DIRS,
   DOWN,
-  LEFT,
   nextGrid,
   opposite,
-  RIGHT,
   turnLeft,
   turnRight,
-  UP,
 } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { seed } from "../util/random.ts"
 import type {
   Action,
-  CommonMove,
   Dir,
   IActor,
   IField,
+  IFollower,
   LoadOptions,
   Move,
   PushedEvent,
@@ -25,6 +22,7 @@ import { ActorDefinition } from "./catalog.ts"
 import { ActionQueue, type ActorAction } from "./action-queue.ts"
 import { ActorSpawnInfo } from "./field-block.ts"
 import { linePattern0 } from "./effect.ts"
+import { MoveBounce, MoveGo, MoveJump } from "./move.ts"
 
 const fallbackImagePhase0 = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADdJREFUOE9jZMAE/9GEGNH4KPLokiC1Q9AAkpzMwMCA4m0QZxgYgJ4SSPLSaDqAJAqSAm3wJSQApTMgCUQZ7FoAAAAASUVORK5CYII=",
@@ -79,159 +77,6 @@ export function spawnActor(
   return new Actor(i, j, def, id, dir, speed, moveEnd, idle)
 }
 
-export class MoveGo implements CommonMove {
-  #phase: number = 0
-  #speed: number = 1
-  #dir: Dir
-
-  type = "move" as const
-  cb?: (move: Move) => void
-
-  constructor(speed: 1 | 2 | 4 | 8 | 16, dir: Dir) {
-    this.#speed = speed
-    this.#dir = dir
-  }
-
-  step() {
-    this.#phase += this.#speed
-  }
-
-  get x(): number {
-    if (this.#dir === LEFT) {
-      return 16 - this.#phase
-    } else if (this.#dir === RIGHT) {
-      return this.#phase - 16
-    }
-    return 0
-  }
-
-  get y(): number {
-    if (this.#dir === UP) {
-      return 16 - this.#phase
-    } else if (this.#dir === DOWN) {
-      return this.#phase - 16
-    }
-    return 0
-  }
-
-  get finished(): boolean {
-    return this.#phase >= 16
-  }
-
-  get dir(): Dir {
-    return this.#dir
-  }
-
-  get halfPassed(): boolean {
-    return this.#phase >= 8
-  }
-}
-
-export class MoveBounce implements CommonMove {
-  #phase: number = 0
-  #dir: Dir
-  #pushedActors: boolean
-  #d = 0
-  #speed: 1 | 2 | 4 | 8 | 16
-
-  type = "bounce" as const
-  cb?: (move: Move) => void
-
-  constructor(dir: Dir, pushedActors: boolean, speed: 1 | 2 | 4 | 8 | 16) {
-    this.#dir = dir
-    this.#pushedActors = pushedActors
-    this.#speed = speed
-  }
-
-  step() {
-    this.#phase += this.#speed
-    if (this.#phase <= 8) {
-      this.#d += this.#speed
-    } else {
-      this.#d -= this.#speed
-    }
-  }
-
-  get x(): number {
-    if (this.#dir === LEFT) {
-      return -this.#d
-    } else if (this.#dir === RIGHT) {
-      return this.#d
-    }
-    return 0
-  }
-
-  get y(): number {
-    if (this.#dir === UP) {
-      return -this.#d
-    } else if (this.#dir === DOWN) {
-      return this.#d
-    }
-    return 0
-  }
-
-  get finished(): boolean {
-    return this.#phase >= 16
-  }
-
-  get pushedActors(): boolean {
-    return this.#pushedActors
-  }
-
-  get dir(): Dir {
-    return this.#dir
-  }
-
-  get halfPassed(): boolean {
-    return this.#phase >= 8
-  }
-}
-
-export class MoveJump implements CommonMove {
-  #phase: number = 0
-  #y: number = 0
-
-  type = "jump" as const
-  cb?: (move: Move) => void
-
-  get x(): number {
-    return 0
-  }
-
-  get y(): number {
-    return this.#y
-  }
-
-  step() {
-    this.#phase += 1
-    if (this.#phase <= 2) {
-      this.#y -= 6
-    } else if (this.#phase <= 4) {
-      this.#y -= 4
-    } else if (this.#phase <= 6) {
-      this.#y -= 2
-    } else if (this.#phase <= 8) {
-      this.#y -= 1
-    } else if (this.#phase <= 10) {
-      this.#y += 1
-    } else if (this.#phase <= 12) {
-      this.#y += 2
-    } else if (this.#phase <= 14) {
-      this.#y += 4
-    } else {
-      this.#y += 6
-    }
-  }
-
-  get finished(): boolean {
-    return this.#phase >= 16
-  }
-
-  get halfPassed(): boolean {
-    return this.#phase >= 8
-  }
-}
-
 /**
  * The actor class
  */
@@ -260,12 +105,16 @@ export class Actor implements IActor {
   #speedUpCb?: () => void
   /** The move of the actor */
   #move: Move | null = null
+  /** The last move dir */
+  #lastMoveDir: Dir | null = null
   /** MoveEnd delegate */
   #moveEnd: MoveEndDelegate | null
   /** Idle delegate */
   #idle: IdleDelegate | null
   /** buff labels */
   buff: Record<string, unknown> = { __proto__: null }
+  /** The follower */
+  #follower: IFollower | null = null
 
   /** The queue of actions to be performed */
   #actionQueue: ActionQueue<Actor, ActorAction> = new ActionQueue(
@@ -348,12 +197,10 @@ export class Actor implements IActor {
           return "end"
         }
         case "add-buff": {
-          console.trace("add-buff")
           this.buff[action.buff] = "value" in action ? action.value : true
           return "next"
         }
         case "remove-buff": {
-          console.trace("remove-buff")
           delete this.buff[action.buff]
           return "next"
         }
@@ -402,8 +249,19 @@ export class Actor implements IActor {
     if (type === "go") this.setDir(dir)
     if (this.canGo(dir, field)) {
       this.#move = new MoveGo(this.#speed, dir)
-      const [nextI, nextJ] = this.nextGrid(dir)
+      if (
+        this.#follower && this.#lastMoveDir &&
+        (this.#i !== this.#follower.i || this.#j !== this.#follower.j)
+      ) {
+        this.#follower.enqueueActions({
+          type: "go",
+          dir: this.#lastMoveDir,
+          speed: this.#speed,
+        })
+      }
+
       // actor position moves to the next grid immediately (the animation catches it up in 16 frames)
+      const [nextI, nextJ] = this.nextGrid(dir)
       this.#i = nextI
       this.#j = nextJ
       this.#physicalGridKey = this.#calcPhysicalGridKey()
@@ -484,6 +342,9 @@ export class Actor implements IActor {
       if (this.#move.finished) {
         this.#move.cb?.(this.#move)
         this.#moveEnd?.onMoveEnd(this, field, this.#move)
+        if (this.#move.type === "move") {
+          this.#lastMoveDir = this.#move.dir
+        }
         this.#move = null
       }
     } else {
@@ -662,6 +523,10 @@ export class Actor implements IActor {
       this.enqueueActions({ type: "wait", until: field.time + event.peakAt })
       this.enqueueActions({ type: "slide", dir: event.dir })
     }
+  }
+
+  setFollower(follower: IFollower) {
+    this.#follower = follower
   }
 }
 

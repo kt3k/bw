@@ -31,7 +31,7 @@ export type IEntity = IBox & ILoader & {
 
 export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
 
-export type IItem = IEntity & {
+export type IItem = IEntity & IStepper & IFollowable & {
   id: string | null
   onCollect(actor: IActor, field: IField): void
 }
@@ -80,6 +80,18 @@ export type IFinishable = {
   readonly finished: boolean
 }
 
+export type IFollower = {
+  i: number
+  j: number
+  enqueueActions(
+    ...actions: { type: "go"; dir: Dir; speed?: 1 | 2 | 4 | 8 | 16 }[]
+  ): void
+}
+
+export type IFollowable = {
+  setFollower(follower: IFollower): void
+}
+
 export type FieldEvent = {
   type: "bounced"
   dir: "up" | "down" | "left" | "right"
@@ -100,6 +112,7 @@ export type FieldEventTarget = {
 export type IActor =
   & IEntity
   & IStepper
+  & IFollowable
   & FieldEventTarget
   & {
     get id(): string
@@ -133,17 +146,16 @@ export type Move =
     type: "jump"
   })
 
+export type MoveActionBase = {
+  readonly cb?: (move: Move) => void
+  move?: Move
+  isFinished?: boolean
+  speed?: 1 | 2 | 4 | 8 | 16
+}
 export type MoveAction =
-  & {
-    readonly cb?: (move: Move) => void
-    move?: Move
-    isFinished?: boolean
-  }
-  & (
-    | { readonly type: "go"; readonly dir: Dir }
-    | { readonly type: "slide"; readonly dir: Dir }
-    | { readonly type: "jump" }
-  )
+  | { readonly type: "go"; readonly dir: Dir } & MoveActionBase
+  | { readonly type: "slide"; readonly dir: Dir } & MoveActionBase
+  | { readonly type: "jump" } & MoveActionBase
 
 export type Action =
   | MoveAction

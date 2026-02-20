@@ -6,13 +6,17 @@ import type {
   Dir,
   IActor,
   IField,
+  IFollower,
   IItem,
   ItemType,
   LoadOptions,
+  Move,
 } from "./types.ts"
 import { DIRS } from "../util/dir.ts"
 import * as signal from "../util/signal.ts"
 import { linePattern0 } from "./effect.ts"
+import { ActionQueue, type ItemAction } from "./action-queue.ts"
+import { MoveGo } from "./move.ts"
 
 const fallbackImage = await fetch(
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADRJREFUOE9jZKAQMFKon2FoGPAfzZsoribGC0PQALxORo92bGEwDAwgKXUTkw7wGjjwBgAAiwgIEW1Cnt4AAAAASUVORK5CYII=",
@@ -21,13 +25,44 @@ const fallbackImage = await fetch(
 export class Item implements IItem {
   /** The unique identifier of the item. Only items which are spawned from block map have ids. */
   readonly id: string | null
-  readonly i: number
-  readonly j: number
+  i: number
+  j: number
   readonly type: ItemType
   readonly def: ItemDefinition
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
   #image: ImageBitmap | undefined
+  #move: Move | null = null
+  #lastMoveDir: Dir | null = null
+  #follower: Item | null = null
+  readonly #actionQueue = new ActionQueue<Item, ItemAction>(
+    (_field, action) => {
+      switch (action.type) {
+        case "go": {
+          this.#move = new MoveGo(action.speed ?? 1, action.dir)
+          switch (action.dir) {
+            case "up":
+              this.j -= 1
+              break
+            case "down":
+              this.j += 1
+              break
+            case "left":
+              this.i -= 1
+              break
+            case "right":
+              this.i += 1
+              break
+          }
+          return "end"
+        }
+        default: {
+          action.type satisfies never
+          throw new Error("Unreachable")
+        }
+      }
+    },
+  )
 
   static #collectedItemIds = new Set<string>()
 
@@ -94,6 +129,11 @@ export class Item implements IItem {
         delegate.onCollect(actor, field, this)
         break
       }
+      case "fish": {
+        const delegate = new CollectFish()
+        delegate.onCollect(actor, field, this)
+        break
+      }
     }
   }
 
@@ -114,10 +154,37 @@ export class Item implements IItem {
   }
 
   get x(): number {
-    return this.i * CELL_SIZE
+    return this.i * CELL_SIZE + (this.#move?.x ?? 0)
   }
   get y(): number {
-    return this.j * CELL_SIZE
+    return this.j * CELL_SIZE + (this.#move?.y ?? 0)
+  }
+
+  step(field: IField) {
+    if (!this.#move) {
+      this.#actionQueue.process(this, field)
+    }
+
+    if (this.#move) {
+      this.#move.step()
+      if (this.#move.finished) {
+        this.#move.cb?.(this.#move)
+        if (this.#move.type === "move") {
+          this.#lastMoveDir = this.#move.dir
+        }
+        this.#move = null
+      }
+    }
+  }
+
+  enqueueActions(...actions: ItemAction[]) {
+    for (const action of actions) {
+      this.#actionQueue.enqueue(action)
+    }
+  }
+
+  setFollower(follower: IFollower): void {
+    this.#follower = follower as Item
   }
 }
 
@@ -242,3 +309,17 @@ export class CollectPurpleMushroom implements CollectDelegate {
     end()
   }
 }
+
+export class CollectFish implements CollectDelegate {
+  onCollect(actor: IActor, field: IField, item: Item): void {
+    actor.setFollower(item)
+
+    for (
+      const effect of linePattern0(DIRS, actor.i, actor.j, 1, 0.7, 3, "#006e8a")
+    ) {
+      field.effects.add(effect)
+    }
+  }
+}
+
+// implement following item delegate

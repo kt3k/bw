@@ -1,7 +1,6 @@
 import type { Dir, IEntity, IField, MoveAction } from "./types.ts"
 import { splashColor } from "../game/field.ts"
 import { EffectLine1, linePattern0 } from "./effect.ts"
-import { UP } from "../util/dir.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 
 type CommonAction = {
@@ -37,6 +36,10 @@ export type PropAction =
   | CommonAction
   | { type: "break"; dir: Dir; cb?: (motion: Motion) => void }
   | { type: "remove" }
+
+export type ItemAction =
+  | CommonAction
+  | MoveAction & { readonly type: "go" }
 
 export type ActorAction =
   | CommonAction
