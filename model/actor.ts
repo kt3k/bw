@@ -249,15 +249,8 @@ export class Actor implements IActor {
     if (type === "go") this.setDir(dir)
     if (this.canGo(dir, field)) {
       this.#move = new MoveGo(this.#speed, dir)
-      if (
-        this.#follower && this.#lastMoveDir &&
-        (this.#i !== this.#follower.i || this.#j !== this.#follower.j)
-      ) {
-        this.#follower.enqueueActions({
-          type: "go",
-          dir: this.#lastMoveDir,
-          speed: this.#speed,
-        })
+      if (this.#follower && this.#lastMoveDir) {
+        this.#follower.follow(this.#i, this.#j, this.#lastMoveDir, this.#speed)
       }
 
       // actor position moves to the next grid immediately (the animation catches it up in 16 frames)
@@ -288,6 +281,7 @@ export class Actor implements IActor {
     this.#move = new MoveJump()
     this.#move.cb = cb
     this.#idleCounter = 0
+    this.unsetFollower()
   }
 
   setDir(state: Dir) {
@@ -526,7 +520,18 @@ export class Actor implements IActor {
   }
 
   setFollower(follower: IFollower) {
-    this.#follower = follower
+    if (this.#follower) {
+      this.#follower.setFollower(follower)
+    } else {
+      this.#follower = follower
+    }
+  }
+
+  unsetFollower() {
+    if (this.#follower) {
+      this.#follower.unfollow()
+      this.#follower = null
+    }
   }
 }
 

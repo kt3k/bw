@@ -34,7 +34,8 @@ export class Item implements IItem {
   #image: ImageBitmap | undefined
   #move: Move | null = null
   #lastMoveDir: Dir | null = null
-  #follower: Item | null = null
+  #follower: IFollower | null = null
+  #followState: "following" | "waiting" | null = null
   readonly #actionQueue = new ActionQueue<Item, ItemAction>(
     (_field, action) => {
       switch (action.type) {
@@ -184,7 +185,41 @@ export class Item implements IItem {
   }
 
   setFollower(follower: IFollower): void {
-    this.#follower = follower as Item
+    if (this.#follower) {
+      this.#follower.setFollower(follower)
+    } else {
+      this.#follower = follower
+    }
+  }
+
+  follow(i: number, j: number, dir: Dir, speed: 1 | 2 | 4 | 8 | 16) {
+    if (this.#followState === "following") {
+      this.enqueueActions({ type: "go", dir, speed })
+      if (this.#follower && this.#lastMoveDir) {
+        this.#follower.follow(this.i, this.j, this.#lastMoveDir, speed)
+      }
+    } else if (this.#followState === "waiting") {
+      if (this.i === i && this.j === j) {
+        this.#followState = "following"
+      }
+    }
+  }
+
+  unfollow() {
+    console.log("unfollow", this.id, this.i, this.j)
+    this.#followState = null
+    if (this.#follower) {
+      this.#follower.unfollow()
+      this.#follower = null
+    }
+  }
+
+  get isFollowing() {
+    return this.#followState !== null
+  }
+
+  startFollowing() {
+    this.#followState = "waiting"
   }
 }
 
@@ -312,7 +347,11 @@ export class CollectPurpleMushroom implements CollectDelegate {
 
 export class CollectFish implements CollectDelegate {
   onCollect(actor: IActor, field: IField, item: Item): void {
+    if (item.isFollowing) {
+      return
+    }
     actor.setFollower(item)
+    item.startFollowing()
 
     for (
       const effect of linePattern0(DIRS, actor.i, actor.j, 1, 0.7, 3, "#006e8a")
@@ -321,5 +360,3 @@ export class CollectFish implements CollectDelegate {
     }
   }
 }
-
-// implement following item delegate
