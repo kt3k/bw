@@ -55,6 +55,7 @@ export class IdleMainActor implements IdleDelegate {
     ) {
       inputQueue.shift()
       actor.jump()
+      actor.unsetFollower()
     }
   }
 }

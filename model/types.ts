@@ -80,12 +80,14 @@ export type IFinishable = {
   readonly finished: boolean
 }
 
-export type IFollower = {
+export type IFollower = IFollowable & {
   i: number
   j: number
   enqueueActions(
     ...actions: { type: "go"; dir: Dir; speed?: 1 | 2 | 4 | 8 | 16 }[]
   ): void
+  follow(i: number, j: number, dir: Dir, speed: 1 | 2 | 4 | 8 | 16): void
+  unfollow(): void
 }
 
 export type IFollowable = {

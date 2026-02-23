@@ -107,15 +107,20 @@ export class FieldItems implements IStepper, ILoader {
   }
 
   step(field: IField) {
+    const changed = new Set<[string, string, IItem]>()
     for (const item of this.#items) {
       const key = `${item.i}.${item.j}`
       item.step(field)
       const keyAfter = `${item.i}.${item.j}`
       if (key !== keyAfter) {
-        // The item has moved
-        delete this.#coordMap[key]
-        this.#coordMap[keyAfter] = item
+        changed.add([key, keyAfter, item])
       }
+    }
+    for (const [key] of changed) {
+      delete this.#coordMap[key]
+    }
+    for (const [_, keyAfter, item] of changed) {
+      this.#coordMap[keyAfter] = item
     }
   }
 

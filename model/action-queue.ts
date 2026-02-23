@@ -63,13 +63,13 @@ export type ActorAction =
       | "back"
   }
   | {
-    type: "add-buff"
-    buff: string
-    value?: unknown
+    readonly type: "add-buff"
+    readonly buff: string
+    readonly value?: unknown
   }
   | {
-    type: "remove-buff"
-    buff: string
+    readonly type: "remove-buff"
+    readonly buff: string
   }
 
 export class ActionQueue<
