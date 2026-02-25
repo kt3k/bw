@@ -9,7 +9,7 @@ import { RectScope } from "../util/rect-scope.ts"
 import { Field } from "./field.ts"
 import { Actor } from "../model/actor.ts"
 
-const parseStart = (hash: string) => {
+const parseGridPosition = (hash: string) => {
   const m = hash.match(/#(-?\d+),(-?\d+)/)
   if (m) {
     return { i: +m[1], j: +m[2] }
@@ -17,7 +17,7 @@ const parseStart = (hash: string) => {
   return null
 }
 
-const start = parseStart(globalThis.location.hash)
+const start = parseGridPosition(globalThis.location.hash)
 
 // The starting position of the main character
 const I = start?.i ?? -131
@@ -78,21 +78,17 @@ export function GameScreen({ el, query }: Context) {
     new MoveEndMainActor(),
     new IdleMainActor(),
   )
-  signal.centerPixel.update({ x: me.centerX, y: me.centerY })
-
   const viewScope = new ViewScope(screenSize, screenSize)
-
   const entityLayer = new DrawLayer(entityCanvas, viewScope)
-
   const activateScope = new ActivateScope(screenSize)
   const deactivateScope = new DeactivateScope(screenSize)
 
-  const field = new Field(query(".field")!, activateScope, deactivateScope)
-  field.actors.add(me)
+  const field = new Field(query(".field")!, me, activateScope, deactivateScope)
+  signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
 
   signal.centerGrid10.subscribe(() => {
-    field.checkBlockLoad(me.i, me.j, viewScope)
-    field.checkBlockUnload(me.i, me.j)
+    field.checkBlockLoad(field.me.i, field.me.j, viewScope)
+    field.checkBlockUnload(field.me.i, field.me.j)
   })
 
   signal.centerPixel.subscribe(({ x, y }) => {
@@ -106,10 +102,7 @@ export function GameScreen({ el, query }: Context) {
     }
   })
 
-  let i = 0
-
   const loop = new Gameloop(60, () => {
-    i++
     if (!field.assetsReady) {
       signal.isGameLoading.update(true)
       return
@@ -117,7 +110,7 @@ export function GameScreen({ el, query }: Context) {
     signal.isGameLoading.update(false)
 
     field.step()
-    signal.centerPixel.update({ x: me.centerX, y: me.centerY })
+    signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
 
     entityLayer.clear()
     entityLayer.drawIterableEntity(field.props.iter())
@@ -126,17 +119,19 @@ export function GameScreen({ el, query }: Context) {
     entityLayer.drawIterableColorBox(field.effects.iter())
     entityLayer.drawWhiteNoise()
 
-    if (i % 300 === 299) {
-      field.actors.checkDeactivate(me.i, me.j)
+    const time = field.time
+
+    if (time % 300 === 299) {
+      field.actors.checkDeactivate(field.me.i, field.me.j)
     }
-    if (i % 300 === 199) {
-      field.items.checkDeactivate(me.i, me.j)
+    if (time % 300 === 199) {
+      field.items.checkDeactivate(field.me.i, field.me.j)
     }
-    if (i % 300 === 99) {
-      field.props.checkDeactivate(me.i, me.j)
+    if (time % 300 === 99) {
+      field.props.checkDeactivate(field.me.i, field.me.j)
     }
-    if (i % 60 === 59) {
-      field.checkActivate(me.i, me.j, { viewScope })
+    if (time % 60 === 59) {
+      field.checkActivate(field.me.i, field.me.j, { viewScope })
     }
   })
   loop.onStep((fps, v) => {
@@ -146,4 +141,22 @@ export function GameScreen({ el, query }: Context) {
     }
   })
   loop.start()
+
+  const reset = (i: number, j: number) => {
+    loop.stop()
+    query(".curtain")!.style.opacity = "1"
+    setTimeout(() => {
+      field.reset()
+      field.me.fastTravel(i, j)
+      signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
+      loop.start()
+    }, 2000)
+  }
+
+  globalThis.onhashchange = () => {
+    const pos = parseGridPosition(globalThis.location.hash)
+    if (pos) {
+      reset(pos.i, pos.j)
+    }
+  }
 }

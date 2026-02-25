@@ -418,34 +418,53 @@ class BlockUnloadScope extends RectScope {
 }
 
 export class Field implements IField {
-  #el: HTMLElement
-  #blocks: Record<string, FieldBlock> = {}
-  #blockElements: Record<string, HTMLCanvasElement> = {}
-  #loadScope = new BlockLoadScope()
-  #unloadScope = new BlockUnloadScope()
-  #activateScope: RectScope
-  #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
-  #initialBlocksLoaded = false
-  #initialActivateReady = false
+  readonly #el: HTMLElement
+  readonly #blocks: Record<string, FieldBlock> = {}
+  readonly #blockElements: Record<string, HTMLCanvasElement> = {}
+  readonly #loadScope = new BlockLoadScope()
+  readonly #unloadScope = new BlockUnloadScope()
+  readonly #activateScope: RectScope
+  readonly #deactivateScope: RectScope
+  readonly #mapLoader = new BlockMapLoader(new URL("map/", location.href).href)
+  readonly me: Actor
 
+  // mutables
   #actors: FieldActors
   #items: FieldItems
   #props: FieldProps
   #effects: FieldEffects
 
-  #time = 0
+  #time: number
+  #initialBlocksLoaded: boolean
+  #initialActivateReady: boolean
 
   constructor(
     el: HTMLElement,
+    me: Actor,
     activateScope: RectScope,
     deactivateScope: RectScope,
   ) {
     this.#el = el
+    this.me = me
     this.#activateScope = activateScope
-    this.#actors = new FieldActors([], deactivateScope)
-    this.#items = new FieldItems(deactivateScope)
-    this.#props = new FieldProps(deactivateScope)
+    this.#deactivateScope = deactivateScope
+    this.#actors = new FieldActors([me], this.#deactivateScope)
+    this.#items = new FieldItems(this.#deactivateScope)
+    this.#props = new FieldProps(this.#deactivateScope)
     this.#effects = new FieldEffects()
+    this.#time = 0
+    this.#initialBlocksLoaded = false
+    this.#initialActivateReady = false
+  }
+
+  reset() {
+    this.#actors = new FieldActors([this.me], this.#deactivateScope)
+    this.#items = new FieldItems(this.#deactivateScope)
+    this.#props = new FieldProps(this.#deactivateScope)
+    this.#effects = new FieldEffects()
+    this.#time = 0
+    this.#initialBlocksLoaded = false
+    this.#initialActivateReady = false
   }
 
   get actors() {

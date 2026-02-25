@@ -240,6 +240,15 @@ export class Actor implements IActor {
     this.#idle = idle
   }
 
+  fastTravel(i: number, j: number) {
+    this.#i = i
+    this.#j = j
+    this.#dir = DOWN
+    this.#physicalGridKey = this.#calcPhysicalGridKey()
+    this.#move = null
+    this.#idleCounter = 0
+  }
+
   tryMove(
     type: "go" | "slide",
     dir: Dir,
