@@ -25,6 +25,7 @@ import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
 import { DIRS, nextGrid } from "../util/dir.ts"
 import { CellDefinition, loadCatalog } from "../model/catalog.ts"
+import { GridSet } from "../util/grid-set.ts"
 
 class FieldEffects implements IStepper {
   #effects = new Set<IStepper & IColorBox & IFinishable>()
@@ -50,8 +51,8 @@ class FieldEffects implements IStepper {
 /** The items on the field */
 export class FieldItems implements IStepper, ILoader {
   #items: Set<IItem> = new Set()
-  #coordMap = {} as Record<string, IItem>
   #deactivateScope: RectScope
+  #gridSet = new GridSet<IItem>()
 
   constructor(scope: RectScope) {
     this.#deactivateScope = scope
@@ -63,14 +64,14 @@ export class FieldItems implements IStepper, ILoader {
       .filter((item) => !this.#deactivateScope.overlaps(item))
       .forEach((item) => {
         console.log("deactivating item", item.id)
-        this.#deactivate(item.i, item.j)
+        this.#deactivate(item.i, item.j, item.id)
       })
     signal.itemsCount.update(this.#items.size)
   }
 
   add(item: IItem) {
     this.#items.add(item)
-    this.#coordMap[`${item.i}.${item.j}`] = item
+    this.#gridSet.add(item.i, item.j, item)
     signal.itemsCount.update(this.#items.size)
   }
 
@@ -79,12 +80,14 @@ export class FieldItems implements IStepper, ILoader {
   }
 
   get(i: number, j: number): IItem | undefined {
-    return this.#coordMap[`${i}.${j}`]
+    // exclude items that are following actors or items
+    return this.#gridSet.get(i, j)?.values().filter((item) => !item.isFollowing)
+      .next().value
   }
 
   /** Collects an item from the field. */
-  collect(i: number, j: number) {
-    const item = this.#deactivate(i, j)
+  collect(i: number, j: number, id: string) {
+    const item = this.#deactivate(i, j, id)
     if (item?.id) {
       Item.collect(item.id)
     }
@@ -94,33 +97,31 @@ export class FieldItems implements IStepper, ILoader {
    * Removes an item from the field.
    * The item can be re-spawned later.
    */
-  #deactivate(i: number, j: number): IItem | undefined {
-    const key = `${i}.${j}`
-    const item = this.#coordMap[key]
+  #deactivate(i: number, j: number, id: string): IItem | undefined {
+    const item = this.#gridSet.get(i, j)?.values().find((item) =>
+      item.id === id
+    )
     if (!item) {
       return
     }
     this.#items.delete(item)
-    delete this.#coordMap[key]
+    this.#gridSet.delete(i, j, item)
     signal.itemsCount.update(this.#items.size)
     return item
   }
 
   step(field: IField) {
-    const changed = new Set<[string, string, IItem]>()
     for (const item of this.#items) {
-      const key = `${item.i}.${item.j}`
+      const iBefore = item.i
+      const jBefore = item.j
       item.step(field)
-      const keyAfter = `${item.i}.${item.j}`
-      if (key !== keyAfter) {
-        changed.add([key, keyAfter, item])
+      const iAfter = item.i
+      const jAfter = item.j
+      if (iBefore !== iAfter || jBefore !== jAfter) {
+        // item moved
+        this.#gridSet.delete(iBefore, jBefore, item)
+        this.#gridSet.add(iAfter, jAfter, item)
       }
-    }
-    for (const [key] of changed) {
-      delete this.#coordMap[key]
-    }
-    for (const [_, keyAfter, item] of changed) {
-      this.#coordMap[keyAfter] = item
     }
   }
 
@@ -522,8 +523,8 @@ export class Field implements IField {
   peekItem(i: number, j: number): IItem | undefined {
     return this.#items.get(i, j)
   }
-  collectItem(i: number, j: number): void {
-    this.#items.collect(i, j)
+  collectItem(i: number, j: number, id: string): void {
+    this.#items.collect(i, j, id)
   }
 
   // Spawns a new actor at the given grid coordinate

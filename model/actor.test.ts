@@ -1,4 +1,5 @@
-import { Actor, MoveGo } from "./actor.ts"
+import { Actor } from "./actor.ts"
+import { MoveGo } from "./move.ts"
 import { ActorDefinition } from "./catalog.ts"
 import { assert, assertEquals, assertFalse } from "@std/assert"
 

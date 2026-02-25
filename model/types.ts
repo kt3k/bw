@@ -32,7 +32,8 @@ export type IEntity = IBox & ILoader & {
 export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
 
 export type IItem = IEntity & IStepper & IFollowable & {
-  id: string | null
+  id: string
+  isFollowing: boolean
   onCollect(actor: IActor, field: IField): void
 }
 
@@ -55,7 +56,7 @@ export type IField = {
   canEnterStatic(i: number, j: number): boolean
   peekItem(i: number, j: number): IItem | undefined
   spawnActor(type: string, i: number, j: number, dir: Dir): IActor | null
-  collectItem(i: number, j: number): void
+  collectItem(i: number, j: number, id: string): void
   actors: {
     iter(): Iterable<IActor>
     /** This method is slow */

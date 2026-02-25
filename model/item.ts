@@ -23,8 +23,8 @@ const fallbackImage = await fetch(
 ).then((res) => res.blob()).then((blob) => createImageBitmap(blob))
 
 export class Item implements IItem {
-  /** The unique identifier of the item. Only items which are spawned from block map have ids. */
-  readonly id: string | null
+  /** The unique identifier of the item. */
+  readonly id: string
   i: number
   j: number
   readonly type: ItemType
@@ -98,7 +98,7 @@ export class Item implements IItem {
     type: ItemType,
     def: ItemDefinition,
   ) {
-    this.id = id
+    this.id = id ?? `item-${i}-${j}-${crypto.randomUUID()}`
     this.i = i
     this.j = j
     this.type = type
@@ -227,8 +227,8 @@ interface CollectDelegate {
 }
 
 export class CollectApple implements CollectDelegate {
-  onCollect(actor: IActor, field: IField, _item: Item): void {
-    field.collectItem(actor.i, actor.j)
+  onCollect(actor: IActor, field: IField, item: Item): void {
+    field.collectItem(actor.i, actor.j, item.id)
     const dirs = [] as Dir[]
     for (const dir of DIRS) {
       if (dir === actor.dir) continue
@@ -251,8 +251,8 @@ export class CollectApple implements CollectDelegate {
 }
 
 export class CollectGreenApple implements CollectDelegate {
-  onCollect(actor: IActor, field: IField, _item: Item): void {
-    field.collectItem(actor.i, actor.j)
+  onCollect(actor: IActor, field: IField, item: Item): void {
+    field.collectItem(actor.i, actor.j, item.id)
 
     for (
       const effect of linePattern0(DIRS, actor.i, actor.j, 1, 0.7, 3, "#004000")
@@ -266,8 +266,8 @@ export class CollectGreenApple implements CollectDelegate {
 }
 
 export class CollectMushroom implements CollectDelegate {
-  onCollect(actor: IActor, field: IField, _item: Item): void {
-    field.collectItem(actor.i, actor.j)
+  onCollect(actor: IActor, field: IField, item: Item): void {
+    field.collectItem(actor.i, actor.j, item.id)
     actor.clearActionQueue()
     actor.enqueueActions(
       { type: "jump" },
@@ -285,8 +285,8 @@ export class CollectMushroom implements CollectDelegate {
 }
 
 export class CollectPurpleMushroom implements CollectDelegate {
-  onCollect(actor: IActor, field: IField, _item: Item): void {
-    field.collectItem(actor.i, actor.j)
+  onCollect(actor: IActor, field: IField, item: Item): void {
+    field.collectItem(actor.i, actor.j, item.id)
     actor.clearActionQueue()
     actor.enqueueActions(
       { type: "jump" },
