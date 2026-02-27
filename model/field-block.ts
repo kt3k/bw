@@ -79,16 +79,19 @@ export class PropSpawnInfo implements IBox {
   readonly y: number
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
+  readonly data: unknown
   constructor(
     i: number,
     j: number,
     type: PropType,
     def: PropDefinition,
+    data: unknown,
   ) {
     this.id = `${i}.${j}.${type}` // Unique ID for the spawn
     this.i = i
     this.j = j
     this.type = type
+    this.data = data
     this.def = def
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
@@ -100,11 +103,15 @@ export class PropSpawnInfo implements IBox {
   }
 
   toJSON(): BlockMapSource["props"][number] {
-    return {
+    const json: BlockMapSource["props"][number] = {
       i: this.i,
       j: this.j,
       type: this.type,
     }
+    if (this.data !== undefined) {
+      json.data = this.data
+    }
+    return json
   }
 }
 
@@ -274,6 +281,7 @@ interface BlockMapSource {
     i: number
     j: number
     type: string
+    data?: unknown
   }[]
   field: string[]
 }
@@ -331,6 +339,7 @@ export class BlockMap {
         prop.j,
         prop.type as PropType,
         catalog.props[prop.type]!,
+        prop.data,
       )
     )
     this.field = obj.field

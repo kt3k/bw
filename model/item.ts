@@ -106,9 +106,6 @@ export class Item implements IItem {
   }
 
   onCollect(actor: Actor, field: IField) {
-    if (this.id) {
-      Item.collect(this.id)
-    }
     switch (this.def.type) {
       case "apple": {
         const delegate = new CollectApple()

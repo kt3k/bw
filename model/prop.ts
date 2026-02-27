@@ -1,6 +1,7 @@
 import { CELL_SIZE } from "../util/constants.ts"
 import type {
   Dir,
+  IActor,
   IField,
   IProp,
   LoadOptions,
@@ -23,6 +24,7 @@ export class Prop implements IProp {
   readonly j: number
   readonly type: PropType
   readonly def: PropDefinition
+  readonly data: unknown
   #motion: Motion | null = null
   readonly #actionQueue = new ActionQueue<Prop, PropAction>(
     (field, action) => {
@@ -60,6 +62,7 @@ export class Prop implements IProp {
       spawn.type,
       spawn.def,
       pushed,
+      spawn.data,
     )
   }
 
@@ -76,6 +79,7 @@ export class Prop implements IProp {
     type: PropType,
     def: PropDefinition,
     pushed: PushedDelegate | null,
+    data: unknown,
   ) {
     this.id = id
     this.i = i
@@ -83,6 +87,7 @@ export class Prop implements IProp {
     this.type = type
     this.def = def
     this.#pushed = pushed
+    this.data = data
   }
 
   /**
@@ -150,6 +155,21 @@ export class Prop implements IProp {
 
   onPushed(event: PushedEvent, field: IField): void {
     this.#pushed?.onPushed(event, this, field)
+  }
+
+  onEnter(_actor: IActor, _field: IField): void {
+    if (this.def.onEnter === "teleport") {
+      // deno-lint-ignore no-explicit-any
+      const data = this.data as any
+      const i = data.i
+      const j = data.j
+      if (typeof i === "number" && typeof j === "number") {
+        location.hash = ""
+        setTimeout(() => {
+          location.replace(`#${i},${j}`)
+        }, 10)
+      }
+    }
   }
 
   enqueueActions(...actions: PropAction[]): void {

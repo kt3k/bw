@@ -53,6 +53,7 @@ export class FieldItems implements IStepper, ILoader {
   #items: Set<IItem> = new Set()
   #deactivateScope: RectScope
   #gridSet = new GridSet<IItem>()
+  #idSet = new Set<string>()
 
   constructor(scope: RectScope) {
     this.#deactivateScope = scope
@@ -60,18 +61,27 @@ export class FieldItems implements IStepper, ILoader {
 
   checkDeactivate(i: number, j: number) {
     this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    ;[...this.#items.values()]
+    let c = 0
+    this.#items.values()
       .filter((item) => !this.#deactivateScope.overlaps(item))
       .forEach((item) => {
-        console.log("deactivating item", item.id)
+        c++
         this.#deactivate(item.i, item.j, item.id)
       })
+    if (c > 0) {
+      console.log(`deactivating ${c} items`)
+    }
     signal.itemsCount.update(this.#items.size)
+  }
+
+  has(id: string) {
+    return this.#idSet.has(id)
   }
 
   add(item: IItem) {
     this.#items.add(item)
     this.#gridSet.add(item.i, item.j, item)
+    this.#idSet.add(item.id)
     signal.itemsCount.update(this.#items.size)
   }
 
@@ -106,6 +116,7 @@ export class FieldItems implements IStepper, ILoader {
     }
     this.#items.delete(item)
     this.#gridSet.delete(i, j, item)
+    this.#idSet.delete(id)
     signal.itemsCount.update(this.#items.size)
     return item
   }
@@ -127,14 +138,15 @@ export class FieldItems implements IStepper, ILoader {
 
   async loadAssets(options: LoadOptions): Promise<void> {
     await Promise.all(
-      [...this.#items]
+      this.#items.values()
         .filter((item) => !item.assetsReady)
-        .map((item) => item.loadAssets(options)),
+        .map((item) => item.loadAssets(options))
+        .toArray(),
     )
   }
 
   get assetsReady(): boolean {
-    return [...this.#items].every((x) => x.assetsReady)
+    return this.#items.values().every((x) => x.assetsReady)
   }
 
   iter() {
@@ -153,12 +165,16 @@ export class FieldProps implements IStepper, ILoader {
 
   checkDeactivate(i: number, j: number) {
     this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
-    ;[...this.#props.values()]
+    let c = 0
+    this.#props.values()
       .filter((obj) => !this.#deactivateScope.overlaps(obj))
       .forEach((obj) => {
-        console.log("deactivating object", obj.id)
+        c++
         this.remove(obj.i, obj.j)
       })
+    if (c > 0) {
+      console.log(`deactivating ${c} objects`)
+    }
     signal.propsCount.update(this.#props.size)
   }
 
@@ -306,17 +322,21 @@ export class FieldActors implements IStepper, ILoader {
     this.#deactivateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
 
     const actors = [] as IActor[]
+    let c = 0
     for (const actor of this.#actors) {
       if (this.#deactivateScope.overlaps(actor)) {
         actors.push(actor)
         continue
       }
-      console.log("deactivating actor", actor.id)
+      c++
       this.#idSet.delete(actor.id)
       this.#coordCountMap.decrement(actor.physicalGridKey)
     }
     this.#actors = actors
     signal.actorsCount.update(this.#actors.length)
+    if (c > 0) {
+      console.log(`deactivating ${c} actors`)
+    }
   }
 
   iter() {
@@ -590,9 +610,7 @@ export class Field implements IField {
       this.#addBlock(new FieldBlock(map))
     }
     const initialLoad = !this.#initialBlocksLoaded
-    await Promise.all(
-      [...this.#getChunks(i, j)].map((c) => c.render(initialLoad)),
-    )
+    await Promise.all(this.#getChunks(i, j).map((c) => c.render(initialLoad)))
     if (!this.#initialBlocksLoaded) {
       this.#initialBlocksLoaded = true
       this.checkActivate(
@@ -627,23 +645,30 @@ export class Field implements IField {
     this.#activateScope.setCenter(i * CELL_SIZE, j * CELL_SIZE)
 
     const chunks = [...this.#getChunks(i, j)]
-    const newCharSpawns = chunks.flatMap((c) => c.getCharacterSpawns())
+    const newActorSpawns = chunks.values()
+      .flatMap((c) => c.getCharacterSpawns())
       .filter((spawn) => !this.#actors.has(spawn.id)) // isn't spawned yet
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
+      .toArray()
 
-    const newItemSpawns = chunks.flatMap((c) => c.getItemSpawns())
+    const newItemSpawns = chunks.values()
+      .flatMap((c) => c.getItemSpawns())
       .filter((spawn) => !this.#items.isCollected(spawn.id)) // isn't collected yet
+      .filter((spawn) => !this.#items.has(spawn.id)) // item is already on the field
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
+      .toArray()
 
-    const newObjectSpawns = chunks.flatMap((c) => c.getPropSpawns())
+    const newPropSpawns = chunks.values()
+      .flatMap((c) => c.getPropSpawns())
       .filter((spawn) => initialLoad || !viewScope.overlaps(spawn)) // not in view
       .filter((spawn) => this.#activateScope.overlaps(spawn)) // in activate scope
+      .toArray()
 
-    if (newCharSpawns.length > 0) {
+    if (newActorSpawns.length > 0) {
       let i = 0
-      for (const spawn of newCharSpawns) {
+      for (const spawn of newActorSpawns) {
         i++
         this.#actors.add(Actor.fromSpawn(spawn))
       }
@@ -681,9 +706,9 @@ export class Field implements IField {
       await this.#items.loadAssets({ loadImage })
     }
 
-    if (newObjectSpawns.length > 0) {
+    if (newPropSpawns.length > 0) {
       let i = 0
-      for (const spawn of newObjectSpawns) {
+      for (const spawn of newPropSpawns) {
         if (this.#props.get(spawn.i, spawn.j)) {
           // The space is already occupied by some other object
           continue

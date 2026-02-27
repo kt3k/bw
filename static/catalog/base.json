@@ -100,6 +100,11 @@
       "pushed": "break",
       "canEnter": false
     },
+    "portal": {
+      "src": "../prop/portal.png",
+      "canEnter": true,
+      "onEnter": "teleport"
+    },
     "a": {
       "src": "../prop/a.png",
       "canEnter": true

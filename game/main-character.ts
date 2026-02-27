@@ -63,5 +63,7 @@ export class IdleMainActor implements IdleDelegate {
 export class MoveEndMainActor implements MoveEndDelegate {
   onMoveEnd(actor: Actor, field: IField, _move: Move): void {
     field.peekItem(actor.i, actor.j)?.onCollect(actor, field)
+
+    field.props.get(actor.i, actor.j)?.onEnter(actor, field)
   }
 }

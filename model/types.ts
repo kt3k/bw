@@ -43,6 +43,7 @@ export type IProp =
   & IEntity
   & IStepper
   & FieldEventTarget
+  & { onEnter(actor: IActor, field: IField): void }
   & {
     id: string | null
     type: PropType

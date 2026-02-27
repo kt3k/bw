@@ -20,8 +20,8 @@ const parseGridPosition = (hash: string) => {
 const start = parseGridPosition(globalThis.location.hash)
 
 // The starting position of the main character
-const I = start?.i ?? -131
-const J = start?.j ?? 183
+const I = start?.i ?? -9964
+const J = start?.j ?? -9981
 
 /**
  * The area which is visible to the user
@@ -148,6 +148,7 @@ export function GameScreen({ el, query }: Context) {
     setTimeout(() => {
       field.reset()
       field.me.fastTravel(i, j)
+      field.me.unsetFollower()
       signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
       loop.start()
     }, 2000)
