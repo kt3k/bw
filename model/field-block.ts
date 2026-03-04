@@ -28,8 +28,8 @@ function g2l(i: number, j: number): [number, number] {
   return [localI, localJ]
 }
 
-/** {@linkcode ItemSpawnInfo} represents the spawn info for the items in {@linkcode FieldBlock} */
-export class ItemSpawnInfo implements IBox {
+/** {@linkcode ItemSpawn} represents the spawn info for the items in {@linkcode FieldBlock} */
+export class ItemSpawn implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
@@ -54,7 +54,7 @@ export class ItemSpawnInfo implements IBox {
     this.y = j * CELL_SIZE
   }
 
-  equals(other: ItemSpawnInfo): boolean {
+  equals(other: ItemSpawn): boolean {
     return this.i === other.i && this.j === other.j &&
       this.type === other.type
   }
@@ -68,8 +68,8 @@ export class ItemSpawnInfo implements IBox {
   }
 }
 
-/** {@linkcode PropSpawnInfo} represents the spawn info for the props in {@linkcode FieldBlock} */
-export class PropSpawnInfo implements IBox {
+/** {@linkcode PropSpawn} represents the spawn info for the props in {@linkcode FieldBlock} */
+export class PropSpawn implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
@@ -97,7 +97,7 @@ export class PropSpawnInfo implements IBox {
     this.y = j * CELL_SIZE
   }
 
-  equals(other: PropSpawnInfo): boolean {
+  equals(other: PropSpawn): boolean {
     return this.i === other.i && this.j === other.j &&
       this.type === other.type
   }
@@ -117,7 +117,7 @@ export class PropSpawnInfo implements IBox {
 
 type ActorSpeed = 1 | 2 | 4 | 8 | 16
 
-export class ActorSpawnInfo implements IBox {
+export class ActorSpawn implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
@@ -147,7 +147,7 @@ export class ActorSpawnInfo implements IBox {
     this.y = j * CELL_SIZE
   }
 
-  equals(other: ActorSpawnInfo): boolean {
+  equals(other: ActorSpawn): boolean {
     return this.i === other.i &&
       this.j === other.j &&
       this.def.type === other.def.type &&
@@ -304,18 +304,18 @@ export class BlockMap {
   readonly i: number
   // The row of the world coordinates
   readonly j: number
-  readonly actors: ActorSpawnInfo[]
-  readonly items: ItemSpawnInfo[]
-  readonly props: PropSpawnInfo[] = []
+  readonly actors: ActorSpawn[]
+  readonly items: ItemSpawn[]
+  readonly props: PropSpawn[] = []
   readonly field: string[]
   #source: BlockMapSource
   catalog: Catalog
-  constructor(url: string, obj: BlockMapSource, catalog: Catalog) {
+  constructor(url: string, source: BlockMapSource, catalog: Catalog) {
     this.url = url
-    this.i = obj.i
-    this.j = obj.j
-    this.actors = (obj.actors ?? []).map((spawn) =>
-      new ActorSpawnInfo(
+    this.i = source.i
+    this.j = source.j
+    this.actors = (source.actors ?? []).map((spawn) =>
+      new ActorSpawn(
         spawn.i,
         spawn.j,
         catalog.actors[spawn.type]!,
@@ -325,16 +325,16 @@ export class BlockMap {
         },
       )
     )
-    this.items = (obj.items ?? []).map((item) =>
-      new ItemSpawnInfo(
+    this.items = (source.items ?? []).map((item) =>
+      new ItemSpawn(
         item.i,
         item.j,
         item.type as ItemType,
         catalog.items[item.type]!,
       )
     )
-    this.props = (obj.props ?? []).map((prop) =>
-      new PropSpawnInfo(
+    this.props = (source.props ?? []).map((prop) =>
+      new PropSpawn(
         prop.i,
         prop.j,
         prop.type as PropType,
@@ -342,8 +342,8 @@ export class BlockMap {
         prop.data,
       )
     )
-    this.field = obj.field
-    this.#source = obj
+    this.field = source.field
+    this.#source = source
     this.catalog = catalog
   }
 
@@ -490,9 +490,9 @@ export class FieldBlock {
   // The row of the world coordinates
   #j: number
   imgMap: Record<string, ImageBitmap> = {}
-  actorSpawns: SpawnMap<ActorSpawnInfo>
-  itemSpawns: SpawnMap<ItemSpawnInfo>
-  propSpawns: SpawnMap<PropSpawnInfo>
+  actorSpawns: SpawnMap<ActorSpawn>
+  itemSpawns: SpawnMap<ItemSpawn>
+  propSpawns: SpawnMap<PropSpawn>
   field: string[]
   #map: BlockMap
   #canvas: HTMLCanvasElement | undefined
@@ -753,15 +753,15 @@ export class FieldBlockChunk {
     this.#fieldBlock = block
   }
 
-  getItemSpawns(): ItemSpawnInfo[] {
+  getItemSpawns(): ItemSpawn[] {
     return this.#fieldBlock.itemSpawns.getChunk(this.#i, this.#j)
   }
 
-  getCharacterSpawns(): ActorSpawnInfo[] {
+  getCharacterSpawns(): ActorSpawn[] {
     return this.#fieldBlock.actorSpawns.getChunk(this.#i, this.#j)
   }
 
-  getPropSpawns(): PropSpawnInfo[] {
+  getPropSpawns(): PropSpawn[] {
     return this.#fieldBlock.propSpawns.getChunk(this.#i, this.#j)
   }
 

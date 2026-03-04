@@ -1,9 +1,9 @@
 import { parseArgs } from "@std/cli/parse-args"
 import {
-  ActorSpawnInfo,
+  ActorSpawn,
   BlockMap,
   FieldBlock,
-  ItemSpawnInfo,
+  ItemSpawn,
 } from "../model/field-block.ts"
 import type { ItemType } from "../model/types.ts"
 
@@ -40,7 +40,7 @@ async function addCharactersRandomly(mapFile: string) {
       c++
       const isRandom = Math.random() > 0.5
       fb.actorSpawns.add(
-        new ActorSpawnInfo(
+        new ActorSpawn(
           i + bm.i,
           j + bm.j,
           isRandom ? "random" : "random-walk",
@@ -52,12 +52,12 @@ async function addCharactersRandomly(mapFile: string) {
   }
   if (mapFile === "block_0.0") {
     fb.itemSpawns.add(
-      new ItemSpawnInfo(2, 6, "mushroom", "../item/mushroom.png", mapJson.href),
+      new ItemSpawn(2, 6, "mushroom", "../item/mushroom.png", mapJson.href),
     )
 
     for (const i of [...Array(8).keys()]) {
       fb.actorSpawns.add(
-        new ActorSpawnInfo(
+        new ActorSpawn(
           69,
           8 + i,
           "random-rotate",
@@ -69,7 +69,7 @@ async function addCharactersRandomly(mapFile: string) {
 
     for (const i of [...Array(7).keys()]) {
       fb.actorSpawns.add(
-        new ActorSpawnInfo(
+        new ActorSpawn(
           72,
           9 + i,
           "random-rotate",
@@ -81,7 +81,7 @@ async function addCharactersRandomly(mapFile: string) {
 
     for (const i of [...Array(8).keys()]) {
       fb.actorSpawns.add(
-        new ActorSpawnInfo(
+        new ActorSpawn(
           75,
           8 + i,
           "inertial",
@@ -92,7 +92,7 @@ async function addCharactersRandomly(mapFile: string) {
     }
 
     fb.actorSpawns.add(
-      new ActorSpawnInfo(72, 8, "inertial", "../char/lena/", mapJson.href),
+      new ActorSpawn(72, 8, "inertial", "../char/lena/", mapJson.href),
     )
   }
 
@@ -114,7 +114,7 @@ async function addCharactersRandomly(mapFile: string) {
       [-6, 8, "apple", "../item/apple.png"],
     ] as const
     for (const [i, j, type, src] of items) {
-      fb.itemSpawns.add(new ItemSpawnInfo(i, j, type, src, mapJson.href))
+      fb.itemSpawns.add(new ItemSpawn(i, j, type, src, mapJson.href))
     }
   }
 
@@ -135,7 +135,7 @@ async function addCharactersRandomly(mapFile: string) {
         type = "green-apple"
       }
       fb.itemSpawns.add(
-        new ItemSpawnInfo(
+        new ItemSpawn(
           i + fb.i,
           j + fb.j,
           type,

@@ -8,7 +8,7 @@ import type {
   PropType,
   PushedEvent,
 } from "./types.ts"
-import { PropSpawnInfo } from "./field-block.ts"
+import { PropSpawn } from "./field-block.ts"
 import { PropDefinition } from "./catalog.ts"
 import { ActionQueue, type PropAction } from "./action-queue.ts"
 
@@ -48,7 +48,7 @@ export class Prop implements IProp {
   readonly #pushed: PushedDelegate | null
   #image: ImageBitmap | undefined
 
-  static fromSpawn(spawn: PropSpawnInfo) {
+  static fromSpawn(spawn: PropSpawn) {
     let pushed: PushedDelegate | null = null
     switch (spawn.def.pushed) {
       case "break":

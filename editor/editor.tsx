@@ -22,13 +22,13 @@ import {
   PropDefinition,
 } from "../model/catalog.ts"
 import {
-  ActorSpawnInfo,
+  ActorSpawn,
   BlockMap,
   createImageDataForRange,
   drawCell,
   FieldBlock,
-  ItemSpawnInfo,
-  PropSpawnInfo,
+  ItemSpawn,
+  PropSpawn,
 } from "../model/field-block.ts"
 import { Prop } from "../model/prop.ts"
 import { floorN, modulo } from "../util/math.ts"
@@ -317,7 +317,7 @@ class ToolManager {
           b.propSpawns.remove(i, j)
         }
         b.propSpawns.add(
-          new PropSpawnInfo(
+          new PropSpawn(
             i,
             j,
             // deno-lint-ignore no-explicit-any
@@ -341,7 +341,7 @@ class ToolManager {
           b.itemSpawns.remove(i, j)
         }
         b.itemSpawns.add(
-          new ItemSpawnInfo(
+          new ItemSpawn(
             i,
             j,
             // deno-lint-ignore no-explicit-any
@@ -365,7 +365,7 @@ class ToolManager {
           b.actorSpawns.remove(i, j)
         }
         b.actorSpawns.add(
-          new ActorSpawnInfo(
+          new ActorSpawn(
             i,
             j,
             tool.def,

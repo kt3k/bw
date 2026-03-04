@@ -27,6 +27,10 @@
     "6": {
       "canEnter": true,
       "src": "../cell/floor5.png"
+    },
+    "b": {
+      "canEnter": false,
+      "src": "../cell/floor_black.png"
     }
   },
   "actors": {

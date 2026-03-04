@@ -20,7 +20,7 @@ import type {
 } from "./types.ts"
 import { ActorDefinition } from "./catalog.ts"
 import { ActionQueue, type ActorAction } from "./action-queue.ts"
-import { ActorSpawnInfo } from "./field-block.ts"
+import { ActorSpawn } from "./field-block.ts"
 import { linePattern0 } from "./effect.ts"
 import { MoveBounce, MoveGo, MoveJump } from "./move.ts"
 
@@ -212,7 +212,7 @@ export class Actor implements IActor {
     },
   )
 
-  static fromSpawn(spawn: ActorSpawnInfo): Actor {
+  static fromSpawn(spawn: ActorSpawn): Actor {
     return spawnActor(spawn.id, spawn.i, spawn.j, spawn.def, {
       dir: spawn.dir,
       speed: spawn.speed,
