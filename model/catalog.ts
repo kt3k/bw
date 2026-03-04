@@ -4,6 +4,7 @@ interface CatalogSource {
   readonly cells: Record<string, {
     readonly canEnter: boolean
     readonly src: string
+    readonly noise?: string
   }>
   readonly items: Record<string, {
     readonly src: string
@@ -27,6 +28,7 @@ export interface CellDefinition {
   readonly canEnter: boolean
   readonly src: string
   readonly href: string
+  readonly noise?: string
 }
 
 export interface ItemDefinition {
@@ -67,42 +69,43 @@ export class Catalog {
     const catalog = new Catalog(source.map(({ src }) => src))
     for (const { src, json } of source) {
       const url = new URL(src, baseUrl).href
-      for (const [name, def] of Object.entries(json.cells)) {
+      for (const [name, data] of Object.entries(json.cells)) {
         catalog.cells[name] = {
           name,
-          canEnter: def.canEnter,
-          src: def.src,
-          href: new URL(def.src, url).href,
+          canEnter: data.canEnter,
+          src: data.src,
+          href: new URL(data.src, url).href,
+          noise: data.noise,
         }
       }
 
-      for (const [type, def] of Object.entries(json.items)) {
+      for (const [type, data] of Object.entries(json.items)) {
         catalog.items[type] = {
           type: type,
-          collect: def.collect,
-          src: def.src,
-          href: new URL(def.src, url).href,
+          collect: data.collect,
+          src: data.src,
+          href: new URL(data.src, url).href,
         }
       }
 
-      for (const [type, def] of Object.entries(json.actors)) {
+      for (const [type, data] of Object.entries(json.actors)) {
         catalog.actors[type] = {
           type: type,
-          moveEnd: def.moveEnd,
-          idle: def.idle,
-          src: def.src,
-          href: new URL(def.src, url).href,
+          moveEnd: data.moveEnd,
+          idle: data.idle,
+          src: data.src,
+          href: new URL(data.src, url).href,
         }
       }
 
-      for (const [type, def] of Object.entries(json.props)) {
+      for (const [type, data] of Object.entries(json.props)) {
         catalog.props[type] = {
           type: type,
-          canEnter: def.canEnter,
-          onEnter: def.onEnter,
-          pushed: def.pushed,
-          src: def.src,
-          href: new URL(def.src, url).href,
+          canEnter: data.canEnter,
+          onEnter: data.onEnter,
+          pushed: data.pushed,
+          src: data.src,
+          href: new URL(data.src, url).href,
         }
       }
     }
@@ -119,6 +122,7 @@ export class Catalog {
       cells[def.name] = {
         canEnter: def.canEnter,
         src: def.src,
+        noise: def.noise,
       }
     }
 

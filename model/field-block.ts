@@ -375,8 +375,6 @@ export function drawCellColor(
   )
 }
 
-const ENABLE_AMBIENT_CELL_COLOR_FIELD = false
-const ENABLE_AMBIENT_CELL_COLOR_WALL = false
 const ENABLE_AMBIENT_CELL_NOISE = true
 
 /** Draws a cell on the canvas */
@@ -394,40 +392,26 @@ export function drawCell(
     localJ * CELL_SIZE,
   )
   if (ENABLE_AMBIENT_CELL_NOISE) {
-    const { randomInt } = seed(`${i}.${j}`)
-    const width = randomInt(3) + 1
-    const x = randomInt(15 - width) + 1
-    const y = randomInt(14) + 1
-    const color = cell.canEnter ? "#b9bcb9" : "black"
-    wrapper.drawRect(
-      localI * CELL_SIZE + x,
-      localJ * CELL_SIZE + y,
-      width,
-      1,
-      color,
-    )
-  }
-  if (ENABLE_AMBIENT_CELL_COLOR_FIELD && cell.canEnter) {
-    const { rng } = seed(`${i}.${j}`)
-    const color = `hsla(${rng() * 100 + 100}, 50%, 20%, ${rng() * 0.1 + 0.1})`
-    wrapper.drawRect(
-      localI * CELL_SIZE,
-      localJ * CELL_SIZE,
-      CELL_SIZE,
-      CELL_SIZE,
-      color,
-    )
-  }
-  if (ENABLE_AMBIENT_CELL_COLOR_WALL && !cell.canEnter) {
-    const { rng } = seed(`${i}.${j}`)
-    const color = `hsla(240, 100%, 10%, ${rng() * 0.2 + 0.15})`
-    wrapper.drawRect(
-      localI * CELL_SIZE,
-      localJ * CELL_SIZE,
-      CELL_SIZE,
-      CELL_SIZE,
-      color,
-    )
+    if (cell.noise) {
+      const { randomInt } = seed(`${i}.${j}`)
+      for (
+        const [color, countStr] of new URLSearchParams(cell.noise).entries()
+      ) {
+        const count = +countStr
+        for (let n = 0; n < count; n++) {
+          const width = randomInt(3) + 1
+          const x = randomInt(15 - width) + 1
+          const y = randomInt(14) + 1
+          wrapper.drawRect(
+            localI * CELL_SIZE + x,
+            localJ * CELL_SIZE + y,
+            width,
+            1,
+            color,
+          )
+        }
+      }
+    }
   }
 }
 

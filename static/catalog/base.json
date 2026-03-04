@@ -2,15 +2,18 @@
   "cells": {
     "0": {
       "canEnter": true,
-      "src": "../cell/floor0.png"
+      "src": "../cell/floor0.png",
+      "noise": "#b9bcb9=1"
     },
     "1": {
       "canEnter": false,
-      "src": "../cell/wall0.png"
+      "src": "../cell/wall0.png",
+      "noise": "black=3"
     },
     "2": {
       "canEnter": false,
-      "src": "../cell/wall1.png"
+      "src": "../cell/wall1.png",
+      "noise": "black=4"
     },
     "3": {
       "canEnter": true,
@@ -18,15 +21,18 @@
     },
     "4": {
       "canEnter": true,
-      "src": "../cell/floor3.png"
+      "src": "../cell/floor3.png",
+      "noise": "#b9bcb9=1"
     },
     "5": {
       "canEnter": true,
-      "src": "../cell/floor4.png"
+      "src": "../cell/floor4.png",
+      "noise": "#b9bcb9=1"
     },
     "6": {
       "canEnter": true,
-      "src": "../cell/floor5.png"
+      "src": "../cell/floor5.png",
+      "noise": "#b9bcb9=1"
     },
     "b": {
       "canEnter": false,
