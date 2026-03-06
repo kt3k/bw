@@ -151,7 +151,7 @@ export function GameScreen({ el, query }: Context) {
       field.me.unsetFollower()
       signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
       loop.start()
-    }, 2000)
+    }, 10)
   }
 
   globalThis.onhashchange = () => {

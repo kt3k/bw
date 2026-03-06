@@ -115,6 +115,10 @@
       "canEnter": true,
       "onEnter": "teleport"
     },
+    "portal-out": {
+      "src": "../prop/portal_out.png",
+      "canEnter": true
+    },
     "a": {
       "src": "../prop/a.png",
       "canEnter": true
