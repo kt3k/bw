@@ -29,15 +29,11 @@ export type IEntity = IBox & ILoader & {
   image(): ImageBitmap
 }
 
-export type ItemType = "apple" | "green-apple" | "mushroom" | "purple-mushroom"
-
 export type IItem = IEntity & IStepper & IFollowable & {
   id: string
   isFollowing: boolean
   onCollect(actor: IActor, field: IField): void
 }
-
-export type PropType = "stool" | "table"
 
 export type IProp =
   & IEntity
@@ -46,7 +42,6 @@ export type IProp =
   & { onEnter(actor: IActor, field: IField): void }
   & {
     id: string | null
-    type: PropType
     canEnter: boolean
   }
 

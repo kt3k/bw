@@ -4,7 +4,7 @@ import { seed } from "../util/random.ts"
 import { floorN, modulo } from "../util/math.ts"
 import { loadImage } from "../util/load.ts"
 import type { Dir, IBox } from "./types.ts"
-import type { ItemType, LoadOptions, PropType as PropType } from "./types.ts"
+import type { LoadOptions } from "./types.ts"
 import {
   ActorDefinition,
   Catalog,
@@ -33,7 +33,6 @@ export class ItemSpawn implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
-  readonly type: ItemType
   readonly def: ItemDefinition
   readonly x: number
   readonly y: number
@@ -42,13 +41,11 @@ export class ItemSpawn implements IBox {
   constructor(
     i: number,
     j: number,
-    type: ItemType,
     def: ItemDefinition,
   ) {
-    this.id = `${i}.${j}.${type}` // Unique ID for the spawn
+    this.id = `${i}.${j}.${def.type}` // Unique ID for the spawn
     this.i = i
     this.j = j
-    this.type = type
     this.def = def
     this.x = i * CELL_SIZE
     this.y = j * CELL_SIZE
@@ -56,14 +53,14 @@ export class ItemSpawn implements IBox {
 
   equals(other: ItemSpawn): boolean {
     return this.i === other.i && this.j === other.j &&
-      this.type === other.type
+      this.def.type === other.def.type
   }
 
   toJSON(): BlockMapSource["items"][number] {
     return {
       i: this.i,
       j: this.j,
-      type: this.type,
+      type: this.def.type,
     }
   }
 }
@@ -73,7 +70,6 @@ export class PropSpawn implements IBox {
   readonly id: string
   readonly i: number
   readonly j: number
-  readonly type: PropType
   readonly def: PropDefinition
   readonly x: number
   readonly y: number
@@ -83,14 +79,12 @@ export class PropSpawn implements IBox {
   constructor(
     i: number,
     j: number,
-    type: PropType,
     def: PropDefinition,
     data: unknown,
   ) {
-    this.id = `${i}.${j}.${type}` // Unique ID for the spawn
+    this.id = `${i}.${j}.${def.type}` // Unique ID for the spawn
     this.i = i
     this.j = j
-    this.type = type
     this.data = data
     this.def = def
     this.x = i * CELL_SIZE
@@ -99,14 +93,14 @@ export class PropSpawn implements IBox {
 
   equals(other: PropSpawn): boolean {
     return this.i === other.i && this.j === other.j &&
-      this.type === other.type
+      this.def.type === other.def.type
   }
 
   toJSON(): BlockMapSource["props"][number] {
     const json: BlockMapSource["props"][number] = {
       i: this.i,
       j: this.j,
-      type: this.type,
+      type: this.def.type,
     }
     if (this.data !== undefined) {
       json.data = this.data
@@ -329,7 +323,6 @@ export class BlockMap {
       new ItemSpawn(
         item.i,
         item.j,
-        item.type as ItemType,
         catalog.items[item.type]!,
       )
     )
@@ -337,7 +330,6 @@ export class BlockMap {
       new PropSpawn(
         prop.i,
         prop.j,
-        prop.type as PropType,
         catalog.props[prop.type]!,
         prop.data,
       )

@@ -693,7 +693,6 @@ export class Field implements IField {
             spawn.id,
             spawn.i,
             spawn.j,
-            spawn.type,
             spawn.def,
           ),
         )

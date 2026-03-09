@@ -5,7 +5,6 @@ import type {
   IField,
   IProp,
   LoadOptions,
-  PropType,
   PushedEvent,
 } from "./types.ts"
 import { PropSpawn } from "./field-block.ts"
@@ -22,7 +21,6 @@ export class Prop implements IProp {
   readonly id: string | null
   readonly i: number
   readonly j: number
-  readonly type: PropType
   readonly def: PropDefinition
   readonly data: unknown
   #motion: Motion | null = null
@@ -59,7 +57,6 @@ export class Prop implements IProp {
       spawn.id,
       spawn.i,
       spawn.j,
-      spawn.type,
       spawn.def,
       pushed,
       spawn.data,
@@ -69,14 +66,14 @@ export class Prop implements IProp {
   /**
    * @param i The column of the grid coordinate
    * @param j The row of the grid coordinate
-   * @param type The type of item
-   * @param src The path to the asset image
+   * @param def The definition of the prop
+   * @param pushed The pushed delegate
+   * @param data The additional data
    */
   constructor(
     id: string | null,
     i: number,
     j: number,
-    type: PropType,
     def: PropDefinition,
     pushed: PushedDelegate | null,
     data: unknown,
@@ -84,7 +81,6 @@ export class Prop implements IProp {
     this.id = id
     this.i = i
     this.j = j
-    this.type = type
     this.def = def
     this.#pushed = pushed
     this.data = data

@@ -8,7 +8,6 @@ import type {
   IField,
   IFollower,
   IItem,
-  ItemType,
   LoadOptions,
   Move,
 } from "./types.ts"
@@ -27,7 +26,6 @@ export class Item implements IItem {
   readonly id: string
   i: number
   j: number
-  readonly type: ItemType
   readonly def: ItemDefinition
   readonly w = CELL_SIZE
   readonly h = CELL_SIZE
@@ -80,7 +78,6 @@ export class Item implements IItem {
       spawn.id,
       spawn.i,
       spawn.j,
-      spawn.type,
       spawn.def,
     )
   }
@@ -88,25 +85,22 @@ export class Item implements IItem {
   /**
    * @param i The column of the grid coordinate
    * @param j The row of the grid coordinate
-   * @param type The type of item
    * @param def The item definition
    */
   constructor(
     id: string | null,
     i: number,
     j: number,
-    type: ItemType,
     def: ItemDefinition,
   ) {
     this.id = id ?? `item-${i}-${j}-${crypto.randomUUID()}`
     this.i = i
     this.j = j
-    this.type = type
     this.def = def
   }
 
   onCollect(actor: Actor, field: IField) {
-    switch (this.def.type) {
+    switch (this.def.collect) {
       case "apple": {
         const delegate = new CollectApple()
         delegate.onCollect(actor, field, this)
