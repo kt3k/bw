@@ -1,0 +1,30 @@
+{
+  "cells": {
+  },
+  "actors": {
+  },
+  "items": {
+  },
+  "props": {
+    "e_red": {
+      "name": "Red",
+      "src": "../prop/e_red.png"
+    },
+    "s_red": {
+      "name": "Red",
+      "src": "../prop/s_red.png"
+    },
+    "c_red": {
+      "name": "Red",
+      "src": "../prop/c_red.png"
+    },
+    "a_red": {
+      "name": "Red",
+      "src": "../prop/a_red.png"
+    },
+    "p_red": {
+      "name": "Red",
+      "src": "../prop/p_red.png"
+    }
+  }
+}
