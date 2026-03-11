@@ -23,7 +23,6 @@ import {
 } from "../model/field-block.ts"
 import { loadImage } from "../util/load.ts"
 import { RectScope } from "../util/rect-scope.ts"
-import { DIRS, nextGrid } from "../util/dir.ts"
 import { CellDefinition, loadCatalog } from "../model/catalog.ts"
 import { GridSet } from "../util/grid-set.ts"
 
@@ -351,6 +350,15 @@ export class FieldActors implements IStepper, ILoader {
     const key = `${i}.${j}`
     return this.#actors.filter((actor) => actor.physicalGridKey === key)
   }
+
+  fastTravel(me: Actor, i: number, j: number) {
+    if (!this.has(me.id)) {
+      throw new Error("The actor is not in the field")
+    }
+    this.#coordCountMap.decrement(me.physicalGridKey)
+    me.fastTravel(i, j)
+    this.#coordCountMap.increment(me.physicalGridKey)
+  }
 }
 
 /**
@@ -485,6 +493,10 @@ export class Field implements IField {
     this.#time = 0
     this.#initialBlocksLoaded = false
     this.#initialActivateReady = false
+  }
+
+  fastTravel(me: Actor, i: number, j: number) {
+    this.#actors.fastTravel(me, i, j)
   }
 
   get actors() {
@@ -748,57 +760,4 @@ export class Field implements IField {
   get assetsReady() {
     return this.#initialActivateReady
   }
-}
-
-export function splashColor(
-  field: IField,
-  i: number,
-  j: number,
-  hue: number,
-  sat: number,
-  light: number,
-  alpha: number = 0.40,
-  radius: number = 2,
-  _rng: () => number = Math.random,
-): void {
-  if (radius < 1) {
-    return
-  }
-  colorCell(i, j, hue, sat, light, alpha, field)
-  if (radius < 2) {
-    return
-  }
-  for (const dir of DIRS) {
-    for (let dist = 2; dist <= radius; dist++) {
-      const [i_, j_] = nextGrid(i, j, dir, dist - 1)
-      if (!field.canEnterStatic(i_, j_)) break
-      setTimeout(() => {
-        colorCell(
-          i_,
-          j_,
-          hue,
-          sat,
-          light,
-          alpha * 0.6 ** dist,
-          field,
-        )
-      }, dist * 32)
-    }
-  }
-}
-
-function colorCell(
-  i: number,
-  j: number,
-  hue: number,
-  sat: number,
-  light: number,
-  alpha: number,
-  field: IField,
-): void {
-  field.colorCell(
-    i,
-    j,
-    `hsla(${hue}, ${sat}%, ${light}%, ${alpha})`,
-  )
 }

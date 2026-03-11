@@ -147,7 +147,7 @@ export function GameScreen({ el, query }: Context) {
     query(".curtain")!.style.opacity = "1"
     setTimeout(() => {
       field.reset()
-      field.me.fastTravel(i, j)
+      field.fastTravel(field.me, i, j)
       field.me.unsetFollower()
       signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
       loop.start()

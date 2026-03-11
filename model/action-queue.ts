@@ -1,18 +1,10 @@
 import type { Dir, IEntity, IField, MoveAction } from "./types.ts"
-import { splashColor } from "../game/field.ts"
 import { EffectLine1, linePattern0 } from "./effect.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 
 type CommonAction = {
   type: "wait"
   until: number
-} | {
-  type: "splash"
-  hue: number
-  sat: number
-  light: number
-  alpha: number
-  radius: number
 } | {
   type: "line-pattern-0"
   dirs: readonly Dir[]
@@ -125,21 +117,6 @@ export class ActionQueue<
       this.#queue.shift()
 
       switch (action.type) {
-        case "splash": {
-          const { i, j } = entity
-          splashColor(
-            field,
-            i,
-            j,
-            action.hue,
-            action.sat,
-            action.light,
-            action.alpha,
-            action.radius,
-            () => 1,
-          )
-          break
-        }
         case "line-pattern-0": {
           for (
             const effect of linePattern0(

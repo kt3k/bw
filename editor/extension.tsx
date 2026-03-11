@@ -83,6 +83,8 @@ function resolveCustomTextEditor(
               height={MAIN_CANVAS_SIZE}
             >
             </canvas>
+            <div class="js-cursor-dropdown bg-white w-12 h-12 absolute">
+            </div>
           </div>
           <a
             class="next-field absolute hover:opacity-75 opacity-50"
@@ -121,24 +123,18 @@ function resolveCustomTextEditor(
           >
           </a>
         </div>
-        <div class="layer-tool px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-16">
-          <div>ACTORS</div>
-          <div>ITEMS</div>
-          <div>PROPS</div>
-          <div>FIELD</div>
-        </div>
-        <div class="toolbox px-2 fixed left-16 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100%-16em)]">
-          <div class="ml-2 group relative">
-            <span class="mode-indicator">dot</span>
-            <span class="
+        <div class="toolbox px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100vw-15em)]">
+          <div class="mode-indicator ml-2 group relative">
+            <span>dot</span>
+            <div class="
               absolute top-full left-1/2 -translate-x-1/2 mt-2
               hidden group-hover:block
             bg-neutral-800 text-white text-sm px-2 py-1 rounded-lg
               border border-neutral-600
               whitespace-nowrap pointer-events-none
             ">
-              Press "s" to toggle
-            </span>
+              Press d/s/p to toggle mode
+            </div>
           </div>
         </div>
         <div class="js-info-panel fixed right-0 top-0 h-full w-48 bg-neutral-900/90 pointer-events-none">

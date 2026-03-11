@@ -186,14 +186,6 @@ export type Action =
     readonly until: number
   }
   | {
-    readonly type: "splash"
-    readonly hue: number
-    readonly sat: number
-    readonly light: number
-    readonly alpha: number
-    readonly radius: number
-  }
-  | {
     readonly type: "line-pattern-0"
     readonly dirs: readonly Dir[]
     readonly baseSpeed: number

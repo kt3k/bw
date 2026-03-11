@@ -34,9 +34,21 @@
       "src": "../cell/floor5.png",
       "noise": "#b9bcb9=1"
     },
+    "a": {
+      "canEnter": true,
+      "src": "../cell/blue.png"
+    },
     "b": {
       "canEnter": false,
       "src": "../cell/floor_black.png"
+    },
+    "g": {
+      "canEnter": true,
+      "src": "../cell/green.png"
+    },
+    "r": {
+      "canEnter": true,
+      "src": "../cell/red.png"
     }
   },
   "actors": {
@@ -233,6 +245,122 @@
     },
     "3": {
       "src": "../prop/3.png",
+      "canEnter": true
+    },
+    "a_white": {
+      "src": "../prop/a_white.png",
+      "canEnter": true
+    },
+    "b_white": {
+      "src": "../prop/b_white.png",
+      "canEnter": true
+    },
+    "c_white": {
+      "src": "../prop/c_white.png",
+      "canEnter": true
+    },
+    "d_white": {
+      "src": "../prop/d_white.png",
+      "canEnter": true
+    },
+    "e_white": {
+      "src": "../prop/e_white.png",
+      "canEnter": true
+    },
+    "f_white": {
+      "src": "../prop/f_white.png",
+      "canEnter": true
+    },
+    "g_white": {
+      "src": "../prop/g_white.png",
+      "canEnter": true
+    },
+    "h_white": {
+      "src": "../prop/h_white.png",
+      "canEnter": true
+    },
+    "i_white": {
+      "src": "../prop/i_white.png",
+      "canEnter": true
+    },
+    "j_white": {
+      "src": "../prop/j_white.png",
+      "canEnter": true
+    },
+    "k_white": {
+      "src": "../prop/k_white.png",
+      "canEnter": true
+    },
+    "l_white": {
+      "src": "../prop/l_white.png",
+      "canEnter": true
+    },
+    "m_white": {
+      "src": "../prop/m_white.png",
+      "canEnter": true
+    },
+    "n_white": {
+      "src": "../prop/n_white.png",
+      "canEnter": true
+    },
+    "o_white": {
+      "src": "../prop/o_white.png",
+      "canEnter": true
+    },
+    "p_white": {
+      "src": "../prop/p_white.png",
+      "canEnter": true
+    },
+    "q_white": {
+      "src": "../prop/q_white.png",
+      "canEnter": true
+    },
+    "r_white": {
+      "src": "../prop/r_white.png",
+      "canEnter": true
+    },
+    "s_white": {
+      "src": "../prop/s_white.png",
+      "canEnter": true
+    },
+    "t_white": {
+      "src": "../prop/t_white.png",
+      "canEnter": true
+    },
+    "u_white": {
+      "src": "../prop/u_white.png",
+      "canEnter": true
+    },
+    "v_white": {
+      "src": "../prop/v_white.png",
+      "canEnter": true
+    },
+    "w_white": {
+      "src": "../prop/w_white.png",
+      "canEnter": true
+    },
+    "x_white": {
+      "src": "../prop/x_white.png",
+      "canEnter": true
+    },
+    "y_white": {
+      "src": "../prop/y_white.png",
+      "canEnter": true
+    },
+    "z_white": {
+      "src": "../prop/z_white.png",
+      "canEnter": true
+    },
+    "1_white": {
+      "src": "../prop/1_white.png",
+      "canEnter": true
+    },
+    "2_white": {
+      "src": "../prop/2_white.png",
+      "canEnter": true
+    },
+    "3_white": {
+      "src": "../prop/3_white.png",
       "canEnter": true
     }
   }

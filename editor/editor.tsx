@@ -239,9 +239,8 @@ class ToolManager {
       null,
       0,
       0,
-      // deno-lint-ignore no-explicit-any
-      tool.type as any,
       tool.def,
+      null,
       null,
     )
   }
@@ -251,8 +250,6 @@ class ToolManager {
       null,
       0,
       0,
-      // deno-lint-ignore no-explicit-any
-      tool.type as any,
       tool.def,
     )
   }
@@ -295,20 +292,18 @@ class ToolManager {
 
   edit({ i, j }: { i: number; j: number }): void {
     const tool = this.currentTool()
-    const block = fieldBlock.get()
-
     if (tool.kind === "cell") {
-      const cell = block.getCell(i, j)
+      const cell = fieldBlock.getCell(i, j)
       if (cell && cell.name !== tool.name) {
         editBlock((b) => b.updateCell(i, j, tool.name))
       }
     } else if (tool.kind === "prop-remove") {
-      if (block.propSpawns.has(i, j)) {
+      if (fieldBlock.propSpawns.has(i, j)) {
         editBlock((b) => b.propSpawns.remove(i, j))
       }
     } else if (tool.kind === "prop") {
-      const spawn = block.propSpawns.get(i, j)
-      if (spawn && spawn.type === tool.type) {
+      const spawn = fieldBlock.propSpawns.get(i, j)
+      if (spawn && spawn.def.type === tool.type) {
         // The object spawn is already the same as selected object
         return
       }
@@ -320,19 +315,18 @@ class ToolManager {
           new PropSpawn(
             i,
             j,
-            // deno-lint-ignore no-explicit-any
-            tool.type as any,
             tool.def,
+            null,
           ),
         )
       })
     } else if (tool.kind === "item-remove") {
-      if (block.itemSpawns.has(i, j)) {
+      if (fieldBlock.itemSpawns.has(i, j)) {
         editBlock((b) => b.itemSpawns.remove(i, j))
       }
     } else if (tool.kind === "item") {
-      const spawn = block.itemSpawns.get(i, j)
-      if (spawn && spawn.type === tool.type) {
+      const spawn = fieldBlock.itemSpawns.get(i, j)
+      if (spawn && spawn.def.type === tool.type) {
         // The item spawn is already the same as selected item
         return
       }
@@ -344,18 +338,16 @@ class ToolManager {
           new ItemSpawn(
             i,
             j,
-            // deno-lint-ignore no-explicit-any
-            tool.type as any,
             tool.def,
           ),
         )
       })
     } else if (tool.kind === "actor-remove") {
-      if (block.actorSpawns.has(i, j)) {
+      if (fieldBlock.actorSpawns.has(i, j)) {
         editBlock((b) => b.actorSpawns.remove(i, j))
       }
     } else if (tool.kind === "actor") {
-      const spawn = block.actorSpawns.get(i, j)
+      const spawn = fieldBlock.actorSpawns.get(i, j)
       if (spawn && spawn.def.type === tool.type) {
         // The actor spawn is already the same as selected actor
         return
@@ -378,11 +370,13 @@ class ToolManager {
 
 const CANVAS_SIZE = BLOCK_SIZE * CELL_SIZE
 
-const mode = new Signal<"dot" | "stroke">("dot")
-const gridIndex = new GroupSignal<{ i: number | null; j: number | null }>({
-  i: null,
-  j: null,
-})
+const modeSignal = new Signal<"dot" | "stroke" | "point">("dot")
+const gridIndexSignal = new GroupSignal<{ i: number | null; j: number | null }>(
+  {
+    i: null,
+    j: null,
+  },
+)
 
 const initialData = Promise.withResolvers<{ uri: string; text: string }>()
 const state = vscode.getState()
@@ -396,52 +390,65 @@ const { uri, text } = await initialData.promise
 const blockMapSource = new GroupSignal({ uri, text })
 const mapObj = JSON.parse(text)
 const catalog = await loadCatalog(uri, mapObj.catalogs, { loadJson })
-const fieldBlock = blockMapSource.map(({ uri, text }) =>
+const fieldBlockSignal = blockMapSource.map(({ uri, text }) =>
   new FieldBlock(new BlockMap(uri, JSON.parse(text), catalog))
 )
-await fieldBlock.get().loadAssets({ loadImage })
+await fieldBlockSignal.get().loadAssets({ loadImage })
 
 function editBlock(cb: (block: FieldBlock) => void) {
-  const block = fieldBlock.get().clone()
+  const block = fieldBlockSignal.get().clone()
   cb(block)
   updateDocument(block)
 }
 
 const toolManager = ToolManager.fromCatalog(catalog)
-const currentTool = new Signal<Tool>(toolManager.currentTool())
+const currentToolSignal = new Signal<Tool>(toolManager.currentTool())
 
-function updateTools(manager: ToolManager) {
-  const tool = manager.currentTool()
-  currentTool.update(tool)
+const cursorSignal = new Signal<{ i: number; j: number } | null>(null)
+
+const signals = {
+  mode: modeSignal,
+  gridIndex: gridIndexSignal,
+  fieldBlock: fieldBlockSignal,
+  currentTool: currentToolSignal,
+  cursor: cursorSignal,
 }
 
 function updateDocument(b: FieldBlock) {
-  fieldBlock.update(b)
+  signals.fieldBlock.update(b)
   vscode.postMessage({
     type: "update",
     map: b.toMap().toObject(),
   })
 }
 
-const SWITCH_ACTIVE = "bg-cyan-400"
-const SWITCH_ACTIVE_CANVAS = "opacity-70"
+function updateTools(manager: ToolManager) {
+  const tool = manager.currentTool()
+  signals.currentTool.update(tool)
+}
+
+let mode = modeSignal.get()
+modeSignal.subscribe((m) => mode = m)
+let fieldBlock = fieldBlockSignal.get()
+fieldBlockSignal.subscribe((b) => fieldBlock = b)
+let currentTool = currentToolSignal.get()
+currentToolSignal.subscribe((t) => currentTool = t)
 
 function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
-  subscribe(currentTool, (tool) => {
-    for (const child of Array.from(el.children)) {
-      const firstChild = child.firstElementChild
-      child.classList.toggle(SWITCH_ACTIVE, child.id === tool.id)
-      firstChild?.classList.toggle(SWITCH_ACTIVE_CANVAS, child.id === tool.id)
-    }
-  })
+  const SWITCH_ACTIVE = "bg-cyan-400"
+  const SWITCH_ACTIVE_CANVAS = "opacity-70"
 
   on("click", (e) => {
-    const div = e.target as HTMLDivElement
-    toolManager.selectById(div.id)
+    const { id } = e.target as HTMLDivElement
+    if (currentTool.id === id) {
+      return
+    }
+    toolManager.selectById(id)
+    signals.mode.update("dot")
     updateTools(toolManager)
   })
 
-  const block = fieldBlock.get()
+  const block = fieldBlock
   toolManager.cellTools.forEach(async (cellTool) => {
     const id = "cell-" + cellTool.name
     const div = ht.div(
@@ -527,11 +534,33 @@ function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     })
   }
 
-  el.appendChild(el.firstChild!) // move mode indicator to last
+  el.appendChild(el.querySelector(".mode-indicator")!) // move mode indicator to last
+
+  function toggleActive(child: Element, active: boolean) {
+    const firstChild = child.firstElementChild
+    child.classList.toggle(SWITCH_ACTIVE, active)
+    firstChild?.classList.toggle(SWITCH_ACTIVE_CANVAS, active)
+  }
+
+  subscribe(signals.currentTool, (tool) => {
+    for (const child of Array.from(el.children)) {
+      toggleActive(child, child.id === tool.id)
+    }
+  })
+
+  subscribe(signals.mode, (mode) => {
+    for (const child of Array.from(el.children)) {
+      if (mode === "point") {
+        toggleActive(child, false)
+      } else {
+        toggleActive(child, child.id === currentTool.id)
+      }
+    }
+  })
 }
 
 function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
-  subscribe(mode, (mode) => el.textContent = mode)
+  subscribe(signals.mode, (mode) => el.textContent = mode)
 }
 
 function createCanvasFromImageData(imageData: ImageData) {
@@ -555,40 +584,50 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
   const actorsCanvas = query<HTMLCanvasElement>(".field-actors-canvas")!
   const actorsCanvasWrapper = new CanvasWrapper(actorsCanvas)
 
-  const block = fieldBlock.get()
-  block.renderAll(cellsCanvas)
+  fieldBlock.renderAll(cellsCanvas)
 
-  for (const spawn of block.propSpawns.getAll()) {
+  for (const spawn of fieldBlock.propSpawns.getAll()) {
     const prop = Prop.fromSpawn(spawn)
     prop.loadAssets({ loadImage })
       .then(() => propsCanvasWrapper.drawEntity(prop))
   }
 
-  for (const spawn of block.itemSpawns.getAll()) {
+  for (const spawn of fieldBlock.itemSpawns.getAll()) {
     const item = Item.fromSpawn(spawn)
     item.loadAssets({ loadImage })
       .then(() => itemsCanvasWrapper.drawEntity(item))
   }
 
-  for (const spawn of block.actorSpawns.getAll()) {
+  for (const spawn of fieldBlock.actorSpawns.getAll()) {
     const actor = Actor.fromSpawn(spawn)
     actor.loadAssets({ loadImage })
       .then(() => actorsCanvasWrapper.drawEntity(actor))
   }
 
   on("click", (e) => {
-    toolManager.edit(getGridIndexFromMouseEvent(e, el))
+    const grid = getGridIndexFromMouseEvent(e, el)
+    switch (mode) {
+      case "dot":
+      case "stroke":
+        toolManager.edit(grid)
+        break
+      case "point":
+        signals.cursor.update(grid)
+        break
+      default:
+        mode satisfies never
+    }
   })
   on("mousemove", (e) => {
-    const index = getGridIndexFromMouseEvent(e, el)
-    gridIndex.update(index)
-    if (mode.get() === "stroke") {
-      toolManager.edit(index)
+    const grid = getGridIndexFromMouseEvent(e, el)
+    signals.gridIndex.update(grid)
+    if (mode === "stroke") {
+      toolManager.edit(grid)
     }
   })
 
-  let prev: FieldBlock = block
-  subscribe(fieldBlock, async (block) => {
+  let prev: FieldBlock = fieldBlock
+  subscribe(signals.fieldBlock, async (block) => {
     const cellsDiff = prev.diffCells(block)
     const propsDiff = prev.propSpawns.diff(block.propSpawns)
     const itemsDiff = prev.itemSpawns.diff(block.itemSpawns)
@@ -646,7 +685,7 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
     }
   })
 
-  subscribe(currentTool, (tool) => {
+  subscribe(signals.currentTool, (tool) => {
     if (tool.kind === "cell") {
       propsCanvas.classList.add("opacity-50")
       itemsCanvas.classList.add("opacity-50")
@@ -665,51 +704,63 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
       actorsCanvas.classList.remove("opacity-50")
     }
   })
+
+  subscribe(signals.mode, (mode) => {
+    el.classList.toggle("cursor-crosshair", mode === "stroke")
+    el.classList.toggle("cursor-pointer", mode === "point")
+  })
 }
 
 function getGridIndexFromMouseEvent(
   e: MouseEvent,
   el: HTMLElement,
 ) {
-  const block = fieldBlock.get()
   const { left, top } = el.getBoundingClientRect()
   const x = floorN(e.clientX - left, 16)
   const y = floorN(e.clientY - top, 16)
-  const i = x / 16 + block.i
-  const j = y / 16 + block.j
+  const i = x / 16 + fieldBlock.i
+  const j = y / 16 + fieldBlock.j
   return { i, j }
 }
 
 function KeyHandler({ on }: Context) {
   on("keydown", (e) => {
-    if (e.key === "k") {
+    if (e.key === "l") {
       toolManager.selectNext()
       updateTools(toolManager)
-      mode.update("dot")
-    } else if (e.key === "j") {
+      signals.mode.update("dot")
+    } else if (e.key === "h") {
       toolManager.selectPrev()
       updateTools(toolManager)
-      mode.update("dot")
-    } else if (e.key === "s" && !e.altKey && !e.metaKey) {
-      if (mode.get() === "dot") {
-        mode.update("stroke")
+      signals.mode.update("dot")
+    } else if (e.key === "p") {
+      if (mode !== "point") {
+        signals.mode.update("point")
       } else {
-        mode.update("dot")
+        signals.mode.update("dot")
+      }
+    } else if (e.key === "s" && !e.altKey && !e.metaKey) {
+      if (mode !== "stroke") {
+        signals.mode.update("stroke")
+      } else {
+        signals.mode.update("dot")
       }
     } else if (e.key === "Escape") {
-      mode.update("dot")
+      signals.mode.update("dot")
     }
   })
 }
 
+/** Cell information panel on the right */
 function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
-  subscribe(gridIndex, ({ i, j }) => {
+  subscribe(signals.gridIndex, ({ i, j }) => {
     const infoContent = query(".info-content")
-    const block = fieldBlock.get()
-    if (!infoContent || !block) return
-    const cell = (i !== null && j !== null) ? block.getCell(i, j) : null
-    const cellInfo = cell ? block.cells[cell.name] : null
-    const spawn = (i !== null && j !== null) ? block.propSpawns.get(i, j) : null
+    if (!infoContent) return
+    const cell = (i !== null && j !== null) ? fieldBlock.getCell(i, j) : null
+    const cellInfo = cell ? fieldBlock.cells[cell.name] : null
+    const spawn = (i !== null && j !== null)
+      ? fieldBlock.propSpawns.get(i, j)
+      : null
     query(".grid-index")!.textContent = i !== null && j !== null
       ? `(${i}, ${j})`
       : "-"
@@ -720,8 +771,18 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
     query(".cell-can-enter")!.textContent = cellInfo
       ? String(cellInfo.canEnter)
       : "-"
-    query(".object-type")!.textContent = spawn ? spawn.type : "-"
+    query(".object-type")!.textContent = spawn ? spawn.def.type : "-"
     query(".object-src")!.textContent = spawn ? spawn.def.src : "-"
+  })
+}
+
+function CursorDropdown({ subscribe, el }: Context<HTMLElement>) {
+  subscribe(signals.cursor, (cursor) => {
+    el.classList.toggle("hidden", cursor === null)
+    if (!cursor) return
+
+    el.style.left = `${modulo(cursor.i * CELL_SIZE, CANVAS_SIZE) + 16}px`
+    el.style.top = `${modulo(cursor.j * CELL_SIZE, CANVAS_SIZE)}px`
   })
 }
 
@@ -770,3 +831,4 @@ register(ModeIndicator, "mode-indicator")
 register(InfoPanel, "js-info-panel")
 register(CanvasLayers, "canvas-layers")
 register(NextField, "next-field")
+register(CursorDropdown, "js-cursor-dropdown")
