@@ -255,6 +255,10 @@ export class SpawnMap<
   }
 }
 
+interface BlockConfig {
+  showsExitButton: boolean
+}
+
 interface BlockMapSource {
   i: number
   j: number
@@ -278,6 +282,7 @@ interface BlockMapSource {
     data?: unknown
   }[]
   field: string[]
+  config?: Partial<BlockConfig>
 }
 
 /**
@@ -304,6 +309,7 @@ export class BlockMap {
   readonly field: string[]
   #source: BlockMapSource
   catalog: Catalog
+  readonly config: BlockConfig
   constructor(url: string, source: BlockMapSource, catalog: Catalog) {
     this.url = url
     this.i = source.i
@@ -337,6 +343,9 @@ export class BlockMap {
     this.field = source.field
     this.#source = source
     this.catalog = catalog
+    this.config = {
+      showsExitButton: source.config?.showsExitButton ?? true,
+    }
   }
 
   clone(): BlockMap {
@@ -457,24 +466,25 @@ export function createImageDataForRange(
 
 /** {@linkcode FieldBlock} represents a {@linkcode BLOCK_SIZE} x {@linkcode BLOCK_SIZE} block of a field */
 export class FieldBlock {
-  #x: number
-  #y: number
-  #w: number
-  #h: number
-  // The column of the world coordinates
-  #i: number
-  // The row of the world coordinates
-  #j: number
-  imgMap: Record<string, ImageBitmap> = {}
-  actorSpawns: SpawnMap<ActorSpawn>
-  itemSpawns: SpawnMap<ItemSpawn>
-  propSpawns: SpawnMap<PropSpawn>
-  field: string[]
-  #map: BlockMap
+  readonly #x: number
+  readonly #y: number
+  readonly #w: number
+  readonly #h: number
+  // The grid index
+  readonly #i: number
+  // The grid index
+  readonly #j: number
+  readonly imgMap: Record<string, ImageBitmap> = {}
+  readonly actorSpawns: SpawnMap<ActorSpawn>
+  readonly itemSpawns: SpawnMap<ItemSpawn>
+  readonly propSpawns: SpawnMap<PropSpawn>
+  readonly field: string[]
+  readonly #map: BlockMap
   #canvas: HTMLCanvasElement | undefined
   #canvasWrapper: CanvasWrapper | undefined
   #assetsReady = false
-  #chunks: Record<string, boolean | "loading"> = {}
+  readonly #chunks: Record<string, boolean | "loading"> = {}
+  readonly config: BlockConfig
 
   constructor(map: BlockMap) {
     this.#i = map.i
@@ -488,6 +498,7 @@ export class FieldBlock {
     this.actorSpawns = new SpawnMap(map.actors)
     this.itemSpawns = new SpawnMap(map.items)
     this.propSpawns = new SpawnMap(map.props)
+    this.config = map.config
   }
 
   get catalog(): Catalog {
@@ -698,6 +709,7 @@ export class FieldBlock {
       items: this.itemSpawns.toJSON(),
       props: this.propSpawns.toJSON(),
       field: this.field,
+      config: this.config,
     }, this.#map.catalog)
   }
 

@@ -1,6 +1,6 @@
 import type { Context } from "@kt3k/cell"
 import { loadImage } from "../../util/load.ts"
-import * as signal from "../../util/signal.ts"
+import * as signal from "../../util/signals.ts"
 
 export function ItemGetEffector({ el, subscribe }: Context) {
   let prevCount = signal.appleCount.get()

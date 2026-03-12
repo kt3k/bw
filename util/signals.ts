@@ -1,5 +1,6 @@
 import { GroupSignal, Signal } from "@kt3k/cell"
 import { CELL_SIZE } from "./constants.ts"
+import { FieldBlock } from "../model/field-block.ts"
 
 // The current frame per second (fps)
 export const fps = new Signal(0)
@@ -29,3 +30,5 @@ export const centerGrid10 = centerGrid.map(({ i, j }) => ({
   i: Math.floor(i / 10) * 10,
   j: Math.floor(j / 10) * 10,
 }))
+
+export const currentBlock = new Signal<FieldBlock | null>(null)

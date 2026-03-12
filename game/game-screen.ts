@@ -1,6 +1,6 @@
-import type { Context } from "@kt3k/cell"
+import { type Context } from "@kt3k/cell"
 import { Gameloop } from "@kt3k/gameloop"
-import * as signal from "../util/signal.ts"
+import * as signals from "../util/signals.ts"
 import { CELL_SIZE } from "../util/constants.ts"
 import { IdleMainActor, MoveEndMainActor } from "./main-character.ts"
 import { DrawLayer } from "./draw-layer.ts"
@@ -84,19 +84,21 @@ export function GameScreen({ el, query }: Context) {
   const deactivateScope = new DeactivateScope(screenSize)
 
   const field = new Field(query(".field")!, me, activateScope, deactivateScope)
-  signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
+  signals.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
 
-  signal.centerGrid10.subscribe(() => {
-    field.checkBlockLoad(field.me.i, field.me.j, viewScope)
+  signals.centerGrid10.subscribe(() => {
+    field.checkBlockLoad(field.me.i, field.me.j, viewScope).then(() => {
+      signals.currentBlock.update(field.currentBlock())
+    })
     field.checkBlockUnload(field.me.i, field.me.j)
   })
 
-  signal.centerPixel.subscribe(({ x, y }) => {
+  signals.centerPixel.subscribe(({ x, y }) => {
     viewScope.setCenter(x, y)
     field.translateBackground(-viewScope.left, -viewScope.top)
   })
 
-  signal.isGameLoading.subscribe((v) => {
+  signals.isGameLoading.subscribe((v) => {
     if (!v) {
       query(".curtain")!.style.opacity = "0"
     }
@@ -104,13 +106,13 @@ export function GameScreen({ el, query }: Context) {
 
   const loop = new Gameloop(60, () => {
     if (!field.assetsReady) {
-      signal.isGameLoading.update(true)
+      signals.isGameLoading.update(true)
       return
     }
-    signal.isGameLoading.update(false)
+    signals.isGameLoading.update(false)
 
     field.step()
-    signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
+    signals.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
 
     entityLayer.clear()
     entityLayer.drawIterableEntity(field.props.iter())
@@ -135,9 +137,9 @@ export function GameScreen({ el, query }: Context) {
     }
   })
   loop.onStep((fps, v) => {
-    signal.fps.update(fps)
+    signals.fps.update(fps)
     if (v > 3000) {
-      signal.v.update(3000)
+      signals.v.update(3000)
     }
   })
   loop.start()
@@ -149,7 +151,7 @@ export function GameScreen({ el, query }: Context) {
       field.reset()
       field.fastTravel(field.me, i, j)
       field.me.unsetFollower()
-      signal.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
+      signals.centerPixel.update({ x: field.me.centerX, y: field.me.centerY })
       loop.start()
     }, 10)
   }

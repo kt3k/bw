@@ -1,4 +1,4 @@
-import * as signal from "../util/signal.ts"
+import * as signal from "../util/signals.ts"
 import { ceilN, floorN } from "../util/math.ts"
 import { BLOCK_CHUNK_SIZE, BLOCK_SIZE, CELL_SIZE } from "../util/constants.ts"
 import type {
@@ -634,6 +634,13 @@ export class Field implements IField {
         this.#initialActivateReady = true
       })
     }
+  }
+
+  currentBlock() {
+    const { i, j } = this.me
+    const offsetI = floorN(i, BLOCK_SIZE)
+    const offsetJ = floorN(j, BLOCK_SIZE)
+    return this.#blocks[`${offsetI}.${offsetJ}`]
   }
 
   checkBlockUnload(i: number, j: number) {

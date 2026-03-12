@@ -1,6 +1,9 @@
 {
   "i": -10000,
   "j": -10000,
+  "config": {
+    "showsExitButton": false
+  },
   "catalogs": [
     "../catalog/base.json",
     "../catalog/title.json"

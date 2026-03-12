@@ -12,7 +12,7 @@ import type {
   Move,
 } from "./types.ts"
 import { DIRS } from "../util/dir.ts"
-import * as signal from "../util/signal.ts"
+import * as signal from "../util/signals.ts"
 import { linePattern0 } from "./effect.ts"
 import { ActionQueue, type ItemAction } from "./action-queue.ts"
 import { MoveGo } from "./move.ts"
