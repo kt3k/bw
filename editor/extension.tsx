@@ -50,14 +50,16 @@ function resolveCustomTextEditor(
         `}
         </style>
       </head>
-      <body class="key-handler p-0">
+      <body class="js-key-handler p-0">
         <div
           class="canvas-container relative mt-20"
           style={`width: ${CONTAINER_WIDTH}px`}
         >
           <div
-            class="canvas-layers absolute"
-            style={`width: ${MAIN_CANVAS_SIZE}px; top: ${SIDE_CANVAS_SIZE}px; left: ${SIDE_CANVAS_SIZE}px`}
+            class="js-canvas-layers absolute"
+            style={`width: ${MAIN_CANVAS_SIZE + 1000}px; height: ${
+              MAIN_CANVAS_SIZE + 600
+            }px; top: ${SIDE_CANVAS_SIZE}px; left: ${SIDE_CANVAS_SIZE}px`}
           >
             <canvas
               class="field-cells-canvas absolute crisp-edges"
@@ -83,48 +85,67 @@ function resolveCustomTextEditor(
               height={MAIN_CANVAS_SIZE}
             >
             </canvas>
-            <div class="js-cursor-dropdown bg-white w-12 h-12 absolute">
+            <div class="js-cursor-dropdown hidden absolute z-10 w-screen h-screen pointer-events-none">
+              <div class="box-content border border-neutral-100 w-4 h-4 absolute ml-[-1px] mt-[-1px] left-0 top-0">
+              </div>
+              <svg
+                class="absolute left-4 top-2"
+                width="32"
+                height="8"
+                viewBox="0 0 32 8"
+              >
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="32"
+                  y2="8"
+                  stroke="#f5f5f5"
+                  stroke-width="1"
+                />
+              </svg>
+              <div class="description rounded-r rounded-bl px-2 py-1 absolute left-12 top-4 bg-neutral-900/90 border border-neutral-100 text-neutral-100">
+              </div>
             </div>
           </div>
           <a
-            class="next-field absolute hover:opacity-75 opacity-50"
+            class="js-next-field absolute hover:opacity-75 opacity-50"
             style={`left: ${SIDE_CANVAS_SIZE}px; top: 0px;`}
             data-i={i}
             data-j={j - 200}
-            data-range={`0,195,200,5`}
+            data-range="0,195,200,5"
           >
           </a>
           <a
-            class="next-field absolute hover:opacity-75 opacity-50"
+            class="js-next-field absolute hover:opacity-75 opacity-50"
             style={`left: ${SIDE_CANVAS_SIZE}px; top: ${
               SIDE_CANVAS_SIZE + MAIN_CANVAS_SIZE
             }px;`}
             data-i={i}
             data-j={j + 200}
-            data-range={`0,0,200,5`}
+            data-range="0,0,200,5"
           >
           </a>
           <a
-            class="next-field absolute hover:opacity-75 opacity-50"
+            class="js-next-field absolute hover:opacity-75 opacity-50"
             style={`left: ${
               SIDE_CANVAS_SIZE + MAIN_CANVAS_SIZE
             }px; top: ${SIDE_CANVAS_SIZE}px;`}
             data-i={i + 200}
             data-j={j}
-            data-range={`0,0,5,200`}
+            data-range="0,0,5,200"
           >
           </a>
           <a
-            class="next-field absolute hover:opacity-75 opacity-50"
+            class="js-next-field absolute hover:opacity-75 opacity-50"
             style={`left: 0px; top: ${SIDE_CANVAS_SIZE}px;`}
             data-i={i - 200}
             data-j={j}
-            data-range={`195,0,5,200`}
+            data-range="195,0,5,200"
           >
           </a>
         </div>
-        <div class="toolbox px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100vw-15em)]">
-          <div class="mode-indicator ml-2 group relative">
+        <div class="js-toolbox px-2 fixed left-0 top-0 flex flex-wrap items-center bg-neutral-900/50 w-[calc(100vw-15em)] z-10">
+          <div class="js-mode-indicator ml-2 group relative">
             <span>dot</span>
             <div class="
               absolute top-full left-1/2 -translate-x-1/2 mt-2
@@ -133,11 +154,15 @@ function resolveCustomTextEditor(
               border border-neutral-600
               whitespace-nowrap pointer-events-none
             ">
-              Press d/s/p to toggle mode
+              Press d/s/p to toggle mode<br />
+              <br />
+              d: dot - edit single dot<br />
+              s: stroke - edit stroke<br />
+              p: point - edit cell/actor/prop/item at the point<br />
             </div>
           </div>
         </div>
-        <div class="js-info-panel fixed right-0 top-0 h-full w-48 bg-neutral-900/90 pointer-events-none">
+        <div class="js-info-panel fixed right-0 top-0 h-full w-48 bg-neutral-900/90 text-neutral-100 pointer-events-none">
           <div class="info-content text-xs font-mono">
             <div class="py-1 px-2 bg-white/50 text-black">Grid</div>
             <div class="px-2 py-1">

@@ -125,7 +125,10 @@
     "portal": {
       "src": "../prop/portal.png",
       "canEnter": true,
-      "onEnter": "teleport"
+      "onEnter": "teleport",
+      "data": {
+        "dest": ["number", "number"]
+      }
     },
     "portal-out": {
       "src": "../prop/portal_out.png",

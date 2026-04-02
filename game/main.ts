@@ -14,7 +14,17 @@ import { AppleCounter } from "./ui/apple-counter.ts"
 import { GameScreen } from "./game-screen.ts"
 import { ExitButton } from "./ui/exit-button.ts"
 
+import * as jsfxr from "jsfxr"
+console.log("jsfxr", jsfxr)
+;(globalThis as any).jsfxr = jsfxr
 globalThis.addEventListener("blur", clearInput)
+
+const preset = "pickupCoin"
+const sound = jsfxr.sfxr.generate(preset)
+
+document.addEventListener("click", () => {
+  jsfxr.sfxr.play(sound)
+})
 
 register(GameScreen, "js-game-screen")
 register(FpsMonitor, "js-fps-monitor")

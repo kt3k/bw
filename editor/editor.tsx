@@ -60,6 +60,7 @@ type ItemTool =
     kind: "item-remove"
   })
 type Tool = CellTool | PropTool | ActorTool | ItemTool
+type Mode = "dot" | "stroke" | "point"
 
 function onExtensionMessage({ data }: MessageEvent<type.Extension.Message>) {
   switch (data.type) {
@@ -370,7 +371,7 @@ class ToolManager {
 
 const CANVAS_SIZE = BLOCK_SIZE * CELL_SIZE
 
-const modeSignal = new Signal<"dot" | "stroke" | "point">("dot")
+const modeSignal = new Signal<Mode>("dot")
 const gridIndexSignal = new GroupSignal<{ i: number | null; j: number | null }>(
   {
     i: null,
@@ -440,12 +441,11 @@ function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
 
   on("click", (e) => {
     const { id } = e.target as HTMLDivElement
-    if (currentTool.id === id) {
-      return
+    if (currentTool.id !== id) {
+      toolManager.selectById(id)
+      updateTools(toolManager)
     }
-    toolManager.selectById(id)
     signals.mode.update("dot")
-    updateTools(toolManager)
   })
 
   const block = fieldBlock
@@ -534,7 +534,7 @@ function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
     })
   }
 
-  el.appendChild(el.querySelector(".mode-indicator")!) // move mode indicator to last
+  el.appendChild(el.querySelector(".js-mode-indicator")!) // move mode indicator to last
 
   function toggleActive(child: Element, active: boolean) {
     const firstChild = child.firstElementChild
@@ -560,7 +560,7 @@ function Toolbox({ el, on, subscribe }: Context<HTMLElement>) {
 }
 
 function ModeIndicator({ subscribe, el }: Context<HTMLElement>) {
-  subscribe(signals.mode, (mode) => el.textContent = mode)
+  subscribe(signals.mode, (mode) => el.firstElementChild!.textContent = mode)
 }
 
 function createCanvasFromImageData(imageData: ImageData) {
@@ -685,24 +685,36 @@ async function CanvasLayers({ query, on, el, subscribe }: Context) {
     }
   })
 
-  subscribe(signals.currentTool, (tool) => {
-    if (tool.kind === "cell") {
-      propsCanvas.classList.add("opacity-50")
-      itemsCanvas.classList.add("opacity-50")
-      actorsCanvas.classList.add("opacity-50")
+  function updateCanvasOpacity(tool: Tool, mode: Mode) {
+    if (mode === "point") {
+      propsCanvas.classList.toggle("opacity-50", false)
+      itemsCanvas.classList.toggle("opacity-50", false)
+      actorsCanvas.classList.toggle("opacity-50", false)
+    } else if (tool.kind === "cell") {
+      propsCanvas.classList.toggle("opacity-50", true)
+      itemsCanvas.classList.toggle("opacity-50", true)
+      actorsCanvas.classList.toggle("opacity-50", true)
     } else if (tool.kind === "prop" || tool.kind === "prop-remove") {
-      propsCanvas.classList.remove("opacity-50")
-      itemsCanvas.classList.add("opacity-50")
-      actorsCanvas.classList.add("opacity-50")
+      propsCanvas.classList.toggle("opacity-50", false)
+      itemsCanvas.classList.toggle("opacity-50", true)
+      actorsCanvas.classList.toggle("opacity-50", true)
     } else if (tool.kind === "item" || tool.kind === "item-remove") {
-      propsCanvas.classList.remove("opacity-50")
-      itemsCanvas.classList.remove("opacity-50")
-      actorsCanvas.classList.add("opacity-50")
+      propsCanvas.classList.toggle("opacity-50", false)
+      itemsCanvas.classList.toggle("opacity-50", false)
+      actorsCanvas.classList.toggle("opacity-50", true)
     } else if (tool.kind === "actor" || tool.kind === "actor-remove") {
-      propsCanvas.classList.remove("opacity-50")
-      itemsCanvas.classList.remove("opacity-50")
-      actorsCanvas.classList.remove("opacity-50")
+      propsCanvas.classList.toggle("opacity-50", false)
+      itemsCanvas.classList.toggle("opacity-50", false)
+      actorsCanvas.classList.toggle("opacity-50", false)
     }
+  }
+
+  subscribe(signals.currentTool, (tool) => {
+    updateCanvasOpacity(tool, mode)
+  })
+
+  subscribe(signals.mode, (mode) => {
+    updateCanvasOpacity(currentTool, mode)
   })
 
   subscribe(signals.mode, (mode) => {
@@ -736,6 +748,13 @@ function KeyHandler({ on }: Context) {
     } else if (e.key === "p") {
       if (mode !== "point") {
         signals.mode.update("point")
+        const grid = signals.gridIndex.get()
+        if (grid.i !== null && grid.j !== null) {
+          signals.cursor.update({
+            i: grid.i,
+            j: grid.j,
+          })
+        }
       } else {
         signals.mode.update("dot")
       }
@@ -776,13 +795,37 @@ function InfoPanel({ subscribe, query }: Context<HTMLElement>) {
   })
 }
 
-function CursorDropdown({ subscribe, el }: Context<HTMLElement>) {
+function CursorDropdown({ subscribe, el, query }: Context<HTMLElement>) {
+  subscribe(signals.mode, (m) => {
+    if (m !== "point") {
+      el.classList.toggle("hidden", true)
+    }
+  })
   subscribe(signals.cursor, (cursor) => {
-    el.classList.toggle("hidden", cursor === null)
+    el.classList.toggle("hidden", cursor === null || mode !== "point")
     if (!cursor) return
 
-    el.style.left = `${modulo(cursor.i * CELL_SIZE, CANVAS_SIZE) + 16}px`
+    el.style.left = `${modulo(cursor.i * CELL_SIZE, CANVAS_SIZE)}px`
     el.style.top = `${modulo(cursor.j * CELL_SIZE, CANVAS_SIZE)}px`
+
+    const desc = query(".description")!
+    desc.replaceChildren(
+      ht.div({}, `[${cursor.i}, ${cursor.j}]`),
+    )
+
+    const cell = fieldBlock.getCell(cursor.i, cursor.j)
+    desc.appendChild(ht.div({}, `Cell: ${cell?.name ?? "-"}`))
+    const propSpawn = fieldBlock.propSpawns.get(cursor.i, cursor.j)
+    desc.appendChild(ht.div({}, `Prop: ${propSpawn?.def.type ?? "-"}`))
+    if (propSpawn?.def.data) {
+      desc.appendChild(
+        ht.div({}, `Prop Data: ${JSON.stringify(propSpawn.def.data)}`),
+      )
+    }
+    const itemSpawn = fieldBlock.itemSpawns.get(cursor.i, cursor.j)
+    desc.appendChild(ht.div({}, `Item: ${itemSpawn?.def.type ?? "-"}`))
+    const actorSpawn = fieldBlock.actorSpawns.get(cursor.i, cursor.j)
+    desc.appendChild(ht.div({}, `Actor: ${actorSpawn?.def.type ?? "-"}`))
   })
 }
 
@@ -825,10 +868,10 @@ async function NextField({ el }: Context<HTMLAnchorElement>) {
   el.appendChild(createCanvasFromImageData(imageData))
 }
 
-register(KeyHandler, "key-handler")
-register(Toolbox, "toolbox")
-register(ModeIndicator, "mode-indicator")
+register(KeyHandler, "js-key-handler")
+register(Toolbox, "js-toolbox")
+register(ModeIndicator, "js-mode-indicator")
 register(InfoPanel, "js-info-panel")
-register(CanvasLayers, "canvas-layers")
-register(NextField, "next-field")
+register(CanvasLayers, "js-canvas-layers")
+register(NextField, "js-next-field")
 register(CursorDropdown, "js-cursor-dropdown")

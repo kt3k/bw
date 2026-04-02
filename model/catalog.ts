@@ -1,5 +1,6 @@
 import { loadJson } from "../util/load.ts"
 
+/** Shape of raw catalog json */
 interface CatalogSource {
   readonly cells: Record<string, {
     readonly canEnter: boolean
@@ -20,9 +21,11 @@ interface CatalogSource {
     readonly canEnter: boolean
     readonly onEnter?: string
     readonly pushed?: string
+    readonly data?: Record<string, unknown>
   }>
 }
 
+/** Parsed cell definition */
 export interface CellDefinition {
   readonly name: string
   readonly canEnter: boolean
@@ -31,6 +34,7 @@ export interface CellDefinition {
   readonly noise?: string
 }
 
+/** Parsed item definition */
 export interface ItemDefinition {
   readonly type: string
   readonly collect: string
@@ -38,6 +42,7 @@ export interface ItemDefinition {
   readonly href: string
 }
 
+/** Parsed actor definition */
 export interface ActorDefinition {
   readonly type: string
   readonly moveEnd?: string
@@ -46,6 +51,7 @@ export interface ActorDefinition {
   readonly href: string
 }
 
+/** Parsed prop definition */
 export interface PropDefinition {
   readonly type: string
   readonly canEnter: boolean
@@ -53,8 +59,10 @@ export interface PropDefinition {
   readonly onEnter?: string
   readonly src: string
   readonly href: string
+  readonly data?: Record<string, unknown>
 }
 
+/** The catalog class */
 export class Catalog {
   readonly refs: string[]
   readonly cells: Record<string, CellDefinition> = {}
@@ -106,6 +114,7 @@ export class Catalog {
           pushed: data.pushed,
           src: data.src,
           href: new URL(data.src, url).href,
+          data: data.data,
         }
       }
     }
@@ -150,6 +159,7 @@ export class Catalog {
         canEnter: def.canEnter,
         onEnter: def.onEnter,
         pushed: def.pushed,
+        data: def.data,
       }
     }
 
